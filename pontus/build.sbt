@@ -66,3 +66,6 @@ libraryDependencies ++= Seq(
   "com.h2database" % "h2" % "1.2.138", // In-process database, useful for development systems
   "ch.qos.logback" % "logback-classic" % "0.9.26" % "compile->default" // Logging
 )
+
+port in container.Configuration := 8888
+
