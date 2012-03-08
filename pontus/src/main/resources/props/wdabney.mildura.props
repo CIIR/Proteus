@@ -1,0 +1,16 @@
+default.index.root=../indexes/1kannotated
+default.picIndex.root=../indexes/canon/pictures
+default.global.parameters=../indexes/local/files/parameters.xml
+default.graph.ids=../indexes/local/files/pairs.txt
+default.image.dir=http://laguna.cs.umass.edu:6800/gimages
+default.pairscores=../indexes/local/files/reordered.txt
+default.titles=../indexes/local/files/ids-titles.txt
+
+english1.index.root=../indexes/mbtei-match
+german1.index.root=../indexes/mbtei-german
+french1.index.root=../indexes/french-small
+italian1.index.root=../indexes/italian-small
+latin1.index.root=../indexes/latin-small
+
+english2.index.root=../indexes/canon-index
+dbpedia.index.root=../indexes/dbpedia

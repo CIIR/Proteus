@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+        <title>Book Location Entities</title> 
+    </head>
+
+    <body class="lift:content_id=main" >
+        <div id="main" class="lift:surround?with=default;at=content" style="border: 1.0px solid #ccc">
+
+            <div class="lift:Maps">
+                <span class="locsJS"></span>
+                <span class="entid"></span>
+                <h3>Location Entities for: <span class="book"></span></h3>
+                <p>The map below shows all location entities automatically extracted from the selected book.  
+                    Some locations are omitted because they cannot be resolved to a specific place on the globe.  
+                    In some cases, locations are resolved incorrectly because of OCR errors in the books or limitations in the state of the art.  
+                    Clusters of locations provide suggestions for the geographical topic of the book.</p>
+                <div id="map" style="width: 100%; height: 400px;"></div>
+                <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+                <script type="text/javascript">
+                    // <![CDATA[
+                    function initialize() {
+                        //alert("This can take a little bit; please stand by...")
+                        var map = new google.maps.Map(document.getElementById('map'), {
+                            zoom: 8,
+                            center: new google.maps.LatLng(0, 0),
+                            mapTypeId: google.maps.MapTypeId.ROADMAP
+                        });
+                        setMarkersBoundingBox(map, locs, ids);
+                    }
+                       
+                    
+                    function setMarkersBoundingBox(map, locs, ids) {
+                        var infowindow = new google.maps.InfoWindow();
+                        var marker, i;
+                        var bounds = new google.maps.LatLngBounds();
+                        for (i = 0; i < locs.length; i++) {
+                            //var place = locs[i];
+                            var myLatLng = new google.maps.LatLng(locs[i][1], locs[i][2])
+                            var marker = new google.maps.Marker({
+                                position: myLatLng,
+                                map: map
+                            });
+                            google.maps.event.addListener(marker, 'click', (function(marker, i) {
+                                return function() {
+                                    infowindow.setContent('<b>'+locs[i][0]+'</b><br />'+
+                                                          '<b><a href=/ent?e='+ids[i][1]+
+                                                          '&id='+ids[i][1]+
+                                                          '&index=default&language=english>'+
+                                                          locs[i][0]+
+                                                          ' entity detail page</a></b>');
+                                    
+                                    infowindow.open(map, marker);
+                                }
+                            })(marker, i));
+                            bounds.extend(myLatLng);
+                            map.fitBounds(bounds);                       
+                        }              
+                    }
+                    
+                    
+                    google.maps.event.addDomListener(window, 'load', initialize);
+                    /* ]]> */
+                </script>
+            </div>
+        </div>
+    </body>
+</html>

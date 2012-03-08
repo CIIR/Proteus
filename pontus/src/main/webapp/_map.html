@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+        <title>Map</title>
+        <style type="text/css">
+            html { height: 100% }
+            body { height: 100%; margin: 0; padding: 0 }
+            #map_canvas { height: 100% }
+        </style>
+        <script type="text/javascript"
+                src="http://maps.googleapis.com/maps/api/js?sensor=true">
+        </script>
+
+        
+    
+        <script type="text/javascript">
+        //<![CDATA[
+
+        function initialize() {
+            alert("hey loaded");
+            var latlng = new google.maps.LatLng(0, 0);
+            var myOptions = {
+                zoom: 6,
+                center: latlng,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+
+            setMarkers(map, locs);
+        }
+
+        function setMarkers(map, locations) {
+
+            var bounds = new google.maps.LatLngBounds();
+            for (var i = 0; i < locations.length; i++) {
+                var loc = locations[i];
+                var myLatLng = new google.maps.LatLng(loc[1], loc[2]);
+
+                var marker = new google.maps.Marker({
+                    position: myLatLng,
+                    map: map,
+                    title: loc[0]
+                });
+                bounds.extend(myLatLng);
+                map.fitBounds(bounds);
+                //marker.setMap(map);
+
+            }
+        }
+//]]>
+
+    </script>
+    </head>
+    <body onload="initialize()">
+
+            <div class="lift:MapEntities">
+                <span class="locs" />
+            </div>
+            <input type="button" onclick="initialize()" value="alert" />
+            <div id="map_canvas" style="width:640px; height:480px"></div>
+
+    </body>
+</html>

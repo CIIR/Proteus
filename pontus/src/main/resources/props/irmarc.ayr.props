@@ -1,0 +1,8 @@
+default.index.root=/usr/ayr/tmp1/irmarc/data/indexes/megabooks/canon
+default.picIndex.root=/usr/ayr/tmp1/irmarc/data/indexes/megabooks/pictures
+dbpedia.index.root=/usr/ayr/tmp1/irmarc/data/indexes/megabooks/dbpedia
+default.global.parameters=/usr/ayr/tmp1/irmarc/data/indexes/megabooks/files/parameters.xml
+default.graph.ids=/usr/ayr/tmp1/irmarc/data/indexes/megabooks/files/pairs.txt
+default.image.dir=/usr/ayr/tmp1/irmarc/data/indexes/megabooks/files/images
+default.pairscores=/usr/ayr/tmp1/irmarc/data/indexes/megabooks/files/reordered.txt
+default.titles=/usr/ayr/tmp1/irmarc/data/indexes/megabooks/files/ids-titles.txt

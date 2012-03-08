@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+        <title>Page-level Entity Annotation</title>
+    </head>
+    <body>
+   <body class="lift:content_id=main">
+      <div id="main" class="lift:surround?with=default_old;at=content" style="border: 0.5px solid #ccc">
+          <table>
+              <tr>
+                  <td width="30%" style="vertical-align:top"><div id="messages"></div></td>
+                  <td width="70%">
+                      <div class="lift:Entity.listEntityAnnotations">
+              <table border="0" padding="0">
+                  <tr><td><span name="username"></span><button class="lift:Entity.logAnnotations">Submit Annotations</button></td>
+                  <tr>
+                      <td><div style="overflow: auto; height: 300px; width: 600px;">
+              <h3>Please select the correct entity in each context</h3>
+              <table style="border: 1px solid #ccc">
+                    <tbody>
+                        <tr id="entities">
+                            <td><span name="entName"></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+              </div></td></tr>
+                  <tr><td width="100%"><span name="iaimg"></span></td>
+                  </tr>
+              </table>
+              <br />
+          </div>
+
+                  </td>
+              </tr>
+          </table>
+
+            <br/>
+        </div> 
+    </body>
+</html>

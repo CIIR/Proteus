@@ -1,0 +1,7 @@
+default.index.root=/usr/dan/users10/mzhao/sss/local
+default.picIndex.root=/usr/dan/users10/mzhao/picIndex/pics_index
+default.global.parameters=/usr/dan/users10/mzhao/sss/local/files/parameters.xml
+default.graph.ids=/usr/dan/users10/mzhao/sss/local/files/pairs.txt
+default.image.dir=/usr/dan/users10/mzhao/sss/local/files/images
+default.pairscores=/usr/dan/users10/mzhao/sss/local/files/reordered.txt
+default.titles=/usr/dan/users10/mzhao/sss/local/files/ids-titles.txt

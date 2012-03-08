@@ -1,0 +1,29 @@
+<lift:surround with="default" at="content">
+
+    <br/>
+ 
+    <div class="lift:Book.list">
+        <div class="result">
+            <table width="100%">
+                <tr>
+                    <td>
+                        <span class="docImage"/>
+                    </td>
+                    <td width="100%">
+                        <strong><span class="docTitle" style="display:inline" /></strong><br />
+                        <span class="docauthor" style="display:block" /><br />
+                        <span class="score" style="display:block" /><br />
+                        <span class="mapLink" style="display:block" />
+                        <span class="entsLink" style="display:block" />
+                        <br/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+ 
+    <lift:Book.paginate>
+        <nav:first/> | <nav:prev /> | <nav:allpages/> |  <nav:next/>  | <nav:last/> | <nav:records />
+    </lift:Book.paginate>
+    
+</lift:surround>

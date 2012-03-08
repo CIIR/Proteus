@@ -1,0 +1,6 @@
+default.index.root=/Users/minh/Pictures/code/local
+default.global.parameters=/Users/minh/Pictures/code/local/files/parameters.xml
+default.graph.ids=/Users/minh/Pictures/code/local/files/pairs.txt
+default.image.dir=/Users/minh/Pictures/code/local/files/images
+default.pairscores=/Users/minh/Pictures/code/local/files/reordered.txt
+default.titles=/Users/minh/Pictures/code/local/files/ids-titles.txt

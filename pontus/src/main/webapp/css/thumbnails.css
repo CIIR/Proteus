@@ -1,0 +1,76 @@
+.edit_error_class {
+    display: block;
+    color: red;
+}
+
+.sidebar ul {
+    margin:0;
+    padding:0;
+    border-bottom:1px solid #ccc;
+}
+
+
+.sidebar ul li {
+    margin:0;
+    padding:0;
+    list-style:none;
+    border:1px solid #ccc;
+    border-bottom:none;
+}
+
+.sidebar ul li a {
+    display:block;
+    padding:3px;
+    text-indent:30px;
+    text-decoration:none;
+}
+
+.sidebar ul li span {
+    display:block;
+    padding:3px;
+    text-indent:30px;
+    text-decoration:none;
+}
+
+.sidebar ul li a:hover {
+    background-color: #eee;
+}
+
+/*enlarge image*/
+.thumbnail{
+    position: relative;
+    z-index: 0;
+}
+
+.thumbnail:hover{
+
+    z-index: 50;
+
+}
+.thumbnail img{
+    border: 2px solid black;
+}
+
+
+.thumbnail span{ /*CSS for enlarged image*/
+    position: absolute;
+    padding: 0px;
+    left: -1000px;
+
+    visibility: hidden;
+    color: black;
+    text-decoration: none;
+}
+
+.thumbnail span img{ /*CSS for enlarged image*/
+    /*border-width: 0;*/
+    border: 5px solid black;
+    padding: 0px;
+}
+
+.thumbnail:hover span{ /*CSS for enlarged image on hover*/
+    visibility: visible;
+    position: fixed;
+    top: 5%;
+    left: 30%; /*position where enlarged image should offset horizontally */
+}

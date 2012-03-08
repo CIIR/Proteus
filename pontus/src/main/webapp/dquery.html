@@ -1,0 +1,40 @@
+<lift:surround with="default" at="content">
+
+    <div class="lift:Document.displaySearchTerm">
+        <h4>Document search results for "<span class="term" />"</h4>
+
+    </div>
+
+    <div class="lift:Document.listDocumentResults">
+        <div class="result">
+            <table width="100%">
+                <tr>
+                    <td>
+                        <span class="docImage"/>
+                    </td>
+                    <td>
+                        <span class="docTitle" style="display:inline" />
+                        <span class="doclink" style="display:inline" />
+                        <span class="archlink" style="display:inline" />
+			<span class="entities" style="display:inline" />
+                        <span class="snippet" /><br />
+                        <span class="dupes" /><br />
+                        <br/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+
+    </div>
+    <br/>
+    <div>
+        <span class="lift:Document.prev">
+            <span class="prev" />
+        </span>
+        <span class="lift:Document.next">
+            <span class="next" />
+        </span>
+    </div>
+</lift:surround>
+

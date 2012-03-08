@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+        <title>Page-level Entity Query</title>
+    </head>
+    <body class="lift:content_id=main">
+        <div id="main" class="lift:surround?with=default;at=content" style="border: 0.5px solid #ccc">
+          <div class="lift:Entity.listEntityResults">
+            <h3>Number of entities on page: <span name="quantity">NUM</span></h3>
+              <table style="border: 1px solid #ccc">
+                    <tbody>
+                        <tr id="entities">
+                            <td name="name"><a href="#">Name</a></td>
+                            <td name="cat"></td>
+                            <td name="url"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- <div>
+                    <button name="left" style="height: 100%; width: 50%"><<</button><button name="right" style="float: right;height: 100%; width: 50%">>></button>
+                </div> -->
+            </div>
+            <br/>
+        </div>
+    </body>
+</html>
+

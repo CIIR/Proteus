@@ -1,0 +1,8 @@
+default.index.root=/Users/logan/code/local/canon
+default.picIndex.root=/Users/logan/code/local/pictures
+dbpedia.index.root=/Users/logan/code/local/dbpedia
+default.global.parameters=/Users/logan/code/local/files/parameters.xml
+default.graph.ids=/Users/logan/code/local/files/pairs.txt
+default.image.dir=/Users/logan/code/local/files/images
+default.pairscores=/Users/logan/code/local/files/reordered.txt
+default.titles=/Users/logan/code/local/files/ids-titles.txt

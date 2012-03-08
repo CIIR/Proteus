@@ -1,0 +1,15 @@
+default.index.root=/usr/lag/data2/irmarc/indexes/shard.0
+default.picIndex.root=/usr/lag/data2/lgiorda/indexes/50k/pictures
+dbpedia.index.root=/usr/lag/data2/lgiorda/indexes/local/dbpedia
+
+default.global.parameters=/usr/lag/data2/irmarc/indexes/03312011_demo/parameters.xml
+default.graph.ids=/usr/lag/data2/irmarc/indexes/09012011_demo/files/pairs.txt
+default.image.dir=/gimages
+default.pairscores=/usr/lag/data2/irmarc/indexes/03312011_demo/files/reordered.txt
+default.titles=/usr/lag/data2/irmarc/indexes/09012011_demo/files/ids-titles.txt
+
+german.index.root=/usr/lag/data2/irmarc/indexes/german-9k
+german.global.parameters=/usr/lag/data2/irmarc/indexes/german-9k/files/parameters.xml
+german.titles=/usr/lag/data2/irmarc/indexes/03312011_demo/files/ids-titles.txt
+
+

@@ -1,0 +1,9 @@
+default.index.root=/indexes/local/canon
+default.picIndex.root=/indexes/local/canon/pictures
+dbpedia.index.root=/indexes/local/dbpedia
+default.global.parameters=/indexes/local/files/parameters.xml
+default.graph.ids=/indexes/local/files/pairs.txt
+default.image.dir=http://laguna.cs.umass.edu:6800/gimages
+default.pairscores=/indexes/local/files/reordered.txt
+default.titles=/indexes/local/files/ids-titles.txt
+
