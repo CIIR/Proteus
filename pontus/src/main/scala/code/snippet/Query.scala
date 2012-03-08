@@ -8,28 +8,19 @@ import java.io.FileWriter
 import java.io.IOException
 import net.liftweb._
 import net.liftweb.common._
-//import edu.umass.ciir.megabooks.tools.Search
 import http._ 
-//import org.galagosearch.core.index.StructuredIndex
-//import org.galagosearch.core.tools.Search.SearchResult
-//import org.galagosearch.tupleflow.Parameters
 import scala.collection.mutable.ListBuffer
 import scala.xml.NodeSeq
 import util._
 import Helpers._
 
 import scala.collection.JavaConversions._
-//import edu.umass.ciir.megabooks.traversal.StemmingTraversal
-//import edu.umass.ciir.megabooks.index.EntityNameReader
-//import org.galagosearch.core.index.DocumentNameReader
 
 import scala.collection.mutable.HashSet
 import java.io.File
 
 import edu.umass.ciir.proteus.protocol.ProteusProtocol._
-import edu.umass.ciir.proteus._
-
-import scala.collection.JavaConversions._
+import edu.umass.ciir.proteus.triton.core._
 
 object Librarian extends Logger with ProteusAPI {
   val library = new LibrarianClient("mildura.cs.umass.edu", 8080)

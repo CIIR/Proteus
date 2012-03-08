@@ -23,7 +23,7 @@ import scala.collection.JavaConversions._
 import code.comet.TheCart
 import code.snippet._
 import edu.umass.ciir.proteus.protocol.ProteusProtocol._
-import edu.umass.ciir.proteus._
+import edu.umass.ciir.proteus.triton.core._
 /*
  * This class will take a document query and return a list of books ranked the sum of their document scores
  * The top 200 results will be returned for now

@@ -17,10 +17,9 @@ import scala.collection.mutable.MutableList
 import util._
 import Helpers._
 import scala.collection.JavaConversions._
-//import org.galagosearch.core.retrieval.BadOperatorException
-//import org.galagosearch.core.tools.Search.SearchResult
 import code.comet._
 import code.lib._
+
 object Picture extends Query {
 
 import code.lib.Cart
