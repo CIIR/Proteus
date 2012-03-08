@@ -1,0 +1,15 @@
+[0m[[0minfo[0m] [0mPackaging /usr/mildura/scratch1/ciir-proteus/triton/core/target/scala-2.9.1/triton-core_2.9.1-0.1-sources.jar ...[0m
+[0m[[0mdebug[0m] [0mInput file mappings:[0m
+[0m[[0mdebug[0m] [0m	edu/umass/ciir/proteus/triton/core/Library.scala[0m
+[0m[[0mdebug[0m] [0m	  /usr/mildura/scratch1/ciir-proteus/triton/core/src/main/scala/edu/umass/ciir/proteus/triton/core/Library.scala[0m
+[0m[[0mdebug[0m] [0m	edu/umass/ciir/proteus/triton/core/Librarian.scala[0m
+[0m[[0mdebug[0m] [0m	  /usr/mildura/scratch1/ciir-proteus/triton/core/src/main/scala/edu/umass/ciir/proteus/triton/core/Librarian.scala[0m
+[0m[[0mdebug[0m] [0m	edu/umass/ciir/proteus/triton/core/ProteusLibrary.scala[0m
+[0m[[0mdebug[0m] [0m	  /usr/mildura/scratch1/ciir-proteus/triton/core/src/main/scala/edu/umass/ciir/proteus/triton/core/ProteusLibrary.scala[0m
+[0m[[0mdebug[0m] [0m	edu/umass/ciir/proteus/triton/core/ClientProfiler.scala[0m
+[0m[[0mdebug[0m] [0m	  /usr/mildura/scratch1/ciir-proteus/triton/core/src/main/scala/edu/umass/ciir/proteus/triton/core/ClientProfiler.scala[0m
+[0m[[0mdebug[0m] [0m	edu/umass/ciir/proteus/triton/core/RandomEndPoint.scala[0m
+[0m[[0mdebug[0m] [0m	  /usr/mildura/scratch1/ciir-proteus/triton/core/src/main/scala/edu/umass/ciir/proteus/triton/core/RandomEndPoint.scala[0m
+[0m[[0mdebug[0m] [0m	edu/umass/ciir/proteus/triton/core/Client.scala[0m
+[0m[[0mdebug[0m] [0m	  /usr/mildura/scratch1/ciir-proteus/triton/core/src/main/scala/edu/umass/ciir/proteus/triton/core/Client.scala[0m
+[0m[[0minfo[0m] [0mDone packaging.[0m
