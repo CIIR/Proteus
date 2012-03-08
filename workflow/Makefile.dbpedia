@@ -1,0 +1,86 @@
+DBPTMP="dbpedia_sorted.dat"
+DBPPART="dbp_part"
+FBTMP="freebase_sorted.dat"
+FBPART="fb_part"
+TMP="/usr/mildura/scratch1/tmp/"
+OUTPATH="output"
+DATAPATH="sources"
+UPTODATE=$(wildcard .*.success)
+
+sort_singles:
+              ifneq ($(strip $(wildcard .sort_singles.success)),.sort_singles.success)
+	      	   - mkdir ${OUTPATH}/
+	      	   - mkdir ${OUTPATH}/dbpedia/
+	      	   - mkdir ${OUTPATH}/dbpedia/sorted/
+	      	   sh scripts/sortFiles.sh ${DATAPATH}/dbpedia/ ${OUTPATH}/dbpedia/sorted/ ${TMP}
+		   touch .sort_singles.success
+              endif
+
+sort_dbpedia: sort_singles
+              ifneq ($(strip $(wildcard .sort_dbpedia.success)),.sort_dbpedia.success)
+	      	   sort -T ${TMP} -s -o ${OUTPATH}/dbpedia/$(DBPTMP) -m ${OUTPATH}/dbpedia/sorted/*
+		   touch .sort_dbpedia.success
+              endif
+
+sort_freebase:
+              ifneq ($(strip $(wildcard .sort_freebase.success)),.sort_freebase.success)
+	      	   - mkdir ${OUTPATH}/freebase/
+	      	   sort -T ${TMP} -s -o ${OUTPATH}/freebase/${FBPTMP} ${DATAPATH}/freebase/freebase-datadump-quadruples.tsv
+		   touch .sort_freebase.success
+              endif
+
+split_dbpedia: sort_dbpedia
+              ifneq ($(strip $(wildcard .split_dbpedia.success)),.split_dbpedia.success)
+	      	   - mkdir ${OUTPATH}/dbpedia/splits/
+	      	   scala scripts/splitfile.scala ${OUTPATH}/dbpedia/${DBPTMP} ${OUTPATH}/dbpedia/splits/${DBPPART}
+	      	   gzip ${OUTPATH}/dbpedia/splits/*
+		   touch .split_dbpedia.success
+              endif
+
+split_freebase: sort_freebase
+              ifneq ($(strip $(wildcard .split_freebase.success)),.split_freebase.success)
+	      	   - mkdir ${OUTPATH}/freebase/splits/
+	      	   scala scripts/splitfile.scala ${OUTPATH}/freebase/${FBTMP} ${OUTPATH}/freebase/splits/${FBPART}
+	      	   gzip ${OUTPATH}/freebase/splits/*
+		   touch .split_freebase.success
+              endif
+
+compile_converter:
+              ifneq ($(strip $(wildcard .compile_converter.success)),.compile_converter.success)
+	      	   - mkdir target/
+	      	   - mkdir target/classes/
+	      	   - mkdir target/classes/rdf-convert/
+	      	   - rm -rf target/classes/rdf-convert/*
+	      	   javac -classpath libs/commons-lang3-3.1.jar:libs/nxparser-1.2.1.jar:src/rdf-convert/ -d target/classes/rdf-convert/ src/rdf-convert/RdfToIndriConverter.java
+	      	   - mkdir ${OUTPATH}/trecweb/
+	      	   - rm -rf ${OUTPATH}/trecweb/*
+		   touch .compile_converter.success
+              endif
+
+convert_freebase: split_freebase compile_converter
+              ifneq ($(strip $(wildcard .convert_freebase.success)),.convert_freebase.success)
+	      	   echo "Rdf Converter for Freebase has not been written yet..."
+	      	   echo "mkdir fb_infiles"
+	      	   echo "rm -rf fb_infiles/*"
+	      	   echo "mv ${FBPART}*.trecweb fb_infiles/"
+	      	   echo "java -classpath commons-lang3-3.1.jar:nxparser-1.2.1.jar:./ RdfToIndriConverter fb_infiles/ outfiles/"
+		   touch .convert_freebase.success
+              endif
+
+convert_dbpedia: split_dbpedia compile_converter
+              ifneq ($(strip $(wildcard .convert_dbpedia.success)),.convert_dbpedia.success)
+	      	   java -classpath libs/commons-lang3-3.1.jar:libs/nxparser-1.2.1.jar:target/classes/rdf-convert/ RdfToIndriConverter ${OUTPATH}/dbpedia/splits/ ${OUTPATH}/trecweb/
+		   - mkdir ${OUTPATH}/trecweb-extras
+		   mv ${OUTPATH}/trecweb/*_fields ${OUTPATH}/trecweb-extras/
+		   mv ${OUTPATH}/trecweb/*_docNo* ${OUTPATH}/trecweb-extras/
+		   touch .convert_dbpedia.success
+              endif
+
+index_dbpedia: convert_freebase convert_dbpedia
+              ifneq ($(strip $(wildcard .index_dbpedia.success)),.index_dbpedia.success)
+	      	   - mkdir ${OUTPATH}/indexes
+	      	   - mkdir ${OUTPATH}/indexes/dbpedia
+	      	   sh scripts/build_dbpedia_index.sh ${TMP}
+		   touch .index_dbpedia.success
+              endif
+

@@ -1,0 +1,18 @@
+# Makefile.gentei
+# Conditionally do whatever needs to be done to generate a set of TEI files from the list of textIDs and filename
+
+tei_generation:
+              ifneq ($(strip $(wildcard .gentei.success)),.gentei.success)
+	      	   echo "Generating original TEI files from ${SOURCE}..."
+		   sh scripts/generate_teis.sh ${SOURCE}
+		   touch .gentei.success
+              endif
+
+tei_field_clean: tei_generation
+              ifneq ($(strip $(wildcard .tei_field.success)),.tei_field.success)
+	      	   echo "Cleaning TEI file fields"
+		   sh scripts/clean_teis.sh
+		   touch .tei_field.success
+              endif
+
+gentei: | tei_field_clean
