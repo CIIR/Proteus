@@ -1,14 +1,20 @@
 
-
+OUTPATH="output"
 SOURCE="targets.list"
-ORIG_TEIS="mbteis.list.gz"
-ANNOTATED_TEIS="annotated_mbteis.list.gz"
+ORIG_TEIS="${OUTPATH}/mbteis/mbteis.list"
+ANNOTATED_TEIS="${OUTPATH}/mbteis/annotated_mbteis.list.gz"
 -include Makefile.gentei
 -include Makefile.dbpedia
 
-ambig_ent_index: gentei
+build_tei_list: gentei
+              ifneq ($(strip $(wildcard .build_tei_list.success)),.build_tei_list.success)
+	      	   sh scripts/build_tei_list.sh ${OUTPATH}/mbteis/cleaned ${ORIG_TEIS}
+		   touch .build_tei_list.success
+              endif
+
+ambig_ent_index: gentei build_tei_list
               ifneq ($(strip $(wildcard .ambig_entity_index.success)),.ambig_entity_index.success)
-	      	   sh scripts/index_entities.sh ${ORIG_TEIS} indexes/ambig_entities
+	      	   sh scripts/index_entities.sh ${ORIG_TEIS}.gz ${OUTPATH}/indexes/ambig_entities
 		   touch .ambig_entity_index.success
               endif
 
