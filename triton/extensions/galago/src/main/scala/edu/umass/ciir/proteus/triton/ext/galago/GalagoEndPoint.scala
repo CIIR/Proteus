@@ -37,11 +37,14 @@ GalagoDataStore {
 	val serverHostname : String = myServer.hostname
 			val serverPort : Int = myServer.port
 			val serverGroupID : String = "galagoProteus"
-			var connection : ConnectLibrary = buildConnection
+			var connection : ConnectLibrary = null
 
 			override def preStart() = {
 	super.preStart
-	initialize(EndPointConfiguration(ProteusType.PAGE, "/usr/mildura/scratch1/indexes/pages_small"))
+//	initialize(EndPointConfiguration(ProteusType.PAGE, "/usr/mildura/scratch1/indexes/pages_small"))
+	initialize(EndPointConfiguration(ProteusType.PAGE, "/usr/mildura/scratch1/ciir-proteus/workflow/output/indexes/ambig_entities"))
+	
+    connection = buildConnection
 	connectToLibrarian(librarian.hostname, librarian.port)
 }
 }
@@ -107,12 +110,12 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 
 	/** Methods Defined Elsewhere **/
 	def containerFor(ptype: ProteusType) : List[ProteusType]
-			def getResourceKey : String
+	def getResourceKey : String
 
-			var galago: tools.Search = null
-			var dataType : ProteusType = ProteusType.COLLECTION
+	var galago: tools.Search = null
+	var dataType : ProteusType = ProteusType.COLLECTION
 
-			override def initialize(configuration: EndPointConfiguration) {
+	override def initialize(configuration: EndPointConfiguration) {
 		galago = new tools.Search(new Parameters(List(
 				"command" -> ("search --index=" + configuration.resourcePath + " --corpus=" + configuration.resourcePath + "/corpus"), 
 				"index" -> configuration.resourcePath,
@@ -306,11 +309,12 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 
 		override def runContainerTransform(transform: ContainerTransform) : SearchResponse = {
 				// Figure out what the correct container type is, then return a singleton response
-				val result = fieldSearch(transform.getId.getIdentifier, transform.getFromType.toString.toLowerCase, transform.getParams)
+			val result = fieldSearch(transform.getId.getIdentifier, 
+				    transform.getFromType.toString.toLowerCase, transform.getParams)
 
-						return SearchResponse.newBuilder
-								.addAllResults(result.items.asScala.map(r => convertResult(r)).asJava)
-								.build
+			return SearchResponse.newBuilder
+					.addAllResults(result.items.asScala.map(r => convertResult(r)).asJava)
+					.build
 		}
 
 		override def runContentsTransform(transform: ContentsTransform) : SearchResponse = {
@@ -319,17 +323,24 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 							.setError("Error in runContentsTransform: Incompatible to/from proteus types")
 							.build
 				} else {
+				    System.out.println("Requesting entities: " + transform.getId.getIdentifier)
 					val document = galago.getDocument(transform.getId.getIdentifier)
-							// Get all tags for the to_type contents field
-							val contents_tags = document.tags.asScala.toList.filter(t => t.name.equals(transform.getToType.toString.toLowerCase))
-							// Generate results from these identifiers
-							return SearchResponse.newBuilder
-									.addAllResults(contents_tags.map(t => {
-										val id = document.text.slice(t.begin, t.end)
-												val title = transform.getToType.toString + " from " + docTitle(document)
-												quickResult(id, transform.getToType, title, title)
-									}).slice(0, transform.getParams.getNumRequested).asJava)
-									.build
+					// Get all tags for the to_type contents field
+					val contents_tags = document.tags.asScala.toList.filter(t => t.name.equals(transform.getToType.toString.toLowerCase))
+					// Generate results from these identifiers
+					System.out.println("Returning contents...");
+					System.out.println(document.text);
+					System.out.println(document.tags.asScala.toList)
+					contents_tags.foreach(t => System.out.println(t.name + ": " + t.attributes + 
+					    " (" + t.begin + " - " + t.end + ") " + document.text.slice(t.begin, t.end)))
+
+					return SearchResponse.newBuilder
+							.addAllResults(contents_tags.map(t => {
+								val id = document.text.slice(t.begin, t.end)
+								val title = transform.getToType.toString + " from " + docTitle(document)
+								quickResult(id, transform.getToType, title, title)
+							}).slice(0, transform.getParams.getNumRequested).asJava)
+							.build
 				}
 		}
 
@@ -575,6 +586,7 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 											.build)
 											.build
 				} else {
+					System.out.println("Looking up: " + accessID.getIdentifier)
 					val document = galago.getDocument(accessID.getIdentifier)
 							val termMap = termCounts(document.terms.asScala.toList)
 							return Organization.newBuilder

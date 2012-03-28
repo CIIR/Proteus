@@ -24,10 +24,11 @@ class RandomEndPoint(myServer: ServerSetting, librarian: ServerSetting) extends
     val serverHostname : String = myServer.hostname
 	val serverPort : Int = myServer.port
 	val serverGroupID : String = "randProteus"
-	var connection : ConnectLibrary = buildConnection
+	var connection : ConnectLibrary = null
 	
 	override def preStart() = {
       super.preStart
+      connection = buildConnection
       connectToLibrarian(librarian.hostname, librarian.port)
 	}
 }

@@ -104,6 +104,7 @@ trait LibrarianConnectionManagement extends RandomDataGenerator with ProteusAPI 
 	    	    supported_dyn_transforms ++= c.getDynamicTransformsList.asScala
     	    }
   	}
+	// TODO: we are currently asking the contents for who they are contained by, need to reverse this!
 	
     /**
      * The main workhorse of this trait, which conditionally forwards messages to libraries (whose ids are in list members), 
@@ -156,6 +157,7 @@ trait LibrarianConnectionManagement extends RandomDataGenerator with ProteusAPI 
      * Return the library ids that support one or more types in the list
      */
     protected def typeSupport(ptypes: List[ProteusType]) : List[String] = {
+      libraries.keys.toList.foreach(k => System.out.println(libraries(k).getSupportedTypes))
       libraries.keys.toList.filter(k => libraries(k).getSupportedTypes.exists(t => ptypes.contains(t)))
     }
     
@@ -180,15 +182,16 @@ trait LibrarianQueryManagement { this: Actor =>
     	case s: Search =>
     	  	val search_query = s.getSearchQuery
     	  	val members = typeSupport(search_query.getTypesList.asScala.toList)
+    	  	System.out.println("Members for search: " + members + " " + search_query.getTypesList.asScala.toList)
     	  	sendOrForwardTo(members, s, self.channel)
     	  	
     	// Libraries must be able to transform to its contained type when getting contents, and from its type when getting container
         case trans: ContainerTransform => // If you support the from type, then you must be able to get its container
-            val members = groupMemberTypeSupport(trans.getFromType, getLibrary(trans.getId.getResourceId).getGroupId)
+            val members = groupMemberTypeSupport(trans.getToType, getLibrary(trans.getId.getResourceId).getGroupId)
     	  	sendOrForwardTo(members, trans, self.channel)
         
-        case trans: ContentsTransform => // If you support the To Type then you must be able to get the contents (equivalent statement as above)
-        	val members = groupMemberTypeSupport(trans.getToType, getLibrary(trans.getId.getResourceId).getGroupId)
+        case trans: ContentsTransform => // If you support the From Type then you must be able to get the contents (equivalent statement as above)
+        	val members = groupMemberTypeSupport(trans.getFromType, getLibrary(trans.getId.getResourceId).getGroupId)
     	  	sendOrForwardTo(members, trans, self.channel)
         
         case trans: OverlapsTransform =>
