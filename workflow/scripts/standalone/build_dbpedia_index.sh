@@ -1,6 +1,5 @@
 f=`dirname $0`
 galago build \
---mode=drmaa --distrib=50 \
 --tokenizer/fields+object-title --tokenizer/fields+objecttype \
 --tokenizer/fields+object-name --tokenizer/fields+object-synonym \
 --tokenizer/fields+internal-link --tokenizer/fields+external-link \

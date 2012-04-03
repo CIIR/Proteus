@@ -14,11 +14,13 @@ gunzip ${f}/../${2}/teilist.list.gz
 split -l 200 ${f}/../${2}/teilist.list ${f}/../${2}/.tei_chunk
 
 for fl in ${f}/../${2}/.tei_chunk* ; do 
-    sh ${f}/cleanTEIChunk.sh ${fl} ${2}
+    qsub -cwd sh ${f}/../standalone/cleanTEIChunk.sh ${fl} ${2}
 done
 
+python ${f}/../standalone/waitforClean.py .tei_chunk
+
 rm ${f}/../${2}/teilist.list
-rm ${f}/../${2}/.tei_chunk*
+#rm ${f}/../${2}/.tei_chunk*
 
 #cp ${f}/../${1}/*_mbtei.xml.gz ${f}/../${2}/
 
