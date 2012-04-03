@@ -76,7 +76,7 @@ index_dbpedia: convert_freebase convert_dbpedia
               ifneq ($(strip $(wildcard .index_dbpedia.success)),.index_dbpedia.success)
 	      	   - mkdir ${OUTPATH}/indexes
 	      	   - mkdir ${OUTPATH}/indexes/dbpedia
-	      	   sh scripts/build_dbpedia_index.sh ${TMP}
+	      	   sh scripts/build_dbpedia_index.sh ${TMP} ${DRMAA}
 		   touch .index_dbpedia.success
               endif
 

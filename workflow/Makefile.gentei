@@ -11,7 +11,7 @@ tei_generation:
 tei_field_clean: tei_generation
               ifneq ($(strip $(wildcard .tei_field.success)),.tei_field.success)
 	      	   echo "Cleaning TEI file fields"
-		   sh scripts/clean_teis.sh ${OUTPATH}/mbteis/originals ${OUTPATH}/mbteis/cleaned
+		   sh scripts/clean_teis.sh ${OUTPATH}/mbteis/originals ${OUTPATH}/mbteis/cleaned ${DRMAA}
 		   touch .tei_field.success
               endif
 
