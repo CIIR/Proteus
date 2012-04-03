@@ -27,7 +27,7 @@ import org.lemurproject.galago.core.parse.Tag
  * myServer describes where this library server is running
  * librarian describes where the librarian/manager is running, in order to notify it of our existence
  */
-class GalagoEndPoint(myServer: ServerSetting, librarian: ServerSetting) extends 
+class GalagoEndPoint(myServer: ServerSetting, librarian: ServerSetting, resources: EndPointConfiguration) extends 
 LibraryServer with 
 EndPointConnectionManagement with
 EndPointQueryManagement with
@@ -39,17 +39,17 @@ GalagoDataStore {
 			val serverGroupID : String = "galagoProteus"
 			var connection : ConnectLibrary = null
 
-			override def preStart() = {
-	super.preStart
-//	initialize(EndPointConfiguration(ProteusType.PAGE, "/usr/mildura/scratch1/indexes/pages_small"))
-	initialize(EndPointConfiguration(ProteusType.PAGE, "/usr/mildura/scratch1/ciir-proteus/workflow/output/indexes/ambig_entities"))
+	override def preStart() = {
+		super.preStart
+//		initialize(EndPointConfiguration(ProteusType.PAGE, "/usr/mildura/scratch1/indexes/pages_small"))
+		initialize(resources)//EndPointConfiguration(ProteusType.PAGE, "/usr/mildura/scratch1/ciir-proteus/workflow/output/indexes/ambig_entities"))
 	
-    connection = buildConnection
-	connectToLibrarian(librarian.hostname, librarian.port)
-}
+		connection = buildConnection
+		connectToLibrarian(librarian.hostname, librarian.port)
+	}
 }
 
-class IAGalagoEndPoint(myServer: ServerSetting, librarian: ServerSetting) extends GalagoEndPoint(myServer, librarian) {
+class IAGalagoEndPoint(myServer: ServerSetting, librarian: ServerSetting, resources: EndPointConfiguration) extends GalagoEndPoint(myServer, librarian, resources) {
 	override def getURL(metadata: Map[String, String], fallback: String) : String = {
 			val prefix = "http://www.archive.org/stream/" + tryMetaData(metadata, "identifier", fallback)
 					dataType match {
@@ -82,23 +82,28 @@ class IAGalagoEndPoint(myServer: ServerSetting, librarian: ServerSetting) extend
 
 }
 
-/**
+/** 
  * A little app to let us run this end point
  */
-object galagoEndPointApp extends App {
-	val libraryService = try {
-		val mysettings = ServerSetting(args(0), args(1).toInt)
-				try {
-					val librarySettings = ServerSetting(args(2), args(3).toInt)
-							actorOf(new IAGalagoEndPoint(mysettings, librarySettings)).start()
-				} catch {
-				case _ => println("Library connection settings not given on command line using defaults.")
-						actorOf(new IAGalagoEndPoint(mysettings, ServerSetting(mysettings.hostname, 8081))).start()
-				}
-	} catch {
-	case _ => println("No arguments supplied using defaults.")
-			actorOf(new IAGalagoEndPoint(ServerSetting("localhost", 8082), ServerSetting("localhost", 8081))).start()
-	}	
+object galagoEndPointApp extends App with ProteusAPI {
+    if(args.length < 2)
+      System.out.println("Usage: sbt 'run ProteusType GalagoIndexPath EndPointHostname EPPort LibraryHostname LibraryPort'")
+    else {
+        val resource = EndPointConfiguration(convertType(args(0).toLowerCase), args(1))
+		val libraryService = try {
+			val mysettings = ServerSetting(args(2), args(3).toInt)
+					try {
+						val librarySettings = ServerSetting(args(4), args(5).toInt)
+								actorOf(new IAGalagoEndPoint(mysettings, librarySettings, resource)).start()
+					} catch {
+					case e:java.lang.IndexOutOfBoundsException => println("Library connection settings not given on command line using defaults.")
+							actorOf(new IAGalagoEndPoint(mysettings, ServerSetting(mysettings.hostname, 8081), resource)).start()
+					}
+		} catch {
+		case e:java.lang.IndexOutOfBoundsException => println("No arguments supplied using defaults.")
+				actorOf(new IAGalagoEndPoint(ServerSetting("localhost", 8082), ServerSetting("localhost", 8081), resource)).start()
+		}
+    }
 }
 
 /********* Implementation of the Random End Point / Random Library *************/
@@ -214,8 +219,8 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 				def docThumbURL(result: tools.Search.SearchResultItem) = getThumbURL(result.metadata.asScala.toMap, docImgURL(result))
 				def docURL(result: tools.Search.SearchResultItem): String = getURL(result.metadata.asScala.toMap, "")
 
-				def quickResult(id: String, pType: ProteusType, title: String, summary: String) : SearchResult = { 
-				val accessID = AccessIdentifier.newBuilder.setIdentifier(id).setResourceId(getResourceKey).build
+				def quickResult(id: String, pType: ProteusType, title: String, summary: String, resource: String = getResourceKey) : SearchResult = { 
+				val accessID = AccessIdentifier.newBuilder.setIdentifier(id).setResourceId(resource).build
 						SearchResult.newBuilder
 						.setId(accessID)
 						.setProteusType(pType)
@@ -299,14 +304,15 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 		override def runSearch(s: Search) : SearchResponse = {
 				// For each type requested generate a random number of results
 				val search_request = s.getSearchQuery
-						val result = galago.runQuery(search_request.getQuery, convertParameters(search_request.getParams), true)
-						return SearchResponse.newBuilder
+				val gparams = convertParameters(search_request.getParams)
+				val result = galago.runQuery(search_request.getQuery, gparams, true)
+				return SearchResponse.newBuilder
 								.addAllResults(result.items.asScala.map(r => convertResult(r)).asJava)
 								.build
 
 		}
 
-
+// sorter : { mem-fraction : 0.5 }
 		override def runContainerTransform(transform: ContainerTransform) : SearchResponse = {
 				// Figure out what the correct container type is, then return a singleton response
 			val result = fieldSearch(transform.getId.getIdentifier, 
@@ -328,17 +334,11 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 					// Get all tags for the to_type contents field
 					val contents_tags = document.tags.asScala.toList.filter(t => t.name.equals(transform.getToType.toString.toLowerCase))
 					// Generate results from these identifiers
-					System.out.println("Returning contents...");
-					System.out.println(document.text);
-					System.out.println(document.tags.asScala.toList)
-					contents_tags.foreach(t => System.out.println(t.name + ": " + t.attributes + 
-					    " (" + t.begin + " - " + t.end + ") " + document.text.slice(t.begin, t.end)))
-
 					return SearchResponse.newBuilder
 							.addAllResults(contents_tags.map(t => {
-								val id = document.text.slice(t.begin, t.end)
-								val title = transform.getToType.toString + " from " + docTitle(document)
-								quickResult(id, transform.getToType, title, title)
+								val id = t.attributes.get("name")
+								val title = t.attributes.get("name")
+								quickResult(id, transform.getToType, title, title, resource="dbp")
 							}).slice(0, transform.getParams.getNumRequested).asJava)
 							.build
 				}

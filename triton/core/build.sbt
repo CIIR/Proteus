@@ -21,19 +21,20 @@ resolvers ++= Seq(
   "Akka Repo" at "http://akka.io/repository",
   "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
   "GuiceyFruit Repo" at "http://guiceyfruit.googlecode.com/svn/repo/releases/",
-  "JBoss Repo" at "http://repository.jboss.org/nexus/content/groups/public/"
+  "JBoss Repo" at "http://repository.jboss.org/nexus/content/groups/public/",
+  "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 )
 
 // when using the sbt web app plugin 0.2.4+, use "container" instead of "jetty" for the context
 // Customize any further dependencies as desired
 libraryDependencies ++= Seq(
-  "se.scalablesolutions.akka" % "akka-actor" % "1.2" % "compile",
-  "se.scalablesolutions.akka" % "akka-slf4j" % "1.2",
-  "se.scalablesolutions.akka" % "akka-remote" % "1.2",
-  "se.scalablesolutions.akka" % "akka-camel" % "1.2",
-  "se.scalablesolutions.akka" % "akka-typed-actor" % "1.2",
-  "se.scalablesolutions.akka" % "akka-stm" % "1.2",
-  "se.scalablesolutions.akka" % "akka-camel-typed" % "1.2"
+  "se.scalablesolutions.akka" % "akka-actor" % "1.3.1" % "compile",
+  "se.scalablesolutions.akka" % "akka-slf4j" % "1.3.1",
+  "se.scalablesolutions.akka" % "akka-remote" % "1.3.1",
+  "se.scalablesolutions.akka" % "akka-camel" % "1.3.1",
+  "se.scalablesolutions.akka" % "akka-typed-actor" % "1.3.1",
+  "se.scalablesolutions.akka" % "akka-stm" % "1.3.1",
+  "se.scalablesolutions.akka" % "akka-camel-typed" % "1.3.1"
 )
 
 publishArtifact in Compile := true

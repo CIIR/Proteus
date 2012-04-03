@@ -27,12 +27,13 @@ entity_linking: ambig_ent_index index_dbpedia gentei
 annotate_teis: entity_linking ambig_ent_index index_dbpedia gentei
               ifneq ($(strip $(wildcard .annotate_teis.success)),.annotate_teis.success)
 	      	   echo "Annotating TEI files with entity disambiguations to list file ${ANNOTATED_TEIS}"
+		   cp ${ORIG_TEIS}.gz ${ANNOTATED_TEIS}
 		   touch .annotate_teis.success
               endif
 
 index_books: annotate_teis
               ifneq ($(strip $(wildcard .index_books.success)),.index_books.success)
-	      	   sh scripts/index_books.sh ${ANNOTATED_TEIS} indexes/books
+	      	   sh scripts/index_books.sh ${ANNOTATED_TEIS} ${OUTPATH}/indexes/books
 		   touch .index_books.success
               endif
 
