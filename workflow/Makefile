@@ -3,6 +3,10 @@ OUTPATH="output"
 SOURCE="targets.list"
 ORIG_TEIS="${OUTPATH}/mbteis/mbteis.list"
 ANNOTATED_TEIS="${OUTPATH}/mbteis/annotated_mbteis.list.gz"
+TMP="/work1/barto/wdabney/tmp/" # "/usr/mildura/scratch1/tmp/"
+
+DATAPATH="sources"
+
 -include Makefile.gentei
 -include Makefile.dbpedia
 
@@ -14,7 +18,7 @@ build_tei_list: gentei
 
 ambig_ent_index: gentei build_tei_list
               ifneq ($(strip $(wildcard .ambig_entity_index.success)),.ambig_entity_index.success)
-	      	   sh scripts/index_entities.sh ${ORIG_TEIS}.gz ${OUTPATH}/indexes/ambig_entities
+	      	   sh scripts/index_entities.sh ${ORIG_TEIS}.gz ${OUTPATH}/indexes/ambig_entities ${TMP}
 		   touch .ambig_entity_index.success
               endif
 
@@ -33,7 +37,7 @@ annotate_teis: entity_linking ambig_ent_index index_dbpedia gentei
 
 index_books: annotate_teis
               ifneq ($(strip $(wildcard .index_books.success)),.index_books.success)
-	      	   sh scripts/index_books.sh ${ANNOTATED_TEIS} ${OUTPATH}/indexes/books
+	      	   sh scripts/index_books.sh ${ANNOTATED_TEIS} ${OUTPATH}/indexes/books ${TMP}
 		   touch .index_books.success
               endif
 

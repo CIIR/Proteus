@@ -2,10 +2,6 @@ DBPTMP="dbpedia_sorted.dat"
 DBPPART="dbp_part"
 FBTMP="freebase_sorted.dat"
 FBPART="fb_part"
-TMP="/work1/barto/wdabney/tmp/"
-OUTPATH="output"
-DATAPATH="sources"
-UPTODATE=$(wildcard .*.success)
 
 sort_singles:
               ifneq ($(strip $(wildcard .sort_singles.success)),.sort_singles.success)
