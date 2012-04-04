@@ -1,8 +1,6 @@
-
-f=`dirname $0`
 while read fl; do
     y=${fl##*/}
-    python ${f}/fixTEIEntities.py ${fl} ${f}/../../${2}/${y} ; 
+    python scripts/fixTEIEntities.py ${fl} ${2}/${y} ; 
 done < $1
 
 rm ${1}

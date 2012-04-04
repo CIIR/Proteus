@@ -1,12 +1,13 @@
 
 OUTPATH="output"
-SOURCE="targets.list"
+SOURCE="../../test.list"#targets.list"
 ORIG_TEIS="${OUTPATH}/mbteis/mbteis.list"
 ANNOTATED_TEIS="${OUTPATH}/mbteis/annotated_mbteis.list.gz"
 TMP="/work1/barto/wdabney/tmp/" # "/usr/mildura/scratch1/tmp/"
 DATAPATH="sources"
 
-DRMAA=50 #0 for standalone
+DRMAA=5
+#DRMAA=0
 
 -include Makefile.gentei
 -include Makefile.dbpedia

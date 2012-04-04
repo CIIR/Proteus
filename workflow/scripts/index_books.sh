@@ -6,12 +6,12 @@ galago build \
 --tokenizer/fields+person --tokenizer/fields+location \
 --tokenizer/fields+organization --tokenizer/fields+page \
 --galagoJobDir=$3 \
---indexPath=${f}/../../$2 --inputPath+${f}/../../$1 #--port=10000
+--indexPath=${f}/../$2 --inputPath+${f}/../$1 #--port=10000
 else
 galago build \
 --mode=drmaa --distrib=$4 \
 --tokenizer/fields+person --tokenizer/fields+location \
 --tokenizer/fields+organization --tokenizer/fields+page \
 --galagoJobDir=$3 \
---indexPath=${f}/../../$2 --inputPath+${f}/../../$1 #--port=10000
+--indexPath=${f}/../$2 --inputPath+${f}/../$1 #--port=10000
 fi
