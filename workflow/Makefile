@@ -1,12 +1,12 @@
 
 OUTPATH="output"
-SOURCE="../../test.list"#targets.list"
+SOURCE="../../demo-54K.present.list" # targets.list"
 ORIG_TEIS="${OUTPATH}/mbteis/mbteis.list"
 ANNOTATED_TEIS="${OUTPATH}/mbteis/annotated_mbteis.list.gz"
 TMP="/work1/barto/wdabney/tmp/" # "/usr/mildura/scratch1/tmp/"
 DATAPATH="sources"
 
-DRMAA=5
+DRMAA=50
 #DRMAA=0
 
 -include Makefile.gentei
