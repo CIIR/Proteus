@@ -6,8 +6,7 @@ ANNOTATED_TEIS="${OUTPATH}/mbteis/annotated_mbteis.list.gz"
 TMP="/work1/barto/wdabney/tmp/" # "/usr/mildura/scratch1/tmp/"
 DATAPATH="sources"
 
-# For large enough jobs (65k books) 50 nodes isn't enough for indexing because they run out of time (4hours)
-DRMAA=65
+DRMAA=100
 #DRMAA=0
 
 -include Makefile.gentei
@@ -22,7 +21,8 @@ build_tei_list: gentei
 
 ambig_ent_index: gentei build_tei_list
               ifneq ($(strip $(wildcard .ambig_entity_index.success)),.ambig_entity_index.success)
-	      	   sh scripts/index_entities.sh ${ORIG_TEIS}.gz ${OUTPATH}/indexes/ambig_entities ${TMP} ${DRMAA
+	      	   sh scripts/index_entities.sh ${ORIG_TEIS}.gz ${OUTPATH}/indexes/ambig_entities ${TMP} ${DRMAA}
+	      	   sh scripts/sanity_check_pages.sh
 		   touch .ambig_entity_index.success
               endif
 
