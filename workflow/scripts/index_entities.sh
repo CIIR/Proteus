@@ -11,7 +11,7 @@ else
 galago build \
 --mode=drmaa --distrib=$4 \
 --tokenizer/fields+person --tokenizer/fields+location \
---tokenizer/fields+organization --galagoJobDir=$3 --deleteJobDir=false \
+--tokenizer/fields+organization --galagoJobDir=$3 --deleteJobDir=true \
 --indexPath=${f}/../$2 --inputPath+${f}/../$1 #--port=10000
 fi
 

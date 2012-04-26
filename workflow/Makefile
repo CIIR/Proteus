@@ -22,7 +22,7 @@ build_tei_list: gentei
 ambig_ent_index: gentei build_tei_list
               ifneq ($(strip $(wildcard .ambig_entity_index.success)),.ambig_entity_index.success)
 	      	   sh scripts/index_entities.sh ${ORIG_TEIS}.gz ${OUTPATH}/indexes/ambig_entities ${TMP} ${DRMAA}
-	      	   sh scripts/sanity_check_pages.sh
+	      	   -sh scripts/sanity_check_pages.sh
 		   touch .ambig_entity_index.success
               endif
 
@@ -42,7 +42,7 @@ annotate_teis: entity_linking ambig_ent_index index_dbpedia gentei
 index_books: annotate_teis
               ifneq ($(strip $(wildcard .index_books.success)),.index_books.success)
 	      	   sh scripts/index_books.sh ${ANNOTATED_TEIS} ${OUTPATH}/indexes/books ${TMP} ${DRMAA}
-	      	   sh scripts/sanity_check_books.sh
+	      	   -sh scripts/sanity_check_books.sh
 		   touch .index_books.success
               endif
 
