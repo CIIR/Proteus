@@ -13,5 +13,5 @@ galago build \
 --tokenizer/fields+person --tokenizer/fields+location \
 --tokenizer/fields+organization --tokenizer/fields+page \
 --parser/splitTag=book --galagoJobDir=$3 --corpusParameters/corpusText=false --corpusParameters/corpusTerms=false \
---indexPath=${f}/../$2 --inputPath+${f}/../$1 #--port=10000
+--deleteJobDir=false --indexPath=${f}/../$2 --inputPath+${f}/../$1 #--port=10000
 fi
