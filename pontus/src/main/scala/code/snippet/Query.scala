@@ -24,7 +24,7 @@ import edu.umass.ciir.proteus.triton.core._
 
 object Librarian extends Logger with ProteusAPI {
   val library = new LibrarianClient("mildura.cs.umass.edu", 8080)
-
+ 
   def performSearch(query:String, typesRequested: List[String]) : List[SearchResult] = {
       
         // catch illegal operator exception here

@@ -1,0 +1,30 @@
+# Makefile.gentei
+# Conditionally do whatever needs to be done to generate a set of TEI files from the list of textIDs and filename
+
+entlink_setup:
+              ifneq ($(strip $(wildcard .entlink_setup.success)),.entlink_setup.success)
+	      	   echo "Compiling, installing, and testing Entity Linking packages..."
+		   #git clone --recursive scm-ciir.cs.umass.edu:/var/git/tacco.git src/tacco
+		   sh scripts/entity_linking_setup.sh
+		   #sh scripts/generate_teis.sh ${SOURCE}
+		   touch .entlink_setup.success
+              endif
+
+# This may need to depend on the first index being created, but need to talk with Jeff about it.
+entlink_build: entlink_setup
+              ifneq ($(strip $(wildcard .entlink_build.success)),.entlink_build.success)
+	      	   echo "Building Entity Linking models..."
+		   sh scripts/entity_linking_build.sh ${OUTPATH}/indexes/wiki_index ${WEX_DATA} ${TMP} ${DRMAA}
+		   touch .entlink_build.success
+              endif
+
+entlink_tei: build_tei_list entlink_build
+              ifneq ($(strip $(wildcard .entlink_tei.success)),.entlink_tei.success)
+	      	   echo "Annotating TEI files using trained Entity Linking models..."
+		   #sh scripts/clean_teis.sh ${OUTPATH}/mbteis/originals ${OUTPATH}/mbteis/cleaned ${DRMAA}
+	      	   echo "Annotated TEI file list saved to ${ANNOTATED_TEIS}"
+	      	   cp ${ORIG_TEIS}.gz ${ANNOTATED_TEIS}
+		   touch .entlink_tei.success
+              endif
+
+annotate_teis: | entlink_tei

@@ -69,7 +69,7 @@ object Entity extends Query {
   def logAnnotations = "* [onclick]" #> SHtml.ajaxInvoke(() => {logging; JsCmds.RedirectTo("/")})
 
   val log = LoggerFactory.getLogger("annotations")
-
+ 
   def logging {
     
     // Append on the user's name to the annotations and write them to a file (appending)
@@ -90,9 +90,10 @@ object Entity extends Query {
 	      val pageItem = TheCart.get.findPageItem(page.slice(5, page.length).toInt).item
         val people = Librarian.library.getContents(pageItem.getId, ProteusType.PAGE, ProteusType.PERSON).get.getResultsList.asScala.toList
         val locations = Librarian.library.getContents(pageItem.getId, ProteusType.PAGE, ProteusType.LOCATION).get.getResultsList.asScala.toList
-	      people ::: locations
+	    val organizations = Librarian.library.getContents(pageItem.getId, ProteusType.PAGE, ProteusType.ORGANIZATION).get.getResultsList.asScala.toList
+	      people ::: locations ::: organizations
 	    } else {
-	      Librarian.performSearch(page, List("person", "location"))
+	      Librarian.performSearch(page, List("person", "location", "organization"))
 	    }
 
     rlist.foreach(r => TheCart.addItem(r))

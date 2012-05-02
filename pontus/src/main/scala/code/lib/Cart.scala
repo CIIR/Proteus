@@ -231,7 +231,7 @@ class Cart extends Logger {
           {
             v :+ PageItem(item, true)
           })
-      case "person" | "location" =>
+      case "person" | "location" | "organization" =>
         entities.atomicUpdate(v => {
           v :+ EntityItem(item, true)
         })
@@ -272,7 +272,9 @@ case class EntityItem(item: SearchResult, selected: Boolean, full_obj: Object = 
   def isLocation: Boolean = item.getProteusType == ProteusType.LOCATION
   def asPerson : Person = if (full_obj == null) null else full_obj.asInstanceOf[Person]
   def asLocation : Location = if (full_obj == null) null else full_obj.asInstanceOf[Location]
+  def asOrganization : Organization = if (full_obj == null) null else full_obj.asInstanceOf[Organization]
 }
+
 
                     
                                 

@@ -104,7 +104,8 @@ trait RandomDataGenerator {
 abstract trait EndPointDataStore {
   
 	protected def unsupportedResponse(method: String): SearchResponse = SearchResponse.newBuilder.setError("Unsupported by end point: " + method).build
-  
+    protected def errorResponse(errorText: String): SearchResponse = SearchResponse.newBuilder.setError("EndPoint Error: " + errorText).build
+    
   	/** Methods Used Here and Elsewhere (MUST BE PROVIDED) **/
 	def getResourceKey : String
   	def getSupportedTypes : List[ProteusType]
