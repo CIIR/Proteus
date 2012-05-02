@@ -105,7 +105,8 @@ trait EndPointQueryManagement { this: Actor =>
   	 */
   	 def runDynamicTransform(transform: DynamicTransform) : SearchResponse 
   	protected def prepareToSend(response: SearchResponse) : SearchResponse
-    
+    protected def errorResponse(errorText: String): SearchResponse 
+         
   	/**
   	 * Handle the messages relating to queries and transforms.
   	 * 
@@ -117,45 +118,127 @@ trait EndPointQueryManagement { this: Actor =>
   	  // All of these simply call the method, modify the response, and then send it back out
     	case s: Search => 
     	  	val chan = self.channel // This is a workaround until the bug in Akka 1.2 is fixed
-    		Future { prepareToSend(runSearch(s)) } onResult { case r: SearchResponse => chan ! r}
+    	  	// Lets add in some exception handling for safety.
+    		Future { 
+	    	  	  try {
+	    	  	    prepareToSend(runSearch(s)) 
+	    	  	  } catch {
+	    	  	    case ex: Exception => System.err.println("Search on endpoint threw an exception:")
+	    	  	    		ex.printStackTrace()
+	    	  	    		errorResponse("Search threw an exception --> " + ex.toString)
+	    	  	  }
+    	  	  } onResult { case r: SearchResponse => chan ! r}
     	
     	case trans: ContainerTransform => 
     	  	val chan = self.channel
-    		Future { prepareToSend(runContainerTransform(trans)) } onResult { case r: SearchResponse => chan ! r }
+    		Future { 
+    	  	  try {
+	    	  	    prepareToSend(runContainerTransform(trans)) 
+	    	  	  } catch {
+	    	  	    case ex: Exception => System.err.println("Container Transform on endpoint threw an exception:")
+	    	  	    		ex.printStackTrace()
+	    	  	    		errorResponse("Container Transform threw an exception --> " + ex.toString)
+	    	  	  }
+    	  	  } onResult { case r: SearchResponse => chan ! r }
         
     	case trans: ContentsTransform => 
     	  	val chan = self.channel
-    		Future { prepareToSend(runContentsTransform(trans)) } onResult { case r: SearchResponse => chan ! r }
+    		Future { 
+    	  	  try {
+	    	  	    prepareToSend(runContentsTransform(trans)) 
+	    	  	  } catch {
+	    	  	    case ex: Exception => System.err.println("Contents Transform on endpoint threw an exception:")
+	    	  	    		ex.printStackTrace()
+	    	  	    		errorResponse("Contents Transform threw an exception --> " + ex.toString)
+	    	  	  }
+    	  	  } onResult { case r: SearchResponse => chan ! r }
         
     	case trans: OverlapsTransform => 
     	  	val chan = self.channel
-    		Future { prepareToSend(runOverlapsTransform(trans)) } onResult { case r: SearchResponse => chan ! r }
+    		Future { 
+    	  	  try {
+	    	  	    prepareToSend(runOverlapsTransform(trans)) 
+	    	  	  } catch {
+	    	  	    case ex: Exception => System.err.println("Overlaps Transform on endpoint threw an exception:")
+	    	  	    		ex.printStackTrace()
+	    	  	    		errorResponse("Overlaps Transform threw an exception --> " + ex.toString)
+	    	  	  }
+    	  	  } onResult { case r: SearchResponse => chan ! r }
         
     	case trans: OccurAsObjTransform => 
     	  	val chan = self.channel
-    		Future { prepareToSend(runOccurAsObjTransform(trans)) } onResult { case r: SearchResponse => chan ! r }
+    		Future { 
+    	  	  try {
+	    	  	    prepareToSend(runOccurAsObjTransform(trans)) 
+	    	  	  } catch {
+	    	  	    case ex: Exception => System.err.println("Occurrence as Object Transform on endpoint threw an exception:")
+	    	  	    		ex.printStackTrace()
+	    	  	    		errorResponse("Occurrence as Object Transform threw an exception --> " + ex.toString)
+	    	  	  }
+    	  	  } onResult { case r: SearchResponse => chan ! r }
         
     	case trans: OccurAsSubjTransform => 
     	  	val chan = self.channel
-    		Future { prepareToSend(runOccurAsSubjTransform(trans)) } onResult { case r: SearchResponse => chan ! r }
+    		Future { 
+    	  	  try {
+	    	  	    prepareToSend(runOccurAsSubjTransform(trans)) 
+	    	  	  } catch {
+	    	  	    case ex: Exception => System.err.println("Occurrence as Subject Transform on endpoint threw an exception:")
+	    	  	    		ex.printStackTrace()
+	    	  	    		errorResponse("Occurrence as Subject Transform threw an exception --> " + ex.toString)
+	    	  	  }
+    	  	  } onResult { case r: SearchResponse => chan ! r }
         
     	case trans: OccurHasObjTransform => 
     	  	val chan = self.channel
-    		Future { prepareToSend(runOccurHasObjTransform(trans)) } onResult { case r: SearchResponse => chan ! r }
+    		Future { 
+    	  	  try {
+	    	  	    prepareToSend(runOccurHasObjTransform(trans)) 
+	    	  	  } catch {
+	    	  	    case ex: Exception => System.err.println("Occurrence has Object Transform on endpoint threw an exception:")
+	    	  	    		ex.printStackTrace()
+	    	  	    		errorResponse("Occurrence has Object Transform threw an exception --> " + ex.toString)
+	    	  	  }
+    	  	  } onResult { case r: SearchResponse => chan ! r }
         
     	case trans: OccurHasSubjTransform => 
     	  	val chan = self.channel
-    		Future { prepareToSend(runOccurHasSubjTransform(trans)) } onResult { case r: SearchResponse => chan ! r }
+    		Future { 
+    	  	  try {
+	    	  	    prepareToSend(runOccurHasSubjTransform(trans)) 
+	    	  	  } catch {
+	    	  	    case ex: Exception => System.err.println("Occurrence has Subject Transform on endpoint threw an exception:")
+	    	  	    		ex.printStackTrace()
+	    	  	    		errorResponse("Occurrence has Subject Transform threw an exception --> " + ex.toString)
+	    	  	  }
+    	  	  } onResult { case r: SearchResponse => chan ! r }
         
     	case trans: NearbyLocationsTransform => 
     	  	val chan = self.channel
-    		Future { prepareToSend(runNearbyLocationsTransform(trans)) } onResult { case r: SearchResponse => chan ! r }
+    		Future { 
+    	  	  try {
+	    	  	    prepareToSend(runNearbyLocationsTransform(trans)) 
+	    	  	  } catch {
+	    	  	    case ex: Exception => System.err.println("Nearby Locations Transform on endpoint threw an exception:")
+	    	  	    		ex.printStackTrace()
+	    	  	    		errorResponse("Nearby Locations Transform threw an exception --> " + ex.toString)
+	    	  	  }
+    	  	  } onResult { case r: SearchResponse => chan ! r }
         
     	case dtrans: DynamicTransform => 
     	  	val chan = self.channel
-    	  	Future { prepareToSend(runDynamicTransform(dtrans)) } onResult { case r: SearchResponse => chan ! r }
+    	  	Future { 
+    	  	  try {
+	    	  	    prepareToSend(runDynamicTransform(dtrans)) 
+	    	  	  } catch {
+	    	  	    case ex: Exception => System.err.println("Dynamic Transform (" + dtrans.getTransformId.getName + ") on endpoint threw an exception:")
+	    	  	    		ex.printStackTrace()
+	    	  	    		errorResponse("Dynamic Transform (" + dtrans.getTransformId.getName + ") threw an exception --> " + ex.toString)
+	    	  	  }
+    	  	  } onResult { case r: SearchResponse => chan ! r }
   	}
 }
+// Note: The analagous situation with object variables can be done using extensions, the librarian/manager can stay the same
 
 /**
  * Trait for providing lookup management for the end point.
@@ -172,41 +255,122 @@ trait EndPointLookupManagement { this: Actor =>
      def lookupLocation(accessID: AccessIdentifier) : Location
      def lookupOrganization(accessID: AccessIdentifier) : Organization
     
+     protected def errorResponse(errorText: String): SearchResponse 
     /**
      * Handle receiving the lookup messages. Note, the same bug affects this trait as well.
      */
   	protected def lookupManagement : Receive = {
     	case lookup: LookupCollection =>
     	  	val chan = self.channel
-    	  	Future { lookupCollection(lookup.getId) } onResult { case r: Collection => chan ! r }
+    	  	Future { 
+    	  	  try {
+    	  	    lookupCollection(lookup.getId) 
+    	  	  } catch {
+    	  	    case ex: Exception => System.err.println("Lookup Collection threw an exception")
+    	  	    		ex.printStackTrace
+    	  	    		Collection.newBuilder
+    	  	    			.setId(lookup.getId.toBuilder.setError("Lookup Collection threw an exception --> " + ex.toString).build)
+    	  	    			.build
+    	  	  }
+    	  	} onResult { case r: Collection => chan ! r }
     	  	
     	case lookup: LookupPage =>
     	  	val chan = self.channel
-    	  	Future { lookupPage(lookup.getId) } onResult { case r: Page => chan ! r }
+    	  	Future { 
+    	  	  try {
+    	  	    lookupPage(lookup.getId) 
+    	  	  } catch {
+    	  	    case ex: Exception => System.err.println("Lookup Page threw an exception")
+    	  	    		ex.printStackTrace
+    	  	    		Page.newBuilder
+    	  	    			.setId(lookup.getId.toBuilder.setError("Lookup Page threw an exception --> " + ex.toString).build)
+    	  	    			.build
+    	  	  }
+    	  	} onResult { case r: Page => chan ! r }
     	  	
     	case lookup: LookupPicture =>
     	  	val chan = self.channel
-    	  	Future { lookupPicture(lookup.getId) } onResult { case r: Picture => chan ! r }
+    	  	Future {
+    	  	  try {
+    	  	    lookupPicture(lookup.getId) 
+    	  	  } catch {
+    	  	    case ex: Exception => System.err.println("Lookup Picture threw an exception")
+    	  	    		ex.printStackTrace
+    	  	    		Picture.newBuilder
+    	  	    			.setId(lookup.getId.toBuilder.setError("Lookup Picture threw an exception --> " + ex.toString).build)
+    	  	    			.build
+    	  	  }
+    	  	} onResult { case r: Picture => chan ! r }
     	  	
     	case lookup: LookupVideo =>
     	  	val chan = self.channel
-    	  	Future { lookupVideo(lookup.getId) } onResult { case r: Video => chan ! r }
+    	  	Future {
+    	  	  try {
+    	  	    lookupVideo(lookup.getId) 
+    	  	  } catch {
+    	  	    case ex: Exception => System.err.println("Lookup Video threw an exception")
+    	  	    		ex.printStackTrace
+    	  	    		Video.newBuilder
+    	  	    			.setId(lookup.getId.toBuilder.setError("Lookup Video threw an exception --> " + ex.toString).build)
+    	  	    			.build
+    	  	  }
+    	  	} onResult { case r: Video => chan ! r }
     	  	
     	case lookup: LookupAudio =>
     	  	val chan = self.channel
-    	  	Future { lookupAudio(lookup.getId) } onResult { case r: Audio => chan ! r }
+    	  	Future {
+    	  	  try {
+    	  	    lookupAudio(lookup.getId) 
+    	  	  } catch {
+    	  	    case ex: Exception => System.err.println("Lookup Audio threw an exception")
+    	  	    		ex.printStackTrace
+    	  	    		Audio.newBuilder
+    	  	    			.setId(lookup.getId.toBuilder.setError("Lookup Audio threw an exception --> " + ex.toString).build)
+    	  	    			.build
+    	  	  }
+    	  	} onResult { case r: Audio => chan ! r }
     	  	
     	case lookup: LookupPerson =>
     	  	val chan = self.channel
-    	  	Future { lookupPerson(lookup.getId) } onResult { case r: Person => chan ! r }
+    	  	Future { 
+    	  	  try {
+    	  	    lookupPerson(lookup.getId) 
+    	  	  } catch {
+    	  	    case ex: Exception => System.err.println("Lookup Person threw an exception")
+    	  	    		ex.printStackTrace
+    	  	    		Person.newBuilder
+    	  	    			.setId(lookup.getId.toBuilder.setError("Lookup Person threw an exception --> " + ex.toString).build)
+    	  	    			.build
+    	  	  }
+    	  	} onResult { case r: Person => chan ! r }
     	  	
     	case lookup: LookupLocation =>
     	  	val chan = self.channel
-    	  	Future { lookupLocation(lookup.getId) } onResult { case r: Location => chan ! r }
+    	  	Future {
+    	  	  try {
+    	  	    lookupLocation(lookup.getId) 
+    	  	  } catch {
+    	  	    case ex: Exception => System.err.println("Lookup Location threw an exception")
+    	  	    		ex.printStackTrace
+    	  	    		Location.newBuilder
+    	  	    			.setId(lookup.getId.toBuilder.setError("Lookup Location threw an exception --> " + ex.toString).build)
+    	  	    			.build
+    	  	  }
+    	  	} onResult { case r: Location => chan ! r }
     	  	
     	case lookup: LookupOrganization =>
     	  	val chan = self.channel
-    	  	Future { lookupOrganization(lookup.getId) } onResult { case r: Organization => chan ! r }
+    	  	Future { 
+    	  	  try {
+    	  	    lookupOrganization(lookup.getId) 
+    	  	  } catch {
+    	  	    case ex: Exception => System.err.println("Lookup Organization threw an exception")
+    	  	    		ex.printStackTrace
+    	  	    		Organization.newBuilder
+    	  	    			.setId(lookup.getId.toBuilder.setError("Lookup Organization threw an exception --> " + ex.toString).build)
+    	  	    			.build
+    	  	  }
+    	  	} onResult { case r: Organization => chan ! r }
 
   	}
 }

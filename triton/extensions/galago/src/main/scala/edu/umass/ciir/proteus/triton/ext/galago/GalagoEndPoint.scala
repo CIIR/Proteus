@@ -18,6 +18,7 @@ import org.lemurproject.galago.core.tools
 import org.lemurproject.galago.tupleflow.Parameters
 import org.lemurproject.galago.core.parse.Document
 import org.lemurproject.galago.core.parse.Tag
+import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 
 
 /**
@@ -168,6 +169,29 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 			builder.setText(modified_summary)
 			return builder.build
 		}
+	
+		/**
+		 * A fast and simple regular expression based snippet generator.
+		 */
+		def generateSummary(text: String, queryTerms: List[String]): ResultSummary = {
+			if (text == null || text.length == 0) {
+			  val builder = ResultSummary.newBuilder
+			  builder.setText("")
+			  return builder.build
+			}
+			
+			val max_words = 60 
+			val pureText = text.replaceAll("<[^>.]*>", "")
+			val lowerText = pureText.toLowerCase
+			val matches = queryTerms.map(query => lowerText.indexOf(query))
+			val start_index = if(matches.length > 0) matches.min else 0// Could do something more fancy like look for the starting index that would cover the maximum number of these
+			val summary = pureText.slice(start_index, text.length).split(" ").slice(0,max_words).mkString(" ")
+			val builder = ResultSummary.newBuilder
+			if(queryTerms.length > 0)
+				(queryTerms.mkString("|").r findAllIn summary.toLowerCase).matchData foreach {m => builder.addHighlights(TextRegion.newBuilder.setStart(m.start).setStop(m.end).build)}
+			builder.setText(summary)
+			return builder.build
+		}
 
 
 		protected def tryMetaData(metadata: Map[String, String], key: String, default: String) : String = {
@@ -182,7 +206,7 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 						"--resultCount=" + params.getNumRequested).toArray)
 		}
 
-		protected def convertResult(galagoResult: tools.Search.SearchResultItem): SearchResult = {
+		protected def convertResult(galagoResult: tools.Search.SearchResultItem, queryTerms: List[String]): SearchResult = {
 				// Assuming for now that it is one type per index or you will write your own way to know which type to use
 				val proteusType = getSupportedTypes.apply(0)
 						val accessID = AccessIdentifier.newBuilder
@@ -190,11 +214,11 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 						.setResourceId(getResourceKey)
 						.build
 
-						SearchResult.newBuilder
+				SearchResult.newBuilder
 						.setId(accessID)
 						.setProteusType(proteusType)
 						.setTitle(galagoResult.displayTitle.replaceAll("<strong>", "").replaceAll("</strong>",""))
-						.setSummary(generateSummary(galagoResult.summary))
+						.setSummary(generateSummary(galagoResult.summary, queryTerms))
 						.setImgUrl(docImgURL(galagoResult))
 						.setThumbUrl(docThumbURL(galagoResult))
 						.setExternalUrl(docURL(galagoResult))
@@ -211,7 +235,7 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 
 				def docTitle(doc: Document): String = getTitle(doc.metadata.asScala.toMap, doc.name)
 				def docURL(doc: Document): String = getURL(doc.metadata.asScala.toMap, "")
-				def docSummary(document: Document) = ResultSummary.newBuilder.setText(getSummary(document.metadata.asScala.toMap, document.text)).build
+				def docSummary(document: Document) = {System.err.println("Doc summary.."); generateSummary(getSummary(document.metadata.asScala.toMap, document.text), List())}
 				def docImgURL(doc: Document) = getImgURL(doc.metadata.asScala.toMap, "")
 				def docThumbURL(doc: Document) = getThumbURL(doc.metadata.asScala.toMap, docImgURL(doc))
 
@@ -230,7 +254,7 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 		}
 
 		def fieldSearch(query: String, field: String, params: SearchParameters) : tools.Search.SearchResult = {
-				galago.runQuery(query + "." + field, convertParameters(params), true) // same as: "#inside( #text:" + query +"() #field:" + field + "() )"?
+				galago.runQuery(query + "." + field, convertParameters(params), false) // same as: "#inside( #text:" + query +"() #field:" + field + "() )"?
 		}
 
 		def termCounts(terms: List[String]) : Map[String, Int] = {
@@ -277,6 +301,7 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 		}
 
 		def genDateHistogram(termMap: Map[String, Int]) : LongValueHistogram = {
+		  System.err.println("generating date hist...")
 				val dateKeys = termMap.keys.filter(isDate _).toList
 						val keyDates = dateKeys.map(k => {val r = parseDate(k); (k, r._1, r._2)}).filter(_._3).map(t => (t._1, (t._2, termMap(t._1)))).toMap
 						val totalCount = keyDates.values.map(_._2).sum.toDouble
@@ -290,6 +315,7 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 
 
 		def genTermHistogram(termMap: Map[String, Int]) : TermHistogram = {
+		  System.err.println("generating term hist..")
 				val totalCount = termMap.values.sum.toDouble
 						return TermHistogram.newBuilder
 								.addAllTerms(termMap.keys.toList.map(key => WeightedTerm.newBuilder
@@ -298,18 +324,78 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 								.build).asJava)
 								.build
 		}
+		
+		def runQuery(query: String, p:Parameters, summarize:Boolean) : (tools.Search.SearchResult, java.util.Set[String]) = { 
+		  val root = StructuredQuery.parse(query)
+		    val transformed = galago.getRetrieval.transformQuery(root, p)
+		   // val result = runTransformedQuery(transformed, p, summarize);
+		    val startAt = p.getLong("startAt").toInt
+		    val count = p.getLong("resultCount").toInt
+		    val results = galago.getRetrieval.runQuery(transformed, p)
+		    val result = new tools.Search.SearchResult()
+		    val queryTerms = StructuredQuery.findQueryTerms(transformed)
+		    galago.generator.setStemming(transformed.toString().contains("part=stemmedPostings"))
+		    result.transformedQuery = transformed
+		    if (results != null)
+		    {
+			    for (i <- startAt until Math.min(startAt + count, results.length)) {
+			      val identifier = results(i).documentName
+			      val item = new tools.Search.SearchResultItem();
 
+			      item.rank = i + 1;
+			      item.identifier = identifier;
+			      item.displayTitle = identifier;
+			
+				  val document = galago.getDocument(identifier)
+				      
+				  if (document.metadata.containsKey("title")) {
+				      item.displayTitle = document.metadata.get("title");
+				  }
+				
+				  if (item.displayTitle != null) {
+				      item.displayTitle = galago.generator.highlight(item.displayTitle, queryTerms);
+				  }
+				
+				  if (document.metadata.containsKey("url")) {
+				      item.url = document.metadata.get("url");
+				  }
+				  
+				  if (document.text != null && summarize)
+				      item.summary = galago.getSummary(document, queryTerms);
+				  else if(document.text != null)
+					  item.summary = document.text
+				  else
+					  item.summary = ""
+					    
+				  item.metadata = document.metadata; 
+			      
+			      item.score = results(i).score
+			      result.items.add(item)
+			    }
+		    }
+		    result.query = transformed;
+			result.queryAsString = query;
+			return (result, queryTerms)
+
+		}
 
 		/** Core Functionality Methods (MUST BE PROVIDED) **/
 		override def runSearch(s: Search) : SearchResponse = {
 				// For each type requested generate a random number of results
+				System.out.println("Got search request...")
 				val search_request = s.getSearchQuery
 				val gparams = convertParameters(search_request.getParams)
-				val result = galago.runQuery(search_request.getQuery, gparams, true)
-				return SearchResponse.newBuilder
-								.addAllResults(result.items.asScala.map(r => convertResult(r)).asJava)
+				val start_time = System.currentTimeMillis
+				//val result = galago.runQuery(search_request.getQuery, gparams, false)
+				val (result, queryTerms) = runQuery(search_request.getQuery, gparams, false)
+				System.out.println("Galago search for " + search_request.getQuery + " took " + ((System.currentTimeMillis - start_time)/1000.0) + " seconds")
+				//val queryTerms = StructuredQuery.findQueryTerms(result.query)
+				val ret = SearchResponse.newBuilder
+								.addAllResults(result.items.asScala.map(r => convertResult(r, queryTerms.asScala.toList)).asJava)
 								.build
-
+								
+				System.out.println("returning..")
+				return ret
 		}
 
 // sorter : { mem-fraction : 0.5 }
@@ -319,7 +405,7 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 				    transform.getFromType.toString.toLowerCase, transform.getParams)
 
 			return SearchResponse.newBuilder
-					.addAllResults(result.items.asScala.map(r => convertResult(r)).asJava)
+					.addAllResults(result.items.asScala.map(r => convertResult(r, List())).asJava)
 					.build
 		}
 
@@ -348,8 +434,8 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 		override def runOccurAsObjTransform(transform: OccurAsObjTransform) : SearchResponse = {
 				transform.getFromType match {
 				case ProteusType.PERSON | ProteusType.LOCATION | ProteusType.ORGANIZATION => 
-				val result = galago.runQuery("obj_of_" + transform.getTerm, convertParameters(transform.getParams), true)
-				return SearchResponse.newBuilder.addAllResults(result.items.asScala.map(r => convertResult(r)).asJava).build
+				val result = galago.runQuery("obj_of_" + transform.getTerm, convertParameters(transform.getParams), false)
+				return SearchResponse.newBuilder.addAllResults(result.items.asScala.map(r => convertResult(r, List("obj_of_" + transform.getTerm))).asJava).build
 						// An example of an unsupported implimentationtransform on a supported type
 				case _ => 
 				return SearchResponse.newBuilder.build // Empty, but no error
@@ -359,8 +445,8 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 		override def runOccurAsSubjTransform(transform: OccurAsSubjTransform) : SearchResponse  = {
 				transform.getFromType match {
 				case ProteusType.PERSON | ProteusType.LOCATION | ProteusType.ORGANIZATION => 
-				val result = galago.runQuery("subj_of_" + transform.getTerm, convertParameters(transform.getParams), true)
-				return SearchResponse.newBuilder.addAllResults(result.items.asScala.map(r => convertResult(r)).asJava).build
+				val result = galago.runQuery("subj_of_" + transform.getTerm, convertParameters(transform.getParams), false)
+				return SearchResponse.newBuilder.addAllResults(result.items.asScala.map(r => convertResult(r, List("subj_of_" + transform.getTerm))).asJava).build
 
 						// An example of an unsupported transform on a supported type
 				case _ => 
@@ -371,8 +457,8 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 		override def runOccurHasObjTransform(transform: OccurHasObjTransform) : SearchResponse = {
 				transform.getFromType match {
 				case ProteusType.PERSON | ProteusType.LOCATION | ProteusType.ORGANIZATION => 
-				val result = galago.runQuery("has_obj_" + transform.getTerm, convertParameters(transform.getParams), true)
-				return SearchResponse.newBuilder.addAllResults(result.items.asScala.map(r => convertResult(r)).asJava).build
+				val result = galago.runQuery("has_obj_" + transform.getTerm, convertParameters(transform.getParams), false)
+				return SearchResponse.newBuilder.addAllResults(result.items.asScala.map(r => convertResult(r, List("has_obj_" + transform.getTerm))).asJava).build
 
 						// An example of an unsupported transform on a supported type
 				case _ => 
@@ -383,8 +469,8 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 		override def runOccurHasSubjTransform(transform: OccurHasSubjTransform) : SearchResponse  = {
 				transform.getFromType match {
 				case ProteusType.PERSON | ProteusType.LOCATION | ProteusType.ORGANIZATION => 
-				val result = galago.runQuery("has_subj_" + transform.getTerm, convertParameters(transform.getParams), true)
-				return SearchResponse.newBuilder.addAllResults(result.items.asScala.map(r => convertResult(r)).asJava).build
+				val result = galago.runQuery("has_subj_" + transform.getTerm, convertParameters(transform.getParams), false)
+				return SearchResponse.newBuilder.addAllResults(result.items.asScala.map(r => convertResult(r, List("has_subj_" + transform.getTerm))).asJava).build
 
 						// An example of an unsupported transform on a supported type
 				case _ => 
@@ -432,12 +518,14 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 											.build
 				} else {
 					// The other way to build. This one is a little nicer IMO
-					val document = galago.getDocument(accessID.getIdentifier)
-							val termMap = termCounts(document.terms.asScala.toList)
-							return Page.newBuilder
+				    val document = galago.getDocument(accessID.getIdentifier)
+					val termMap = termCounts(document.terms.asScala.toList)
+					val docText = if(document.text != null) document.text else ""
+					return Page.newBuilder
 									.setId(accessID)
 									.setTitle(docTitle(document))
 									.setSummary(docSummary(document))
+									.setFullText(docText)
 									.setImgUrl(docImgURL(document))
 									.setThumbUrl(docThumbURL(document))
 									.setExternalUrl(docURL(document))
@@ -447,7 +535,8 @@ trait GalagoDataStore extends EndPointDataStore with RandomDataGenerator {
 				}
 		}
 
-
+// TODO: Fixing OCR Text: So, it gets the text no problem... but either isn't returning it or someo f the builder steps here (or their methods) are taking wayyyy too longer
+		
 
 		override def lookupPicture(accessID: AccessIdentifier) : Picture = {
 				if (accessID.getResourceId != getResourceKey) {

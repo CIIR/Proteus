@@ -132,8 +132,13 @@ trait LibrarianConnectionManagement extends RandomDataGenerator with ProteusAPI 
 	    	  	    case _ => SearchResponse.newBuilder
 	    	  			  		.setError("Error in responses from libraries...")
 	    	  			  		.build
-    	  	  	}
-          final_result onResult { case r: SearchResponse => chan ! r }
+    	  	  	}.get
+/*          final_result onResult { 
+            	case r: SearchResponse => 
+            	  		System.out.println("Library recieved response " + r)
+            			chan ! r }*/
+    	  System.out.println("Got " + final_result)
+    	  chan ! final_result
         }
     }	
     

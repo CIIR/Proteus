@@ -20,7 +20,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 	 * the full objects.
 	 */
 	def query(text: String, types_requested: List[ProteusType], 
-			  num_requested: Int = 100, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
+			  num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
 		// Build the parts of the message
 		val search_params = SearchParameters.newBuilder
 				.setNumRequested(num_requested)
@@ -47,7 +47,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 	 * a given access identifier (which specifies a data resource). The response is returned as a Future.
 	 */
 	def getContents(id: AccessIdentifier, id_type: ProteusType, contents_type: ProteusType, 
-				num_requested: Int = 100, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
+				num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
 	  
 		if(!contents_map(id_type).contains(contents_type))
 		  throw new IllegalArgumentException("Mismatched to/from types for getContents: (" + id_type.getValueDescriptor.getName + ", " + contents_type.getValueDescriptor.getName + ")")
@@ -72,7 +72,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 	 * Get the reference result for the containing data resource of of this access identifier
 	 */
 	def getContainer(id: AccessIdentifier, id_type: ProteusType, container_type: ProteusType, 
-				num_requested: Int = 100, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
+				num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
 	  
 	   if((!container_map.contains(id_type) && id_type != container_type) || (container_map.contains(id_type) && !container_map(id_type).contains(container_type)))
 		  throw new IllegalArgumentException("Mismatched to/from types for getContainer: (" + id_type.getValueDescriptor.getName + ", " + container_type.getValueDescriptor.getName + ")")
@@ -115,7 +115,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 	 * a given access identifier (which specifies a data resource). The response is returned as a Future.
 	 */
 	def getDescendants(start_item: SearchResult, type_path: List[ProteusType], 
-				num_requested: Int = 100, language: String = "en") : Future[List[SearchResult]] = {
+				num_requested: Int = 30, language: String = "en") : Future[List[SearchResult]] = {
 	  
 	    // Verify that the type_path is a valid path
 	    if(!type_path.dropRight(1).zip(type_path.drop(1)).forall(t => contents_map(t._1).contains(t._2)))
@@ -130,7 +130,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 	 * Get the reference result for the containing data resource of of this access identifier
 	 */
 	def getAncesters(start_item: SearchResult, type_path: List[ProteusType], 
-				num_requested: Int = 100, language: String = "en") : Future[List[SearchResult]] = {
+				num_requested: Int = 30, language: String = "en") : Future[List[SearchResult]] = {
 	   // Verify that the type_path is a valid path
 	    if(!type_path.dropRight(1).zip(type_path.drop(1)).forall(t => container_map(t._1).contains(t._2)))
 		  throw new IllegalArgumentException("Mismatched type path for getAncesters: (" + type_path.map(_.getValueDescriptor.getName).mkString(", ") + ")")
@@ -144,7 +144,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 	 * Get the overlaping resources of the same type as this one. Where the precise meaning of overlapping 
 	 * is up to the end point data stores to decide.
 	 */
-	def getOverlaps(id: AccessIdentifier, id_type: ProteusType, num_requested: Int = 100, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
+	def getOverlaps(id: AccessIdentifier, id_type: ProteusType, num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
 	  	val search_params = SearchParameters.newBuilder
 				.setNumRequested(num_requested)
 				.setStartAt(start_at)
@@ -165,7 +165,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 	 * occurs as an object of the provided term.
 	 */
 	def getOccurrencesAsObj(id: AccessIdentifier, id_type: ProteusType, term: String, 
-							num_requested: Int = 100, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
+							num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
 	  
 	  	val search_params = SearchParameters.newBuilder
 				.setNumRequested(num_requested)
@@ -187,7 +187,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 	 * occurs as a subject of the provided term.
 	 */
 	def getOccurencesAsSubj(id: AccessIdentifier, id_type: ProteusType, term: String, 
-							num_requested: Int = 100, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
+							num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
 	  
 	  	val search_params = SearchParameters.newBuilder
 				.setNumRequested(num_requested)
@@ -209,7 +209,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 	 * occurs having as its object the provided term.
 	 */
 	def getOccurrencesHasObj(id: AccessIdentifier, id_type: ProteusType, term: String, 
-							num_requested: Int = 100, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
+							num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
 	  
 	  	val search_params = SearchParameters.newBuilder
 				.setNumRequested(num_requested)
@@ -231,7 +231,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 	 * occurs having as its subject the provided term.
 	 */
 	def getOccurrencesHasSubj(id: AccessIdentifier, id_type: ProteusType, term: String, 
-							num_requested: Int = 100, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
+							num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
 	  
 	  	val search_params = SearchParameters.newBuilder
 				.setNumRequested(num_requested)
@@ -252,7 +252,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 	 * Get locations within radius of the location described by id
 	 */
 	def getNearbyLocations(id: AccessIdentifier, radius: Int, 
-							num_requested: Int = 100, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
+							num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
 	  
 	  	val search_params = SearchParameters.newBuilder
 				.setNumRequested(num_requested)
@@ -274,7 +274,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 	 * transform_name. The librarian must have a end point supporting this transform loaded for this to succeed.
 	 */
 	def useDynamicTransform(id: AccessIdentifier, id_type: ProteusType, transform_name: String,  
-							num_requested: Int = 100, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
+							num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
 	  
 	  	val search_params = SearchParameters.newBuilder
 				.setNumRequested(num_requested)
@@ -425,7 +425,12 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
    * Take a ResultSummary and turn it into a string with html tags around the
    * highlighted text regions.
    */
-  def tagTerms(summary: ResultSummary, startTag: String = "<b>", endTag: String = "</b>") = wrapTerms(summary.getText, summary.getHighlightsList.asScala.toList, startTag=startTag, endTag=endTag)
+  def tagTerms(summary: ResultSummary, startTag: String = "<b>", endTag: String = "</b>") = {
+    if (summary.getHighlightsCount > 0) 
+      wrapTerms(summary.getText, summary.getHighlightsList.asScala.toList, startTag=startTag, endTag=endTag)
+    else
+      summary.getText
+  }
 
   protected def wrapTerms(description: String, locations: List[TextRegion], startTag: String, endTag: String) : String = {
     if (locations.length == 0)

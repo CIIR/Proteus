@@ -5,12 +5,14 @@ ORIG_TEIS="${OUTPATH}/mbteis/mbteis.list"
 ANNOTATED_TEIS="${OUTPATH}/mbteis/annotated_mbteis.list.gz"
 TMP="/work1/barto/wdabney/tmp/" # "/usr/mildura/scratch1/tmp/"
 DATAPATH="sources"
+WEX_DATA="armadale:/hdfs/disk2/jdalton/freebase-wex-2012-01-27-joined"
 
 DRMAA=100
 #DRMAA=0
 
 -include Makefile.gentei
 -include Makefile.dbpedia
+-include Makefile.entlink
 
 build_tei_list: gentei
               ifneq ($(strip $(wildcard .build_tei_list.success)),.build_tei_list.success)
@@ -24,19 +26,6 @@ ambig_ent_index: gentei build_tei_list
 	      	   sh scripts/index_entities.sh ${ORIG_TEIS}.gz ${OUTPATH}/indexes/ambig_entities ${TMP} ${DRMAA}
 	      	   sh scripts/sanity_check_pages.sh
 		   touch .ambig_entity_index.success
-              endif
-
-entity_linking: ambig_ent_index index_dbpedia gentei
-              ifneq ($(strip $(wildcard .entity_linking.success)),.entity_linking.success)
-	      	   echo "Updating entity linking model..."
-		   touch .entity_linking.success
-              endif
-
-annotate_teis: entity_linking ambig_ent_index index_dbpedia gentei
-              ifneq ($(strip $(wildcard .annotate_teis.success)),.annotate_teis.success)
-	      	   echo "Annotating TEI files with entity disambiguations to list file ${ANNOTATED_TEIS}"
-		   cp ${ORIG_TEIS}.gz ${ANNOTATED_TEIS}
-		   touch .annotate_teis.success
               endif
 
 index_books: annotate_teis
