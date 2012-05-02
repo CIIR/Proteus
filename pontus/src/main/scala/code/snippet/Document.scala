@@ -33,7 +33,7 @@ object Timer {
         "QUERYTIME: " + activity + " took " + (end-start)/1000.0 + "s"
     }
 }
-
+ 
 
 object Document extends Query {
  

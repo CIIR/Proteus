@@ -69,7 +69,7 @@ object Entity extends Query {
   def logAnnotations = "* [onclick]" #> SHtml.ajaxInvoke(() => {logging; JsCmds.RedirectTo("/")})
 
   val log = LoggerFactory.getLogger("annotations")
-
+ 
   def logging {
     
     // Append on the user's name to the annotations and write them to a file (appending)
