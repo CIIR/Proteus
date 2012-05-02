@@ -275,5 +275,6 @@ case class EntityItem(item: SearchResult, selected: Boolean, full_obj: Object = 
   def asOrganization : Organization = if (full_obj == null) null else full_obj.asInstanceOf[Organization]
 }
 
+
                     
                                 
