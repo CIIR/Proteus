@@ -6,6 +6,7 @@ ANNOTATED_TEIS="${OUTPATH}/mbteis/annotated_mbteis.list.gz"
 TMP="/work1/barto/wdabney/tmp/" # "/usr/mildura/scratch1/tmp/"
 DATAPATH="sources"
 WEX_DATA="armadale:/hdfs/disk2/jdalton/freebase-wex-2012-01-27-joined"
+ENTLINK_INDEX="/work1/allan/jdalton/entity-linking/freebase-wex-all" # ${OUTPATH}/indexes/wiki_index
 
 #DRMAA=100
 DRMAA=0
