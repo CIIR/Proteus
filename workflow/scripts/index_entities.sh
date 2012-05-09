@@ -5,12 +5,12 @@ if [ $4 = 0 ]; then
 echo "Building.. $1 $2 $3"
 galago build \
 --tokenizer/fields+person --tokenizer/fields+location \
---tokenizer/fields+organization --galagoJobDir=$3 \
+--tokenizer/fields+organization --galagoJobDir=$3 --corpusParameters/corpusTerms=false \
 --indexPath=${f}/../$2 --inputPath+${f}/../$1 #--port=10000
 else
 galago build \
 --mode=drmaa --distrib=$4 \
---tokenizer/fields+person --tokenizer/fields+location \
+--tokenizer/fields+person --tokenizer/fields+location --corpusParameters/corpusTerms=false \
 --tokenizer/fields+organization --galagoJobDir=$3 --deleteJobDir=false \
 --indexPath=${f}/../$2 --inputPath+${f}/../$1 #--port=10000
 fi
