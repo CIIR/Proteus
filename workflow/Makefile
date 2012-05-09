@@ -1,14 +1,14 @@
 
 OUTPATH="output"
-SOURCE="../../demo-54K.present.list" # targets.list"
+SOURCE=demo5.list #"../../demo-54K.present.list" # targets.list"
 ORIG_TEIS="${OUTPATH}/mbteis/mbteis.list"
 ANNOTATED_TEIS="${OUTPATH}/mbteis/annotated_mbteis.list.gz"
 TMP="/work1/barto/wdabney/tmp/" # "/usr/mildura/scratch1/tmp/"
 DATAPATH="sources"
 WEX_DATA="armadale:/hdfs/disk2/jdalton/freebase-wex-2012-01-27-joined"
 
-DRMAA=100
-#DRMAA=0
+#DRMAA=100
+DRMAA=0
 
 -include Makefile.gentei
 -include Makefile.dbpedia

@@ -9,18 +9,25 @@ rm -rf $f/../${2}/*
 
 echo "Cleaning TEI fields..."
 # Move entity name's into the RS tags so that tag-tokenizer can create fields from them:
+echo "Running build list"
 sh ${f}/build_tei_list.sh $1 ${f}/../${2}/teilist.list
 gunzip ${f}/../${2}/teilist.list.gz
 
 echo "List at ${f}/../${2}/teilist.list"
-if [ $3 = 0 ]; then
-split -l 200 ${f}/../${2}/teilist.list ${f}/../${2}/.tei_chunk
-
-for fl in ${f}/../${2}/.tei_chunk* ; do
-    sh ${f}/cleanTEIChunk.sh ${fl} ${2}
-done
-else
 counter=`wc -l ${f}/../${2}/teilist.list | awk '{print $1}'`
+
+if [ $3 = 0 ]; then
+    if [ $counter -lt 200 ]; then
+	echo "split -l $counter ${f}/../${2}/teilist.list ${f}/../${2}/.tei_chunk"
+	split -l $counter ${f}/../${2}/teilist.list ${f}/../${2}/.tei_chunk
+    else
+	split -l 200 ${f}/../${2}/teilist.list ${f}/../${2}/.tei_chunk
+    fi
+    for fl in ${f}/../${2}/.tei_chunk* ; do
+	sh ${f}/cleanTEIChunk.sh ${fl} ${2}
+    done
+else
+#counter=`wc -l ${f}/../${2}/teilist.list | awk '{print $1}'`
 numLines=`echo ${counter}/${3} | bc`
 split -l $numLines ${f}/../${2}/teilist.list ${f}/../${2}/.tei_chunk
 
@@ -31,7 +38,7 @@ done
 python ${f}/waitforClean.py ${f}/../${2}/.tei_chunk
 fi
 
-rm ${f}/../${2}/teilist.list
+#rm ${f}/../${2}/teilist.list
 #rm ${f}/../${2}/.tei_chunk*
 
 #cp ${f}/../${1}/*_mbtei.xml.gz ${f}/../${2}/

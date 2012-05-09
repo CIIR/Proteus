@@ -16,5 +16,7 @@ echo "Generating TEI files from source file: " $1
 while read line
 do
     echo ${line}
-    cp ${line} ${f}/../output/mbteis/originals/
+    if [ "$line" ]; then
+    	cp ${line} ${f}/../output/mbteis/originals/
+    fi
 done < ${1}
