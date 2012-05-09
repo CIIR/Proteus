@@ -28,8 +28,12 @@ if [ $3 = 0 ]; then
     done
 else
 #counter=`wc -l ${f}/../${2}/teilist.list | awk '{print $1}'`
-numLines=`echo ${counter}/${3} | bc`
-split -l $numLines ${f}/../${2}/teilist.list ${f}/../${2}/.tei_chunk
+    if [ $counter -lt $3 ]; then
+	split -l $counter ${f}/../${2}/teilist.list ${f}/../${2}/.tei_chunk
+    else
+	numLines=`echo ${counter}/${3} | bc`
+	split -l $numLines ${f}/../${2}/teilist.list ${f}/../${2}/.tei_chunk
+    fi
 
 for fl in ${f}/../${2}/.tei_chunk* ; do 
     qsub -cwd -o ${f}/../output/logs/teiClean.out -e ${f}/../output/logs/teiClean.err ${f}/cleanTEIChunk.sh ${fl} ${2}

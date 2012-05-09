@@ -8,8 +8,8 @@ DATAPATH="sources"
 WEX_DATA="armadale:/hdfs/disk2/jdalton/freebase-wex-2012-01-27-joined"
 ENTLINK_INDEX="/work1/allan/jdalton/entity-linking/freebase-wex-all" # ${OUTPATH}/indexes/wiki_index
 
-#DRMAA=100
-DRMAA=0
+DRMAA=100
+#DRMAA=0
 
 -include Makefile.gentei
 -include Makefile.dbpedia
