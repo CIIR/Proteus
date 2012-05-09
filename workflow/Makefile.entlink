@@ -1,10 +1,11 @@
 # Makefile.gentei
-# Conditionally do whatever needs to be done to generate a set of TEI files from the list of textIDs and filename
+# Conditionally do whatever needs to be done to generate a 
+# set of TEI files from the list of textIDs and filename
 
 entlink_setup:
               ifneq ($(strip $(wildcard .entlink_setup.success)),.entlink_setup.success)
 	      	   echo "Compiling, installing, and testing Entity Linking packages..."
-		   #git clone --recursive scm-ciir.cs.umass.edu:/var/git/tacco.git src/tacco
+		   #git clone --recursive scm-ciir.cs.umass.edu:/var/git/tacco.git output/tacco
 		   sh scripts/entity_linking_setup.sh
 		   #sh scripts/generate_teis.sh ${SOURCE}
 		   touch .entlink_setup.success
@@ -14,7 +15,7 @@ entlink_setup:
 entlink_build: entlink_setup
               ifneq ($(strip $(wildcard .entlink_build.success)),.entlink_build.success)
 	      	   echo "Building Entity Linking models..."
-		   sh scripts/entity_linking_build.sh ${OUTPATH}/indexes/wiki_index ${WEX_DATA} ${TMP} ${DRMAA}
+		   sh scripts/entity_linking_build.sh ${WEX_DATA} ${ENTLINK_INDEX} ${TMP} ${DRMAA}
 		   touch .entlink_build.success
               endif
 
