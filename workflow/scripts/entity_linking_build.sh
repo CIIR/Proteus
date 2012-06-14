@@ -1,10 +1,27 @@
 #!/bin/bash
 
 f=`dirname $0`
-cd $f/../output/tacco
+
+cd $f/../
+
+mkdir target/
+mkdir target/classes/
+mkdir target/classes/entity_linker/
+
+# Compile the entity linking code
+rm -rf target/classes/entity_linker/*
+
+scalac -classpath src/entity_linker/:output/tacco/target/classes/:output/tacco/tackbp/target/classes/:output/tacco/custom-galago/core/target/classes/:output/tacco/custom-galago/tupleflow/target/classes/:output/tacco/factorie/target/classes/ -d target/classes/entity_linker/ src/entity_linker/*.scala
+cp src/entity_linker/tac*.properties target/classes/entity_linker/
+
+echo "Done Compiling."
+
+# Everything past this point isn't used right now, but will be used for building the galago index for entity linking
+cd output/tacco
 
 # Install Modified Galago into local maven
 cd custom-galago/
+
 
 # Next we should build the wiki-wex index
 WEX_DATA=$1

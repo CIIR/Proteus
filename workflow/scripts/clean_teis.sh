@@ -2,10 +2,12 @@
 
 f=`dirname $0`
 mkdir $f/../$2
+mkdir $f/../output/logs
 
 # Call the program(s) to clean the fields of the TEI files in 'originals'
 echo "Clearing out old files in output/mbteis/cleaned/ ..."
 rm -rf $f/../${2}/*
+rm -rf $f/../output/logs/*
 
 echo "Cleaning TEI fields..."
 # Move entity name's into the RS tags so that tag-tokenizer can create fields from them:
@@ -42,7 +44,7 @@ done
 python ${f}/waitforClean.py ${f}/../${2}/.tei_chunk
 fi
 
-#rm ${f}/../${2}/teilist.list
+rm ${f}/../${2}/teilist.list
 #rm ${f}/../${2}/.tei_chunk*
 
 #cp ${f}/../${1}/*_mbtei.xml.gz ${f}/../${2}/
