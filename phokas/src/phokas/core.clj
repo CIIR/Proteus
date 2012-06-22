@@ -17,16 +17,7 @@
 	   (edu.stanford.nlp.util ArrayCoreMap)
 	   (edu.stanford.nlp.ling CoreLabel
 				  CoreAnnotations$TokensAnnotation
-				  CoreAnnotations$SentencesAnnotation
-				  CoreAnnotations$PartOfSpeechAnnotation
-				  CoreAnnotations$NamedEntityTagAnnotation
-				  CoreAnnotations$LemmaAnnotation
-				  CoreAnnotations$TextAnnotation
-				  CoreAnnotations$BeforeAnnotation
-				  CoreAnnotations$AfterAnnotation
-				  CoreAnnotations$CurrentAnnotation
-				  CoreAnnotations$CharacterOffsetBeginAnnotation
-				  CoreAnnotations$CharacterOffsetEndAnnotation))
+				  CoreAnnotations$SentencesAnnotation))
   (:gen-class))
 
 (defn gzresource
@@ -670,7 +661,8 @@
 	      false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")
 	     :tagger
 	     (edu.stanford.nlp.pipeline.POSTaggerAnnotator.
-	      DefaultPaths/DEFAULT_POS_MODEL false 500)
+              "edu/stanford/nlp/models/pos-tagger/wsj3t0-18-left3words/left3words-distsim-wsj-0-18.tagger"
+	      false 500)
 	     :parser
 	     (parser.Parser/pretrained)
 	     :name-deps #{"NAME" "TITLE"}
