@@ -4,9 +4,8 @@
             [clojure.set]
 	    [clojure.java.io :as jio]
 	    [clojure.data.zip :as zf]
-	    [clojure.zip :as zip]
-	    [clojure.xml :as xml])
-  (:use [clojure.contrib.command-line]
+	    [clojure.zip :as zip])
+  (:use [clojure.tools.cli]
 	[clojure.contrib.lazy-xml :only (parse-seq parse-trim)]
 	[clojure.data.zip.xml]
 	[ciir.utils])
@@ -871,12 +870,18 @@
 	(dj-convert-file tname)))))
 
 (defn -main [& args]
-  (with-command-line args
-    "IA book converter"
-    [[clobber? c? "Clobber existing files" false]
-     remaining]
-    (binding [*clobber?* clobber?]
-      (if (empty? remaining) (dj-convert-file-list (-> System/in java.io.InputStreamReader. java.io.BufferedReader. line-seq))
-          (doseq [ff remaining]
-            (with-open [in (gzreader ff)]
-              (dj-convert-file-list (line-seq in))))))))
+  "IA book converter"
+  (let [[options remaining banner]
+        (cli args
+             ["-c" "--clobber" "Clobber existing files" :default false :flag true]
+             ["-h" "--help" "Show help" :default false :flag true])]
+    (when (:help options)
+      (println banner)
+      (System/exit 0))
+    (binding [*clobber?* (:clobber options)]
+      (if (empty? remaining)
+        (dj-convert-file-list
+         (-> System/in java.io.InputStreamReader. java.io.BufferedReader. line-seq))
+        (doseq [ff remaining]
+          (with-open [in (gzreader ff)]
+            (dj-convert-file-list (line-seq in))))))))
