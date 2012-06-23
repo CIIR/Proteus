@@ -74,15 +74,15 @@
 
 (defn dj-pages
   [events]
-  (partition-when #(and (= (% :name) :MAP)
-			(= (% :type) :end-element))
+  (partition-when #(and (= (:name %) :MAP)
+			(= (:type %) :end-element))
 		  events))
 
 (defn dj-tags
   [s]
   (let [freqs (->> s
-		   (filter #(= (% :type) :characters))
-		   (map #(% :str))
+		   (filter #(= (:type %) :characters))
+		   (map :str)
 		   (frequencies))
 	googles (or (freqs "Google") 0)]
     (if (>= googles 3)
@@ -97,24 +97,24 @@
        (filter
 	not-empty
 	(map
-	 #(case (% :type)
+	 #(case (:type %)
 		:start-element
-		(case (% :name)
+		(case (:name %)
 		      :OBJECT (str "<pb n=\""
-				   (nth (re-find #"_0*(\d+).djvu$" ((% :attrs) :usemap)) 1)
+				   (nth (re-find #"_0*(\d+).djvu$" ((:attrs %) :usemap)) 1)
 				   "\" />")
 		      :PAGECOLUMN "<cb />"
 		      :LINE "<lb />"
 		      :PARAGRAPH "<p>"
-		      :WORD (str "<w coords=\"" ((% :attrs) :coords) "\">")
+		      :WORD (str "<w coords=\"" ((:attrs %) :coords) "\">")
 		      nil)
 		:end-element
-		(case (% :name)
+		(case (:name %)
 		      :LINE "\n"
 		      :PARAGRAPH "</p>\n"
 		      :WORD "</w> "
 		      nil)
-		:characters (s/escape (% :str) escapes))
+		:characters (s/escape (:str %) escapes))
 	 s))))))
 
 (defn no-tags
@@ -234,16 +234,16 @@
 
 (defn- make-tree-labels
   [sen]
-  (let [a (map #(:attrs %) (xml-> sen :w zip/node))
-	stext (s/join " " (map #(% :form) a))
+  (let [a (map :attrs (xml-> sen :w zip/node))
+	stext (s/join " " (map :form a))
 	toks
 	(ArrayList. [(doto (Annotation. stext)
 		       (.set CoreAnnotations$TokensAnnotation
 			     (map #(doto (CoreLabel.)
-				     (.setDocID (% :coords))
-				     (.setWord (% :form))
-				     (.setTag (% :type))
-				     (.setLemma (% :lemma)))
+				     (.setDocID (:coords %))
+				     (.setWord (:form %))
+				     (.setTag (:type %))
+				     (.setLemma (:lemma %)))
 				  a)))])]
     (doto (Annotation. stext)
       (.set CoreAnnotations$SentencesAnnotation toks)
@@ -495,8 +495,8 @@
   [s]
   (->> s
        parse-seq
-       (filter #(= (% :type) :characters))
-       (map #(% :str))
+       (filter #(= (:type %) :characters))
+       (map :str)
        (frequencies)))
 
 (defn dj-paras
@@ -526,8 +526,8 @@
 
 (defn ocrml-sections
   [events]
-  (partition-when #(and (= (% :name) :section)
-			(= (% :type) :end-element))
+  (partition-when #(and (= (:name %) :section)
+			(= (:type %) :end-element))
 		  events))
 
 (defn ocrml-tags
@@ -538,10 +538,10 @@
      (filter
       not-empty
       (map
-       #(case (% :type)
+       #(case (:type %)
 	      :start-element
 	      (let [attrs (:attrs %)]
-		(case (% :name)
+		(case (:name %)
 		      :section (case label
 				     "SEC_HEADER" "<fw place=\"top\">"
 				     "SEC_FOOTER" "<fw place=\"bottom\">"
@@ -552,7 +552,7 @@
 		      :marker (str "<marker" (map-str (fn [x] (str " " (name (first x)) "=\"" (second x) "\"")) attrs) " />")
 		      nil))
 	      :end-element
-	      (case (% :name)
+	      (case (:name %)
 		    :section (case label
 				   "SEC_HEADER" "</fw>"
 				   "SEC_FOOTER" "</fw>"
@@ -562,7 +562,7 @@
 		    :page "<pb />"
 		    ;; :marker "</marker>"
 		    nil)
-	      :characters (s/escape (% :str) escapes))
+	      :characters (s/escape (:str %) escapes))
        s)))))
 
 (defn ocrml-page
