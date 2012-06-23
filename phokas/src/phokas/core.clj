@@ -1,13 +1,14 @@
 (ns phokas.core
   ^{:author "David Smith"}
   (:require [clojure.string :as s]
+            [clojure.set]
 	    [clojure.java.io :as jio]
-	    [clojure.contrib.zip-filter :as zf]
+	    [clojure.data.zip :as zf]
 	    [clojure.zip :as zip]
 	    [clojure.xml :as xml])
   (:use [clojure.contrib.command-line]
 	[clojure.contrib.lazy-xml :only (parse-seq parse-trim)]
-	[clojure.contrib.zip-filter.xml :as zx]
+	[clojure.data.zip.xml]
 	[ciir.utils])
   (:import (java.io File BufferedInputStream InputStreamReader
 		    BufferedReader PushbackReader)
@@ -26,20 +27,20 @@
       ClassLoader/getSystemResourceAsStream
       BufferedInputStream. GZIPInputStream. InputStreamReader. BufferedReader.))
 
-(def *clobber?* true)
+(def ^:dynamic *clobber?* true)
 
-(def *language* "eng")
+(def ^:dynamic *language* "eng")
 
-(def *languages* #{"eng" "fre" "ger" "ita" "lat"})
+(def ^:dynamic *languages* #{"eng" "fre" "ger" "ita" "lat"})
 
-(def *lang-map* {"English" "eng",
-                 "French" "fre", "Français" "fre", "fra" "fre",
-                 "German" "ger",
-		 "Latin" "lat", "Italian" "ita", "Spanish" "spa"})
+(def ^:dynamic *lang-map* {"English" "eng",
+                           "French" "fre", "Français" "fre", "fra" "fre",
+                           "German" "ger",
+                           "Latin" "lat", "Italian" "ita", "Spanish" "spa"})
 
-(def *dict* (-> "dict/words.eng.gz"
-                gzresource
-		line-seq set))
+(def ^:dynamic *dict* (-> "dict/words.eng.gz"
+                          gzresource
+                          line-seq set))
 
 (defn read-stopwords
   [s]
@@ -49,28 +50,28 @@
 	       (assoc-in %1 [lang w] (Double/parseDouble p)))
 	    {} lines)))
 
-(def *stopwords* (-> "langid/stopwords.tab" ClassLoader/getSystemResourceAsStream read-stopwords))
+(def ^:dynamic *stopwords* (-> "langid/stopwords.tab" ClassLoader/getSystemResourceAsStream read-stopwords))
 
-(def *lang-annotators*)
-(def *annotators*)
+(def ^:dynamic *lang-annotators*)
+(def ^:dynamic *annotators*)
 
 ;; TODO: PTBLexer includes americanize in the ptb3Escaping
 ;; options. Annoyingly, it processes options in a sorted set order, so
 ;; we have to include all the ptb3Escaping options piecemeal without
 ;; americanize.
 
-(def *ssplitter*
+(def ^:dynamic *ssplitter*
      (edu.stanford.nlp.pipeline.WordsToSentencesAnnotator. false))
 
-(def *lemmatizer* (edu.stanford.nlp.pipeline.MorphaAnnotator. false))
+(def ^:dynamic *lemmatizer* (edu.stanford.nlp.pipeline.MorphaAnnotator. false))
 
-(def *name-keepers* #{"PERSON" "LOCATION" "ORGANIZATION" "MISC" "MONEY"})
+(def ^:dynamic *name-keepers* #{"PERSON" "LOCATION" "ORGANIZATION" "MISC" "MONEY"})
 
 ;; Maybe we should just use some other unicode character for backslashes.
-(def *escapes* {\< "&lt;", \> "&gt;", \& "&amp;", \" "&quot;", \' "&apos;"
-		;;\\ "backslashesareinescapable"}
-		\\ "\u2216"		; set minus
-		})
+(def escapes {\< "&lt;", \> "&gt;", \& "&amp;", \" "&quot;", \' "&apos;"
+              ;;\\ "backslashesareinescapable"}
+              \\ "\u2216"		; set minus
+              })
 
 (defn dj-pages
   [events]
@@ -114,7 +115,7 @@
 		      :PARAGRAPH "</p>\n"
 		      :WORD "</w> "
 		      nil)
-		:characters (s/escape (% :str) *escapes*))
+		:characters (s/escape (% :str) escapes))
 	 s))))))
 
 (defn no-tags
@@ -280,7 +281,7 @@
 	names (map #(get-phrase (:id %) words kids true) props)]
     (map-str
      #(str "<rs type=\"MISC\""
-	   " name=\"" (s/escape (s/join " " (map :form %)) *escapes*) "\""
+	   " name=\"" (s/escape (s/join " " (map :form %)) escapes) "\""
 	   " coords=\"" (s/join "|" (map :coords %)) "\"></rs>")
      names)))
 
@@ -432,7 +433,7 @@
 ;;                                   (s/replace (nth orig 2)
 ;;                                              #" lemma=\"[^\"]+\" "
 ;;                                              (str " lemma=\""
-;;                                                   (s/escape lemma *escapes*)
+;;                                                   (s/escape lemma escapes)
 ;;                                                   "\" "))
 ;;                                   "</w>"))
 ;;                            wspans lems))
@@ -454,7 +455,7 @@
 			     (str (nth orig 1)
 				  "<w"
 				  " head=\"" head "\""
-				  " deprel=\"" (s/escape deprel *escapes*) "\" "
+				  " deprel=\"" (s/escape deprel escapes) "\" "
 				  (nth orig 2) "</w>"))
 			   wspans heads deprels))
 	       (last wsegs))))))
@@ -548,7 +549,7 @@
 				     "<p>")
 		      :page (str "<pb n=\"" (:key attrs) "\" />")
 		      :line "<lb />"
-		      :word (str "<w coords=\"" (s/join "," (map (partial get attrs) [:l :t :w :h])) "\">" (s/escape (:val attrs) *escapes*))
+		      :word (str "<w coords=\"" (s/join "," (map (partial get attrs) [:l :t :w :h])) "\">" (s/escape (:val attrs) escapes))
 		      :marker (str "<marker" (map-str (fn [x] (str " " (name (first x)) "=\"" (second x) "\"")) attrs) " />")
 		      nil))
 	      :end-element
@@ -562,7 +563,7 @@
 		    :page "<pb />"
 		    ;; :marker "</marker>"
 		    nil)
-	      :characters (s/escape (% :str) *escapes*))
+	      :characters (s/escape (% :str) escapes))
        s)))))
 
 (defn ocrml-page
@@ -597,7 +598,7 @@
   [paridx text]
   (str "<p>"
        (-> text
-	   (s/escape *escapes*)
+	   (s/escape escapes)
 	   (s/replace #"\$" "&dollar;")
 	   (partition-str #"[ \n_]+")
 	   (#(map-indexed (fn [idx w]
