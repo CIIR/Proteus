@@ -5,7 +5,6 @@
                  [org.clojure/data.xml "0.0.3"]
                  [org.clojure/data.zip "0.1.1"]
                  [org.clojure/tools.cli "0.2.1"]
-                 [org.clojure/clojure-contrib "1.2.0"]
 		 [ciir/utils "1.0.0-SNAPSHOT"]
                  [xom "1.2.5"]
 		 [dparser "2011-01-18"]

@@ -6,9 +6,8 @@
 	    [clojure.data.zip :as zf]
 	    [clojure.zip :as zip])
   (:use [clojure.tools.cli]
-	[clojure.contrib.lazy-xml :only (parse-seq parse-trim)]
-	[clojure.data.zip.xml]
-	[ciir.utils])
+	[clojure.data.xml :only (source-seq parse-str)]
+	[clojure.data.zip.xml]	[ciir.utils])
   (:import (java.io File BufferedInputStream InputStreamReader
 		    BufferedReader PushbackReader)
 	   (java.util ArrayList Properties)
@@ -289,8 +288,7 @@
   (let [tags (->
 	      ;; Wrap in dummy tags to allow stuff before or after main <p>.
 	      (str "<text>" para "</text>")
-	      java.io.StringReader.
-	      parse-trim
+	      parse-str
 	      zip/xml-zip
 	      (xml-> :p :s)
 	      (#(map ner-sen %)))]
@@ -302,8 +300,7 @@
   [para]
   (let [tags (->
 	      (str "<text>" para "</text>")
-	      java.io.StringReader.
-	      parse-trim
+	      parse-str
 	      zip/xml-zip
 	      (xml-> :p :s))]
     para))
@@ -319,7 +316,7 @@
 
 (defn dc-language
   [dc-string]
-  (let [mt (zip/xml-zip (parse-trim (java.io.StringReader. dc-string)))]
+  (let [mt (zip/xml-zip (parse-str dc-string))]
     (xml1-> mt :language text)))
 
 (defn ^String local-language
@@ -494,7 +491,7 @@
 (defn dj-words
   [s]
   (->> s
-       parse-seq
+       source-seq
        (filter #(= (:type %) :characters))
        (map :str)
        (frequencies)))
@@ -504,7 +501,7 @@
   tagged words."
   [s]
   (->> s
-      parse-seq
+      source-seq
       dj-pages
       (map dj-tags)
       (map proc-page)
@@ -518,7 +515,7 @@
 (defn ocrml-words
   [s]
   (->> s
-       parse-seq
+       source-seq
        (filter #(and (= (:name %) :word)
 		     (= (:type %) :start-element)))
        (map #(:val (:attrs %)))
@@ -578,7 +575,7 @@
   "Transform OCRML markup into a sequence of TEI paragraphs."
   [s]
   (->> s
-       parse-seq
+       source-seq
        ocrml-sections
        (map-str ocrml-tags)
        (#(s/split % #"<pb />"))
