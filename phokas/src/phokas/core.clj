@@ -19,6 +19,8 @@
 				  CoreAnnotations$SentencesAnnotation))
   (:gen-class))
 
+(set! *warn-on-reflection* true)
+
 (defn gzresource
   [rname]
   (-> rname
@@ -58,7 +60,7 @@
 ;; we have to include all the ptb3Escaping options piecemeal without
 ;; americanize.
 
-(def ^:dynamic *ssplitter*
+(def ssplitter
      (edu.stanford.nlp.pipeline.WordsToSentencesAnnotator. false))
 
 (def ^:dynamic *lemmatizer* (edu.stanford.nlp.pipeline.MorphaAnnotator. false))
@@ -158,7 +160,7 @@
       (s/replace #"&dollar;" "\\$")))
 
 (defn- ssplit-body
-  [para ann]
+  [^String para ^Annotation ann]
   (let [[pref & wspans] (s/split para #"<w ")]
     (if (empty? wspans) para
 	(loop [res pref
@@ -187,7 +189,7 @@
 	      words (map #(nth % 2) wspans)
 	      ann (Annotation. (s/join " " words))]
 	  (.annotate (*annotators* :tokenizer) ann)
-	  (.annotate *ssplitter* ann)
+	  (.annotate ssplitter ann)
 	  (->>
 	   (.get ann CoreAnnotations$TokensAnnotation)
 	   (partition-all 2 1)
@@ -208,7 +210,7 @@
 ;;; Some ugly private functions to interface with Stanford Core NLP
 ;;; Java annotation objections.
 
-(defn- make-core-labels
+(defn- ^Annotation make-core-labels
   [x]
   (doto (Annotation. (s/join " " x))
     (.set CoreAnnotations$TokensAnnotation
@@ -305,7 +307,7 @@
 	      (xml-> :p :s))]
     para))
 
-(defn dc-fix
+(defn ^String dc-fix
   [dc-string]
   (-> dc-string
       (s/replace
@@ -628,7 +630,7 @@
        (flatten)
        (frequencies)))
 
-(defn annotate-para
+(defn ^String annotate-para
   "Perform linguistic annotation on a paragraph."
   [para]
   (let [lang (or (local-language (re-find #"<p(?: [^>]+)?>" para)) *language*)
@@ -763,7 +765,7 @@
   Return the path to the output file.  If an exception is encountered,
   remove the output file and return the empty string."
 
-  [ipath]
+  [^String ipath]
   (let [ifile (File. ipath)
 	idir (.getParent ifile)
 	bid (second (re-find #"^(.*)_ocrml.xml$" (.getName ifile)))
@@ -775,15 +777,14 @@
       ""
       (try
 	(let [metadata (-> mfile bzreader slurp (s/replace #"^<\?xml [^>]+\?>\n*" "") dc-fix)
-	      file-read jio/reader
 	      para-seq ocrml-paras
-	      raw-counts (with-open [in (file-read ipath)] (ocrml-words in))
+	      raw-counts (with-open [in (jio/reader ipath)] (ocrml-words in))
 	      lang *language*]
 	  (with-bindings {#'*lang-annotators* {lang (init-annotators lang)}
 			  #'*dict* (clojure.set/union
 				    *dict*
 				    (set (filter #(re-find #"^[A-Za-z]+$" %) (keys raw-counts))))}
-	    (with-open [in (file-read ipath)
+	    (with-open [in (jio/reader ipath)
 			out (-> ofile java.io.FileOutputStream. GZIPOutputStream. jio/writer)]
 	      (.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TEI>\n")
 	      (.write out metadata)
@@ -810,7 +811,7 @@
   Return the path to the output file.  If an exception is encountered,
   remove the output file and return the empty string."
 
-  [ipath]
+  [^String ipath]
   (let [ifile (File. ipath)
 	idir (.getParent ifile)
 	bid (.getName (File. idir))
@@ -825,7 +826,7 @@
 	      encoding (if (re-find #"-8\." (.getName ifile)) "ISO-8859-1" "UTF-8")
 	      file-read #(jio/reader (if (re-find #"\.bz2$" %) (bzreader %) %) :encoding encoding)
 	      para-seq (if (re-find #"gut$" bid) gut-paras dj-paras)
-	      raw-counts (with-open [in (file-read ipath)]
+	      raw-counts (with-open [in ^BufferedReader (file-read ipath)]
 	      		   (if (re-find #"gut$" bid)
 	      		     (gut-words in)
 	      		     (dj-words in)))
@@ -844,7 +845,7 @@
 			    #'*dict* (clojure.set/union
 				      *dict*
 				      (set (filter #(re-find #"^[A-Za-z]+$" %) (keys raw-counts))))}
-	      (with-open [in (file-read ipath)
+	      (with-open [in ^BufferedReader (file-read ipath)
 			  out (-> ofile java.io.FileOutputStream. GZIPOutputStream. (jio/writer :encoding "UTF-8"))]
 		(.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TEI>\n")
 		(.write out metadata)
@@ -878,7 +879,7 @@
     (binding [*clobber?* (:clobber options)]
       (if (empty? remaining)
         (dj-convert-file-list
-         (-> System/in java.io.InputStreamReader. java.io.BufferedReader. line-seq))
+         (-> System/in InputStreamReader. BufferedReader. line-seq))
         (doseq [ff remaining]
           (with-open [in (gzreader ff)]
             (dj-convert-file-list (line-seq in))))))))
