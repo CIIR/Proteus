@@ -1,11 +1,13 @@
 package edu.umass.ciir.proteus.triton.core
 
+// A small application to test the average response time
+// of a Proteus installation.
+
 import akka.actor.Actor._
 import akka.actor.Actor
 import akka.dispatch.Future
 import scala.collection.JavaConverters._
 import edu.umass.ciir.proteus.protocol.ProteusProtocol._
-
 
 object clientProfilerApp extends App {
   val total_start = System.currentTimeMillis
