@@ -1,253 +1,234 @@
-
 option java_package = "edu.umass.ciir.proteus.protocol";
 
 // The Core Proteus Types
 enum ProteusType {
-	COLLECTION = 0;
-	PAGE = 1;
-	PICTURE = 2;
-	VIDEO = 3;
-	AUDIO = 4;
-	PERSON = 5;
-	LOCATION = 6;
-	ORGANIZATION = 7;
+  COLLECTION = 0;
+  PAGE = 1;
+  PICTURE = 2;
+  VIDEO = 3;
+  AUDIO = 4;
+  PERSON = 5;
+  LOCATION = 6;
+  ORGANIZATION = 7;
 }
 
-// **** Query Type Messages ****
+// Information needed to access a specific resource item
+// This object represents a "unique identifier" in the
+// Proteus space.
+message AccessIdentifier {
+  // Identifier for the accessing a result, used for lookup of an object.
+  required string identifier = 1;
 
-// Defines a search query to run
-message SearchRequest {
-	required string query = 1; 							// Query Text
-	repeated ProteusType types = 2; 					// Proteus Type to search for
-	optional SearchParameters params = 3; 				// Parameters of search request
+  // Indicates which library/resource this was pulled from.
+  optional string resource_id = 2;
+
+  // Provide error messages for any object passing, lookup not found errors report here.
+  optional string error = 3;					
 }
 
 // Parameters used in searching and transformations
 message SearchParameters {
-	optional int32 num_requested = 1 [default = 100]; 	// Maximum number of results to return
-	optional int32 start_at = 2 [default = 0]; 			// Return results starting from this index in rank order
-	optional string language = 3 [default = "en"];		// Restrict results to this language
+  // Maximum number of results to return
+  optional int32 num_requested = 1 [default = 100];
+
+  // Return results starting from this index in rank order.
+  // Otherwise known as the offset.
+  optional int32 start_at = 2 [default = 0];
+
+  // Restrict results to this language
+  optional string language = 3 [default = "en"];
+}
+
+// **** Query Type Messages ****
+// Defines a search query to run
+message SearchRequest {
+
+  // The raw text of the query
+  required string query = 1;
+
+  // The Proteus type(s) to search for.
+  // See above for possible values.
+  repeated ProteusType types = 2;
+
+  // Parameters of the search request
+  optional SearchParameters params = 3;
 }
 
 // **** Response Type Messages ****
 
 // The response message to a search query
 message SearchResponse {
-	repeated SearchResult results = 1;					// List of rank ordered search results
-	optional string error = 2;							// Error string, empty if no errors
+  // List of rank ordered search results
+  repeated SearchResult results = 1;
+
+  // Error string, empty if no errors
+  optional string error = 2;
 }
 
 // Defines a single result item from a search query
 message SearchResult {
-	required AccessIdentifier id = 1;						
-	optional ProteusType proteus_type = 2 [default = COLLECTION];	// Proteus type that this result belongs to
-	optional string title = 3;							// Title of the result
-	optional ResultSummary summary = 4;					// Summary of the contents of this result. May come from surrounding text.
-	optional string img_url = 5;						// URL of image depiction of this result's data
-	optional string thumb_url = 6;						// URL of thumbnail image depiction of this result's data
-	optional string external_url = 7;					// URL for visiting the original data source for this item
-}
-	
-// Information needed to access a specific resource item
-message AccessIdentifier {
-	required string identifier = 1;						// Ident. for the accessing a result, used for lookup of object
-	optional string resource_id = 2;					// Indicates which library/resource this was pulled from
-	optional string error = 3;							// Provide error messages for any object passing, lookup not found errors report here
-}
+  // The unique identifier of this result
+  required AccessIdentifier id = 1;
+				
+  // Proteus type that this result belongs to
+  optional ProteusType proteus_type = 2 [default = COLLECTION];
 
-// A Chunk of text with optional highlighting of regions
+  // Title/label of the result
+  // This is what should be displayed in a link for the object.
+  optional string title = 3;			
+
+  // Summary of the contents of this result. May come from surrounding text.
+  // This should be used as the "snippet" of the object.
+  optional ResultSummary summary = 4;	
+
+  // URL of image depiction of this result's data
+  optional string img_url = 5;
+
+  // URL of thumbnail image depiction of this result's data
+  optional string thumb_url = 6;
+
+  // URL for visiting the original data source for this item
+  optional string external_url = 7;				
+}       
+
+// A chunk of text with optional highlighting of regions
 message ResultSummary {
-	required string text = 1;
-	repeated TextRegion highlights = 2;
+  required string text = 1;
+  repeated TextRegion highlights = 2;
 }
 
 // Defines a region in text
 message TextRegion {
-	required int32 start = 1; // Starting character index
-	required int32 stop = 2; // Ending index (non-inclusive)
+  required int32 start = 1; // Starting character index
+  required int32 stop = 2; // Ending index (non-inclusive)
 }
 
 message WeightedTerm {
-	required string term = 1;
-	optional double weight = 2 [default = 1.0];
+  required string term = 1;
+  optional double weight = 2 [default = 1.0];
 }
 
 // A list of string (term) : weight (frequency) pairs. Used for language models, and other things.
 message TermHistogram {	
-	repeated WeightedTerm terms = 1;
+  repeated WeightedTerm terms = 1;
 }
 
 message WeightedDate {
-	required sint64 date = 1;
-	optional double weight = 2 [default = 1.0];
+  required sint64 date = 1;
+  optional double weight = 2 [default = 1.0];
 }
 
 // A list of long values (dates) : weight (frequency) pairs. Used for date mentions, and other things.
 message LongValueHistogram {	
-	repeated WeightedDate dates = 1;
+  repeated WeightedDate dates = 1;
 }
 
 // **** Proteus Typed Data Structures ****
+// We create a single ProteusObject message, that is
+// then specialized via composition with lower level 
+// optional messages
+message ProteusObject {
+  required AccessIdentifier id = 1;
+  required ProteusType type = 2;
+  optional string title = 3;
+  optional ResultSummary summary = 4;
+  optional string img_url = 5;
+  optional string thumb_url = 6;
+  optional string external_url = 7;	
 
-// Collection: Book, Newspaper, Website, etc. (highest level container of data)
-message Collection {
-	required AccessIdentifier id = 1;
-	optional string title = 2;
-	optional ResultSummary summary = 3;
-	optional string img_url = 4;
-	optional string thumb_url = 5;
-	optional string external_url = 6;	
-	
-	optional LongValueHistogram date_freq = 7;				// Dates mentioned in this collection
-	optional TermHistogram language_model = 8;				// Language model of this collection (term histogram)
-	optional string language = 9 [default = "en"];							// Primary language of this collection
-	
-	// Collection specific fields
-	optional sint64 publication_date = 10;					// Date this collection was published
-	optional string publisher = 11;							// Publisher of the collection
-	optional string edition = 12;							// Edition this collection represents ---> TODO: Add creators here.
-	optional int32 num_pages = 13;							// Number of pages contained by this collection
+  // Dates where this object was mentioned (e.g. a person)
+  // or dates contained by this object (e.g. collection)
+  optional LongValueHistogram date_freq = 7;
+  optional TermHistogram language_model = 8;
+  optional string language = 9 [default = "en"];
+
+  // Each of the composed message types
+  optional Collection collection = 10;
+  optional Page page = 11;
+  optional Picture picture = 12;
+  optional Video video = 13;
+  optional Audio audio = 14;
+  optional Person person = 15;
+  optional Location location = 16;
+  optional Organization organization = 17;
+}
+
+// Collection: Book, Newspaper, Website, etc. 
+// (highest level container of data)
+message Collection {	
+  optional sint64 publication_date = 1;
+  optional string publisher = 2;
+
+  // Edition this collection represents ---> TODO: Add creators here.
+  optional string edition = 3;
+  optional int32 num_pages = 4;
 }
 
 // Page: Page in a book, page of a newspaper, web page on a site, etc.
 message Page {
-	required AccessIdentifier id = 1;
-	optional string title = 2;
-	optional ResultSummary summary = 3;
-	optional string img_url = 4;
-	optional string thumb_url = 5;
-	optional string external_url = 6;	
-	
-	optional LongValueHistogram date_freq = 7;				// Dates mentioned
-	optional TermHistogram language_model = 8;
-	optional string language = 9 [default = "en"];
-
-	// Page specific fields
-	optional string full_text = 10; 						// The full text of the containing page
-	repeated string creators = 11;							// The creators of this resource
-	optional int32 page_number = 12; 						// Where in the collection this page is located
+  optional string full_text = 1;
+  repeated string creators = 2;
+  optional int32 page_number = 3;
 }
 
 // Coordinates of something on a page
 message Coordinates {
-	required int32 left = 1;
-	required int32 right = 2;
-	required int32 up = 3;
-	required int32 down = 4;
+  required int32 left = 1;
+  required int32 right = 2;
+  required int32 up = 3;
+  required int32 down = 4;
 }
 
-// Picture: Picture on a page, on a webpage, etc. (There can be zero or more of these on a page)
+// Picture: Picture on a page, on a webpage, etc. 
+// (There can be zero or more of these on a page)
 message Picture {
-	required AccessIdentifier id = 1;
-	optional string title = 2;
-	optional ResultSummary summary = 3;
-	optional string img_url = 4;
-	optional string thumb_url = 5;
-	optional string external_url = 6;	
-	
-	optional LongValueHistogram date_freq = 7;				// Dates mentioned
-	optional TermHistogram language_model = 8;
-	optional string language = 9 [default = "en"];
-
-	// Picture specific fields
-	optional string caption = 10;
-	optional Coordinates coordinates = 11;
-	repeated string creators = 12;							// The creators of this resource
+  optional string caption = 1;
+  optional Coordinates coordinates = 2;
+  repeated string creators = 3;
 }
 
-// Video: Video contained on a web page, or other page instance (Zero or more per page)
+// Video: Video contained on a web page, or other page instance 
+// (Zero or more per page)
 message Video {
-	required AccessIdentifier id = 1;
-	optional string title = 2;
-	optional ResultSummary summary = 3;
-	optional string img_url = 4;
-	optional string thumb_url = 5;
-	optional string external_url = 6;	
-	
-	optional LongValueHistogram date_freq = 7;				// Dates mentioned
-	optional TermHistogram language_model = 8;
-	optional string language = 9 [default = "en"];
-
-	// Video specific fields
-	optional string caption = 10;							// Caption associated with this video
-	optional Coordinates coordinates = 11;					// Coordinates (location) of video on page
-	optional int32 length = 12;								// Length in seconds of the video
-	repeated string creators = 13;							// The creators of this resource
+  optional string caption = 1;
+  optional Coordinates coordinates = 2;
+  optional int32 length_in_seconds = 3;
+  repeated string creators = 4;
 }
 
-// Audio: Audio contained on a web page, or other page instance (Zero or more per page)
+// Audio: Audio contained on a web page, or other page instance 
+// (Zero or more per page)
 message Audio {
-	required AccessIdentifier id = 1;
-	optional string title = 2;
-	optional ResultSummary summary = 3;
-	optional string img_url = 4;
-	optional string thumb_url = 5;
-	optional string external_url = 6;	
-	
-	optional LongValueHistogram date_freq = 7;				// Dates mentioned
-	optional TermHistogram language_model = 8;
-	optional string language = 9 [default = "en"];
-
-	// Audio specific fields
-	optional string caption = 10;							// Caption associated with this audio clip
-	optional Coordinates coordinates = 11;					// Coordinates (location) of audio clip on the page
-	optional int32 length = 12;								// Length in seconds of the audio clip
-	repeated string creators = 13;							// The creators of this resource
+  optional string caption = 1;							// Caption associated with this audio clip
+  optional Coordinates coordinates = 2;					// Coordinates (location) of audio clip on the page
+  optional int32 length = 3;								// Length in seconds of the audio clip
+  repeated string creators = 4;							// The creators of this resource
 }
 
-// Person: A person entity mentioned on a page (in text, picture, video, or audio)
+// Person: A person entity mentioned on a page 
+// (in text, picture, video, or audio)
 message Person {
-	required AccessIdentifier id = 1;
-	optional string title = 2;
-	optional ResultSummary summary = 3;
-	optional string img_url = 4;
-	optional string thumb_url = 5;
-	
-	optional LongValueHistogram date_freq = 6;				// Dates mentioned near this person
-	optional TermHistogram language_model = 7;				// Language model of terms mentioned near this person	
-	
-	// Person specific fields
-	optional string full_name = 8;							// Full name of this person
-	repeated string alternate_names = 9;					// List of alternate names, nick names, and aliases
-	optional string wiki_link = 10;							// Wikipedia link for this person
-	optional sint64 birth_date = 11;						// Date of birth 
-	optional sint64 death_date = 12;						// Date of death
+  optional string full_name = 1;							// Full name of this person
+  repeated string alternate_names = 2;					// List of alternate names, nick names, and aliases
+  optional string wiki_link = 3;							// Wikipedia link for this person
+  optional sint64 birth_date = 4;						// Date of birth 
+  optional sint64 death_date = 5;						// Date of death
 }
 
 // Location: A location entity mentioned on a page
 message Location {
-	required AccessIdentifier id = 1;
-	optional string title = 2;
-	optional ResultSummary summary = 3;
-	optional string img_url = 4;
-	optional string thumb_url = 5;
-	
-	optional LongValueHistogram date_freq = 6;				// Dates mentioned near this location
-	optional TermHistogram language_model = 7;				// Language model of terms mentioned near this location
-	
-	// Location specific fields
-	optional string full_name = 8;
-	repeated string alternate_names = 9;
-	optional string wiki_link = 10;
-	optional double longitude = 11;							// Longitude of this location
-	optional double latitude = 12;							// Latitude of this location
+  optional string full_name = 1;
+  repeated string alternate_names = 2;
+  optional string wiki_link = 3;
+  optional double longitude = 4;
+  optional double latitude = 5;
 }
 
 // Organization: An organization mentioned on a page
 message Organization {
-	required AccessIdentifier id = 1;
-	optional string title = 2;
-	optional ResultSummary summary = 3;
-	optional string img_url = 4;
-	optional string thumb_url = 5;
-	
-	optional LongValueHistogram date_freq = 6;				// Dates mentioned
-	optional TermHistogram language_model = 7;
-	
-	// Organization specific fields
-	optional string full_name = 8;
-	repeated string alternate_names = 9;
-	optional string wiki_link = 10;
+  optional string full_name = 1;
+  repeated string alternate_names = 2;
+  optional string wiki_link = 3;
 }
 
 
@@ -255,118 +236,117 @@ message Organization {
 
 // Perform a distributed search: Returns SearchResponse
 message Search {
-    required SearchRequest search_query = 1;
+  required SearchRequest search_query = 1;
 }
 
 // Get the container for this data resource: Returns SearchResponse (max length of 1), Only one step transforms allowed
 message ContainerTransform {
-	required AccessIdentifier id = 1;				     	// Look for a container for resource with this ID
-	optional ProteusType from_type = 2;						// The Proteus Type of this resource
-	optional ProteusType to_type = 3;						// What container type to be finding
-	optional SearchParameters params = 4;					// Parameters for the search
+  required AccessIdentifier id = 1;				     	// Look for a container for resource with this ID
+  optional ProteusType from_type = 2;						// The Proteus Type of this resource
+  optional ProteusType to_type = 3;						// What container type to be finding
+  optional SearchParameters params = 4;					// Parameters for the search
 }
 
 // Get the contents for this data resource: Returns SearchResponse, Only one step transforms allowed
 message ContentsTransform {
-	required AccessIdentifier id = 1;						// Search for all the contents of resource with this ID
-	optional ProteusType from_type = 2;						// Type of this resource
-	optional ProteusType to_type = 3;						// Which child type to return. (where applicable)
-	optional SearchParameters params = 4;					// Parameters for the search
+  required AccessIdentifier id = 1;						// Search for all the contents of resource with this ID
+  optional ProteusType from_type = 2;						// Type of this resource
+  optional ProteusType to_type = 3;						// Which child type to return. (where applicable)
+  optional SearchParameters params = 4;					// Parameters for the search
 }
 
 // Find overlapping resources of the same type (Duplicates, Collections of Works, etc.)
 message OverlapsTransform {
-	required AccessIdentifier id = 1;
-	optional ProteusType from_type = 2;
-	optional SearchParameters params = 3;
+  required AccessIdentifier id = 1;
+  optional ProteusType from_type = 2;
+  optional SearchParameters params = 3;
 }
 
 // Find Pages where the person, location, or organization (specified by ID) occurs as an object of term
 message OccurAsObjTransform {
-	required AccessIdentifier id = 1;
-	optional ProteusType from_type = 2; // Must be person, location, or organization
-	optional string term = 3; // Term to look for occurrences as the object of
-	optional SearchParameters params = 4;
+  required AccessIdentifier id = 1;
+  optional ProteusType from_type = 2; // Must be person, location, or organization
+  optional string term = 3; // Term to look for occurrences as the object of
+  optional SearchParameters params = 4;
 }
 
 // Find Pages where the person, location, or organization (specified by ID) occurs as the subject of term
 message OccurAsSubjTransform {
-	required AccessIdentifier id = 1;
-	optional ProteusType from_type = 2;
-	optional string term = 3;
-	optional SearchParameters params = 4;
+  required AccessIdentifier id = 1;
+  optional ProteusType from_type = 2;
+  optional string term = 3;
+  optional SearchParameters params = 4;
 }
 
 // Find Pages where the person, location, or organization (specified by ID) occurs having term as its object
 message OccurHasObjTransform {
-	required AccessIdentifier id = 1;
-	optional ProteusType from_type = 2;
-	optional string term = 3;
-	optional SearchParameters params = 4;
+  required AccessIdentifier id = 1;
+  optional ProteusType from_type = 2;
+  optional string term = 3;
+  optional SearchParameters params = 4;
 }
 
 // Find Pages where the person, location, or organization (specified by ID) occurs having term as its subject
 message OccurHasSubjTransform {
-	required AccessIdentifier id = 1;
-	optional ProteusType from_type = 2;
-	optional string term = 3;
-	optional SearchParameters params = 4;
+  required AccessIdentifier id = 1;
+  optional ProteusType from_type = 2;
+  optional string term = 3;
+  optional SearchParameters params = 4;
 }
 
 // Find Locations near the location given by ID
 message NearbyLocationsTransform {
-	required AccessIdentifier id = 1;
-	optional int32 radius_miles = 2 [default = 10];
-	optional SearchParameters params = 3;
+  required AccessIdentifier id = 1;
+  optional int32 radius_miles = 2 [default = 10];
+  optional SearchParameters params = 3;
 }	
 
 // Apply dynamically loaded transformation (name) to id (of type from_type). Result must be a SearchResponse
 // Note: The analagous situation with object variables can be done using extensions, the librarian/manager can stay the same
 message DynamicTransformID {
-	required string name = 1;
-	optional ProteusType from_type = 2;
+  required string name = 1;
+  optional ProteusType from_type = 2;
 }
 
 message DynamicTransform {
-	required AccessIdentifier id = 1;
-	optional DynamicTransformID transform_id = 2;
-	optional SearchParameters params = 4;
+  required AccessIdentifier id = 1;
+  optional DynamicTransformID transform_id = 2;
+  optional SearchParameters params = 4;
 }
-
 
 // **** Resource Lookup Messages / RPCs ****
 // These all respond with the correctly typed object instantiations
 
 message LookupCollection {
-	required AccessIdentifier id = 1;
+  required AccessIdentifier id = 1;
 }
 
 message LookupPage {
-	required AccessIdentifier id = 1;
+  required AccessIdentifier id = 1;
 }
 
 message LookupPicture {
-	required AccessIdentifier id = 1;
+  required AccessIdentifier id = 1;
 }
 
 message LookupVideo {
-	required AccessIdentifier id = 1;
+  required AccessIdentifier id = 1;
 }
 
 message LookupAudio {
-	required AccessIdentifier id = 1;
+  required AccessIdentifier id = 1;
 }
 
 message LookupPerson {
-	required AccessIdentifier id = 1;
+  required AccessIdentifier id = 1;
 }
 
 message LookupLocation {
-	required AccessIdentifier id = 1;
+  required AccessIdentifier id = 1;
 }
 
 message LookupOrganization {
-	required AccessIdentifier id = 1;
+  required AccessIdentifier id = 1;
 }
 
 // **** Connection Related Messages ****
@@ -374,16 +354,16 @@ message LookupOrganization {
 // Sent by a library to the librarian telling it how to connect/use this library
 // No immediate response is expected, but once the library is added the first message sent will be LibraryConnected
 message ConnectLibrary {
-	required string hostname = 1;
-	optional int32 port = 2;
-	optional string group_id = 3;
-	optional string requested_key = 4;
+  required string hostname = 1;
+  optional int32 port = 2;
+  optional string group_id = 3;
+  optional string requested_key = 4;
 	
-	repeated ProteusType supported_types = 5;
-	repeated DynamicTransformID dynamic_transforms = 6;
+  repeated ProteusType supported_types = 5;
+  repeated DynamicTransformID dynamic_transforms = 6;
 }
 
 message LibraryConnected {
-	optional string resource_id = 1;
-	optional string error = 2;
+  optional string resource_id = 1;
+  optional string error = 2;
 }

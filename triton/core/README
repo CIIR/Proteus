@@ -1,2 +1,20 @@
 Proteus Triton Core:
 
+The code that implements the Proteus side of the API for library services.
+
+Contents:
+	README:		This file
+	build.sbt:   	sbt build script.
+
+	fixProtoBuf.sh:	Script to rewrite somne of the boilerplate from the generated
+			protocol buffer files (the java files from the proto compiler)
+
+	project:	The 'project' for SBT, meaning build.sbt processes
+			the contents of this directory as part of build
+			for THIS directory.
+
+	publish.sh:	script to update 3rd party packages, generate the protos,
+			compile the core, use fixProtoBuf, and deploy the code
+			locally.
+
+	src:		Directory containing all source code for the project.

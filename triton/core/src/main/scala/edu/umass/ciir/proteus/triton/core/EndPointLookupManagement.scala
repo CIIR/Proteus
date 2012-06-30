@@ -8,8 +8,8 @@ import akka.actor.Actor
 import akka.config.Supervision._
 import edu.umass.ciir.proteus.protocol.ProteusProtocol._
 import scala.collection.JavaConverters._
-// Note: The analagous situation with object variables can be done using extensions, the librarian/manager can stay the same
 
+// Note: The analagous situation with object variables can be done using extensions, the librarian/manager can stay the same
 trait EndPointLookupManagement { 
   this: Actor =>  
     def lookupCollection(accessID: AccessIdentifier) : Collection
@@ -135,7 +135,6 @@ trait EndPointLookupManagement {
     	.build
       }
     } onResult { case r: Organization => chan ! r }
-
   }
 }
 
