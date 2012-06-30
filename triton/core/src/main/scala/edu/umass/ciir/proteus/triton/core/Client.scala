@@ -256,9 +256,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
     return (librarian_actor ? transform_message).mapTo[SearchResponse] 
   }
 
-  /**
-  * Get locations within radius of the location described by id
-  */
+  // Get locations within radius of the location described by id
   def getNearbyLocations(id: AccessIdentifier, radius: Int, 
 			 num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
     
@@ -277,10 +275,9 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
     return (librarian_actor ? transform_message).mapTo[SearchResponse] 
   }
 
-  /**
-  * Use a dynamically loaded transform from id (of corresponding type id_type), where the name of the transform is 
-  * transform_name. The librarian must have a end point supporting this transform loaded for this to succeed.
-  */
+  // Use a dynamically loaded transform from id (of corresponding type id_type),
+  // where the name of the transform is <transform_name>. The librarian must 
+  // have a end point supporting this transform loaded for this to succeed.
   def useDynamicTransform(id: AccessIdentifier, id_type: ProteusType, transform_name: String,  
 			  num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
     
@@ -305,116 +302,13 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
   }
   
   /*** Lookup Methods ***/
-  
-  /**
-  * Request that the librarian look up a Collection by its reference (SearchResult) and return 
-  * a Future to the full object.
-  */
-  def lookupCollection(result: SearchResult) : Future[Collection] = {
-    // Sanity checking first
-    if (result.getProteusType != ProteusType.COLLECTION)
-      throw new IllegalArgumentException("Mismatched type with lookup method")
-    
-    val lookup_message = LookupCollection.newBuilder
+  def lookup(result: SearchResult) : Future[ProteusObject] = {
+    val lookup_message = Lookup.newBuilder
     .setId(result.getId)
+    .setType(result.getType)
     .build
     
-    return (librarian_actor ? lookup_message).mapTo[Collection]
-  }
-  
-  /**
-  * Request the librarian look up a Page by its result reference
-  */
-  def lookupPage(result: SearchResult) : Future[Page] = {
-    // Sanity checking first
-    if (result.getProteusType != ProteusType.PAGE)
-      throw new IllegalArgumentException("Mismatched type with lookup method")
-    
-    val lookup_message = LookupPage.newBuilder
-    .setId(result.getId)
-    .build
-    
-    return (librarian_actor ? lookup_message).mapTo[Page]
-  }
-  
-  /**
-  * Request the librarian look up a Picture by its result reference
-  */
-  def lookupPicture(result: SearchResult) : Future[Picture] = {
-    // Sanity checking first
-    if (result.getProteusType != ProteusType.PICTURE)
-      throw new IllegalArgumentException("Mismatched type with lookup method")
-    
-    val lookup_message = LookupPicture.newBuilder
-    .setId(result.getId)
-    .build
-    
-    return (librarian_actor ? lookup_message).mapTo[Picture]
-  }
-  
-  /**
-  * Request the librarian look up a Video by its result reference
-  */
-  def lookupVideo(result: SearchResult) : Future[Video] = {
-    // Sanity checking first
-    if (result.getProteusType != ProteusType.VIDEO)
-      throw new IllegalArgumentException("Mismatched type with lookup method")
-    
-    val lookup_message = LookupVideo.newBuilder
-    .setId(result.getId)
-    .build
-    
-    return (librarian_actor ? lookup_message).mapTo[Video]
-  }
-  
-  /**
-  * Request the librarian look up a Audio clip by its result reference
-  */
-  def lookupAudio(result: SearchResult) : Future[Audio] = {
-    // Sanity checking first
-    if (result.getProteusType != ProteusType.AUDIO)
-      throw new IllegalArgumentException("Mismatched type with lookup method")
-    
-    val lookup_message = LookupAudio.newBuilder
-    .setId(result.getId)
-    .build
-    
-    return (librarian_actor ? lookup_message).mapTo[Audio]
-  }
-  
-  /**
-  * Request the librarian look up a Person by its result reference
-  */
-  def lookupPerson(result: SearchResult) : Future[Person] = {
-    if (result.getProteusType != ProteusType.PERSON)
-      throw new IllegalArgumentException("Mismatched type with lookup method")    
-    val lookup_message = LookupPerson.newBuilder
-    .setId(result.getId)
-    .build
-    
-    return (librarian_actor ? lookup_message).mapTo[Person]
-  }
-  
-  // Request the librarian look up a Location by its result reference
-  def lookupLocation(result: SearchResult) : Future[Location] = {
-    if (result.getProteusType != ProteusType.LOCATION)
-      throw new IllegalArgumentException("Mismatched type with lookup method")    
-    val lookup_message = LookupLocation.newBuilder
-    .setId(result.getId)
-    .build
-    
-    return (librarian_actor ? lookup_message).mapTo[Location]
-  }
-  
-  // Request the librarian look up a Page by its result reference
-  def lookupOrganization(result: SearchResult) : Future[Organization] = {
-    if (result.getProteusType != ProteusType.ORGANIZATION)
-      throw new IllegalArgumentException("Mismatched type with lookup method")    
-    val lookup_message = LookupOrganization.newBuilder
-    .setId(result.getId)
-    .build
-    
-    return (librarian_actor ? lookup_message).mapTo[Organization]
+    return (librarian_actor ? lookup_message)
   }
 
   /** Utility functions to make interacting with the data easier **/

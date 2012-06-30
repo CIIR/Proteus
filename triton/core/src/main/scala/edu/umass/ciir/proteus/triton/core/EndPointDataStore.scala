@@ -26,87 +26,15 @@ abstract trait EndPointDataStore {
   def runOccurHasSubjTransform(transform: OccurHasSubjTransform) : SearchResponse  = unsupportedResponse("Occurrences having Subject")  	
   def runNearbyLocationsTransform(transform: NearbyLocationsTransform) : SearchResponse  = unsupportedResponse("Nearby Locations")
   def runDynamicTransform(transform: DynamicTransform) : SearchResponse = unsupportedResponse("Dynamic Transform")
-    
-  def lookupCollection(accessID: AccessIdentifier) : Collection = {
-    return Collection.newBuilder
-    .setId(AccessIdentifier.newBuilder
-    	   .setIdentifier(accessID.getIdentifier)
-    	   .setResourceId(getResourceKey)
-    	   .setError("error: lookup not supported by " + getResourceKey)
-    	   .build)
-    .build
+  def lookup(access_id: AccessIdentifier, proteus_type: ProteusType) : ProteusObject = {
+    return ProteusObject.newBuilder
+	    .setId(AccessIdentifier.newBuilder
+    		   .setIdentifier(accessID.getIdentifier)
+    		   .setResourceId(getResourceKey)
+    		   .setError("error: lookup not supported by " + getResourceKey)
+    		   .build)
+	    .build
   }
-  
-  def lookupPage(accessID: AccessIdentifier) : Page = {
-    return Page.newBuilder
-    .setId(AccessIdentifier.newBuilder
-    	   .setIdentifier(accessID.getIdentifier)
-    	   .setResourceId(getResourceKey)
-    	   .setError("error: lookup not supported by " + getResourceKey)
-    	   .build)
-    .build
-  }
-  
-  def lookupPicture(accessID: AccessIdentifier) : Picture = {
-    return Picture.newBuilder
-    .setId(AccessIdentifier.newBuilder
-    	   .setIdentifier(accessID.getIdentifier)
-    	   .setResourceId(getResourceKey)
-    	   .setError("error: lookup not supported by " + getResourceKey)
-    	   .build)
-    .build
-  }
-  
-  def lookupVideo(accessID: AccessIdentifier) : Video = {
-    return Video.newBuilder
-    .setId(AccessIdentifier.newBuilder
-    	   .setIdentifier(accessID.getIdentifier)
-    	   .setResourceId(getResourceKey)
-    	   .setError("error: lookup not supported by " + getResourceKey)
-    	   .build)
-    .build
-  }
-  
-  def lookupAudio(accessID: AccessIdentifier) : Audio = {
-    return Audio.newBuilder
-    .setId(AccessIdentifier.newBuilder
-    	   .setIdentifier(accessID.getIdentifier)
-    	   .setResourceId(getResourceKey)
-    	   .setError("error: lookup not supported by " + getResourceKey)
-    	   .build)
-    .build
-  }
-  
-  def lookupPerson(accessID: AccessIdentifier) : Person = {
-    return Person.newBuilder
-    .setId(AccessIdentifier.newBuilder
-    	   .setIdentifier(accessID.getIdentifier)
-    	   .setResourceId(getResourceKey)
-    	   .setError("error: lookup not supported by " + getResourceKey)
-    	   .build)
-    .build
-
-  }   
-  
-  def lookupLocation(accessID: AccessIdentifier) : Location = {
-    return Location.newBuilder
-    .setId(AccessIdentifier.newBuilder
-    	   .setIdentifier(accessID.getIdentifier)
-    	   .setResourceId(getResourceKey)
-    	   .setError("error: lookup not supported by " + getResourceKey)
-    	   .build)
-    .build
-  } 
-  
-  def lookupOrganization(accessID: AccessIdentifier) : Organization = {
-    return Organization.newBuilder
-    .setId(AccessIdentifier.newBuilder
-    	   .setIdentifier(accessID.getIdentifier)
-    	   .setResourceId(getResourceKey)
-    	   .setError("error: lookup not supported by " + getResourceKey)
-    	   .build)
-    .build
-  } 
 
   // Canned error messages for generic unsupported operations/types
   protected def unsupportedResponse(method: String): SearchResponse = 
@@ -114,5 +42,4 @@ abstract trait EndPointDataStore {
 
   protected def errorResponse(errorText: String): SearchResponse = 
     SearchResponse.newBuilder.setError("EndPoint Error: " + errorText).build
-
 }

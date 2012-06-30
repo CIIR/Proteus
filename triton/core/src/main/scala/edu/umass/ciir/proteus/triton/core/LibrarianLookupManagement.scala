@@ -12,7 +12,7 @@ import scala.collection.JavaConverters._
 import edu.umass.ciir.proteus.protocol.ProteusProtocol._
 
 trait LibrarianLookupManagement { this: Actor =>
-  // Handle messages to the librarian for looking up resource data. */
+  // Handle messages to the librarian for looking up resource data.
   def lookupManagement : Receive = {
     case lookup: LookupCollection =>
       val lib = getLibrary(lookup.getId.getResourceId)

@@ -22,19 +22,15 @@ message AccessIdentifier {
   // Indicates which library/resource this was pulled from.
   optional string resource_id = 2;
 
-  // Provide error messages for any object passing, lookup not found errors report here.
+  // Provide error messages for any object passing, 
+  // lookup not found errors report here.
   optional string error = 3;					
 }
 
 // Parameters used in searching and transformations
 message SearchParameters {
-  // Maximum number of results to return
-  optional int32 num_requested = 1 [default = 100];
-
-  // Return results starting from this index in rank order.
-  // Otherwise known as the offset.
+  optional int32 num_results_requested = 1 [default = 100];
   optional int32 start_at = 2 [default = 0];
-
   // Restrict results to this language
   optional string language = 3 [default = "en"];
 }
@@ -42,15 +38,8 @@ message SearchParameters {
 // **** Query Type Messages ****
 // Defines a search query to run
 message SearchRequest {
-
-  // The raw text of the query
-  required string query = 1;
-
-  // The Proteus type(s) to search for.
-  // See above for possible values.
+  required string raw_query = 1;
   repeated ProteusType types = 2;
-
-  // Parameters of the search request
   optional SearchParameters params = 3;
 }
 
@@ -58,35 +47,18 @@ message SearchRequest {
 
 // The response message to a search query
 message SearchResponse {
-  // List of rank ordered search results
   repeated SearchResult results = 1;
-
-  // Error string, empty if no errors
   optional string error = 2;
 }
 
 // Defines a single result item from a search query
 message SearchResult {
-  // The unique identifier of this result
-  required AccessIdentifier id = 1;
-				
-  // Proteus type that this result belongs to
-  optional ProteusType proteus_type = 2 [default = COLLECTION];
-
-  // Title/label of the result
-  // This is what should be displayed in a link for the object.
-  optional string title = 3;			
-
-  // Summary of the contents of this result. May come from surrounding text.
-  // This should be used as the "snippet" of the object.
-  optional ResultSummary summary = 4;	
-
-  // URL of image depiction of this result's data
+  required AccessIdentifier id = 1;			       
+  optional ProteusType type = 2 [default = COLLECTION];
+  optional string title = 3;
+  optional ResultSummary summary = 4;
   optional string img_url = 5;
-
-  // URL of thumbnail image depiction of this result's data
   optional string thumb_url = 6;
-
   // URL for visiting the original data source for this item
   optional string external_url = 7;				
 }       
@@ -231,9 +203,7 @@ message Organization {
   optional string wiki_link = 3;
 }
 
-
 // **** Remote Actor Messages / RPC Messages ****
-
 // Perform a distributed search: Returns SearchResponse
 message Search {
   required SearchRequest search_query = 1;
@@ -301,8 +271,10 @@ message NearbyLocationsTransform {
   optional SearchParameters params = 3;
 }	
 
-// Apply dynamically loaded transformation (name) to id (of type from_type). Result must be a SearchResponse
-// Note: The analagous situation with object variables can be done using extensions, the librarian/manager can stay the same
+// Apply dynamically loaded transformation (name) to id 
+// (of type <from_type>). Result must be a SearchResponse
+// Note: The analagous situation with object variables can be done 
+// using extensions, the librarian/manager can stay the same
 message DynamicTransformID {
   required string name = 1;
   optional ProteusType from_type = 2;
@@ -314,39 +286,11 @@ message DynamicTransform {
   optional SearchParameters params = 4;
 }
 
-// **** Resource Lookup Messages / RPCs ****
-// These all respond with the correctly typed object instantiations
-
-message LookupCollection {
+// A single 'lookup' command RPC, carrying the id of the
+// resource to look up and its type.
+message Lookup {
   required AccessIdentifier id = 1;
-}
-
-message LookupPage {
-  required AccessIdentifier id = 1;
-}
-
-message LookupPicture {
-  required AccessIdentifier id = 1;
-}
-
-message LookupVideo {
-  required AccessIdentifier id = 1;
-}
-
-message LookupAudio {
-  required AccessIdentifier id = 1;
-}
-
-message LookupPerson {
-  required AccessIdentifier id = 1;
-}
-
-message LookupLocation {
-  required AccessIdentifier id = 1;
-}
-
-message LookupOrganization {
-  required AccessIdentifier id = 1;
+  required ProteusType type = 2;
 }
 
 // **** Connection Related Messages ****

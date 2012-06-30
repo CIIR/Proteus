@@ -5,8 +5,8 @@ import akka.actor.Actor._
 import akka.remoteinterface._
 import scala.collection.JavaConverters._
 import util.Random
-
 import edu.umass.ciir.proteus.protocol.ProteusProtocol._
+import edu.umass.ciir.proteus.protocol.ProteusProtocol.ProteusType
 
 // Random End Point (Library resource) class
 // Once the data store trait is completed it is an extremely simple class to create.
@@ -117,7 +117,8 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
   def supportsType(ptype: ProteusType) : Boolean = true
   def supportsDynTransform(dtID: DynamicTransformID) : Boolean = getDynamicTransforms.contains(dtID)
   
-  /** Internal Utility Methods **/
+  // Internal Utility Methods
+  // TODO(irmarc): Can we declare these private in bulk somehow?
   def generateRandomSummary : ResultSummary = {
     return ResultSummary.newBuilder
     .setText("Summarizing... " + List.range(0, Random.nextInt(30)+2).map(_ => genKey()).mkString(" "))
@@ -291,10 +292,10 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
     }
   }
   
-  
-  override def lookupCollection(accessID: AccessIdentifier) : Collection = {
+  override def lookup(access_id: AccessIdentifier, proteus_type: ProteusType) : ProteusObject = {
+    val result = ProteusObject.newBuilder
     if (accessID.getResourceId != getResourceKey) {
-      return Collection.newBuilder
+      return result
       .setId(AccessIdentifier.newBuilder
     	     .setIdentifier(accessID.getIdentifier)
     	     .setResourceId(getResourceKey)
@@ -303,40 +304,9 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
     	     .build)
       .build
     } else {
-      val builder = Collection.newBuilder
-      builder.setId(accessID)
-      builder.setTitle("Collection: " + genKey())
-      builder.setSummary(generateRandomSummary)
-      builder.setImgUrl(imgURLs(Random.nextInt(imgURLs.length)))
-      builder.setThumbUrl(thumbURLs(Random.nextInt(thumbURLs.length)))
-      builder.setExternalUrl(extLinks(Random.nextInt(extLinks.length)))
-      builder.setDateFreq(genRandomDates)
-      builder.setLanguageModel(genRandomTermHist)
-      // Not setting the optional field language (override defaults to english), as an example
-      // builder.setLanguage("en")
-      builder.setPublicationDate(Random.nextLong)
-      builder.setPublisher("Publishing house of Umass")
-      builder.setEdition("First")
-      builder.setNumPages(Random.nextInt(2000) + 1)
-      return builder.build
-    }
-  }
-  
-  override def lookupPage(accessID: AccessIdentifier) : Page = {
-    if (accessID.getResourceId != getResourceKey) {
-      return Page.newBuilder
-      .setId(AccessIdentifier.newBuilder
-    	     .setIdentifier(accessID.getIdentifier)
-    	     .setResourceId(getResourceKey)
-    	     .setError("Received lookup with mismatched resource ID: " + 
-    		       accessID.getResourceId + " vs " + getResourceKey)
-    	     .build)
-      .build
-    } else {
-      // The other way to build. This one is a little nicer IMO
-      return Page.newBuilder
+      result
       .setId(accessID)
-      .setTitle("Page: " + genKey())
+      .setTitle(accessID.getType.mkString + " : " + genKey())
       .setSummary(generateRandomSummary)
       .setImgUrl(imgURLs(Random.nextInt(imgURLs.length)))
       .setThumbUrl(thumbURLs(Random.nextInt(thumbURLs.length)))
@@ -344,183 +314,77 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
       .setDateFreq(genRandomDates)
       .setLanguageModel(genRandomTermHist)
       .setLanguage("en")
-      .setFullText(List.range(0, Random.nextInt(1000)+10).map(_ => genKey(Random.nextInt(13)+1)).mkString(" "))
-      .addCreators("Logan Giorda")
-      .addCreators("Will Dabney")
-      .setPageNumber(Random.nextInt(1000))
-      .build
+
+      // Use the proteus type to complete the message and return
+      // the completed object.
+      return proteus_type match {
+	case COLLECTION => results
+	.setCollection(Collection.newBuilder
+		       .setPublicationDate(Random.nextLong)
+		       .setPublisher("Publishing house of Umass")
+		       .setEdition("First")
+		       .setNumPages(Random.nextInt(2000) + 1)
+		       .build)
+	.build
+	case PAGE => results
+	.setPage(Page.newBuilder
+		 .setFullText(List.range(0, Random.nextInt(1000)+10).map(_ => genKey(Random.nextInt(13)+1)).mkString(" "))
+		 .addCreators("Logan Giorda")
+		 .addCreators("Will Dabney")
+		 .setPageNumber(Random.nextInt(1000))
+		 .build)
+	.build
+	case PICTURE => results
+	.setPicture(Picture.newBuilder
+		    .setCaption("Caption: " + List.range(0, Random.nextInt(5)+1).map(_ => genKey(Random.nextInt(8)+1)).mkString(" "))
+		    .setCoordinates(genRandCoordinates)
+		    .addCreators("Logan Giorda")
+		    .addCreators("Will Dabney")
+		    .build)
+	.build
+	case VIDEO => results
+	.setVideo(Video.newBuilder
+		  .setCaption("Caption: " + List.range(0, Random.nextInt(5)+1).map(_ => genKey(Random.nextInt(8)+1)).mkString(" "))
+		  .setCoordinates(genRandCoordinates)
+		  .addCreators("Logan Giorda")
+		  .addCreators("Will Dabney")
+		  .setLength(Random.nextInt(5000))
+		  .build)
+	.build
+	case AUDIO => results
+	.setAudio(Audio.newBuilder
+		  .setCaption("Caption: " + List.range(0, Random.nextInt(5)+1).map(_ => genKey(Random.nextInt(8)+1)).mkString(" "))
+		  .setCoordinates(genRandCoordinates)
+		  .addCreators("Logan Giorda")
+		  .addCreators("Will Dabney")
+		  .setLength(Random.nextInt(5000))
+		  .build)
+	.build
+	case PERSON => results
+	.setPerson(Person.newBuilder
+		   .setFullName(genKey().capitalize + " " + genKey().capitalize)
+		   .addAllAlternateNames(List.range(0, Random.nextInt(5)).map(_ => genKey().capitalize + " " + genKey().capitalize).asJava)
+		   .setWikiLink(wikiLinks(Random.nextInt(wikiLinks.length)))
+		   .setBirthDate(Random.nextLong)
+		   .setDeathDate(Random.nextLong)
+		   .build)
+	.build
+	case LOCATION => results
+	.setLocation(Location.newBuilder
+		     .setFullName(genKey().capitalize + " " + genKey().capitalize)
+		     .addAllAlternateNames(List.range(0, Random.nextInt(5)).map(_ => genKey().capitalize + " " + genKey().capitalize).asJava)
+		     .setWikiLink(wikiLinks(Random.nextInt(wikiLinks.length)))
+		     .setLongitude((Random.nextDouble - 0.5) * 2.0 * 180.0)
+		     .setLatitude((Random.nextDouble - 0.5) * 2.0 * 90.0)
+		     .build)
+	.build
+	case ORGANIZATION => results
+	.setOrganization(Organization.newBuilder
+			 .setFullName(genKey().capitalize + " " + genKey().capitalize)
+			 .setWikiLink(wikiLinks(Random.nextInt(wikiLinks.length)))
+			 .build)
+	.build
+      }
     }
-  }
-  
-  override def lookupPicture(accessID: AccessIdentifier) : Picture = {
-    if (accessID.getResourceId != getResourceKey) {
-      return Picture.newBuilder
-      .setId(AccessIdentifier.newBuilder
-    	     .setIdentifier(accessID.getIdentifier)
-    	     .setResourceId(getResourceKey)
-    	     .setError("Received lookup with mismatched resource ID: " + 
-    		       accessID.getResourceId + " vs " + getResourceKey)
-    	     .build)
-      .build
-    } else {
-      return Picture.newBuilder
-      .setId(accessID)
-      .setTitle("Picture: " + genKey())
-      .setSummary(generateRandomSummary)
-      .setImgUrl(imgURLs(Random.nextInt(imgURLs.length)))
-      .setThumbUrl(thumbURLs(Random.nextInt(thumbURLs.length)))
-      .setExternalUrl(extLinks(Random.nextInt(extLinks.length)))
-      .setDateFreq(genRandomDates)
-      .setLanguageModel(genRandomTermHist)
-      .setLanguage("en")
-      .setCaption("Caption: " + List.range(0, Random.nextInt(5)+1).map(_ => genKey(Random.nextInt(8)+1)).mkString(" "))
-      .setCoordinates(genRandCoordinates)
-      .addCreators("Logan Giorda")
-      .addCreators("Will Dabney")
-      .build
-    }
-  }
-  
-  override def lookupVideo(accessID: AccessIdentifier) : Video = {
-    if (accessID.getResourceId != getResourceKey) {
-      return Video.newBuilder
-      .setId(AccessIdentifier.newBuilder
-    	     .setIdentifier(accessID.getIdentifier)
-    	     .setResourceId(getResourceKey)
-    	     .setError("Received lookup with mismatched resource ID: " + 
-    		       accessID.getResourceId + " vs " + getResourceKey)
-    	     .build)
-      .build
-    } else {
-      return Video.newBuilder
-      .setId(accessID)
-      .setTitle("Video Clip: " + genKey())
-      .setSummary(generateRandomSummary)
-      .setImgUrl(imgURLs(Random.nextInt(imgURLs.length)))
-      .setThumbUrl(thumbURLs(Random.nextInt(thumbURLs.length)))
-      .setExternalUrl(extLinks(Random.nextInt(extLinks.length)))
-      .setDateFreq(genRandomDates)
-      .setLanguageModel(genRandomTermHist)
-      .setLanguage("en")
-      .setCaption("Caption: " + List.range(0, Random.nextInt(5)+1).map(_ => genKey(Random.nextInt(8)+1)).mkString(" "))
-      .setCoordinates(genRandCoordinates)
-      .addCreators("Logan Giorda")
-      .addCreators("Will Dabney")
-      .setLength(Random.nextInt(5000))
-      .build
-    }
-  }
-  
-  override def lookupAudio(accessID: AccessIdentifier) : Audio = {
-    if (accessID.getResourceId != getResourceKey) {
-      return Audio.newBuilder
-      .setId(AccessIdentifier.newBuilder
-    	     .setIdentifier(accessID.getIdentifier)
-    	     .setResourceId(getResourceKey)
-    	     .setError("Received lookup with mismatched resource ID: " + 
-    		       accessID.getResourceId + " vs " + getResourceKey)
-    	     .build)
-      .build
-    } else {
-      return Audio.newBuilder
-      .setId(accessID)
-      .setTitle("Audio Clip: " + genKey())
-      .setSummary(generateRandomSummary)
-      .setImgUrl(imgURLs(Random.nextInt(imgURLs.length)))
-      .setThumbUrl(thumbURLs(Random.nextInt(thumbURLs.length)))
-      .setExternalUrl(extLinks(Random.nextInt(extLinks.length)))
-      .setDateFreq(genRandomDates)
-      .setLanguageModel(genRandomTermHist)
-      .setLanguage("en")
-      .setCaption("Caption: " + List.range(0, Random.nextInt(5)+1).map(_ => genKey(Random.nextInt(8)+1)).mkString(" "))
-      .setCoordinates(genRandCoordinates)
-      .addCreators("Logan Giorda")
-      .addCreators("Will Dabney")
-      .setLength(Random.nextInt(5000))
-      .build
-    }
-  }
-  
-  override def lookupPerson(accessID: AccessIdentifier) : Person = {
-    if (accessID.getResourceId != getResourceKey) {
-      return Person.newBuilder
-      .setId(AccessIdentifier.newBuilder
-    	     .setIdentifier(accessID.getIdentifier)
-    	     .setResourceId(getResourceKey)
-    	     .setError("Received lookup with mismatched resource ID: " + 
-    		       accessID.getResourceId + " vs " + getResourceKey)
-    	     .build)
-      .build
-    } else {
-      return Person.newBuilder
-      .setId(accessID)
-      .setTitle("Person: " + genKey())
-      .setSummary(generateRandomSummary)
-      .setImgUrl(imgURLs(Random.nextInt(imgURLs.length)))
-      .setThumbUrl(thumbURLs(Random.nextInt(thumbURLs.length)))
-      .setDateFreq(genRandomDates)
-      .setLanguageModel(genRandomTermHist)
-      .setFullName(genKey().capitalize + " " + genKey().capitalize)
-      .addAllAlternateNames(List.range(0, Random.nextInt(5)).map(_ => genKey().capitalize + " " + genKey().capitalize).asJava)
-      .setWikiLink(wikiLinks(Random.nextInt(wikiLinks.length)))
-      .setBirthDate(Random.nextLong)
-      .setDeathDate(Random.nextLong)
-      .build
-    }
-  }   
-  
-  override def lookupLocation(accessID: AccessIdentifier) : Location = {
-    if (accessID.getResourceId != getResourceKey) {
-      return Location.newBuilder
-      .setId(AccessIdentifier.newBuilder
-    	     .setIdentifier(accessID.getIdentifier)
-    	     .setResourceId(getResourceKey)
-    	     .setError("Received lookup with mismatched resource ID: " + 
-    		       accessID.getResourceId + " vs " + getResourceKey)
-    	     .build)
-      .build
-    } else {
-      return Location.newBuilder
-      .setId(accessID)
-      .setTitle("Location: " + genKey())
-      .setSummary(generateRandomSummary)
-      .setImgUrl(imgURLs(Random.nextInt(imgURLs.length)))
-      .setThumbUrl(thumbURLs(Random.nextInt(thumbURLs.length)))
-      .setDateFreq(genRandomDates)
-      .setLanguageModel(genRandomTermHist)
-      .setFullName(genKey().capitalize + " " + genKey().capitalize)
-      .addAllAlternateNames(List.range(0, Random.nextInt(5)).map(_ => genKey().capitalize + " " + genKey().capitalize).asJava)
-      .setWikiLink(wikiLinks(Random.nextInt(wikiLinks.length)))
-      .setLongitude((Random.nextDouble - 0.5) * 2.0 * 180.0)
-      .setLatitude((Random.nextDouble - 0.5) * 2.0 * 90.0)
-      .build
-    }
-  } 
-  
-  override def lookupOrganization(accessID: AccessIdentifier) : Organization = {
-    if (accessID.getResourceId != getResourceKey) {
-      return Organization.newBuilder
-      .setId(AccessIdentifier.newBuilder
-    	     .setIdentifier(accessID.getIdentifier)
-    	     .setResourceId(getResourceKey)
-    	     .setError("Received lookup with mismatched resource ID: " + 
-    		       accessID.getResourceId + " vs " + getResourceKey)
-    	     .build)
-      .build
-    } else {
-      return Organization.newBuilder
-      .setId(accessID)
-      .setTitle("Organization: " + genKey())
-      .setSummary(generateRandomSummary)
-      .setImgUrl(imgURLs(Random.nextInt(imgURLs.length)))
-      .setThumbUrl(thumbURLs(Random.nextInt(thumbURLs.length)))
-      .setDateFreq(genRandomDates)
-      .setLanguageModel(genRandomTermHist)
-      .setFullName(genKey().capitalize + " " + genKey().capitalize)
-      .setWikiLink(wikiLinks(Random.nextInt(wikiLinks.length)))
-      .build
-    }
-  } 
-  
-  
+  }  
 }
