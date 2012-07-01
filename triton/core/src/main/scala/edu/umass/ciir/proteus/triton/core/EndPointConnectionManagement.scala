@@ -1,7 +1,6 @@
 // Trait for providing connection management for the end points of the system.
 // It is mainly responsible for sending a connection message to the librarian.
-trait EndPointConnectionManagement { 
-  this: Actor =>
+trait EndPointConnectionManagement { this: Actor =>
   val serverGroupID : String
   def serverHostname : String
   def serverPort : Int

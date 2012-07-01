@@ -10,11 +10,7 @@ abstract trait EndPointDataStore {
   
   /** Core Functionality Methods (MUST BE PROVIDED) **/
   def initialize(configuration: EndPointConfiguration) {}
-  
   def supportsType(ptype: ProteusType) : Boolean
-  def supportsDynTransform(dtID: DynamicTransformID) : Boolean
-    
-  def getDynamicTransforms : List[DynamicTransformID] = List[DynamicTransformID]()
   def runSearch(s: Search) : SearchResponse = unsupportedResponse("Search")
   
   def runContainerTransform(transform: ContainerTransform) : SearchResponse = unsupportedResponse("Container Transform")  	
@@ -25,7 +21,6 @@ abstract trait EndPointDataStore {
   def runOccurHasObjTransform(transform: OccurHasObjTransform) : SearchResponse = unsupportedResponse("Occurrences having Object")  	
   def runOccurHasSubjTransform(transform: OccurHasSubjTransform) : SearchResponse  = unsupportedResponse("Occurrences having Subject")  	
   def runNearbyLocationsTransform(transform: NearbyLocationsTransform) : SearchResponse  = unsupportedResponse("Nearby Locations")
-  def runDynamicTransform(transform: DynamicTransform) : SearchResponse = unsupportedResponse("Dynamic Transform")
   def lookup(access_id: AccessIdentifier, proteus_type: ProteusType) : ProteusObject = {
     return ProteusObject.newBuilder
 	    .setId(AccessIdentifier.newBuilder

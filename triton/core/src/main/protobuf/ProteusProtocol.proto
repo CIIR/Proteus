@@ -44,7 +44,6 @@ message SearchRequest {
 }
 
 // **** Response Type Messages ****
-
 // The response message to a search query
 message SearchResponse {
   repeated SearchResult results = 1;
@@ -71,8 +70,11 @@ message ResultSummary {
 
 // Defines a region in text
 message TextRegion {
-  required int32 start = 1; // Starting character index
-  required int32 stop = 2; // Ending index (non-inclusive)
+  // Starting character index, inclusive.
+  required int32 start = 1;
+  
+  // Ending index, exclusive.
+  required int32 stop = 2; 
 }
 
 message WeightedTerm {
@@ -115,6 +117,7 @@ message ProteusObject {
   optional string language = 9 [default = "en"];
 
   // Each of the composed message types
+  // Only one of these should be filled in for a given instance.
   optional Collection collection = 10;
   optional Page page = 11;
   optional Picture picture = 12;
@@ -130,10 +133,9 @@ message ProteusObject {
 message Collection {	
   optional sint64 publication_date = 1;
   optional string publisher = 2;
-
-  // Edition this collection represents ---> TODO: Add creators here.
   optional string edition = 3;
   optional int32 num_pages = 4;
+  repeated string creators = 5;
 }
 
 // Page: Page in a book, page of a newspaper, web page on a site, etc.
@@ -147,8 +149,8 @@ message Page {
 message Coordinates {
   required int32 left = 1;
   required int32 right = 2;
-  required int32 up = 3;
-  required int32 down = 4;
+  required int32 top = 3;
+  required int32 bottom = 4;
 }
 
 // Picture: Picture on a page, on a webpage, etc. 
@@ -171,20 +173,20 @@ message Video {
 // Audio: Audio contained on a web page, or other page instance 
 // (Zero or more per page)
 message Audio {
-  optional string caption = 1;							// Caption associated with this audio clip
-  optional Coordinates coordinates = 2;					// Coordinates (location) of audio clip on the page
-  optional int32 length = 3;								// Length in seconds of the audio clip
-  repeated string creators = 4;							// The creators of this resource
+  optional string caption = 1;
+  optional Coordinates coordinates = 2;
+  optional int32 length = 3;
+  repeated string creators = 4;
 }
 
 // Person: A person entity mentioned on a page 
 // (in text, picture, video, or audio)
 message Person {
-  optional string full_name = 1;							// Full name of this person
-  repeated string alternate_names = 2;					// List of alternate names, nick names, and aliases
-  optional string wiki_link = 3;							// Wikipedia link for this person
-  optional sint64 birth_date = 4;						// Date of birth 
-  optional sint64 death_date = 5;						// Date of death
+  optional string full_name = 1;
+  repeated string alternate_names = 2;
+  optional string wiki_link = 3;
+  optional sint64 birth_date = 4;
+  optional sint64 death_date = 5;
 }
 
 // Location: A location entity mentioned on a page
@@ -271,22 +273,7 @@ message NearbyLocationsTransform {
   optional SearchParameters params = 3;
 }	
 
-// Apply dynamically loaded transformation (name) to id 
-// (of type <from_type>). Result must be a SearchResponse
-// Note: The analagous situation with object variables can be done 
-// using extensions, the librarian/manager can stay the same
-message DynamicTransformID {
-  required string name = 1;
-  optional ProteusType from_type = 2;
-}
-
-message DynamicTransform {
-  required AccessIdentifier id = 1;
-  optional DynamicTransformID transform_id = 2;
-  optional SearchParameters params = 4;
-}
-
-// A single 'lookup' command RPC, carrying the id of the
+// A single 'lookup' RPC, carrying the id of the
 // resource to look up and its type.
 message Lookup {
   required AccessIdentifier id = 1;

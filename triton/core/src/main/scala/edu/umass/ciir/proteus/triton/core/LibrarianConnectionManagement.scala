@@ -7,9 +7,7 @@ trait LibrarianConnectionManagement extends RandomDataGenerator with ProteusAPI 
   
   // Libraries with the same groupID can support each other and combine to form a single resource
   val group_membership = new collection.mutable.HashMap[String, List[String]]()
-  
   var supported_types = Set[ProteusType]()
-  var supported_dyn_transforms = List[DynamicTransformID]()
   
   // Determines if the library should be referred to by a new generated key, 
   // the one it requested, or if there is a collision and the connection is trashed.
@@ -57,7 +55,6 @@ trait LibrarianConnectionManagement extends RandomDataGenerator with ProteusAPI 
       
       // Update support types/transforms
       supported_types ++= Set() ++ c.getSupportedTypesList.asScala
-      supported_dyn_transforms ++= c.getDynamicTransformsList.asScala
     }
   }
   // TODO: we are currently asking the contents for who they are contained by, need to reverse this!
@@ -65,13 +62,14 @@ trait LibrarianConnectionManagement extends RandomDataGenerator with ProteusAPI 
   // The main workhorse of this trait, which conditionally forwards messages to libraries (whose ids are in list members), 
   // or sends the message to all of them and recombines the results, alternatively may also return an error based response.
   // This is where most of the interesting Librarian intelligent code would go (such as load balancing and topic grouping).
-  protected def sendOrForwardTo(members: List[String], message: Any, chan: UntypedChannel) {
-    if (members.length == 0) {
-      chan ! (SearchResponse.newBuilder
-    	      .setError("No library support for this operation...")
-    	      .build) 
+  protected def sendOrForwardTo(members: List[String], message: Any, chan: UntypedChannel) : Unit = {
+    members.length match {
+      case 0 => 
+	chan ! (SearchResponse.newBuilder
+    		.setError("No library support for this operation...")
+    		.build) 
     } else if (members.length == 1) {
-      libraries(members(0)).forwardMessage(message, chan)
+      libraries(members(0)).forward(message)
     } else {
       // All the re-ordering code for reassembling the multiple responses should go here
       // First send the message to all the libraries, and get the Future result
@@ -95,14 +93,7 @@ trait LibrarianConnectionManagement extends RandomDataGenerator with ProteusAPI 
   protected def groupMemberTypeSupport(ptype: ProteusType, groupId: String) : List[String] = {
     group_membership(groupId).filter(id => libraries(id).supportsType(ptype))
   }
-  
-  // Get the libraries that support the dynamic transform given and are in groupId
-  protected def groupMemberDynTransSupport(dtID: DynamicTransformID, groupId: String) : List[String] = {
-    group_membership(groupId).filter(id => 
-      libraries(id).getDynamicTransforms.exists(dt => 
-	dt.getName == dtID.getName && dt.getFromType == dtID.getFromType))
-  }
-  
+    
   // Return the library ids that support one or more types in the list
   protected def typeSupport(ptypes: List[ProteusType]) : List[String] = {
     libraries.keys.toList.foreach(k => System.out.println(libraries(k).getSupportedTypes))
@@ -111,8 +102,6 @@ trait LibrarianConnectionManagement extends RandomDataGenerator with ProteusAPI 
   
   // Does this librarian have a library that supports ptype
   protected def supportsType(ptype: ProteusType) : Boolean = supported_types.contains(ptype)
-  // Does this librarian have a library that supports the dynamic transform dtID
-  protected def supportsDynTransform(dtID: DynamicTransformID) : Boolean = supported_dyn_transforms.contains(dtID)
   // Given a library's resource ID get that remote library (or null if none exist with that id)
   protected def getLibrary(id: String) : RemoteLibrary = if (libraries.contains(id)) libraries(id) else null  
 }

@@ -274,32 +274,6 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
     
     return (librarian_actor ? transform_message).mapTo[SearchResponse] 
   }
-
-  // Use a dynamically loaded transform from id (of corresponding type id_type),
-  // where the name of the transform is <transform_name>. The librarian must 
-  // have a end point supporting this transform loaded for this to succeed.
-  def useDynamicTransform(id: AccessIdentifier, id_type: ProteusType, transform_name: String,  
-			  num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
-    
-    val search_params = SearchParameters.newBuilder
-    .setNumRequested(num_requested)
-    .setStartAt(start_at)
-    .setLanguage(language)
-    .build  
-    
-    val dt_id = DynamicTransformID.newBuilder
-    .setName(transform_name)
-    .setFromType(id_type)
-    .build
-    
-    val transform_message = DynamicTransform.newBuilder
-    .setId(id)
-    .setTransformId(dt_id)
-    .setParams(search_params)
-    .build
-    
-    return (librarian_actor ? transform_message).mapTo[SearchResponse] 
-  }
   
   /*** Lookup Methods ***/
   def lookup(result: SearchResult) : Future[ProteusObject] = {

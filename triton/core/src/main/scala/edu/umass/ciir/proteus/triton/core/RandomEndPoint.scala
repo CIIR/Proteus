@@ -97,25 +97,7 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
   
   /** Methods Used Here and Elsewhere (MUST BE PROVIDED) **/
   def getSupportedTypes : List[ProteusType] = List.range(0, numProteusTypes).map(i => ProteusType.valueOf(i))
-  override def getDynamicTransforms : List[DynamicTransformID] = {
-    val firstDTID = DynamicTransformID.newBuilder
-    .setName("weird")
-    .setFromType(ProteusType.COLLECTION)
-    .build
-    val secondDTID = DynamicTransformID.newBuilder
-    .setName("illustrative")
-    .setFromType(ProteusType.PERSON)
-    .build
-    val overloadedDTID = DynamicTransformID.newBuilder
-    .setName("weird")
-    .setFromType(ProteusType.PAGE)
-    .build	
-    
-    return List(firstDTID, secondDTID, overloadedDTID)
-  }
-  
   def supportsType(ptype: ProteusType) : Boolean = true
-  def supportsDynTransform(dtID: DynamicTransformID) : Boolean = getDynamicTransforms.contains(dtID)
   
   // Internal Utility Methods
   // TODO(irmarc): Can we declare these private in bulk somehow?
@@ -179,13 +161,13 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
   
   def genRandCoordinates : Coordinates = {
     val left = Random.nextInt(500)
-    val up = Random.nextInt(500)
+    val top = Random.nextInt(500)
     
     return Coordinates.newBuilder
     .setLeft(left)
-    .setUp(up)
+    .setTop(top)
     .setRight(left + Random.nextInt(500) + 10)
-    .setDown(up + Random.nextInt(500) + 10)
+    .setBottom(top + Random.nextInt(500) + 10)
     .build
   }
   
@@ -279,20 +261,10 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
     return genSimpleRandomResponse(ProteusType.LOCATION, transform.getParams.getNumRequested)
   }
   
-  override def runDynamicTransform(transform: DynamicTransform) : SearchResponse = {
-    if (!getDynamicTransforms.contains(transform.getTransformId)) {
-      // This indicates a bug in the routing from the librarian
-      return SearchResponse.newBuilder
-      .setError("Error in runDynamicTransform: Unsupported transformation: " + 
-    		transform.getTransformId + " " + transform.getTransformId.getFromType.getValueDescriptor.getName)
-      .build
-    } else {
-      return genSimpleRandomResponse(ProteusType.valueOf(Random.nextInt(numProteusTypes)), 
-    				     transform.getParams.getNumRequested)
-    }
-  }
-  
-  override def lookup(access_id: AccessIdentifier, proteus_type: ProteusType) : ProteusObject = {
+  // This method creates randomly generated objects (as ProteusObject messages) 
+  // in response to Lookup messages.
+  override def retrieveResource(access_id: AccessIdentifier, 
+				proteus_type: ProteusType) : ProteusObject = {
     val result = ProteusObject.newBuilder
     if (accessID.getResourceId != getResourceKey) {
       return result

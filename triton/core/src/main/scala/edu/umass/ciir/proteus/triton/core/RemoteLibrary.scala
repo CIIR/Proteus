@@ -33,10 +33,10 @@ class RemoteLibrary(details: ConnectLibrary) extends ProteusAPI {
   def supportsType(ptype: ProteusType): Boolean = details.getSupportedTypesList.asScala.contains(ptype)
   def supportsDynTransform(dtID: DynamicTransformID): Boolean = details.getDynamicTransformsList.asScala.contains(dtID)
   
-  // Forward a message to the remote actor (meaning that supposedly, it will reply directly to the client)
-  def forwardMessage(message: Any, channel: UntypedChannel) {
-    // When the akka bug is fixed we can instead do: client forward message
-    client ? message onResult { case r => channel ! r }
+  // Forward a message to the remote actor. The sender is unchanged, so the
+  // receiving actor can reply directly to the original sender.
+  def forward(message: Any) : Unit = client.forward(message)
+
   }
 }
 
