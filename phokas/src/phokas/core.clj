@@ -1,14 +1,13 @@
 (ns phokas.core
   ^{:author "David Smith"}
   (:require [clojure.string :as s]
+            [clojure.set]
 	    [clojure.java.io :as jio]
-	    [clojure.contrib.zip-filter :as zf]
-	    [clojure.zip :as zip]
-	    [clojure.xml :as xml])
-  (:use [clojure.contrib.command-line]
-	[clojure.contrib.lazy-xml :only (parse-seq parse-trim)]
-	[clojure.contrib.zip-filter.xml :as zx]
-	[ciir.utils])
+	    [clojure.data.zip :as zf]
+	    [clojure.zip :as zip])
+  (:use [clojure.tools.cli]
+	[clojure.data.xml :only (source-seq parse-str)]
+	[clojure.data.zip.xml]	[ciir.utils])
   (:import (java.io File BufferedInputStream InputStreamReader
 		    BufferedReader PushbackReader)
 	   (java.util ArrayList Properties)
@@ -17,17 +16,10 @@
 	   (edu.stanford.nlp.util ArrayCoreMap)
 	   (edu.stanford.nlp.ling CoreLabel
 				  CoreAnnotations$TokensAnnotation
-				  CoreAnnotations$SentencesAnnotation
-				  CoreAnnotations$PartOfSpeechAnnotation
-				  CoreAnnotations$NamedEntityTagAnnotation
-				  CoreAnnotations$LemmaAnnotation
-				  CoreAnnotations$TextAnnotation
-				  CoreAnnotations$BeforeAnnotation
-				  CoreAnnotations$AfterAnnotation
-				  CoreAnnotations$CurrentAnnotation
-				  CoreAnnotations$CharacterOffsetBeginAnnotation
-				  CoreAnnotations$CharacterOffsetEndAnnotation))
+				  CoreAnnotations$SentencesAnnotation))
   (:gen-class))
+
+(set! *warn-on-reflection* true)
 
 (defn gzresource
   [rname]
@@ -35,20 +27,20 @@
       ClassLoader/getSystemResourceAsStream
       BufferedInputStream. GZIPInputStream. InputStreamReader. BufferedReader.))
 
-(def *clobber?* true)
+(def ^:dynamic *clobber?* true)
 
-(def *language* "eng")
+(def ^:dynamic *language* "eng")
 
-(def *languages* #{"eng" "fre" "ger" "ita" "lat"})
+(def ^:dynamic *languages* #{"eng" "fre" "ger" "ita" "lat"})
 
-(def *lang-map* {"English" "eng",
-                 "French" "fre", "Français" "fre", "fra" "fre",
-                 "German" "ger",
-		 "Latin" "lat", "Italian" "ita", "Spanish" "spa"})
+(def ^:dynamic *lang-map* {"English" "eng",
+                           "French" "fre", "Français" "fre", "fra" "fre",
+                           "German" "ger",
+                           "Latin" "lat", "Italian" "ita", "Spanish" "spa"})
 
-(def *dict* (-> "dict/words.eng.gz"
-                gzresource
-		line-seq set))
+(def ^:dynamic *dict* (-> "dict/words.eng.gz"
+                          gzresource
+                          line-seq set))
 
 (defn read-stopwords
   [s]
@@ -58,40 +50,40 @@
 	       (assoc-in %1 [lang w] (Double/parseDouble p)))
 	    {} lines)))
 
-(def *stopwords* (-> "langid/stopwords.tab" ClassLoader/getSystemResourceAsStream read-stopwords))
+(def ^:dynamic *stopwords* (-> "langid/stopwords.tab" ClassLoader/getSystemResourceAsStream read-stopwords))
 
-(def *lang-annotators*)
-(def *annotators*)
+(def ^:dynamic *lang-annotators*)
+(def ^:dynamic *annotators*)
 
 ;; TODO: PTBLexer includes americanize in the ptb3Escaping
 ;; options. Annoyingly, it processes options in a sorted set order, so
 ;; we have to include all the ptb3Escaping options piecemeal without
 ;; americanize.
 
-(def *ssplitter*
+(def ssplitter
      (edu.stanford.nlp.pipeline.WordsToSentencesAnnotator. false))
 
-(def *lemmatizer* (edu.stanford.nlp.pipeline.MorphaAnnotator. false))
+(def ^:dynamic *lemmatizer* (edu.stanford.nlp.pipeline.MorphaAnnotator. false))
 
-(def *name-keepers* #{"PERSON" "LOCATION" "ORGANIZATION" "MISC" "MONEY"})
+(def ^:dynamic *name-keepers* #{"PERSON" "LOCATION" "ORGANIZATION" "MISC" "MONEY"})
 
 ;; Maybe we should just use some other unicode character for backslashes.
-(def *escapes* {\< "&lt;", \> "&gt;", \& "&amp;", \" "&quot;", \' "&apos;"
-		;;\\ "backslashesareinescapable"}
-		\\ "\u2216"		; set minus
-		})
+(def escapes {\< "&lt;", \> "&gt;", \& "&amp;", \" "&quot;", \' "&apos;"
+              ;;\\ "backslashesareinescapable"}
+              \\ "\u2216"		; set minus
+              })
 
 (defn dj-pages
   [events]
-  (partition-when #(and (= (% :name) :MAP)
-			(= (% :type) :end-element))
+  (partition-when #(and (= (:name %) :MAP)
+			(= (:type %) :end-element))
 		  events))
 
 (defn dj-tags
   [s]
   (let [freqs (->> s
-		   (filter #(= (% :type) :characters))
-		   (map #(% :str))
+		   (filter #(= (:type %) :characters))
+		   (map :str)
 		   (frequencies))
 	googles (or (freqs "Google") 0)]
     (if (>= googles 3)
@@ -106,24 +98,24 @@
        (filter
 	not-empty
 	(map
-	 #(case (% :type)
+	 #(case (:type %)
 		:start-element
-		(case (% :name)
+		(case (:name %)
 		      :OBJECT (str "<pb n=\""
-				   (nth (re-find #"_0*(\d+).djvu$" ((% :attrs) :usemap)) 1)
+				   (nth (re-find #"_0*(\d+).djvu$" ((:attrs %) :usemap)) 1)
 				   "\" />")
 		      :PAGECOLUMN "<cb />"
 		      :LINE "<lb />"
 		      :PARAGRAPH "<p>"
-		      :WORD (str "<w coords=\"" ((% :attrs) :coords) "\">")
+		      :WORD (str "<w coords=\"" ((:attrs %) :coords) "\">")
 		      nil)
 		:end-element
-		(case (% :name)
+		(case (:name %)
 		      :LINE "\n"
 		      :PARAGRAPH "</p>\n"
 		      :WORD "</w> "
 		      nil)
-		:characters (s/escape (% :str) *escapes*))
+		:characters (s/escape (:str %) escapes))
 	 s))))))
 
 (defn no-tags
@@ -168,7 +160,7 @@
       (s/replace #"&dollar;" "\\$")))
 
 (defn- ssplit-body
-  [para ann]
+  [^String para ^Annotation ann]
   (let [[pref & wspans] (s/split para #"<w ")]
     (if (empty? wspans) para
 	(loop [res pref
@@ -197,7 +189,7 @@
 	      words (map #(nth % 2) wspans)
 	      ann (Annotation. (s/join " " words))]
 	  (.annotate (*annotators* :tokenizer) ann)
-	  (.annotate *ssplitter* ann)
+	  (.annotate ssplitter ann)
 	  (->>
 	   (.get ann CoreAnnotations$TokensAnnotation)
 	   (partition-all 2 1)
@@ -218,7 +210,7 @@
 ;;; Some ugly private functions to interface with Stanford Core NLP
 ;;; Java annotation objections.
 
-(defn- make-core-labels
+(defn- ^Annotation make-core-labels
   [x]
   (doto (Annotation. (s/join " " x))
     (.set CoreAnnotations$TokensAnnotation
@@ -243,16 +235,16 @@
 
 (defn- make-tree-labels
   [sen]
-  (let [a (map #(:attrs %) (xml-> sen :w zip/node))
-	stext (s/join " " (map #(% :form) a))
+  (let [a (map :attrs (xml-> sen :w zip/node))
+	stext (s/join " " (map :form a))
 	toks
 	(ArrayList. [(doto (Annotation. stext)
 		       (.set CoreAnnotations$TokensAnnotation
 			     (map #(doto (CoreLabel.)
-				     (.setDocID (% :coords))
-				     (.setWord (% :form))
-				     (.setTag (% :type))
-				     (.setLemma (% :lemma)))
+				     (.setDocID (:coords %))
+				     (.setWord (:form %))
+				     (.setTag (:type %))
+				     (.setLemma (:lemma %)))
 				  a)))])]
     (doto (Annotation. stext)
       (.set CoreAnnotations$SentencesAnnotation toks)
@@ -289,7 +281,7 @@
 	names (map #(get-phrase (:id %) words kids true) props)]
     (map-str
      #(str "<rs type=\"MISC\""
-	   " name=\"" (s/escape (s/join " " (map :form %)) *escapes*) "\""
+	   " name=\"" (s/escape (s/join " " (map :form %)) escapes) "\""
 	   " coords=\"" (s/join "|" (map :coords %)) "\"></rs>")
      names)))
 
@@ -298,8 +290,7 @@
   (let [tags (->
 	      ;; Wrap in dummy tags to allow stuff before or after main <p>.
 	      (str "<text>" para "</text>")
-	      java.io.StringReader.
-	      parse-trim
+	      parse-str
 	      zip/xml-zip
 	      (xml-> :p :s)
 	      (#(map ner-sen %)))]
@@ -311,13 +302,12 @@
   [para]
   (let [tags (->
 	      (str "<text>" para "</text>")
-	      java.io.StringReader.
-	      parse-trim
+	      parse-str
 	      zip/xml-zip
 	      (xml-> :p :s))]
     para))
 
-(defn dc-fix
+(defn ^String dc-fix
   [dc-string]
   (-> dc-string
       (s/replace
@@ -328,7 +318,7 @@
 
 (defn dc-language
   [dc-string]
-  (let [mt (zip/xml-zip (parse-trim (java.io.StringReader. dc-string)))]
+  (let [mt (zip/xml-zip (parse-str dc-string))]
     (xml1-> mt :language text)))
 
 (defn ^String local-language
@@ -441,7 +431,7 @@
 ;;                                   (s/replace (nth orig 2)
 ;;                                              #" lemma=\"[^\"]+\" "
 ;;                                              (str " lemma=\""
-;;                                                   (s/escape lemma *escapes*)
+;;                                                   (s/escape lemma escapes)
 ;;                                                   "\" "))
 ;;                                   "</w>"))
 ;;                            wspans lems))
@@ -463,7 +453,7 @@
 			     (str (nth orig 1)
 				  "<w"
 				  " head=\"" head "\""
-				  " deprel=\"" (s/escape deprel *escapes*) "\" "
+				  " deprel=\"" (s/escape deprel escapes) "\" "
 				  (nth orig 2) "</w>"))
 			   wspans heads deprels))
 	       (last wsegs))))))
@@ -503,9 +493,9 @@
 (defn dj-words
   [s]
   (->> s
-       parse-seq
-       (filter #(= (% :type) :characters))
-       (map #(% :str))
+       source-seq
+       (filter #(= (:type %) :characters))
+       (map :str)
        (frequencies)))
 
 (defn dj-paras
@@ -513,7 +503,7 @@
   tagged words."
   [s]
   (->> s
-      parse-seq
+      source-seq
       dj-pages
       (map dj-tags)
       (map proc-page)
@@ -527,7 +517,7 @@
 (defn ocrml-words
   [s]
   (->> s
-       parse-seq
+       source-seq
        (filter #(and (= (:name %) :word)
 		     (= (:type %) :start-element)))
        (map #(:val (:attrs %)))
@@ -535,8 +525,8 @@
 
 (defn ocrml-sections
   [events]
-  (partition-when #(and (= (% :name) :section)
-			(= (% :type) :end-element))
+  (partition-when #(and (= (:name %) :section)
+			(= (:type %) :end-element))
 		  events))
 
 (defn ocrml-tags
@@ -547,21 +537,21 @@
      (filter
       not-empty
       (map
-       #(case (% :type)
+       #(case (:type %)
 	      :start-element
 	      (let [attrs (:attrs %)]
-		(case (% :name)
+		(case (:name %)
 		      :section (case label
 				     "SEC_HEADER" "<fw place=\"top\">"
 				     "SEC_FOOTER" "<fw place=\"bottom\">"
 				     "<p>")
 		      :page (str "<pb n=\"" (:key attrs) "\" />")
 		      :line "<lb />"
-		      :word (str "<w coords=\"" (s/join "," (map (partial get attrs) [:l :t :w :h])) "\">" (s/escape (:val attrs) *escapes*))
+		      :word (str "<w coords=\"" (s/join "," (map (partial get attrs) [:l :t :w :h])) "\">" (s/escape (:val attrs) escapes))
 		      :marker (str "<marker" (map-str (fn [x] (str " " (name (first x)) "=\"" (second x) "\"")) attrs) " />")
 		      nil))
 	      :end-element
-	      (case (% :name)
+	      (case (:name %)
 		    :section (case label
 				   "SEC_HEADER" "</fw>"
 				   "SEC_FOOTER" "</fw>"
@@ -571,7 +561,7 @@
 		    :page "<pb />"
 		    ;; :marker "</marker>"
 		    nil)
-	      :characters (s/escape (% :str) *escapes*))
+	      :characters (s/escape (:str %) escapes))
        s)))))
 
 (defn ocrml-page
@@ -587,7 +577,7 @@
   "Transform OCRML markup into a sequence of TEI paragraphs."
   [s]
   (->> s
-       parse-seq
+       source-seq
        ocrml-sections
        (map-str ocrml-tags)
        (#(s/split % #"<pb />"))
@@ -606,7 +596,7 @@
   [paridx text]
   (str "<p>"
        (-> text
-	   (s/escape *escapes*)
+	   (s/escape escapes)
 	   (s/replace #"\$" "&dollar;")
 	   (partition-str #"[ \n_]+")
 	   (#(map-indexed (fn [idx w]
@@ -640,7 +630,7 @@
        (flatten)
        (frequencies)))
 
-(defn annotate-para
+(defn ^String annotate-para
   "Perform linguistic annotation on a paragraph."
   [para]
   (let [lang (or (local-language (re-find #"<p(?: [^>]+)?>" para)) *language*)
@@ -670,7 +660,8 @@
 	      false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")
 	     :tagger
 	     (edu.stanford.nlp.pipeline.POSTaggerAnnotator.
-	      DefaultPaths/DEFAULT_POS_MODEL false 500)
+              "edu/stanford/nlp/models/pos-tagger/wsj3t0-18-left3words/left3words-distsim-wsj-0-18.tagger"
+	      false 500)
 	     :parser
 	     (parser.Parser/pretrained)
 	     :name-deps #{"NAME" "TITLE"}
@@ -774,7 +765,7 @@
   Return the path to the output file.  If an exception is encountered,
   remove the output file and return the empty string."
 
-  [ipath]
+  [^String ipath]
   (let [ifile (File. ipath)
 	idir (.getParent ifile)
 	bid (second (re-find #"^(.*)_ocrml.xml$" (.getName ifile)))
@@ -786,15 +777,14 @@
       ""
       (try
 	(let [metadata (-> mfile bzreader slurp (s/replace #"^<\?xml [^>]+\?>\n*" "") dc-fix)
-	      file-read jio/reader
 	      para-seq ocrml-paras
-	      raw-counts (with-open [in (file-read ipath)] (ocrml-words in))
+	      raw-counts (with-open [in (jio/reader ipath)] (ocrml-words in))
 	      lang *language*]
 	  (with-bindings {#'*lang-annotators* {lang (init-annotators lang)}
 			  #'*dict* (clojure.set/union
 				    *dict*
 				    (set (filter #(re-find #"^[A-Za-z]+$" %) (keys raw-counts))))}
-	    (with-open [in (file-read ipath)
+	    (with-open [in (jio/reader ipath)
 			out (-> ofile java.io.FileOutputStream. GZIPOutputStream. jio/writer)]
 	      (.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TEI>\n")
 	      (.write out metadata)
@@ -821,7 +811,7 @@
   Return the path to the output file.  If an exception is encountered,
   remove the output file and return the empty string."
 
-  [ipath]
+  [^String ipath]
   (let [ifile (File. ipath)
 	idir (.getParent ifile)
 	bid (.getName (File. idir))
@@ -836,7 +826,7 @@
 	      encoding (if (re-find #"-8\." (.getName ifile)) "ISO-8859-1" "UTF-8")
 	      file-read #(jio/reader (if (re-find #"\.bz2$" %) (bzreader %) %) :encoding encoding)
 	      para-seq (if (re-find #"gut$" bid) gut-paras dj-paras)
-	      raw-counts (with-open [in (file-read ipath)]
+	      raw-counts (with-open [in ^BufferedReader (file-read ipath)]
 	      		   (if (re-find #"gut$" bid)
 	      		     (gut-words in)
 	      		     (dj-words in)))
@@ -855,7 +845,7 @@
 			    #'*dict* (clojure.set/union
 				      *dict*
 				      (set (filter #(re-find #"^[A-Za-z]+$" %) (keys raw-counts))))}
-	      (with-open [in (file-read ipath)
+	      (with-open [in ^BufferedReader (file-read ipath)
 			  out (-> ofile java.io.FileOutputStream. GZIPOutputStream. (jio/writer :encoding "UTF-8"))]
 		(.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TEI>\n")
 		(.write out metadata)
@@ -878,12 +868,18 @@
 	(dj-convert-file tname)))))
 
 (defn -main [& args]
-  (with-command-line args
-    "IA book converter"
-    [[clobber? c? "Clobber existing files" false]
-     remaining]
-    (binding [*clobber?* clobber?]
-      (if (empty? remaining) (dj-convert-file-list (-> System/in java.io.InputStreamReader. java.io.BufferedReader. line-seq))
-          (doseq [ff remaining]
-            (with-open [in (gzreader ff)]
-              (dj-convert-file-list (line-seq in))))))))
+  "IA book converter"
+  (let [[options remaining banner]
+        (cli args
+             ["-c" "--clobber" "Clobber existing files" :default false :flag true]
+             ["-h" "--help" "Show help" :default false :flag true])]
+    (when (:help options)
+      (println banner)
+      (System/exit 0))
+    (binding [*clobber?* (:clobber options)]
+      (if (empty? remaining)
+        (dj-convert-file-list
+         (-> System/in InputStreamReader. BufferedReader. line-seq))
+        (doseq [ff remaining]
+          (with-open [in (gzreader ff)]
+            (dj-convert-file-list (line-seq in))))))))
