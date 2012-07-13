@@ -4,7 +4,7 @@ seq(PB.protobufSettings: _*)
 
 javaSource in PB.protobufConfig <<= (sourceDirectory in Compile)(_ / "generated")
 
-version in PB.protobufConfig := "2.3.0"
+version in PB.protobufConfig := "2.4.1"
 
 name := "triton-core"
 
@@ -28,13 +28,9 @@ resolvers ++= Seq(
 // when using the sbt web app plugin 0.2.4+, use "container" instead of "jetty" for the context
 // Customize any further dependencies as desired
 libraryDependencies ++= Seq(
-  "se.scalablesolutions.akka" % "akka-actor" % "1.3.1" % "compile",
-  "se.scalablesolutions.akka" % "akka-slf4j" % "1.3.1",
-  "se.scalablesolutions.akka" % "akka-remote" % "1.3.1",
-  "se.scalablesolutions.akka" % "akka-camel" % "1.3.1",
-  "se.scalablesolutions.akka" % "akka-typed-actor" % "1.3.1",
-  "se.scalablesolutions.akka" % "akka-stm" % "1.3.1",
-  "se.scalablesolutions.akka" % "akka-camel-typed" % "1.3.1"
+  "com.typesafe.akka" % "akka-actor" % "2.0.2" % "compile",
+  "com.typesafe.akka" % "akka-slf4j" % "2.0.2",
+  "com.typesafe.akka" % "akka-remote" % "2.0.2"
 )
 
 publishArtifact in Compile := true

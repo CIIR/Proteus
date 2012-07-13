@@ -1,5 +1,11 @@
 package edu.umass.ciir.proteus.triton.core
 
+import akka.dispatch._
+import akka.actor.Actor._
+import akka.actor.Actor
+import edu.umass.ciir.proteus.protocol.ProteusProtocol._
+import scala.collection.JavaConverters._
+
 // Connection management for the librarian. 
 trait LibrarianConnectionManagement extends RandomDataGenerator with ProteusAPI { this: Actor =>  
   // Hashmaps for quickly looking up the library/endpoint from its key
@@ -67,27 +73,26 @@ trait LibrarianConnectionManagement extends RandomDataGenerator with ProteusAPI 
       case 0 => 
 	chan ! (SearchResponse.newBuilder
     		.setError("No library support for this operation...")
-    		.build) 
-    } else if (members.length == 1) {
-      libraries(members(0)).forward(message)
-    } else {
-      // All the re-ordering code for reassembling the multiple responses should go here
-      // First send the message to all the libraries, and get the Future result
-      val futureList = members.map(id => (libraries(id).client ? message).mapTo[SearchResponse])
-      // Next, combine these results into a single future over a list of search results
-      val resultsList = Futures.fold(List[SearchResult]())(futureList)((a: List[SearchResult], b: SearchResponse) => b.getResultsList.asScala.toList ::: a)
-      // Finally, turn this into a SearchResponse and return it.
-      val final_result = resultsList
-      .map(srList => SearchResponse.newBuilder.addAllResults(srList.asJava).build)
-      .recover {
-	case _ => SearchResponse.newBuilder
-	.setError("Error in responses from libraries...")
-	.build
-      }.get
-      chan ! final_result
-    }
-  }	
-  
+    		.build)
+      case 1 => libraries(members(0)).forward(message)
+      case _ => {
+	// All the re-ordering code for reassembling the multiple responses should go here
+	// First send the message to all the libraries, and get the Future result
+	val futureList = members.map(id => (libraries(id).client ? message).mapTo[SearchResponse])
+	// Next, combine these results into a single future over a list of search results
+	val resultsList = Futures.fold(List[SearchResult]())(futureList)((a: List[SearchResult], b: SearchResponse) => b.getResultsList.asScala.toList ::: a)
+	// Finally, turn this into a SearchResponse and return it.
+	val final_result = resultsList
+	.map(srList => SearchResponse.newBuilder.addAllResults(srList.asJava).build)
+	.recover {
+	  case _ => SearchResponse.newBuilder
+	  .setError("Error in responses from libraries...")
+	  .build
+	}.get
+	chan ! final_result
+      }
+    }	
+  }
   
   // Get the libraries which belong to groupId and support ptype
   protected def groupMemberTypeSupport(ptype: ProteusType, groupId: String) : List[String] = {

@@ -2,10 +2,8 @@
 package edu.umass.ciir.proteus.triton.core
 
 import akka.actor.Actor._
-import akka.actor.UntypedChannel
 import akka.actor.Actor
 import akka.actor.ActorRef
-import akka.config.Supervision._
 import akka.dispatch._
 import scala.collection.JavaConverters._
 
@@ -52,15 +50,10 @@ trait LibrarianQueryManagement { this: Actor =>
     
     case trans: NearbyLocationsTransform =>
       val members = groupMemberTypeSupport(ProteusType.LOCATION, getLibrary(trans.getId.getResourceId).getGroupId)
-    sendOrForwardTo(members, trans, self.channel)
-    
-    case dtrans: DynamicTransform =>
-      val members = groupMemberDynTransSupport(dtrans.getTransformId, getLibrary(dtrans.getId.getResourceId).getGroupId)
-    sendOrForwardTo(members, dtrans, self.channel)
+    sendOrForwardTo(members, trans, self.channel)    
   }
     	  			
   // Methods this trait relies upon that must be implemented in another trait/class
-  protected def groupMemberDynTransSupport(dtID: DynamicTransformID, groupId: String) : List[String]
   protected def typeSupport(ptypes: List[ProteusType]) : List[String]
   protected def groupMemberTypeSupport(ptype: ProteusType, groupId: String) : List[String]
   protected def sendOrForwardTo(members: List[String], message: Any, chan: UntypedChannel)

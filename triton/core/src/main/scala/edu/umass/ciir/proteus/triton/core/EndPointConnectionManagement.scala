@@ -1,3 +1,13 @@
+package edu.umass.ciir.proteus.triton.core
+
+import akka.actor.Actor._
+import akka.actor.Actor
+import akka.actor.ActorRef
+import akka.dispatch._
+import scala.collection.JavaConverters._
+
+import edu.umass.ciir.proteus.protocol.ProteusProtocol._
+
 // Trait for providing connection management for the end points of the system.
 // It is mainly responsible for sending a connection message to the librarian.
 trait EndPointConnectionManagement { this: Actor =>
@@ -6,7 +16,6 @@ trait EndPointConnectionManagement { this: Actor =>
   def serverPort : Int
   def proteus_service_name : String
   def getSupportedTypes : List[ProteusType]
-  def getDynamicTransforms : List[DynamicTransformID]
   
   var connection : ConnectLibrary // This gets set elsewhere
 	
@@ -17,7 +26,6 @@ trait EndPointConnectionManagement { this: Actor =>
     .setPort(serverPort)
     .setGroupId(serverGroupID)
     .addAllSupportedTypes(getSupportedTypes.asJava)
-    .addAllDynamicTransforms(getDynamicTransforms.asJava)
     .build
   }
     

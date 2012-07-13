@@ -3,6 +3,14 @@
 // be implemented elsewhere.
 package edu.umass.ciir.proteus.triton.core
 
+import akka.actor.Actor._
+import akka.actor.Actor
+import akka.actor.ActorRef
+import akka.dispatch._
+import scala.collection.JavaConverters._
+
+import edu.umass.ciir.proteus.protocol.ProteusProtocol._
+
 trait EndPointQueryManagement { 
   this: Actor =>
     // If your end point does not support direct searches, 

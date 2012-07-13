@@ -21,7 +21,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 	    language: String = "en") : Future[SearchResponse] = {
     // Build the parts of the message
     val search_params = SearchParameters.newBuilder
-    .setNumRequested(num_requested)
+    .setNumResultsRequested(num_requested)
     .setStartAt(start_at)
     .setLanguage(language)
     .build
@@ -53,13 +53,13 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 					 id_type.getValueDescriptor.getName + ", " + 
 					 contents_type.getValueDescriptor.getName + ")")
     val search_params = SearchParameters.newBuilder
-    .setNumRequested(num_requested)
+    .setNumResultsRequested(num_requested)
     .setStartAt(start_at)
     .setLanguage(language)
     .build  
     
     val transform_message = ContentsTransform.newBuilder
-    .setId(id)
+    .setReferenceId(id)
     .setFromType(id_type)
     .setToType(contents_type)
     .setParams(search_params)
@@ -82,7 +82,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 					 id_type.getValueDescriptor.getName + ", " + 
 					 container_type.getValueDescriptor.getName + ")")    
     val transform_message = ContainerTransform.newBuilder
-    .setId(id)
+    .setReferenceId(id)
     .setFromType(id_type)
     .setToType(container_type)
     .build
@@ -150,13 +150,13 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 		  start_at: Int = 0, 
 		  language: String = "en") : Future[SearchResponse] = {
     val search_params = SearchParameters.newBuilder
-    .setNumRequested(num_requested)
+    .setNumResultsRequested(num_requested)
     .setStartAt(start_at)
     .setLanguage(language)
     .build  
     
     val transform_message = OverlapsTransform.newBuilder
-    .setId(id)
+    .setReferenceId(id)
     .setFromType(id_type)
     .setParams(search_params)
     .build
@@ -173,13 +173,13 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 			  start_at: Int = 0, 
 			  language: String = "en") : Future[SearchResponse] = {    
     val search_params = SearchParameters.newBuilder
-    .setNumRequested(num_requested)
+    .setNumResultsRequested(num_requested)
     .setStartAt(start_at)
     .setLanguage(language)
     .build  
     
     val transform_message = OccurAsObjTransform.newBuilder
-    .setId(id)
+    .setReferenceId(id)
     .setFromType(id_type)
     .setParams(search_params)
     .build
@@ -196,13 +196,13 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 			  start_at: Int = 0, 
 			  language: String = "en") : Future[SearchResponse] = {   
     val search_params = SearchParameters.newBuilder
-    .setNumRequested(num_requested)
+    .setNumResultsRequested(num_requested)
     .setStartAt(start_at)
     .setLanguage(language)
     .build  
     
     val transform_message = OccurAsSubjTransform.newBuilder
-    .setId(id)
+    .setReferenceId(id)
     .setFromType(id_type)
     .setParams(search_params)
     .build
@@ -219,13 +219,13 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 			   start_at: Int = 0, 
 			   language: String = "en") : Future[SearchResponse] = {    
     val search_params = SearchParameters.newBuilder
-    .setNumRequested(num_requested)
+    .setNumResultsRequested(num_requested)
     .setStartAt(start_at)
     .setLanguage(language)
     .build  
     
     val transform_message = OccurHasObjTransform.newBuilder
-    .setId(id)
+    .setReferenceId(id)
     .setFromType(id_type)
     .setParams(search_params)
     .build
@@ -242,13 +242,13 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 			    language: String = "en") : Future[SearchResponse] = {
     
     val search_params = SearchParameters.newBuilder
-    .setNumRequested(num_requested)
+    .setNumResultsRequested(num_requested)
     .setStartAt(start_at)
     .setLanguage(language)
     .build  
     
     val transform_message = OccurHasSubjTransform.newBuilder
-    .setId(id)
+    .setReferenceId(id)
     .setFromType(id_type)
     .setParams(search_params)
     .build
@@ -261,13 +261,13 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
 			 num_requested: Int = 30, start_at: Int = 0, language: String = "en") : Future[SearchResponse] = {
     
     val search_params = SearchParameters.newBuilder
-    .setNumRequested(num_requested)
+    .setNumResultsRequested(num_requested)
     .setStartAt(start_at)
     .setLanguage(language)
     .build  
     
     val transform_message = NearbyLocationsTransform.newBuilder
-    .setId(id)
+    .setReferenceId(id)
     .setRadiusMiles(radius)
     .setParams(search_params)
     .build
@@ -278,7 +278,7 @@ class LibrarianClient(libHostName: String, libPort: Int) extends ProteusAPI {
   /*** Lookup Methods ***/
   def lookup(result: SearchResult) : Future[ProteusObject] = {
     val lookup_message = Lookup.newBuilder
-    .setId(result.getId)
+    .setReferenceId(result.getId)
     .setType(result.getType)
     .build
     

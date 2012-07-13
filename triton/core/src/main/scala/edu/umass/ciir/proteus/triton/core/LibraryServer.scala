@@ -22,5 +22,4 @@ trait LibraryServer extends Actor with ProteusAPI {
   protected def queryManagement : Receive
   protected def lookupManagement : Receive 
   protected def supportsType(ptype: ProteusType) : Boolean
-  protected def supportsDynTransform(dtID: DynamicTransformID) : Boolean
 }

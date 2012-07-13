@@ -1,3 +1,24 @@
+// This protocol buffer definition makes heavy use of
+// nested message definition and composition to keep the
+// number of top level messages small:
+//
+// - AccessIdentifier
+// - RequestParameters
+// - SearchRequest
+// - SearchResponse
+// - LookupRequest
+// - LookupResponse
+// - TransformRequest
+// - TransformResponse
+// - ConnectToClient
+// - ConnectToProvider
+//
+// It also means the inner messages have implicit context.
+// Example: Coordinates are inside ProteusObject, as an object
+// can have coordinates, and now we can't have orphan coordinate
+// messages flying off into the ether. Subclassing is done via
+// composition (the specializations are optional submessages)
+
 option java_package = "edu.umass.ciir.proteus.protocol";
 
 // The Core Proteus Types
@@ -12,6 +33,8 @@ enum ProteusType {
   ORGANIZATION = 7;
 }
 
+// List atomic messages first
+
 // Information needed to access a specific resource item
 // This object represents a "unique identifier" in the
 // Proteus space.
@@ -19,16 +42,19 @@ message AccessIdentifier {
   // Identifier for the accessing a result, used for lookup of an object.
   required string identifier = 1;
 
+  // The type of this object
+  required ProteusType type = 2;
+
   // Indicates which library/resource this was pulled from.
-  optional string resource_id = 2;
+  optional string resource_id = 3;
 
   // Provide error messages for any object passing, 
   // lookup not found errors report here.
-  optional string error = 3;					
+  optional string error = 4;
 }
 
 // Parameters used in searching and transformations
-message SearchParameters {
+message RequestParameters {
   optional int32 num_results_requested = 1 [default = 100];
   optional int32 start_at = 2 [default = 0];
   // Restrict results to this language
@@ -40,61 +66,42 @@ message SearchParameters {
 message SearchRequest {
   required string raw_query = 1;
   repeated ProteusType types = 2;
-  optional SearchParameters params = 3;
+  optional RequestParameters params = 3;
 }
+
 
 // **** Response Type Messages ****
 // The response message to a search query
 message SearchResponse {
+
+  // Defines a single result item from a search query
+  message SearchResult {
+    required AccessIdentifier id = 1;
+    optional string title = 3;
+
+    // A chunk of text with optional highlighting of regions
+    message ResultSummary {
+      required string text = 1;
+      
+      // Defines a region in text
+      message TextRegion {
+	// Starting character index, inclusive.
+	required int32 start = 1;
+	
+	// Ending index, exclusive.
+	required int32 stop = 2; 
+      }
+      repeated TextRegion highlights = 2;
+    }
+    
+    optional ResultSummary summary = 4;
+    optional string img_url = 5;
+    optional string thumb_url = 6;
+    // URL for visiting the original data source for this item
+    optional string external_url = 7;
+  }
   repeated SearchResult results = 1;
   optional string error = 2;
-}
-
-// Defines a single result item from a search query
-message SearchResult {
-  required AccessIdentifier id = 1;			       
-  optional ProteusType type = 2 [default = COLLECTION];
-  optional string title = 3;
-  optional ResultSummary summary = 4;
-  optional string img_url = 5;
-  optional string thumb_url = 6;
-  // URL for visiting the original data source for this item
-  optional string external_url = 7;				
-}       
-
-// A chunk of text with optional highlighting of regions
-message ResultSummary {
-  required string text = 1;
-  repeated TextRegion highlights = 2;
-}
-
-// Defines a region in text
-message TextRegion {
-  // Starting character index, inclusive.
-  required int32 start = 1;
-  
-  // Ending index, exclusive.
-  required int32 stop = 2; 
-}
-
-message WeightedTerm {
-  required string term = 1;
-  optional double weight = 2 [default = 1.0];
-}
-
-// A list of string (term) : weight (frequency) pairs. Used for language models, and other things.
-message TermHistogram {	
-  repeated WeightedTerm terms = 1;
-}
-
-message WeightedDate {
-  required sint64 date = 1;
-  optional double weight = 2 [default = 1.0];
-}
-
-// A list of long values (dates) : weight (frequency) pairs. Used for date mentions, and other things.
-message LongValueHistogram {	
-  repeated WeightedDate dates = 1;
 }
 
 // **** Proteus Typed Data Structures ****
@@ -103,198 +110,153 @@ message LongValueHistogram {
 // optional messages
 message ProteusObject {
   required AccessIdentifier id = 1;
-  required ProteusType type = 2;
   optional string title = 3;
-  optional ResultSummary summary = 4;
+  optional string description = 4;
   optional string img_url = 5;
   optional string thumb_url = 6;
   optional string external_url = 7;	
 
   // Dates where this object was mentioned (e.g. a person)
   // or dates contained by this object (e.g. collection)
-  optional LongValueHistogram date_freq = 7;
-  optional TermHistogram language_model = 8;
-  optional string language = 9 [default = "en"];
+  // A list of long values (dates) : weight (frequency) pairs. Used for date mentions, and other things.
+  message LongValueHistogram {
+    message WeightedDate {
+      required sint64 date = 1;
+      optional double weight = 2 [default = 1.0];
+    }  
+    repeated WeightedDate dates = 1;
+  }
+  optional LongValueHistogram date_freq = 8;
+  
+  // A list of string (term) : weight (frequency) pairs. Used for language models, and other things.
+  message TermHistogram {	
+    message WeightedTerm {
+      required string term = 1;
+      optional double weight = 2 [default = 1.0];
+    }
+    repeated WeightedTerm terms = 1;
+  }
+  optional TermHistogram language_model = 9;
+  optional string language = 10 [default = "en"];
 
   // Each of the composed message types
   // Only one of these should be filled in for a given instance.
-  optional Collection collection = 10;
-  optional Page page = 11;
-  optional Picture picture = 12;
-  optional Video video = 13;
-  optional Audio audio = 14;
-  optional Person person = 15;
-  optional Location location = 16;
-  optional Organization organization = 17;
+
+  // Collection: Book, Newspaper, Website, etc. 
+  // (highest level container of data)
+  message Collection {	
+    optional sint64 publication_date = 1;
+    optional string publisher = 2;
+    optional string edition = 3;
+    optional int32 num_pages = 4;
+    repeated string creators = 5;
+  }
+  optional Collection collection = 11;
+
+  // Page: Page in a book, page of a newspaper, web page on a site, etc.
+  message Page {
+    optional string full_text = 1;
+    repeated string creators = 2;
+    optional int32 page_number = 3;
+  }
+  optional Page page = 12;
+
+  // Coordinates of something on a page
+  message Coordinates {
+    required int32 left = 1;
+    required int32 right = 2;
+    required int32 top = 3;
+    required int32 bottom = 4;
+  }
+
+  // Picture: Picture on a page, on a webpage, etc. 
+  // (There can be zero or more of these on a page)
+  message Picture {
+    optional string caption = 1;
+    optional Coordinates coordinates = 2;
+    repeated string creators = 3;
+  }
+  optional Picture picture = 13;
+
+  // Video: Video contained on a web page, or other page instance 
+  // (Zero or more per page)
+  message Video {
+    optional string caption = 1;
+    optional Coordinates coordinates = 2;
+    optional int32 length_in_seconds = 3;
+    repeated string creators = 4;
+  }
+  optional Video video = 14;
+
+  // Audio: Audio contained on a web page, or other page instance 
+  // (Zero or more per page)
+  message Audio {
+    optional string caption = 1;
+    optional Coordinates coordinates = 2;
+    optional int32 length = 3;
+    repeated string creators = 4;
+  }
+  optional Audio audio = 15;
+
+  // Person: A person entity mentioned on a page 
+  // (in text, picture, video, or audio)
+  message Person {
+    optional string full_name = 1;
+    repeated string alternate_names = 2;
+    optional string wiki_link = 3;
+    optional sint64 birth_date = 4;
+    optional sint64 death_date = 5;
+  }
+  optional Person person = 16;
+
+  // Location: A location entity mentioned on a page
+  message Location {
+    optional string full_name = 1;
+    repeated string alternate_names = 2 [packed=true];
+    optional string wiki_link = 3;
+    optional double longitude = 4;
+    optional double latitude = 5;
+  }
+  optional Location location = 17;
+
+  // Organization: An organization mentioned on a page
+  message Organization {
+    optional string full_name = 1;
+    repeated string alternate_names = 2 [packed=true];
+    optional string wiki_link = 3;
+  }
+  optional Organization organization = 18;
 }
 
-// Collection: Book, Newspaper, Website, etc. 
-// (highest level container of data)
-message Collection {	
-  optional sint64 publication_date = 1;
-  optional string publisher = 2;
-  optional string edition = 3;
-  optional int32 num_pages = 4;
-  repeated string creators = 5;
+message TransformRequest {
+  enum TransformType {
+    TO_CONTAINER = 0;
+    TO_CONTENTS = 1;
+    OVERLAP = 2;
+    OBJECT_OF = 3;
+    SUBJECT_OF = 4;
+    HAS_AS_OBJECT = 5;
+    HAS_AS_SUBJECT = 6;
+    GEOGRAPHIC_PROX = 7;
+  }
+  required TransformType transform_type = 1;
+  required AccessIdentifier reference_id = 2;
+  optional ProteusType target_type = 3;
+  optional RequestParameters params = 4;
+  // This is only used for *_OF and *_AS_* transforms 
+  optional string term = 5;
+  optional int32 radius_in_miles [default = 10] = 6;
 }
 
-// Page: Page in a book, page of a newspaper, web page on a site, etc.
-message Page {
-  optional string full_text = 1;
-  repeated string creators = 2;
-  optional int32 page_number = 3;
+message TransformResponse {
+  repeated ProteusObject objects = 1 [packed=true];
 }
 
-// Coordinates of something on a page
-message Coordinates {
-  required int32 left = 1;
-  required int32 right = 2;
-  required int32 top = 3;
-  required int32 bottom = 4;
+// Something to look up one or more objects
+message LookupRequest {
+  repeated AccessIdentifier id = 1 [packed=true];
 }
 
-// Picture: Picture on a page, on a webpage, etc. 
-// (There can be zero or more of these on a page)
-message Picture {
-  optional string caption = 1;
-  optional Coordinates coordinates = 2;
-  repeated string creators = 3;
-}
-
-// Video: Video contained on a web page, or other page instance 
-// (Zero or more per page)
-message Video {
-  optional string caption = 1;
-  optional Coordinates coordinates = 2;
-  optional int32 length_in_seconds = 3;
-  repeated string creators = 4;
-}
-
-// Audio: Audio contained on a web page, or other page instance 
-// (Zero or more per page)
-message Audio {
-  optional string caption = 1;
-  optional Coordinates coordinates = 2;
-  optional int32 length = 3;
-  repeated string creators = 4;
-}
-
-// Person: A person entity mentioned on a page 
-// (in text, picture, video, or audio)
-message Person {
-  optional string full_name = 1;
-  repeated string alternate_names = 2;
-  optional string wiki_link = 3;
-  optional sint64 birth_date = 4;
-  optional sint64 death_date = 5;
-}
-
-// Location: A location entity mentioned on a page
-message Location {
-  optional string full_name = 1;
-  repeated string alternate_names = 2;
-  optional string wiki_link = 3;
-  optional double longitude = 4;
-  optional double latitude = 5;
-}
-
-// Organization: An organization mentioned on a page
-message Organization {
-  optional string full_name = 1;
-  repeated string alternate_names = 2;
-  optional string wiki_link = 3;
-}
-
-// **** Remote Actor Messages / RPC Messages ****
-// Perform a distributed search: Returns SearchResponse
-message Search {
-  required SearchRequest search_query = 1;
-}
-
-// Get the container for this data resource: Returns SearchResponse (max length of 1), Only one step transforms allowed
-message ContainerTransform {
-  required AccessIdentifier id = 1;				     	// Look for a container for resource with this ID
-  optional ProteusType from_type = 2;						// The Proteus Type of this resource
-  optional ProteusType to_type = 3;						// What container type to be finding
-  optional SearchParameters params = 4;					// Parameters for the search
-}
-
-// Get the contents for this data resource: Returns SearchResponse, Only one step transforms allowed
-message ContentsTransform {
-  required AccessIdentifier id = 1;						// Search for all the contents of resource with this ID
-  optional ProteusType from_type = 2;						// Type of this resource
-  optional ProteusType to_type = 3;						// Which child type to return. (where applicable)
-  optional SearchParameters params = 4;					// Parameters for the search
-}
-
-// Find overlapping resources of the same type (Duplicates, Collections of Works, etc.)
-message OverlapsTransform {
-  required AccessIdentifier id = 1;
-  optional ProteusType from_type = 2;
-  optional SearchParameters params = 3;
-}
-
-// Find Pages where the person, location, or organization (specified by ID) occurs as an object of term
-message OccurAsObjTransform {
-  required AccessIdentifier id = 1;
-  optional ProteusType from_type = 2; // Must be person, location, or organization
-  optional string term = 3; // Term to look for occurrences as the object of
-  optional SearchParameters params = 4;
-}
-
-// Find Pages where the person, location, or organization (specified by ID) occurs as the subject of term
-message OccurAsSubjTransform {
-  required AccessIdentifier id = 1;
-  optional ProteusType from_type = 2;
-  optional string term = 3;
-  optional SearchParameters params = 4;
-}
-
-// Find Pages where the person, location, or organization (specified by ID) occurs having term as its object
-message OccurHasObjTransform {
-  required AccessIdentifier id = 1;
-  optional ProteusType from_type = 2;
-  optional string term = 3;
-  optional SearchParameters params = 4;
-}
-
-// Find Pages where the person, location, or organization (specified by ID) occurs having term as its subject
-message OccurHasSubjTransform {
-  required AccessIdentifier id = 1;
-  optional ProteusType from_type = 2;
-  optional string term = 3;
-  optional SearchParameters params = 4;
-}
-
-// Find Locations near the location given by ID
-message NearbyLocationsTransform {
-  required AccessIdentifier id = 1;
-  optional int32 radius_miles = 2 [default = 10];
-  optional SearchParameters params = 3;
-}	
-
-// A single 'lookup' RPC, carrying the id of the
-// resource to look up and its type.
-message Lookup {
-  required AccessIdentifier id = 1;
-  required ProteusType type = 2;
-}
-
-// **** Connection Related Messages ****
-
-// Sent by a library to the librarian telling it how to connect/use this library
-// No immediate response is expected, but once the library is added the first message sent will be LibraryConnected
-message ConnectLibrary {
-  required string hostname = 1;
-  optional int32 port = 2;
-  optional string group_id = 3;
-  optional string requested_key = 4;
-	
-  repeated ProteusType supported_types = 5;
-  repeated DynamicTransformID dynamic_transforms = 6;
-}
-
-message LibraryConnected {
-  optional string resource_id = 1;
-  optional string error = 2;
+message LookupResponse {
+  repeated ProteusObject objects = 1 [packed=true];
 }

@@ -5,7 +5,6 @@ package edu.umass.ciir.proteus.triton.core
 import akka.dispatch._
 import akka.actor.Actor._
 import akka.actor.Actor
-import akka.config.Supervision._
 import edu.umass.ciir.proteus.protocol.ProteusProtocol._
 import scala.collection.JavaConverters._
 

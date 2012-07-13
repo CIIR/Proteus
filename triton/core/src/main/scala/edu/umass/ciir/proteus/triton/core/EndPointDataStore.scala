@@ -1,7 +1,16 @@
+package edu.umass.ciir.proteus.triton.core
+
 /**
 * Abstract base class which contains abstract methods for all the methods that a data store (library/endpoint) trait 
 * needs to implement.
 */
+
+import akka.dispatch._
+import akka.actor.Actor._
+import akka.actor.Actor
+import edu.umass.ciir.proteus.protocol.ProteusProtocol._
+import scala.collection.JavaConverters._
+
 abstract trait EndPointDataStore {
   
   /** Methods Used Here and Elsewhere (MUST BE PROVIDED) **/
@@ -21,7 +30,7 @@ abstract trait EndPointDataStore {
   def runOccurHasObjTransform(transform: OccurHasObjTransform) : SearchResponse = unsupportedResponse("Occurrences having Object")  	
   def runOccurHasSubjTransform(transform: OccurHasSubjTransform) : SearchResponse  = unsupportedResponse("Occurrences having Subject")  	
   def runNearbyLocationsTransform(transform: NearbyLocationsTransform) : SearchResponse  = unsupportedResponse("Nearby Locations")
-  def lookup(access_id: AccessIdentifier, proteus_type: ProteusType) : ProteusObject = {
+  def lookup(accessID: AccessIdentifier, proteusType: ProteusType) : ProteusObject = {
     return ProteusObject.newBuilder
 	    .setId(AccessIdentifier.newBuilder
     		   .setIdentifier(accessID.getIdentifier)

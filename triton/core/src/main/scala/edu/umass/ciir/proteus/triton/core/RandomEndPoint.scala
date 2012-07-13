@@ -2,7 +2,6 @@ package edu.umass.ciir.proteus.triton.core
 
 import akka.actor.Actor
 import akka.actor.Actor._
-import akka.remoteinterface._
 import scala.collection.JavaConverters._
 import util.Random
 import edu.umass.ciir.proteus.protocol.ProteusProtocol._
@@ -116,7 +115,7 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
     
     val result = SearchResult.newBuilder
     .setId(accessID)
-    .setProteusType(ptype)
+    .setType(ptype)
     .setTitle("Title: " + genKey())
     .setSummary(generateRandomSummary)
     .setImgUrl(imgURLs(Random.nextInt(imgURLs.length)))
@@ -176,17 +175,17 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
     // For each type requested generate a random number of results
     val search_request = s.getSearchQuery
     val total_results = Random.shuffle(search_request.getTypesList.asScala
-  	  				    .map(t => genNRandomResults(t, Random.nextInt(search_request.getParams.getNumRequested)))
+  	  				    .map(t => genNRandomResults(t, Random.nextInt(search_request.getParams.getNumResultsRequested)))
   	  				    .flatten)
     
     return SearchResponse.newBuilder
-    .addAllResults(total_results.slice(0, search_request.getParams.getNumRequested).asJava)
+    .addAllResults(total_results.slice(0, search_request.getParams.getNumResultsRequested).asJava)
     .build
   }
   
   override def runContainerTransform(transform: ContainerTransform) : SearchResponse = {
     // Figure out what the correct container type is, then return a singleton response
-    val result = genNRandomResults(transform.getToType, Random.nextInt(transform.getParams.getNumRequested))
+    val result = genNRandomResults(transform.getToType, Random.nextInt(transform.getParams.getNumResultsRequested))
     
     return SearchResponse.newBuilder
     .addAllResults(result.asJava)
@@ -199,7 +198,7 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
       .setError("Error in runContentsTransform: Incompatible to/from proteus types")
       .build
     } else {
-      return genSimpleRandomResponse(transform.getToType, transform.getParams.getNumRequested)
+      return genSimpleRandomResponse(transform.getToType, transform.getParams.getNumResultsRequested)
     }
   }
   
@@ -209,14 +208,14 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
       case ProteusType.PERSON | ProteusType.LOCATION | ProteusType.ORGANIZATION => 
     	return SearchResponse.newBuilder.build // Empty, but no error
       case frmType: ProteusType => 
-    	return genSimpleRandomResponse(frmType, transform.getParams.getNumRequested)
+    	return genSimpleRandomResponse(frmType, transform.getParams.getNumResultsRequested)
     }
   }
   
   override def runOccurAsObjTransform(transform: OccurAsObjTransform) : SearchResponse = {
     transform.getFromType match {
       case ProteusType.PERSON | ProteusType.LOCATION | ProteusType.ORGANIZATION => 
-    	return genSimpleRandomResponse(ProteusType.PAGE, transform.getParams.getNumRequested)
+    	return genSimpleRandomResponse(ProteusType.PAGE, transform.getParams.getNumResultsRequested)
       
       // An example of an unsupported implimentationtransform on a supported type
       case _ => 
@@ -227,7 +226,7 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
   override def runOccurAsSubjTransform(transform: OccurAsSubjTransform) : SearchResponse  = {
     transform.getFromType match {
       case ProteusType.PERSON | ProteusType.LOCATION | ProteusType.ORGANIZATION => 
-    	return genSimpleRandomResponse(ProteusType.PAGE, transform.getParams.getNumRequested)
+    	return genSimpleRandomResponse(ProteusType.PAGE, transform.getParams.getNumResultsRequested)
       
       // An example of an unsupported transform on a supported type
       case _ => 
@@ -238,7 +237,7 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
   override def runOccurHasObjTransform(transform: OccurHasObjTransform) : SearchResponse = {
     transform.getFromType match {
       case ProteusType.PERSON | ProteusType.LOCATION | ProteusType.ORGANIZATION => 
-    	return genSimpleRandomResponse(ProteusType.PAGE, transform.getParams.getNumRequested)
+    	return genSimpleRandomResponse(ProteusType.PAGE, transform.getParams.getNumResultsRequested)
       
       // An example of an unsupported transform on a supported type
       case _ => 
@@ -249,7 +248,7 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
   override def runOccurHasSubjTransform(transform: OccurHasSubjTransform) : SearchResponse  = {
     transform.getFromType match {
       case ProteusType.PERSON | ProteusType.LOCATION | ProteusType.ORGANIZATION => 
-    	return genSimpleRandomResponse(ProteusType.PAGE, transform.getParams.getNumRequested)
+    	return genSimpleRandomResponse(ProteusType.PAGE, transform.getParams.getNumResultsRequested)
       
       // An example of an unsupported transform on a supported type
       case _ => 
@@ -258,13 +257,13 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
   }
   
   override def runNearbyLocationsTransform(transform: NearbyLocationsTransform) : SearchResponse  = {
-    return genSimpleRandomResponse(ProteusType.LOCATION, transform.getParams.getNumRequested)
+    return genSimpleRandomResponse(ProteusType.LOCATION, transform.getParams.getNumResultsRequested)
   }
   
   // This method creates randomly generated objects (as ProteusObject messages) 
   // in response to Lookup messages.
-  override def retrieveResource(access_id: AccessIdentifier, 
-				proteus_type: ProteusType) : ProteusObject = {
+  override def retrieveResource(accessID: AccessIdentifier, 
+				proteusType: ProteusType) : ProteusObject = {
     val result = ProteusObject.newBuilder
     if (accessID.getResourceId != getResourceKey) {
       return result
@@ -278,7 +277,7 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
     } else {
       result
       .setId(accessID)
-      .setTitle(accessID.getType.mkString + " : " + genKey())
+      .setTitle(accessID.toString + " : " + genKey())
       .setSummary(generateRandomSummary)
       .setImgUrl(imgURLs(Random.nextInt(imgURLs.length)))
       .setThumbUrl(thumbURLs(Random.nextInt(thumbURLs.length)))
@@ -289,8 +288,8 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
 
       // Use the proteus type to complete the message and return
       // the completed object.
-      return proteus_type match {
-	case COLLECTION => results
+      return proteusType match {
+	case ProteusType.COLLECTION => result
 	.setCollection(Collection.newBuilder
 		       .setPublicationDate(Random.nextLong)
 		       .setPublisher("Publishing house of Umass")
@@ -298,7 +297,7 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
 		       .setNumPages(Random.nextInt(2000) + 1)
 		       .build)
 	.build
-	case PAGE => results
+	case ProteusType.PAGE => result
 	.setPage(Page.newBuilder
 		 .setFullText(List.range(0, Random.nextInt(1000)+10).map(_ => genKey(Random.nextInt(13)+1)).mkString(" "))
 		 .addCreators("Logan Giorda")
@@ -306,7 +305,7 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
 		 .setPageNumber(Random.nextInt(1000))
 		 .build)
 	.build
-	case PICTURE => results
+	case ProteusType.PICTURE => result
 	.setPicture(Picture.newBuilder
 		    .setCaption("Caption: " + List.range(0, Random.nextInt(5)+1).map(_ => genKey(Random.nextInt(8)+1)).mkString(" "))
 		    .setCoordinates(genRandCoordinates)
@@ -314,16 +313,16 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
 		    .addCreators("Will Dabney")
 		    .build)
 	.build
-	case VIDEO => results
+	case ProteusType.VIDEO => result
 	.setVideo(Video.newBuilder
 		  .setCaption("Caption: " + List.range(0, Random.nextInt(5)+1).map(_ => genKey(Random.nextInt(8)+1)).mkString(" "))
 		  .setCoordinates(genRandCoordinates)
 		  .addCreators("Logan Giorda")
 		  .addCreators("Will Dabney")
-		  .setLength(Random.nextInt(5000))
+		  .setLengthInSeconds(Random.nextInt(5000))
 		  .build)
 	.build
-	case AUDIO => results
+	case ProteusType.AUDIO => result
 	.setAudio(Audio.newBuilder
 		  .setCaption("Caption: " + List.range(0, Random.nextInt(5)+1).map(_ => genKey(Random.nextInt(8)+1)).mkString(" "))
 		  .setCoordinates(genRandCoordinates)
@@ -332,7 +331,7 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
 		  .setLength(Random.nextInt(5000))
 		  .build)
 	.build
-	case PERSON => results
+	case ProteusType.PERSON => result
 	.setPerson(Person.newBuilder
 		   .setFullName(genKey().capitalize + " " + genKey().capitalize)
 		   .addAllAlternateNames(List.range(0, Random.nextInt(5)).map(_ => genKey().capitalize + " " + genKey().capitalize).asJava)
@@ -341,7 +340,7 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
 		   .setDeathDate(Random.nextLong)
 		   .build)
 	.build
-	case LOCATION => results
+	case ProteusType.LOCATION => result
 	.setLocation(Location.newBuilder
 		     .setFullName(genKey().capitalize + " " + genKey().capitalize)
 		     .addAllAlternateNames(List.range(0, Random.nextInt(5)).map(_ => genKey().capitalize + " " + genKey().capitalize).asJava)
@@ -350,7 +349,7 @@ trait RandomDataStore extends EndPointDataStore with RandomDataGenerator {
 		     .setLatitude((Random.nextDouble - 0.5) * 2.0 * 90.0)
 		     .build)
 	.build
-	case ORGANIZATION => results
+	case ProteusType.ORGANIZATION => result
 	.setOrganization(Organization.newBuilder
 			 .setFullName(genKey().capitalize + " " + genKey().capitalize)
 			 .setWikiLink(wikiLinks(Random.nextInt(wikiLinks.length)))

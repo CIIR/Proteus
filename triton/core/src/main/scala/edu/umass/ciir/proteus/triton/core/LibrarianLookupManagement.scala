@@ -2,10 +2,8 @@
 package edu.umass.ciir.proteus.triton.core
 
 import akka.actor.Actor._
-import akka.actor.UntypedChannel
 import akka.actor.Actor
 import akka.actor.ActorRef
-import akka.config.Supervision._
 import akka.dispatch._
 import scala.collection.JavaConverters._
 

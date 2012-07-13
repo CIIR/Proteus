@@ -1,10 +1,8 @@
 package edu.umass.ciir.proteus.triton.core
 
 import akka.actor.Actor._
-import akka.actor.UntypedChannel
 import akka.actor.Actor
 import akka.actor.ActorRef
-import akka.config.Supervision._
 import akka.dispatch._
 import scala.collection.JavaConverters._
 
@@ -29,15 +27,11 @@ class RemoteLibrary(details: ConnectLibrary) extends ProteusAPI {
   def getPort: Int = details.getPort.toInt
   def getGroupId: String = details.getGroupId
   def getSupportedTypes: List[ProteusType] = details.getSupportedTypesList.asScala.toList
-  def getDynamicTransforms: List[DynamicTransformID] = details.getDynamicTransformsList.asScala.toList
   def supportsType(ptype: ProteusType): Boolean = details.getSupportedTypesList.asScala.contains(ptype)
-  def supportsDynTransform(dtID: DynamicTransformID): Boolean = details.getDynamicTransformsList.asScala.contains(dtID)
   
   // Forward a message to the remote actor. The sender is unchanged, so the
   // receiving actor can reply directly to the original sender.
   def forward(message: Any) : Unit = client.forward(message)
-
-  }
 }
 
 
