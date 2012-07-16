@@ -4,6 +4,7 @@ import PlayProject._
 
 object ApplicationBuild extends Build {
 
+
     val appName         = "morpheus"
     val appVersion      = "1.0-SNAPSHOT"
 
@@ -11,8 +12,9 @@ object ApplicationBuild extends Build {
       // Add your project dependencies here,
     )
 
-    val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
-      // Add your own project settings here      
-    )
+  val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
+    // Add your own project settings here
+  )
+
 
 }

@@ -1,7 +1,14 @@
-@(message: String)
+@(posts: Seq[Post])
 
-@main("Welcome to Play 2.0") {
-    
-    @play20.welcome(message)
-    
+
+@main(Html("Proteus Search")) {
+
+<h2>Scala-generated list</h2>
+
+<ul>
+    @posts.map { post =>
+       <li>@post.title</li>
+    }
+</ul>
+
 }
