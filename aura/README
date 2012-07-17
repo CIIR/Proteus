@@ -1,0 +1,5 @@
+Required: sbt 0.11.2
+
+enter sbt console
+run "scrooge-gen"
+run "gen-idea" (if you want to use intellij, there are plugins for netbeans and eclipse out there too)
