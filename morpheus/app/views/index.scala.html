@@ -1,14 +1,15 @@
 @(posts: Seq[Post])
 
 
-@main(Html("Proteus Search")) {
+@main(Html("Proteus Search"), "super fun!") {
 
-<h2>Scala-generated list</h2>
+<h3>Scala-generated list</h3>
+<p></p>
 
-<ul>
+<ol>
     @posts.map { post =>
        <li>@post.title</li>
     }
-</ul>
+</ol>
 
 }
