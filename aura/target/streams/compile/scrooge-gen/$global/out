@@ -1,0 +1,4 @@
+[0m[[0minfo[0m] [0mGenerating scrooge thrift for /Users/logan.giorda/ciir-dev/lgiorda-proteus/Proteus-1/aura/src/main/thrift/hello.thrift, /Users/logan.giorda/ciir-dev/lgiorda-proteus/Proteus-1/aura/src/main/thrift/proteus.thrift ...[0m
+[0m[[0mdebug[0m] [0mjava -jar /Users/logan.giorda/ciir-dev/lgiorda-proteus/Proteus-1/aura/project/target/scrooge-2.5.4/scrooge-2.5.4.jar --finagle --ostrich --verbose   -d /Users/logan.giorda/ciir-dev/lgiorda-proteus/Proteus-1/aura/target/scala-2.9.1/src_managed/main/scala -s /Users/logan.giorda/ciir-dev/lgiorda-proteus/Proteus-1/aura/src/main/thrift/hello.thrift /Users/logan.giorda/ciir-dev/lgiorda-proteus/Proteus-1/aura/src/main/thrift/proteus.thrift[0m
+[0m[[0minfo[0m] [0m+ Compiling /Users/logan.giorda/ciir-dev/lgiorda-proteus/Proteus-1/aura/src/main/thrift/hello.thrift[0m
+[0m[[0minfo[0m] [0m+ Compiling /Users/logan.giorda/ciir-dev/lgiorda-proteus/Proteus-1/aura/src/main/thrift/proteus.thrift[0m
