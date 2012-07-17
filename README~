@@ -3,5 +3,3 @@ Triton - Backend search service that collects responses from multiple sharded se
 Pontus - Front-end web service written in the Lift web framework
 Temporal - Some exploratory work on temporal data mining 
 Phokas - Wrap book text in <strike>putrid sealskin</strike> TEI XML
-
-Morpheus - New front-end web service using the Play web framework
