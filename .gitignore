@@ -1,8 +1,10 @@
+*~
 target
 *.iml
 *.ipr
 *.iws
 /.idea
+/.idea_modules
 out
 lib_managed
 src_managed
