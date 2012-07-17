@@ -1,0 +1,24 @@
+.span12
+ .hero-unit
+  %h1 Welcome to Proteus
+  %p
+   This demonstration system automatically annotates, links,
+   indexes, and searches scanned books for text, pictures, and
+   named entities.  For more information,
+   see 
+   %a{:href => "http://books.cs.umass.edu/beta-sprint/"} our description of its architecture and functionality.
+  %p 
+   Try a few sample queries:
+   %ul
+    %li
+     %a{:href => "/search?q=Oneida"} Oneida
+     , particularly the related entities for a list of related names
+    %li
+     %a{:href => "/search?q=Tycho+Brahe"} Tycho Brahe
+     , particularly the pictures and the related entities
+    %li
+     %a{:href => "/search?q=&quot;liberal+arts&quot;"} "liberal arts"
+    %p 
+     or:
+     %a.btn.btn-primary.btn-large{:href => "/search" }
+      Let's start searching &raquo;

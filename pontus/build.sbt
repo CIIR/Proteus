@@ -4,7 +4,7 @@ version := "0.1"
 
 scalaVersion := "2.9.1" 
 
-seq(webSettings: _*)
+seq(webSettings :_*)
 
 // If using JRebel with 0.1.0 of the sbt web plugin
 //jettyScanDirs := Nil

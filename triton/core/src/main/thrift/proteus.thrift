@@ -1,21 +1,9 @@
-
-// - AccessIdentifier
-// - RequestParameters
 // - SearchRequest
 // - SearchResponse
 // - LookupRequest
 // - LookupResponse
 // - TransformRequest
 // - TransformResponse
-// - ConnectToClient
-// - ConnectToProvider
-//
-// It also means the inner messages have implicit context.
-// Example: Coordinates are inside ProteusObject, as an object
-// can have coordinates, and now we can't have orphan coordinate
-// messages flying off into the ether. Subclassing is done via
-// composition (the specializations are optional submessages)
-
 namespace java edu.umass.ciir.proteus.protocol
 
 // The Core Proteus Types
@@ -235,6 +223,7 @@ struct TransformRequest {
   4: optional RequestParameters params,
   // This is only used for *_OF and *_AS_* transforms 
   5: optional string term,
+  // Only used for the geographic proximity transform
   6: optional i32 radius_in_miles = 10,
 }
 

@@ -1,0 +1,31 @@
+-@ var pageResults : List[String] = List("a", "b", "c")
+-@ var bookResults : List[String] = List("a", "b", "c", "d", "e")
+-@ var peopleResults : List[String] = List("a", "b", "c", "e", "f", "g")
+-@ var locationResults : List[String] = List("a", "b", "c", "d")
+-@ var pictureResults : List[String] = List("a")
+
+.container-fluid
+ .row-fluid
+  .span3
+   .well.sidebar-nav
+    %ul.nav.nav-list
+     %li.nav-header Results For...
+     %li.active
+      %a{:href => "#"} Pages in Books (#{pageResults.size})
+     %li
+      %a{:href => "#"} Whole Books (#{bookResults.size})
+     %li
+      %a{:href => "#"} People (#{peopleResults.size})
+     %li
+      %a{:href => "#"} Places (#{locationResults.size})
+     %li
+      %a{:href => "#"} Pictures (#{pictureResults.size})
+
+  .span9
+   %table.table-bordered.table-striped
+    %tr
+     %td Result 1
+    %tr
+     %td Result 2
+    %tr
+     %td Result 3
