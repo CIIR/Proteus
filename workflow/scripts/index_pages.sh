@@ -1,4 +1,5 @@
 # Index Pages using galago and the specified tei file list
+echo "DONT ACTUALLY USE THIS. INDEX_BOOKS DOES PAGES AS WELL"
 echo "Indexing Pages.... ../../$1 to ../../$2"
 echo "galago build \
 --tokenizer/fields+object-title --tokenizer/fields+objecttype \

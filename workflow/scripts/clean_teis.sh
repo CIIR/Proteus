@@ -1,27 +1,29 @@
 #!/bin/bash
 
 f=`dirname $0`
+mkdir $f/../output
+mkdir $f/../output/mbteis
 mkdir $f/../$2
+mkdir $f/../output/logs
 
 # Call the program(s) to clean the fields of the TEI files in 'originals'
 echo "Clearing out old files in output/mbteis/cleaned/ ..."
 rm -rf $f/../${2}/*
+rm -rf $f/../output/logs/*
 
 echo "Cleaning TEI fields..."
 # Move entity name's into the RS tags so that tag-tokenizer can create fields from them:
-echo "Running build list"
-sh ${f}/build_tei_list.sh $1 ${f}/../${2}/teilist.list
-gunzip ${f}/../${2}/teilist.list.gz
+TEILIST=$1
 
-echo "List at ${f}/../${2}/teilist.list"
-counter=`wc -l ${f}/../${2}/teilist.list | awk '{print $1}'`
+echo "List at ${f}/../${TEILIST}"
+counter=`cat ${f}/../${TEILIST} | wc -l`
 
 if [ $3 = 0 ]; then
     if [ $counter -lt 200 ]; then
-	echo "split -l $counter ${f}/../${2}/teilist.list ${f}/../${2}/.tei_chunk"
-	split -l $counter ${f}/../${2}/teilist.list ${f}/../${2}/.tei_chunk
+	echo "split -l $counter ${f}/../${TEILIST} ${f}/../${2}/.tei_chunk"
+	split -l $counter ${f}/../${TEILIST} ${f}/../${2}/.tei_chunk
     else
-	split -l 200 ${f}/../${2}/teilist.list ${f}/../${2}/.tei_chunk
+	split -l 200 ${f}/../${TEILIST} ${f}/../${2}/.tei_chunk
     fi
     for fl in ${f}/../${2}/.tei_chunk* ; do
 	sh ${f}/cleanTEIChunk.sh ${fl} ${2}

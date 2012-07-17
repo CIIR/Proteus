@@ -5,7 +5,6 @@
 entlink_setup:
               ifneq ($(strip $(wildcard .entlink_setup.success)),.entlink_setup.success)
 	      	   echo "Compiling, installing, and testing Entity Linking packages..."
-		   git clone --recursive scm-ciir.cs.umass.edu:/var/git/tacco.git output/tacco
 		   sh scripts/entity_linking_setup.sh
 		   #sh scripts/generate_teis.sh ${SOURCE}
 		   touch .entlink_setup.success
@@ -15,15 +14,21 @@ entlink_setup:
 entlink_build: entlink_setup
               ifneq ($(strip $(wildcard .entlink_build.success)),.entlink_build.success)
 	      	   echo "Building Entity Linking models..."
-		   sh scripts/entity_linking_build.sh ${WEX_DATA} ${ENTLINK_INDEX} ${TMP} ${DRMAA}
+ifneq ($(ENTLINK_INDEX), "")
+	sh scripts/entity_linking_build.sh ${WEX_DATA} ${ENTLINK_INDEX} ${TMP} ${DRMAA}
+endif
 		   touch .entlink_build.success
               endif
 
 entlink_tei: build_tei_list entlink_build
               ifneq ($(strip $(wildcard .entlink_tei.success)),.entlink_tei.success)
 	      	   echo "Annotating TEI files using trained Entity Linking models..."
-		   sh scripts/entity_linking_build.sh ${ENTLINK_INDEX} ${OUTPATH}/mbteis/cleaned ${OUTPATH}/mbteis/annotated ${TMP} ${DRMAA}
-	      	   sh scripts/build_tei_list.sh ${OUTPATH}/mbteis/annotated ${ANNOTATED_TEIS}
+ifneq ($(ENTLINK_INDEX), "")
+		   	sh scripts/entity_linking_annotate.sh ${ENTLINK_INDEX} ${ORIG_TEIS}.gz ${OUTPATH}/mbteis/annotated ${TMP} ${DRMAA}
+	      	   	sh scripts/build_tei_list.sh ${OUTPATH}/mbteis/annotated ${ANNOTATED_TEIS}
+else
+	      	   	cp ${ORIG_TEIS}.gz ${ANNOTATED_TEIS}.gz
+endif
 	      	   echo "Annotated TEI file list saved to ${ANNOTATED_TEIS}"
 		   touch .entlink_tei.success
               endif

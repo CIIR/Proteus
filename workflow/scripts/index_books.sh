@@ -15,3 +15,4 @@ galago build \
 --parser/splitTag=book --galagoJobDir=$3 --corpusParameters/corpusText=false --corpusParameters/corpusTerms=false \
 --deleteJobDir=false --indexPath=${f}/../$2 --inputPath+${f}/../$1 #--port=10000
 fi
+echo "Done indexing books..."

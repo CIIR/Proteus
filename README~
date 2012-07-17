@@ -2,6 +2,10 @@ Pharos - Named entity recognition and linking
 Triton - Backend search service that collects responses from multiple sharded search servers
 Pontus - Front-end web service written in the Lift web framework
 Temporal - Some exploratory work on temporal data mining 
+<<<<<<< HEAD
 Phokas - Wrap book text in <strike>putrid sealskin</strike> TEI XML
-Morpheus - New front-end web service using the Scalatra lightweight router, and Scalate for templating.
+=======
+Phokas - Wrap book text in <strike>putrid sealskin</strike> TEI XML
 
+Morpheus - New front-end web service using the Play web framework
+>>>>>>> d2c5c64485f92b3fc5f040410f046f7855e458dd

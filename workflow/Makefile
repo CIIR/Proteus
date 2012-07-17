@@ -2,14 +2,16 @@
 OUTPATH="output"
 SOURCE=demo5.list #"../../demo-54K.present.list" # targets.list"
 ORIG_TEIS="${OUTPATH}/mbteis/mbteis.list"
-ANNOTATED_TEIS="${OUTPATH}/mbteis/annotated_mbteis.list.gz"
+ANNOTATED_TEIS="${OUTPATH}/mbteis/annotated_mbteis.list"
 TMP="/work1/barto/wdabney/tmp/" # "/usr/mildura/scratch1/tmp/"
 DATAPATH="sources"
 WEX_DATA="armadale:/hdfs/disk2/jdalton/freebase-wex-2012-01-27-joined"
-ENTLINK_INDEX="/work1/allan/jdalton/entity-linking/freebase-wex-all" # ${OUTPATH}/indexes/wiki_index
 
-DRMAA=100
-#DRMAA=0
+# Controlling entity linking on/off by whether or not this is empty
+ENTLINK_INDEX=""#"/work1/allan/jdalton/entity-linking/indexes/tac-wiki-new2" # ${OUTPATH}/indexes/wiki_index
+
+#DRMAA=100
+DRMAA=0
 
 -include Makefile.gentei
 -include Makefile.dbpedia
@@ -31,26 +33,26 @@ ambig_ent_index: gentei build_tei_list
 
 index_books: annotate_teis
               ifneq ($(strip $(wildcard .index_books.success)),.index_books.success)
-	      	   sh scripts/index_books.sh ${ANNOTATED_TEIS} ${OUTPATH}/indexes/books ${TMP} ${DRMAA}
+	      	   sh scripts/index_books.sh ${ANNOTATED_TEIS}.gz ${OUTPATH}/indexes/books ${TMP} ${DRMAA}
 	      	   -sh scripts/sanity_check_books.sh
 		   touch .index_books.success
               endif
 
 index_pages: annotate_teis
               ifneq ($(strip $(wildcard .index_pages.success)),.index_pages.success)
-	      	   sh scripts/index_pages.sh ${ANNOTATED_TEIS} indexes/pages
+	      	   sh scripts/index_pages.sh ${ANNOTATED_TEIS}.gz indexes/pages
 		   touch .index_pages.success
               endif
 
 index_pictures: annotate_teis
               ifneq ($(strip $(wildcard .index_pictures.success)),.index_pictures.success)
-	      	   sh scripts/index_pictures.sh ${ANNOTATED_TEIS} indexes/pictures
+	      	   sh scripts/index_pictures.sh ${ANNOTATED_TEIS}.gz indexes/pictures
 		   touch .index_pictures.success
               endif
 
 index_entities: annotate_teis
               ifneq ($(strip $(wildcard .index_entities.success)),.index_entities.success)
-	      	   sh scripts/index_entities.sh ${ANNOTATED_TEIS} indexes/entities
+	      	   sh scripts/index_entities.sh ${ANNOTATED_TEIS}.gz indexes/entities
 		   touch .index_entities.success
               endif
 
