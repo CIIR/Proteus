@@ -1,3 +1,10 @@
-.idea/
-*~
 target/
+.idea/
+.idea_modules/
+nbproject
+#*#
+*~
+.ensime
+build.xml
+.classpath  #for eclipse sbt plugin
+.project    #for eclipse sbt plugin

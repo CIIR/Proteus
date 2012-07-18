@@ -1,31 +1,12 @@
--@ var pageResults : List[String] = List("a", "b", "c")
--@ var bookResults : List[String] = List("a", "b", "c", "d", "e")
--@ var peopleResults : List[String] = List("a", "b", "c", "e", "f", "g")
--@ var locationResults : List[String] = List("a", "b", "c", "d")
--@ var pictureResults : List[String] = List("a")
-
+-@ val results : Map[String, Any] = Map[String, Any]()
+-@ val q : String = ""
 .container-fluid
  .row-fluid
-  .span3
-   .well.sidebar-nav
-    %ul.nav.nav-list
-     %li.nav-header Results For...
-     %li.active
-      %a{:href => "#"} Pages in Books (#{pageResults.size})
-     %li
-      %a{:href => "#"} Whole Books (#{bookResults.size})
-     %li
-      %a{:href => "#"} People (#{peopleResults.size})
-     %li
-      %a{:href => "#"} Places (#{locationResults.size})
-     %li
-      %a{:href => "#"} Pictures (#{pictureResults.size})
-
-  .span9
-   %table.table-bordered.table-striped
-    %tr
-     %td Result 1
-    %tr
-     %td Result 2
-    %tr
-     %td Result 3
+  .span12
+   %form.well.form-search{:method => "get", :action => "search"}
+    %input.input-medium.search-query#q{:type => "text", :name => "q",
+    				       :value=> {q}}
+    %button.btn{:type => "submit"} Search
+ %br
+ - if (!results.isEmpty)
+  = render("results.scaml", Map("results" -> results))

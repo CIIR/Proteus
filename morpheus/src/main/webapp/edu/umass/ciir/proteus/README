@@ -1,0 +1,7 @@
+This directory structure mirrors the package structure of the Proteus classes.
+We do this because when we call "view(a.b.c.myClass, 'collection')" in Scalate on an object, say,
+it looks for a template file in a/b/c/myClass.collection.<template-ext>.
+
+So, we have a lot of ProteusObject instances floating around. Therefore we need templates in
+edu/umass/ciir/proteus (here), and they're called ProteusObject.<subtype>.scaml, because
+ProteusObjects compose more specialized copies.

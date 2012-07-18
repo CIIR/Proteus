@@ -1,0 +1,35 @@
+-@ val results : Map[String, List[AnyRef]]
+.row-fluid
+ .span12
+  %ul.nav.nav-tabs
+   %li.active
+    %a(href="#pages" data-toggle="tab") Pages (#{results("pages").size})
+   %li
+    %a(href="#books" data-toggle="tab") Whole Books (#{results("books").size})
+   %li
+    %a(href="#people" data-toggle="tab") People (#{results("people").size})
+   %li
+    %a(href="#places" data-toggle="tab") Places (#{results("locations").size})
+   %li
+    %a(href="#pictures" data-toggle="tab") Pictures (#{results("pictures").size})
+  
+  .tab-content
+   .tab-pane.fade.in.active#pages
+    %table.table-bordered.table-striped
+     = collection(results("pages"), "page")
+  
+   .tab-pane.fade#books
+    %table.table-bordered.table-striped
+     = collection(results("books"), "book")
+
+   .tab-pane.fade#people
+    %table.table-bordered.table-striped
+     = collection(results("people"), "person")
+
+   .tab-pane.fade#places
+    %table.table-bordered.table-striped
+     = collection(results("locations"), "location")
+
+   .tab-pane.fade#pictures
+    %table.table-bordered.table-striped
+     = collection(results("pictures"), "picture")
