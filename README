@@ -7,7 +7,7 @@ Morpheus - New front-end web service using the Scalatra lightweight router, and 
 Aura - New proteus service using finagle/thrift
 
 Morpheus and Aura:
-These two subprojects compose and single SBT subproject.  All dependencies and settings for each are
+These two subprojects compose a single SBT subproject.  All dependencies and settings for each are
 contained in the root project directory, in ProteusBuild.scala (if you'd like to "t" search it). 
 To compile the thrift code:
 from root directory enter sbt
