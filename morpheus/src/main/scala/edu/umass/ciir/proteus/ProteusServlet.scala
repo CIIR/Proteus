@@ -5,12 +5,24 @@ import scalate.ScalateSupport
 import scala.collection.JavaConversions._
 
 class ProteusServlet extends ScalatraServlet with ScalateSupport {
-  before() { contentType = "text/html" }
-  get("/") { templateEngine.layout("index.scaml") }
-  get("/index") { templateEngine.layout("index.scaml") }
-  get("/about") { templateEngine.layout("about.scaml") }
-  get("/contact") { templateEngine.layout("contact.scaml") }
+  val extensionPattern = """\.([a-zA-Z]+)$""".r
+  
+  def renderHTML(template: String, args: Map[String, Any] = Map[String,Any]()) = {
+    contentType = "text/html"
+    templateEngine.layout(template, args)
+  }
 
+/*
+  before("""\.(jpg|jpeg)$""".r) { contentType = "image/jpeg" }
+  before("""\.gif$""".r) { contentType = "image/gif" }
+  before("""\.png$""".r) { contentType = "image/png" }
+  before("""\.css$""".r) { contentType = "text/stylesheet" }
+  before("""\.js$""".r) { contentType = "text/javascript" }
+*/
+  get("/") { renderHTML("index.scaml") }
+  get("/index") { renderHTML("index.scaml") }
+  get("/about") { renderHTML("about.scaml") }
+  get("/contact") { renderHTML("contact.scaml") }
   get("/search") {
     var actuals = Map[String, Any]() 
     if (params.contains("q")) {
@@ -33,14 +45,10 @@ class ProteusServlet extends ScalatraServlet with ScalateSupport {
       actuals += Tuple2("q", params("q"))
       actuals += Tuple2("results", results)
     }
-    templateEngine.layout("search.scaml", actuals)
+    renderHTML("search.scaml", actuals)
   }
 
   notFound {
-    // Try to render a ScalateTemplate if no route matched
-    findTemplate(requestPath) map { path =>
-      contentType = "text/html"
-      layoutTemplate(path)
-    } orElse serveStaticResource() getOrElse resourceNotFound() 
+    serveStaticResource()
   }
 }

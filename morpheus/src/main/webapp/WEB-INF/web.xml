@@ -15,12 +15,10 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
 	</servlet-mapping>
 	
 	<!-- Static Asset Serving Example -->
-	<!--
 	<servlet-mapping>
         <servlet-name>default</servlet-name>
-        <url-pattern>/img/*</url-pattern>
-        <url-pattern>/css/*</url-pattern>
-        <url-pattern>/js/*</url-pattern>
+        <url-pattern>/assets/img/*</url-pattern>
+        <url-pattern>/assets/css/*</url-pattern>
+        <url-pattern>/assets/js/*</url-pattern>
     </servlet-mapping>
-	-->
 </web-app>
