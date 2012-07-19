@@ -4,4 +4,15 @@ Pontus - Front-end web service written in the Lift web framework
 Temporal - Some exploratory work on temporal data mining 
 Phokas - Wrap book text in <strike>putrid sealskin</strike> TEI XML
 Morpheus - New front-end web service using the Scalatra lightweight router, and Scalate for templating.
+Aura - New proteus service using finagle/thrift
 
+Morpheus and Aura:
+These two subprojects compose and single SBT subproject.  All dependencies and settings for each are
+contained in the root project directory, in ProteusBuild.scala (if you'd like to "t" search it). 
+To compile the thrift code:
+from root directory enter sbt
+>> project aura
+>> scrooge-gen
+To start webapp:
+>> project morpheus
+>> container:start
