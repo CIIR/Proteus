@@ -13,11 +13,15 @@ class RemoteRandomDataProvider extends ProteusProvider.FutureIface with FakeData
     for (ptype <- srequest.types) {
       results = getSearchResults(count, ptype) ::: results
     }
-    Future(SearchResponse(results, None))
+    return Future(SearchResponse(results, None))
   }
 
   override def lookup(lrequest: LookupRequest): Future[LookupResponse] = {
-    return null
+    var objects = List[ProteusObject]()
+    for (aid <- lrequest.ids) {
+      objects = getProteusObject(aid) :: objects
+    }
+    return Future(LookupResponse(objects))
   }
 
   override def transform(trequest: TransformRequest): Future[TransformResponse] = {

@@ -16,6 +16,6 @@ object RemoteDataServer {
       .name("RandomProteusDataService")
       .bindTo(new InetSocketAddress(8888))
       .codec(ThriftServerFramedCodec())
-      .build(service)  // calls start underneath?
+      .build(service)  // calls start underneath
   }
 }

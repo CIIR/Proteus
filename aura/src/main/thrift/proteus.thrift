@@ -234,7 +234,7 @@ struct TransformResponse {
 
 // Something to look up one or more objects
 struct LookupRequest {
-  1: list<AccessIdentifier> id,
+  1: list<AccessIdentifier> ids,
 }
 
 struct LookupResponse {
