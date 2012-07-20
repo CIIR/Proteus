@@ -3,10 +3,28 @@
 .container-fluid
  .row-fluid
   .span12
-   %form.well.form-search{:method => "get", :action => "search"}
-    %input.input-medium.search-query#q{:type => "text", :name => "q",
-    				       :value=> {q}}
-    %button.btn{:type => "submit"} Search
+   %form.well.form-search#searchform{:method => "get", :action => "search"}
+    %span.pull-left
+     %input.input-medium.search-query#q{:type => "text", :name => "q",
+    	   				:value=> {q}}
+     %button.btn.btn-primary{:type => "submit"} Search
+     %span Types to find:
+    %span.btn-group(data-toggle="buttons-checkbox")
+     %button.btn#pagetypes{:type => "button"} Pages
+     %button.btn#booktypes{:type => "button"}  Books
+     %button.btn#locationtypes{:type => "button"} Places
+     %button.btn#picturetypes{:type => "button" } Pictures
+     %button.btn#alltypes{:type => "button" } Whatever you Got
+ :javascript
+  $('#searchform').submit(function() {
+   if ($('#q').val().trim() == '') {
+    $('#searchform + #search_empty').remove();
+    $('#searchform').after('<div id="search_empty" class="alert alert-error span5"><button class="close" data-dismiss="alert" type="button" href="#">x</button>You\'re gonna want to enter some search text, chief.</div>');
+    return false;
+   } else {
+    return true;
+   }
+  });
  %br
  - if (!results.isEmpty)
   = render("results.scaml", Map("results" -> results))

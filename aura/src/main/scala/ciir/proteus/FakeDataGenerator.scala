@@ -1,27 +1,6 @@
-package ciir.aura.proteus
-
-import com.twitter.util.Future
-
-class ProteusServiceImpl extends ProteusProvider.FutureIface with FakeDataGenerator {
-
-  override def search(srequest: SearchRequest): Future[SearchResponse] = {
-    return null
-  }
-
-  override def lookup(lrequest: LookupRequest): Future[LookupResponse] = {
-    return null
-  }
-
-  override def transform(trequest: TransformRequest): Future[TransformResponse] = {
-    return null
-  }
-
-}
-
-
+package ciir.proteus
 
 trait FakeDataGenerator {
-
   val chars =  ('a' to 'z')
   val intRange = 5 to 15
   val dblRange = 25.0 to 150.0

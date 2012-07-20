@@ -1,24 +1,33 @@
 package edu.umass.ciir.proteus
 
+import ciir.proteus._
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.util.{Duration,Future}
+import com.twitter.finagle.thrift.ThriftClientFramedCodec
+import java.net.InetSocketAddress
+import java.util.concurrent.TimeUnit
+import org.apache.thrift.protocol._
 import org.scalatra._
 import scalate.ScalateSupport
 import scala.collection.JavaConversions._
 
 class ProteusServlet extends ScalatraServlet with ScalateSupport {
   val extensionPattern = """\.([a-zA-Z]+)$""".r
-  
+
+  val randomDataService = ClientBuilder()
+    .hosts(new InetSocketAddress("ayr.cs.umass.edu", 8888))
+    .codec(ThriftClientFramedCodec())
+    .hostConnectionLimit(1)
+    .tcpConnectTimeout(Duration(1, TimeUnit.SECONDS))
+    .retries(2)
+    .build()
+  val dataClient = new ProteusProvider.FinagledClient(randomDataService)
+
   def renderHTML(template: String, args: Map[String, Any] = Map[String,Any]()) = {
     contentType = "text/html"
     templateEngine.layout(template, args)
   }
 
-/*
-  before("""\.(jpg|jpeg)$""".r) { contentType = "image/jpeg" }
-  before("""\.gif$""".r) { contentType = "image/gif" }
-  before("""\.png$""".r) { contentType = "image/png" }
-  before("""\.css$""".r) { contentType = "text/stylesheet" }
-  before("""\.js$""".r) { contentType = "text/javascript" }
-*/
   get("/") { renderHTML("index.scaml") }
   get("/index") { renderHTML("index.scaml") }
   get("/about") { renderHTML("about.scaml") }

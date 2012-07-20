@@ -4,7 +4,7 @@
 // - LookupResponse
 // - TransformRequest
 // - TransformResponse
-namespace java ciir.aura.proteus
+namespace java ciir.proteus
 
 // The Core Proteus Types
 enum ProteusType {
@@ -69,12 +69,13 @@ struct ResultSummary {
 // Defines a single result item from a search query
 struct SearchResult {
   1: AccessIdentifier id,
-  2: optional string title,
-  3: optional ResultSummary summary,
-  4: optional string img_url,
-  5: optional string thumb_url,
+  2: double score;
+  3: optional string title,
+  4: optional ResultSummary summary,
+  5: optional string img_url,
+  6: optional string thumb_url,
   // URL for visiting the original data source for this item
-  6: optional string external_url,
+  7: optional string external_url,
 }
 
 // **** Response Type Structs ****
