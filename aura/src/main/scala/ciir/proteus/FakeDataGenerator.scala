@@ -12,12 +12,31 @@ trait FakeDataGenerator {
       chars(index)
     } mkString("")
   }
-
+  
   private def genDate = rnd.nextLong()
   private def genDbl = rnd.nextDouble()
   private def genLink = "http://wiki-link/" + genStr
   private def genNum = rnd.nextInt()
+  private def genAccessId(ptype: ProteusType) = 
+    AccessIdentifier(genStr, ptype, genStr, None)
+  private def genResultSummary() : ResultSummary = {
+    var regions = List[TextRegion]()
+    for (i <- 0 to 3) {
+      val begin = genNum
+      regions = TextRegion(begin, begin+genNum) :: regions
+    }
+    ResultSummary(genStr, regions)
+  }
 
+  def getSearchResults(count: Int, ptype: ProteusType) = {
+    var results = List[SearchResult]()
+    for (i <- 1 to count) {
+      results =  SearchResult(genAccessId(ptype), genDbl, Some(genStr),
+			      Some(genResultSummary), Some(genLink),
+			      Some(genLink), Some(genLink)) :: results
+    }
+    results
+  }
 
   def getPersonObjects(count: Int) = {
     1 to count map { _ =>
