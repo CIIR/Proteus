@@ -15,17 +15,16 @@ class ProteusServlet extends ScalatraServlet
 with ScalateSupport 
 with FakeDataGenerator {
   val kReturnableTypes = List("page", "collection", "picture", "person", "location")
-  val kNumSearchResults = 2
-  /*
+  val kNumSearchResults = 10
+  
   val randomDataService = ClientBuilder()
-    .hosts(new InetSocketAddress("ayr.cs.umass.edu", 8888))
+    .hosts(new InetSocketAddress("localhost", 8888))
     .codec(ThriftClientFramedCodec())
     .hostConnectionLimit(1)
     .tcpConnectTimeout(Duration(1, TimeUnit.SECONDS))
     .retries(2)
     .build()
   val dataClient = new ProteusProvider.FinagledClient(randomDataService)
-  */
 
   def renderHTML(template: String, args: Map[String, Any] = Map[String,Any]()) = {
     contentType = "text/html"
@@ -58,8 +57,10 @@ with FakeDataGenerator {
 				  parameters = Some(parameters))
 
       // THIS IS WHERE WE'D NORMALLY MAKE THE RPC CALL
-      val response = getSearchResponse(request)
-      
+      //val futureResponse = getFutureSearchResponse(request)
+      val futureResponse = dataClient.search(request)
+      println("Received future: " + futureResponse)
+      val response = futureResponse(Duration(1, TimeUnit.SECONDS))
       // Need to split the results by type
       var splitResults = Map[String, AnyRef]()
       for (typeStr : String <- kReturnableTypes) {
