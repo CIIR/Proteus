@@ -1,0 +1,17 @@
+%tr
+ %td
+  %img{:src => {thumbUrl.get}, :width => "75", :height => "100"}
+ %td  
+  %table
+   %tr
+    %td
+     %u
+      %strong 
+       = title.get
+     %span
+      %a{:href => {externalUrl.get}} [View at Internet Archive]
+   %tr
+    %td
+     %p
+      = summary.get.text
+

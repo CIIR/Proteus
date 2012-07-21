@@ -1,5 +1,7 @@
 package ciir.proteus
 
+import com.twitter.util.Future
+
 trait FakeDataGenerator {
   val chars =  ('a' to 'z')
   val intRange = 5 to 15
@@ -46,6 +48,22 @@ trait FakeDataGenerator {
 		  location = getLocation(aid.`type`),
 		  organization = getOrganization(aid.`type`));
 
+  def getFutureSearchResponse(request: SearchRequest) : Future[SearchResponse] =
+    Future(getSearchResponse(request))
+
+  def getSearchResponse(request: SearchRequest) : SearchResponse = {
+    val count = request.parameters match {
+      case Some(p : RequestParameters) => p.numResultsRequested
+      case None => 5
+    }
+
+    var results : List[SearchResult] = List[SearchResult]()
+    for (resultType <- request.types) {
+      results = getSearchResults(count, resultType) ::: results
+    }
+    return SearchResponse(results, None)
+  }
+  
   def getSearchResults(count: Int, ptype: ProteusType) : List[SearchResult] = {
     var results = List[SearchResult]()
     for (i <- 1 to count) {

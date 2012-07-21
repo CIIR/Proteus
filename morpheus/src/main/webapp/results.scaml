@@ -1,35 +1,50 @@
 -@ val results : Map[String, List[AnyRef]]
 .row-fluid
  .span12
-  %ul.nav.nav-tabs
+  %ul.nav.nav-tabs#resultTabs
+   - for (resType <- results.keys.toList.sorted)
+    %li 
+     %a(href="##{resType}tab" data-toggle="tab") #{resType.capitalize} (#{results(resType).size})
+  
+  -#  This is a Scaml comment. Everything nested under here is omitted from 
+       output. The static version of the loop code is below, kept for posterity
+       for now. The indent depth of this is *very* important. Left one, and everything
+       in the rest of this div is commented. One right, and the list items below will activate.
    %li.active
-    %a(href="#pages" data-toggle="tab") Pages (#{results("pages").size})
+    %a(href="#pagetab" data-toggle="tab") Pages (#{results("page").size})
    %li
-    %a(href="#books" data-toggle="tab") Whole Books (#{results("books").size})
+    %a(href="#collectiontab" data-toggle="tab") Whole Books (#{results("collection").size})
    %li
-    %a(href="#people" data-toggle="tab") People (#{results("people").size})
+    %a(href="#persontab" data-toggle="tab") People (#{results("person").size})
    %li
-    %a(href="#places" data-toggle="tab") Places (#{results("locations").size})
+    %a(href="#locationtab" data-toggle="tab") Places (#{results("location").size})
    %li
-    %a(href="#pictures" data-toggle="tab") Pictures (#{results("pictures").size})
+    %a(href="#picturetab" data-toggle="tab") Pictures (#{results("picture").size})
   
   .tab-content
-   .tab-pane.fade.in.active#pages
-    %table.table-bordered.table-striped
-     = collection(results("pages"), "page")
-  
-   .tab-pane.fade#books
-    %table.table-bordered.table-striped
-     = collection(results("books"), "book")
+   - for (resType <- results.keys.toList.sorted)
+    .tab-pane.fade(id="#{resType}tab")
+     %table.table-bordered.table-striped
+      = collection(results(resType), "show")
 
-   .tab-pane.fade#people
-    %table.table-bordered.table-striped
-     = collection(results("people"), "person")
-
-   .tab-pane.fade#places
-    %table.table-bordered.table-striped
-     = collection(results("locations"), "location")
-
-   .tab-pane.fade#pictures
-    %table.table-bordered.table-striped
-     = collection(results("pictures"), "picture")
+  -# Activate the first result pane and check the types
+     we searched for.
+  :javascript
+   $(function() {
+    // This activates the first pane
+    $('#resultTabs a:first').tab('show');
+    
+    // Now select the type buttons
+    var resultTypes = $('#resultTabs a');
+    if (resultTypes.size() == 5) {
+      // Previous search did 'all'
+      $('#typeselection button[name="all"]').addClass('active');
+    } else {
+      // Do 'em one by one.
+      var pattern = /#([a-z]+)tab/
+      resultTypes.each(function() {
+       var buttonName = pattern.exec($(this).attr('href'))[1]
+       $('#typeselection button[name="'+buttonName+'"]').addClass('active');
+      });
+    }
+   })
