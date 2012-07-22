@@ -8,7 +8,7 @@ import cc.refectorie.user.dietz.tacco.entitylinking.baseline.nil.ConfigurableNil
 import cc.refectorie.user.dietz.tacco.util.ConfInfo
 import java.lang.String
 import java.io.{FileWriter, File}
-import cc.refectorie.user.dietz.tacco.entitylinking.baseline.{RankingWriter, BasicEntityLinkingPipeline}
+import cc.refectorie.user.dietz.tacco.entitylinking.baseline.{RankingWriter, GalagoOnlyEntityPipeline}
 import cc.refectorie.user.dietz.tacco.{GlobalCounters, PausableTimer, GlobalTimers, PrintConfInfo}
 
 trait BookELQuery extends TacELQuery with MentionWithContext {
@@ -19,13 +19,13 @@ trait BookELQuery extends TacELQuery with MentionWithContext {
 }
 
 case class BookELQueryImpl(docId: String, enttype:String, queryId:String, name:String, contextTerms:Seq[String], 
-	fullText:String="", groundTruthWikiTitle:Option[String]=None) extends BookELQuery
+	fullText:String="", groundTruthWikiTitle:Option[String]=None, isNuissance:Boolean = false) extends BookELQuery
 
 
-class BooksEntityLinking(loadQueries: Seq[BookELQuery]) extends BasicEntityLinkingPipeline with TacGalagoPipelineHookups with RankingWriter {
+class BooksEntityLinking(loadQueries: Seq[BookELQuery]) extends GalagoOnlyEntityPipeline with TacPipelineHookup with RankingWriter {
   val ranker = new ConfigurableFeatureRankingMain(true)
   val nilPredict = new ConfigurableNilClassifyMain(true)
-  type PredictionEntry = PredictEntryWithScoredRanking
+  type PredictionEntry = PredictEntry
   type Predictions = Seq[PredictionEntry]
 
   PrintConfInfo.print()
