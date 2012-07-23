@@ -1,5 +1,9 @@
 package ciir.proteus.app
 
+import java.io.File
+
+import scala.collection.mutable.ListBuffer
+
 import ciir.proteus._
 import ciir.proteus.galago.GalagoAdapter
 import com.twitter.finagle.builder._
@@ -12,7 +16,21 @@ import org.lemurproject.galago.tupleflow.Utility
 
 object AdapterServer {
   def main(args: Array[String]) {
-    val parameters = Parameters.parse(args.mkString(" "))
+    val (fileArgs: Array[String], nonFileArgs: Array[String]) = args.partition { 
+      arg : String => 
+	new File(arg).exists()
+    }
+    val parameters = new Parameters()
+    // Read in all files
+    for (path <- fileArgs; f = new File(path)) {
+      val tmp = Parameters.parse(f)
+      parameters.copyFrom(tmp)
+    }
+
+    // Command-line overrides file args
+    val tmp = new Parameters(nonFileArgs)
+    parameters.copyFrom(tmp)
+
     if (!parameters.containsKey("adapter")) {
       println("Please provide an 'adapter' type in the parameters.");
       return;
@@ -20,7 +38,7 @@ object AdapterServer {
 
     val adapter = parameters.getString("adapter") match {
       // Hopefully we'll develop more of these in the future.
-      case _ => GalagoAdapter(parameters)
+      case "galago" => new GalagoAdapter(parameters)
     }
     val port : Int = if (parameters.containsKey("port")) {
       parameters.getLong("port").asInstanceOf[Int]

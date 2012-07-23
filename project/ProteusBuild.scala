@@ -49,8 +49,10 @@ object BuildSettings {
 object Resolvers {
   val twitter = "twitter" at "http://maven.twttr.com/"
   val sonatype = "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+  val galagoSF = "Galago @ SourceForge" at "http://lemur.sf.net/repo"
+  val blikiRepo = "Bliki Google Code Repo" at "http://gwtwiki.googlecode.com/svn/maven-repository/"
 
-  def all = Seq(twitter, sonatype)
+  def all = Seq(twitter, sonatype, galagoSF, blikiRepo)
 }
 
 object AuraDeps {
@@ -62,8 +64,11 @@ object AuraDeps {
   val finagleThrift = "com.twitter" %% "finagle-thrift" % finagleVer
   val ostrich = "com.twitter" %% "finagle-ostrich4" % finagleVer
   val scroogeRuntime = "com.twitter" %% "scrooge-runtime" % "1.1.3"
+  val galagoCore = "org.lemurproject.galago" % "core" % "3.3-SNAPSHOT"
+  val galagoTupleflow = "org.lemurproject.galago" % "core" % "3.3-SNAPSHOT"
 
-  def deps = Seq(thriftLib, finagleCore, finagleThrift, ostrich, scroogeRuntime)
+  def deps = Seq(thriftLib, finagleCore, finagleThrift, ostrich, scroogeRuntime,
+	       galagoCore, galagoTupleflow)
 
 }
 
