@@ -18,6 +18,37 @@ enum ProteusType {
   ORGANIZATION = 7,
 }
 
+// Specify containment
+// A mapping of objects to what objects may contain them. A reverse mapping
+// of 'contains', defined below.
+const map<string, list<string> > containedBy = { 
+  "page" : [ "collection" ],
+  "picture" : [ "page" ],
+  "video" : [ "page" ],
+  "audio" : [ "page" ],
+  "person" : ["page", "picture", "video", "audio"],
+  "location" : [ "page", "picture", "video", "audio" ],
+  "organization" : [ "page", "picture", "video", "audio" ]
+}
+
+// What a given type can have contents of type
+// For example, the first mapping states that a collection can contain
+// pages. The next mapping says a page may contain picutres, videos,
+// and so on.
+//
+// Note that we define "contains" w.r.t. the modality in question,
+// for example an audio object may contain persons, locations, but 
+// in the sense of them being mentioned, whereas a page would contain
+// the text of those entities.
+const map<string, list<string>> contains = {
+  "collection" : [ "page" ],
+  "page" : [ "picture", "video", "audio", 
+  "person", "location", "organization"],
+  "picture" : [ "person", "location", "organization" ],
+  "video" : [ "person", "location", "organization" ],
+  "audio" : [ "person", "location", "organization" ]
+}
+
 // List atomic structs first
 
 // Information needed to access a specific resource item
