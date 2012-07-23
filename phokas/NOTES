@@ -1,0 +1,49 @@
+This is to hold some information concerning the manual process I'm going through
+to get the pipeline working:
+
+phokas:
+
+- You need to install 'leiningen' version 2:
+  https://github.com/technomancy/leiningen/
+ 
+  Until homebrew and apt-get are updated, I recommend manual installation for
+  the time being. It's not hard:
+  https://github.com/technomancy/leiningen/#installation
+
+- A quick protip: 
+  Put '{:user {:plugins [[lein-localrepo "0.4.0"]]}}' in
+  '~/.lein/profiles.clj'. It should install a local repo
+  scanner, meaning 'lein localrepo list' will show you
+  what lein can see. You may need that to make sure you
+  get the Maven coordinates right.
+
+- Until we get these up on a repo, you need to pull a few jars and install them
+  locally so lein can find them. They're scattered on the various UMass clusters,
+  so you'll need to ask one of the team members for the downloads directly.
+  These total about 700MB, so make sure you have room to support that.
+  The Maven coordinates (<groupId>.<artifactId>.<version>) for the installed 
+  files are:
+      - dparser.dparser.2011-01-18
+      - stanford-corenlp.stanford-corenlp.2010-11-12
+      - ciir.nlp-models.pom.2011-07-12
+
+- There are also some "dep" files that need to be pulled down, which are used in
+  language determination (I think). They're not packaged, so again you need to ask
+  for them and stick them somewhere local:
+      - fre.dep
+      - ger.dep
+      - german.dep
+      - ita.dep
+      - lat.dep   
+      - ger.pos
+      - lat.pos 
+
+Those last two may not be needed, but they're not big and couldn't hurt, from 
+what I can tell.
+
+- core.clj in Phokas has at least 1 hardcoded directory. You'll need to update it.
+
+- And now I'm at the point of get some weird exceptions:
+#<ClassCastException java.lang.ClassCastException: clojure.data.xml.Event cannot be cast to clojure.lang.IFn>
+
+so for now I'm stopping with this.

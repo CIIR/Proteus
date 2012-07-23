@@ -6,7 +6,7 @@ import com.twitter.finagle.thrift.ThriftServerFramedCodec
 import org.apache.thrift.protocol._
 import java.net.InetSocketAddress
 
-object RemoteDataServer {
+object RandomDataServer {
   def main(args: Array[String]) {
     val dataSource = new RemoteRandomDataProvider()
     
