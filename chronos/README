@@ -1,0 +1,38 @@
+
+
+TEMPORAL FRONTEND
+let the odyssey begin..
+
+How to get this project working:
+
+## setup some dependencies:
+NOTE: I know this is hairy; I will do my best to eliminate some of these steps...
+- it will be extremely useful to have the SBT jar downloaded, and a script in your environment to execute it (version 0.11.2 is recommended)  go here for directions: https://github.com/harrah/xsbt/wiki/Getting-Started-Setup, look under "Installing sbt"
+- SBT is INCLUDED in the project to make building and running easy (it is version 0.11.2 for the curious)
+- the project has been adapted from the lift-bootstrap github project (https://github.com/fbettag)
+   -- you MUST clone the author's other project located at https://github.com/fbettag/lift-bhtml, do a 'sbt publish-local' 
+- the project uses the Highcharts-with-Scala github project to generate graphs
+   -- you MUST clone this project and perform a 'sbt publish-local' within the project's directory
+- unsurprisingly, Galago 3.2 is another dependency that must be checked out from it's Sourceforge location
+   -- get Galago, do a 'mvn install' or 'mvn package' (not sure which one actually publishes it to the local repo) 
+- ALL other dependencies specified in the build.sbt file should be auto-downloaded upon invoking './sbt' for the first time!
+
+## for the query-word frequency demo:
+- on laguna there is a 50k document index at /usr/lag/work1/allan/lgiorda
+- in that dir, run 'galago search --index=./50k.index --corpus=./50k.index/corpus --port=9900
+   -- note that the port NEEDS to be at 9900 for now since it's hardcoded into the website code
+- ideally we'd be using the Pontos (c) distributed arch to search indexes
+
+
+## for the verb/subj/obj frequency demo:
+- the info displayed is currently housed in a mongodb instance out on armadale.cs.umass.edu (armadale.cs.umass.edu:28017 to verify it's working)
+  -- the mongodb is located at /hdfs/disk2/lgiorda/data
+  -- the class that calls methods on this DB is located in code.lib.Mongo
+
+## RUNNING
+clone and cd into the project directory
+run './sbt' (using the "./" since we want to use the sbt located in the project)
+run 'container:start' to fire up an instance of the site running at your localhost:8082
+
+most of all, enjoy.
+
