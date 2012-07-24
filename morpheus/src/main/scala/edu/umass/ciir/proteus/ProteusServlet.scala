@@ -18,7 +18,7 @@ with FakeDataGenerator {
   val kNumSearchResults = 10
   
   val randomDataService = ClientBuilder()
-    .hosts(new InetSocketAddress("localhost", 8888))
+    .hosts(new InetSocketAddress("ayr.cs.umass.edu", 8100))
     .codec(ThriftClientFramedCodec())
     .hostConnectionLimit(1)
     .tcpConnectTimeout(Duration(1, TimeUnit.SECONDS))
@@ -60,7 +60,9 @@ with FakeDataGenerator {
       //val futureResponse = getFutureSearchResponse(request)
       val futureResponse = dataClient.search(request)
       println("Received future: " + futureResponse)
-      val response = futureResponse(Duration(1, TimeUnit.SECONDS))
+      //val response = futureResponse(Duration(1, TimeUnit.SECONDS))
+      val response = futureResponse()
+      println("Expanded to response: " + response)
       // Need to split the results by type
       var splitResults = Map[String, AnyRef]()
       for (typeStr : String <- kReturnableTypes) {
