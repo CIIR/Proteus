@@ -1,0 +1,44 @@
+The main class is:
+ciir.proteus.entitylinking.TEIAnnotator
+
+It takes two parameters:
+Annotating TEI file " + args(0) + ", new file saving to " + args(1)
+
+The TEI files are assumed to be gz compressed files.
+
+The entity linker annotates all <name> tags with a "Wiki_Title" attribute.  If the linker cannot find a match a suitable matching document, the value "NIL" is written for this value.
+
+The configuration of the linker is controlled by:
+src/resources/tacco-aubury.properties
+
+Replace aubury with the name of the machine it is being run on.  Removing the machine name altogether should also work.
+
+
+Galago Setup
+---------------------------------------------------
+The linker can be run over a local index or on a remote index server.
+
+If running a local index, the following property should be specified:
+galagoJsonParameterFile=pathToJsonFile
+
+
+You can also start a  galago search server on port 10008 (or as desired)
+
+chmod 755 ./core/target/appassembler/bin/galago
+export PARAM_FILE=/home/jdalton/$PARAMETER_FILE_NAME
+./core/target/appassembler/bin/galago search $PARAM_FILE --port=10005
+
+Example json parameter file  in json format, for example:
+    {
+    "index" : "/work1/allan/jdalton/entity-linking/indexes/full-wiki-stanf3",
+    "fields" : ["title","title-exact","fbname","fbname-exact","fbtype","category","redirect","kb_class","anchor-exact,text"],
+    "stemming" : false
+    }
+
+
+The galago server and port are specified in the properties file.
+
+Linking Model Files
+------------------
+
+More to come on these.   For now, we are using the baseline galago ranking without a nil classifier.
