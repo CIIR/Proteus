@@ -39,6 +39,7 @@ object AdapterServer {
     val adapter = parameters.getString("adapter") match {
       // Hopefully we'll develop more of these in the future.
       case "galago" => new GalagoAdapter(parameters)
+      case "random" => new RemoteRandomDataProvider
     }
     val port : Int = if (parameters.containsKey("port")) {
       parameters.getLong("port").asInstanceOf[Int]
