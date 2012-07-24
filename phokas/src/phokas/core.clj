@@ -3,6 +3,7 @@
   (:require [clojure.string :as s]
             [clojure.set]
 	    [clojure.java.io :as jio]
+            [net.cgrand.enlive-html :as html]
 	    [clojure.data.zip :as zf]
 	    [clojure.zip :as zip])
   (:use [clojure.tools.cli]
@@ -265,6 +266,19 @@
 		       cur
 		       (map #(get-phrase % words kids false) (filter #(> % id) k))))))))
 
+(defn- wrap-words
+  [nodes sen start end]
+  (html/transform nodes
+                  {[[:s (html/nth-of-type sen)] :> [:w (html/nth-of-type start)]]
+                   [[:s (html/nth-of-type sen)] :> [:w (html/nth-of-type end)]]}
+                  (html/wrap "name" {:type "MISC"})))
+
+(defn- name-xform
+  [name-info]
+  [{[[:w (html/nth-of-type (inc (:id (first name-info))))]] [[:w (html/nth-of-type (inc (:id (last name-info))))]]}
+   (html/wrap "name" {:type "MISC"})])
+  
+
 (defn ner-sen
   [sen]
   (let [words (->> (xml-> sen :w zip/node)
@@ -279,24 +293,41 @@
 			    (re-find #"^[A-Z][a-z]*\.?$" (:form %))
 			    (not ((*annotators* :name-deps) (:deprel %)))) words) ; already non-recursive name?
 	names (map #(get-phrase (:id %) words kids true) props)]
-    (map-str
-     #(str "<rs type=\"MISC\""
-	   " name=\"" (s/escape (s/join " " (map :form %)) escapes) "\""
-	   " coords=\"" (s/join "|" (map :coords %)) "\"></rs>")
-     names)))
+    (map #(map :id %) names)))
+    
+    ;; (map-str
+    ;;  #(str "<rs type=\"MISC\""
+    ;;        " name=\"" (s/escape (s/join " " (map :form %)) escapes) "\""
+    ;;        " coords=\"" (s/join "|" (map :coords %)) "\"></rs>")
+    ;;  names)))
 
 (defn ner-para
   [para]
-  (let [tags (->
-	      ;; Wrap in dummy tags to allow stuff before or after main <p>.
-	      (str "<text>" para "</text>")
-	      parse-str
-	      zip/xml-zip
-	      (xml-> :p :s)
-	      (#(map ner-sen %)))]
-    (if (= "" (s/join tags))
+  (let [tree (parse-str (str "<text>" para "</text>")) ;; Wrap in dummy tags to allow stuff before or after main <p>.
+        tags (-> tree
+                 zip/xml-zip
+                 (xml-> :p :s)
+                 (#(map ner-sen %)))]
+    (if (= tags '(()))
       para
-      (s/join "</s>" (map str (s/split para #"</s>") (concat tags [""]))))))
+      ;; Since we select words by offset, we need to reverse them in each sentence.
+      (let [trips (apply concat (map-indexed #(map (fn [x] (vec (concat [%1] x))) (reverse %2)) tags))]
+        (->
+         (reduce
+          (fn [t off]
+            (cond (nil? off) t
+                  (= 2 (count off)) (wrap-words t (inc (first off)) (inc (second off)) (inc (second off)))
+                  :else
+                  (let [[sen start end] off]
+                    (wrap-words t (inc sen) (inc start) (inc end)))))
+          (html/as-nodes tree)
+          trips)
+         html/emit*
+         s/join
+         (s/replace #"^<text>" "")
+         (s/replace #"</text>$" ""))))))
+
+;;      (s/join "</s>" (map str (s/split para #"</s>") (concat tags [""]))))))
 
 (defn xmlck-para
   [para]
@@ -371,23 +402,25 @@
   (let [[pref ptag body] (partition-str para #"<p(?: [^>]*)?>")]
     (if (empty? body) para
 	(let [wsegs (s/split body #"</w>")
-	      wspans (map #(re-find #"^((?:.|\n)*)<w form=\"([^\"]+)(\"(?:.|\n)+)$" %) wsegs)
-	      ann (->> body sentence-tokens
-		       (map #(map (fn [s] (s/replace s #"^&amp;$" "&")) %)) ; PTB expects bare amp
-		       make-annotated-sentences)]
-	  (.annotate (*annotators* :tagger) ann)
-	  (.annotate *lemmatizer* ann)
-	  (str pref ptag
-	       (apply str		; because map-str doesn't work on multiple colls
-		      (map (fn [orig tok]
-			     (str (nth orig 1)
-				  "<w"
-				  " type=\"" (.tag tok) "\""
-				  " lemma=\"" (s/replace  (.lemma tok) #"^&$" "&amp;") "\""
-				  " form=\"" (nth orig 2)
-				  (nth orig 3) "</w>"))
-			   wspans (.get ann CoreAnnotations$TokensAnnotation)))
-	       (last wsegs))))))
+	      wspans (map #(re-find #"^((?:.|\n)*)<w form=\"([^\"]+)(\"(?:.|\n)+)$" %) wsegs)]
+          (if (= wspans '(nil))
+            para
+            (let [ann (->> body sentence-tokens
+                           (map #(map (fn [s] (s/replace s #"^&amp;$" "&")) %)) ; PTB expects bare amp
+                           make-annotated-sentences)]
+              (.annotate (*annotators* :tagger) ann)
+              (.annotate *lemmatizer* ann)
+              (str pref ptag
+                   (apply str		; because map-str doesn't work on multiple colls
+                          (map (fn [orig tok]
+                                 (str (nth orig 1)
+                                      "<w"
+                                      " type=\"" (.tag tok) "\""
+                                      " lemma=\"" (s/replace  (.lemma tok) #"^&$" "&amp;") "\""
+                                      " form=\"" (nth orig 2)
+                                      (nth orig 3) "</w>"))
+                               wspans (.get ann CoreAnnotations$TokensAnnotation)))
+                   (last wsegs))))))))
 
 (defn lemmatize-word
   [w]
@@ -660,7 +693,10 @@
 	      false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")
 	     :tagger
 	     (edu.stanford.nlp.pipeline.POSTaggerAnnotator.
-              "edu/stanford/nlp/models/pos-tagger/wsj3t0-18-left3words/left3words-distsim-wsj-0-18.tagger"
+              ;; "/home2/dasmith/src/stanford-corenlp-2012-05-22/edu/stanford/nlp/models/pos-tagger/wsj-left3words/wsj-0-18-left3words-distsim.tagger"
+              ;; "/home2/dasmith/src/umass-models/edu/stanford/nlp/models/pos-tagger/wsj3t0-18-left3words/left3words-distsim-wsj-0-18.tagger"
+              ;;"edu/stanford/nlp/models/pos-tagger/wsj3t0-18-left3words/left3words-distsim-wsj-0-18.tagger"
+              "edu/stanford/nlp/models/pos-tagger/wsj-left3words/wsj-0-18-left3words-distsim.tagger"
 	      false 500)
 	     :parser
 	     (parser.Parser/pretrained)
