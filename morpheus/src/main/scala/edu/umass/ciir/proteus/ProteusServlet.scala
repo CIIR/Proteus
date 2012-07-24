@@ -1,5 +1,12 @@
 package edu.umass.ciir.proteus
 
+import ciir.proteus._
+import com.twitter.finagle.builder.ClientBuilder
+import com.twitter.util.{Duration,Future}
+import com.twitter.finagle.thrift.ThriftClientFramedCodec
+import java.net.InetSocketAddress
+import java.util.concurrent.TimeUnit
+import org.apache.thrift.protocol._
 import org.scalatra._
 import scalate.ScalateSupport
 import scala.collection.JavaConversions._

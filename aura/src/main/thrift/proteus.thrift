@@ -4,7 +4,7 @@
 // - LookupResponse
 // - TransformRequest
 // - TransformResponse
-namespace java ciir.aura.proteus
+namespace java ciir.proteus
 
 // The Core Proteus Types
 enum ProteusType {
@@ -16,6 +16,37 @@ enum ProteusType {
   PERSON = 5,
   LOCATION = 6,
   ORGANIZATION = 7,
+}
+
+// Specify containment
+// A mapping of objects to what objects may contain them. A reverse mapping
+// of 'contains', defined below.
+const map<string, list<string> > containedBy = { 
+  "page" : [ "collection" ],
+  "picture" : [ "page" ],
+  "video" : [ "page" ],
+  "audio" : [ "page" ],
+  "person" : ["page", "picture", "video", "audio"],
+  "location" : [ "page", "picture", "video", "audio" ],
+  "organization" : [ "page", "picture", "video", "audio" ]
+}
+
+// What a given type can have contents of type
+// For example, the first mapping states that a collection can contain
+// pages. The next mapping says a page may contain picutres, videos,
+// and so on.
+//
+// Note that we define "contains" w.r.t. the modality in question,
+// for example an audio object may contain persons, locations, but 
+// in the sense of them being mentioned, whereas a page would contain
+// the text of those entities.
+const map<string, list<string>> contains = {
+  "collection" : [ "page" ],
+  "page" : [ "picture", "video", "audio", 
+  "person", "location", "organization"],
+  "picture" : [ "person", "location", "organization" ],
+  "video" : [ "person", "location", "organization" ],
+  "audio" : [ "person", "location", "organization" ]
 }
 
 // List atomic structs first
@@ -69,12 +100,13 @@ struct ResultSummary {
 // Defines a single result item from a search query
 struct SearchResult {
   1: AccessIdentifier id,
-  2: optional string title,
-  3: optional ResultSummary summary,
-  4: optional string img_url,
-  5: optional string thumb_url,
+  2: double score;
+  3: optional string title,
+  4: optional ResultSummary summary,
+  5: optional string img_url,
+  6: optional string thumb_url,
   // URL for visiting the original data source for this item
-  6: optional string external_url,
+  7: optional string external_url,
 }
 
 // **** Response Type Structs ****
@@ -233,7 +265,7 @@ struct TransformResponse {
 
 // Something to look up one or more objects
 struct LookupRequest {
-  1: list<AccessIdentifier> id,
+  1: list<AccessIdentifier> ids,
 }
 
 struct LookupResponse {
