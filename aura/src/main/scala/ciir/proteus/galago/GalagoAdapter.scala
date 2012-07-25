@@ -77,7 +77,7 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
 				title = Some(title),
 				summary = Some(summary),
 				externalUrl = Some(externalUrl),
-				thumbUrl = Some("http://ciir.cs.umass.edu/~irmarc/imgs/opera-house-thumb.JPG"))
+				thumbUrl = getThumbUrl,
       if (document.metadata.containsKey("url")) {
 	result = result.copy(externalUrl = Some(document.metadata.get("url")));
       }
@@ -135,5 +135,12 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
     }
 
     return generator.getSnippet(document.text, query);
+  }
+
+  private def getThumbUrl(id: AccessIdentifier) : Some[String] =
+    return Some(List("http://www.archive.org/download/",
+		     id.identifier,
+		     "/page/cover_thumb.jpg")
+		.mkString)
   }
 }
