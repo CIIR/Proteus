@@ -5,18 +5,22 @@
  .row-fluid
   .span12
    %form.well.form-search#searchform{:method => "get", :action => "search"}
-    %span.pull-left
-     %input.input-medium.search-query#q{:type => "text", :name => "q",
-    	   				:value=> {q}}
-     %button.btn.btn-primary{:type => "submit"} Search
-     %span Types to find:
-    %span.btn-group#typeselection(data-toggle="buttons-checkbox")
-     %button.btn{:type => "button", :name => "page"} Pages
-     %button.btn{:type => "button", :name => "collection"} Books
-     %button.btn{:type => "button", :name => "person"} People
-     %button.btn{:type => "button", :name => "location"} Places
-     %button.btn{:type => "button", :name => "picture"} Pictures
-     %button.btn{:type => "button", :name => "all" } Whatever you Got
+    %table
+     %tr
+      %td
+       %input.input-medium.search-query#q{:type => "text", :name => "q",
+       					  :value=> {q}}
+       %button.btn.btn-primary{:type => "submit"} Search
+      %td
+       %span Types to find:
+      %td
+       %span.btn-group#typeselection(data-toggle="buttons-checkbox")
+        %button.btn{:type => "button", :name => "page"} Pages
+        %button.btn{:type => "button", :name => "collection"} Books
+        %button.btn{:type => "button", :name => "person"} People
+        %button.btn{:type => "button", :name => "location"} Places
+        %button.btn{:type => "button", :name => "picture"} Pictures
+        %button.btn{:type => "button", :name => "all" } Whatever you Got
   %script{:src => "assets/js/proteus/search-validate.js"}   
  -# This either renders an error or the result page. Not both.
  %br

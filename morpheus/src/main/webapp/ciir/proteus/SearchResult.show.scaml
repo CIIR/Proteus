@@ -1,7 +1,7 @@
 %tr
- %td
-  %a{:href => {imgUrl.get}}
-   %img{:src => {thumbUrl.get}, :width => "75", :height => "100"}
+ %td(width="103px")
+  %a.thumbnail{:href => {imgUrl.get}}
+   %img{:src => {thumbUrl.get}}
  %td  
   %table
    %tr
@@ -14,6 +14,6 @@
        [View at Internet Archive]
    %tr
     %td
-     %p
-      = summary.get.text
+     %p 
+      != summary.get.text
 
