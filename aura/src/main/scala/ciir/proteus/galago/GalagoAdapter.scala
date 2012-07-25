@@ -40,14 +40,15 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
     searchParams.set("count", count+offset)
     val root : Node = StructuredQuery.parse(srequest.rawQuery);
     val transformed : Node = retrieval.transformQuery(root, searchParams);
+    val start = System.currentTimeMillis
     val scored : Array[ScoredDocument] = retrieval.runQuery(transformed, 
 							    searchParams)
+    val finish = System.currentTimeMillis
     if (scored == null) {
       return Future(SearchResponse(results = List(), 
 				   error = Some("No results matched.")))
     }
-
-    printf("Returned %d scored documents.\n", scored.length)
+    printf("[q=%s,ms=%d,nr=%d]\n", srequest.rawQuery, (finish-start), scored.length)
     val queryTerms = StructuredQuery.findQueryTerms(root);
     generator.setStemming(root.toString().contains("part=stemmedPostings"));
     val c = new Parameters;
@@ -77,13 +78,13 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
 				title = Some(title),
 				summary = Some(summary),
 				externalUrl = Some(externalUrl),
-				thumbUrl = getThumbUrl(accessId))
+				thumbUrl = getThumbUrl(accessId),
+				imgUrl = getImgUrl(accessId))
       if (document.metadata.containsKey("url")) {
 	result = result.copy(externalUrl = Some(document.metadata.get("url")));
       }
       results += result
     }
-    println("Returning results: " + results.mkString(","))
     return Future(SearchResponse(results = results.toList, error = None))
   }
 
@@ -137,9 +138,18 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
     return generator.getSnippet(document.text, query);
   }
 
-  private def getThumbUrl(id: AccessIdentifier) : Some[String] =
-    return Some(List("http://www.archive.org/download/",
-		     id.identifier,
-		     "/page/cover_thumb.jpg")
-		.mkString)
+  private def getImgUrl(id: AccessIdentifier) : Some[String] = {
+    val Array(archiveId, pageNo) = id.identifier.split("_")
+    return Some(String.format("http://www.archive.org/download/%s/page/n%s.jpg",
+		     archiveId,
+		     pageNo))
+  }
+
+  private def getThumbUrl(id: AccessIdentifier) : Some[String] = {
+    val Array(archiveId, pageNo) = id.identifier.split("_")
+    return Some(
+      String.format("http://www.archive.org/download/%s/page/n%s_thumb.jpg",
+		    archiveId,
+		     pageNo))
+  }
 }
