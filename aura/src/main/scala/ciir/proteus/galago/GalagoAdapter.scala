@@ -77,7 +77,7 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
 				title = Some(title),
 				summary = Some(summary),
 				externalUrl = Some(externalUrl),
-				thumbUrl = getThumbUrl,
+				thumbUrl = getThumbUrl(accessId))
       if (document.metadata.containsKey("url")) {
 	result = result.copy(externalUrl = Some(document.metadata.get("url")));
       }
@@ -142,5 +142,4 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
 		     id.identifier,
 		     "/page/cover_thumb.jpg")
 		.mkString)
-  }
 }
