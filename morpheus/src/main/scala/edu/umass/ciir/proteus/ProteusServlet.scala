@@ -40,7 +40,6 @@ with FakeDataGenerator {
     
     // If we have a query, put together a SearchRequest and ship it
     if (params.contains("q")) {
-      println("multiparams: " + multiParams.toString)
       // Request this many
       val count = kNumSearchResults
       val requestedTypes = if (multiParams("st").contains("all")) {
@@ -56,13 +55,8 @@ with FakeDataGenerator {
 				  types = requestedTypes, 
 				  parameters = Some(parameters))
 
-      // THIS IS WHERE WE'D NORMALLY MAKE THE RPC CALL
-      //val futureResponse = getFutureSearchResponse(request)
       val futureResponse = dataClient.search(request)
-      println("Received future: " + futureResponse)
-      //val response = futureResponse(Duration(1, TimeUnit.SECONDS))
       val response = futureResponse()
-      println("Expanded to response: " + response)
       // Need to split the results by type
       var splitResults = Map[String, AnyRef]()
       for (typeStr : String <- kReturnableTypes) {
