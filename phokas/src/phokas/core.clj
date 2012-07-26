@@ -360,7 +360,8 @@
         spans (EmbedTagger/tagText (s/join " " words))]
     (map
      (fn [^TokenSpan span]
-       [(.. span head position) (.. span last position) (.. span head nerLabel shortCategoryValue) (.string span)]))))
+       [(.. span head position) (.. span last position) (.. span head nerLabel shortCategoryValue) (.string span)])
+     spans)))
 
 (defn ner-para
   [para]
