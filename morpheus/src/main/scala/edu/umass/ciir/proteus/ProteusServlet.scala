@@ -10,21 +10,25 @@ import org.apache.thrift.protocol._
 import org.scalatra._
 import scalate.ScalateSupport
 import scala.collection.JavaConversions._
+import org.lemurproject.galago.tupleflow.Parameters
 
 class ProteusServlet extends ScalatraServlet 
 with ScalateSupport 
 with FakeDataGenerator {
   val kReturnableTypes = List("page", "collection", "picture", "person", "location")
   val kNumSearchResults = 10
-  
-  val randomDataService = ClientBuilder()
-    .hosts(new InetSocketAddress("ayr.cs.umass.edu", 8100))
-    .codec(ThriftClientFramedCodec())
-    .hostConnectionLimit(1)
-    .tcpConnectTimeout(Duration(1, TimeUnit.SECONDS))
-    .retries(2)
-    .build()
-  val dataClient = new ProteusProvider.FinagledClient(randomDataService)
+
+  val parameters = new Parameters()
+
+  val dataService = ClientBuilder()
+  .hosts(new InetSocketAddress(parameters.get("host", "ayr.cs.umass.edu"),
+			       parameters.get("port", 8101).toInt))
+  .codec(ThriftClientFramedCodec())
+  .hostConnectionLimit(1)
+  .tcpConnectTimeout(Duration(1, TimeUnit.SECONDS))
+  .retries(2)
+  .build()
+  val dataClient = new ProteusProvider.FinagledClient(dataService)
 
   def renderHTML(template: String, args: Map[String, Any] = Map[String,Any]()) = {
     contentType = "text/html"

@@ -80,8 +80,9 @@ object MorpheusDeps {
   val logback = "ch.qos.logback" % "logback-classic" % "1.0.0" % "runtime"  // is this shit really necessary, it's in every project I've ever seen and only seems to clutter shit up  /rant
   val jetty = "org.eclipse.jetty" % "jetty-webapp" % "7.6.0.v20120127" % "container"
   val javax = "javax.servlet" % "servlet-api" % "2.5" % "provided"
-
-  def deps = Seq(scalatra, scalate, scalatraSpecs2, logback, jetty, javax)
+  val galagoCore = "org.lemurproject.galago" % "core" % "3.3-SNAPSHOT"
+  val galagoTupleflow = "org.lemurproject.galago" % "core" % "3.3-SNAPSHOT"
+  def deps = Seq(scalatra, scalate, scalatraSpecs2, logback, jetty, javax, galagoCore, galagoTupleflow)
 }
 
 
