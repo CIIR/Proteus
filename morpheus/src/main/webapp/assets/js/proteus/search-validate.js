@@ -7,10 +7,10 @@ $('#searchform').submit(
 	    $('#searchform + #search_empty').remove();
 	    $('#searchform').after('<div id="search_empty" class="alert alert-error span5"><button class="close" data-dismiss="alert" type="button" href="#">x</button>You\'re gonna want to enter some search text, chief.</div>');
 	    return false;
-	} else if ($('#typeselection > .active').length == 0) {
-	    $('#searchform + #types_empty').remove();
-	    $('#searchform').after('<div id=\"types_empty" class="alert alert-error span5"><button class="close" data-dismiss="alert" type="button" href="#">x</button>You must select at least one search type.</div>');
-	    return false;
+	//} else if ($('#typeselection > .active').length == 0) {
+	//    $('#searchform + #types_empty').remove();
+	//    $('#searchform').after('<div id=\"types_empty" class="alert alert-error span5"><button class="close" data-dismiss="alert" type="button" href="#">x</button>You must select at least one search type.</div>');
+	//    return false;
 	} else {
 	    // Find all selected buttons, and add inputs to the form
 	    // to make processing on the backend easier.

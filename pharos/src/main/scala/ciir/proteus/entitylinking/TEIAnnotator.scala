@@ -1,211 +1,144 @@
 package ciir.proteus.entitylinking
 
-import java.util.LinkedList
-import java.util.Queue
-import java.io.File
-import java.io.FileInputStream
-import java.io.FilenameFilter
-import java.io.InputStream
-import java.io.PrintWriter
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import java.io.Writer
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
+import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.util.Arrays
-import java.util.HashMap
-import java.util.HashSet
-import java.util.regex.Pattern
-import java.util.regex.Matcher
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
-import scala.collection.Iterator
 import collection.JavaConversions._
 import cc.refectorie.user.dietz.tacco.data.WikipediaEntity
-
-case class EntityType(name: String) { override def toString : String = name }
-case object PERSON extends EntityType("person")
-case object LOCATION extends EntityType("location")
-case object ORGANIZATION extends EntityType("organization")
-
-object TEIPatterns {
-    val person_pattern = Pattern.compile("(.*)</person>") //<person name=\"([^>.]*)\">(.*)</person>(.*)")
-    val location_pattern = Pattern.compile("(.*)</location>") //<location name=\"([^>.]*)\">(.*)</location>(.*)")
-    val organization_pattern = Pattern.compile("(.*)</organization>") //<organization name=\"([^>.]*)\">(.*)</organization>(.*)")
-    val tag_pattern = Pattern.compile("<[^>]*>|[.,-_!~;\"*']|&quot|&amp|&apos|&gt|&lt|^")
-
-  val stopwords : Set[String] = try {
-	  io.Source.fromInputStream(getClass().getResourceAsStream("/stopwords/inquery")).getLines().toSet
-
-    } catch {
-      case _ =>
-      println(" Oh well")
-      Set()
-    }
-}
-
-class TEIEntityIterator(input_filename: String) extends Iterator[EntityTag] {
-	val input = io.Source.fromInputStream(new GZIPInputStream(new FileInputStream(input_filename)))
-	val entity_pattern = Pattern.compile("<(person|location|organization) name=\"([^>]*)\"")
-	var current_entity_type:EntityType = null
-	var current_entity_name: String = ""
-	var previous_tag: EntityTag = null
-
-
-	def takeToEntity : (String, EntityType, String) = {
-		var buffer = ""
-		var found_name:String = ""
-		var found_type:EntityType = null
-		while (!input.isEmpty && found_type == null) {
-			val (chunk, ftype, fname) = takeStep
-			found_type = ftype
-			found_name = fname
-			buffer = buffer + chunk
-		}
-		return (buffer, found_type, found_name)
-	}
-
-	def takeStep : (String,EntityType,String) = {
-		if (input.isEmpty)
-			return ("", null, null)
-
-		val prefix = input.takeWhile( _ != '<').mkString
-
-		if (input.isEmpty)
-			return (prefix, null, null)
-
-		val tagid = input.ch + input.takeWhile( _ != '>').mkString
-		// Now check if the tagid is an entity
-		val matcher = entity_pattern.matcher(tagid)
-		if (matcher.find) {
-			// Matched, we have an entity...
-			val entity_type = matcher.group(1) match {
-				case "person" => PERSON
-				case "location" => LOCATION
-				case "organization" => ORGANIZATION
-			}
-
-			return (prefix, entity_type, matcher.group(2))
-		} 
-		
-		return (prefix + tagid + input.ch, null, null)
-	}
-
-	def next: EntityTag = {
-		val (data, ent_type, ent_name) = takeToEntity
-		if (ent_type != null) {
-			val prevText = if(previous_tag == null) "" else previous_tag.cleanFollowText
-			val entity = new EntityTag(prevText, current_entity_type, current_entity_name, data)
-			previous_tag = entity
-			current_entity_type = ent_type
-			current_entity_name = ent_name
-			return entity 
-		} else {
-		  val entity = new EntityTag("", current_entity_type, current_entity_name, data)
-		  return entity
-		}
-	}
-
-	def hasNext: Boolean = !input.isEmpty
-    
-}
-
-
-class EntityTag(prevTagText: String, ent_type: EntityType, surface_form: String, textBlock:String) {
-	
-	val matcher = ent_type match {
-		case PERSON => TEIPatterns.person_pattern.matcher(textBlock)
-		case LOCATION => TEIPatterns.location_pattern.matcher(textBlock)
-		case ORGANIZATION => TEIPatterns.organization_pattern.matcher(textBlock)
-		case null => null
-		}
-
-	if(matcher != null && !matcher.find)
-		System.err.println("Error: Malformed textblock for creating Entity Tag: " + ent_type + " " + textBlock + "\n\n")
-	val tag_text = if(matcher == null) "" else matcher.group(1) // The text inside the tag matching group
-	val follow_text = if(matcher == null) textBlock else {
-	    val endtag = "</" + ent_type + ">"
-	    textBlock.slice(textBlock.indexOf(endtag) + endtag.length, textBlock.length) // The text after the tag.
-	    }
-	// Don't include . in [] it thinks its a period
-	val surrounding_text = TEIPatterns.tag_pattern.matcher(prevTagText.toLowerCase).replaceAll("") + cleanFollowText
-	var identifier = ""
-
-	lazy val cleanFollowText : String = TEIPatterns.tag_pattern.matcher(follow_text.toLowerCase).replaceAll("")
-	def setAnnotation(wiki: WikipediaEntity) {
-	    if (wiki != null) {
-	      identifier = wiki.wikipediaTitle
-	      // TODO: use wiki metadata to figure out what entity type to use
-	    }
-	}
-	def getIdentifier : String = if (identifier != "") identifier else surface_form
-	def getName : String = surface_form
-	lazy val contextTerms: Seq[String] = {
-	    val terms = surrounding_text.split("\\s").distinct.filter(t => t.length > 1 && !TEIPatterns.stopwords.contains(t))
-	    val index = ((terms.length - 32)/2).toInt
-	    terms.distinct.filter(t => !TEIPatterns.stopwords.contains(t)).drop(index).dropRight(index).toSeq
-	}
-
-	def getTagText : String = "<" + ent_type + " name=\"" + getIdentifier + "\">" + tag_text + "</" + ent_type + ">"
-	def getTEIText : String = if(ent_type != null) getTagText + follow_text else follow_text
-	override def toString : String = getTagText
-	def getEntityType: EntityType = ent_type
-	lazy val queryId = surrounding_text.hashCode.toString
-
-	def toQuery(bookId: String): BookELQuery = {
-          return BookELQueryImpl(docId = bookId, enttype = ent_type.toString, queryId = queryId, name = surface_form.toLowerCase, contextTerms = contextTerms)
-	}
-
-    }
+import scala.xml._
+import scala.xml.transform._
+import scala.collection.mutable.HashMap
 
 object TEIAnnotator {
 
       val linker = new BooksEntityLinker
-      
+     
        def main(args: Array[String]) {
-       	   if (args.length < 2) {
+       	   if (args.length < 1) {
 	      println("Usage: scala TEIAnnotator inputFile outputFile")
 	      exit
 	   }
-
-       	   println("Annotating TEI file " + args(0) + ", new file saving to " + args(1))
-	   annotate(args(0), args(1), 10, 20)
+       println("Annotating TEI file " + args(0) + ", new file saving to " + args(1))
+	   processTeiFile(args(0), args(1))
        }
-
-def processEntities(entities: Queue[EntityTag], bookId:String) : Queue[EntityTag] =  {
-	 
-      println("Linking entities... " + entities)
-      entities.map(e => {
-       val query = e.toQuery(bookId)
-       println("Linking query: " + query.name)
-       val annotation = linker.link(query)
-       e.setAnnotation(annotation.head)
-     })
-
-          println("Done linking... ")
-          entities
-}
-
-def annotate(input_file: String, output_file: String, context_size: Int, buffer_size: Int) {
-      val entity_iterator = new TEIEntityIterator(input_file)
-      val bookId = input_file.split("/").last.split("_")(0)
-    // Maintain two fixed length queues: 
-    // Context queue (already written to disk used for entity linking based context queries), 
-    // Active queue awaiting being written out to disk. Also provides context for entity linking but in the forward direction.
-
-      val context:Queue[EntityTag] = new LinkedList[EntityTag]()
-      val active:Queue[EntityTag] = new LinkedList[EntityTag]()
-
-      val output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(output_file)))))
-      for ( tag <- entity_iterator ) {
-      	  active.add(tag)
-       }      
       
-      if (!active.isEmpty) {
-	     processEntities(active, bookId).foreach( ent => output.write(ent.getTEIText) )
-      }
+  def processTeiFile(input_filename: String, output_filename: String) {
+    val input = new java.io.InputStreamReader(new GZIPInputStream(new FileInputStream(input_filename)))
+    var data = XML.load(reader = input)
+//    var entities = data \\ "name"
+//    val bookId = input_filename.split("/").last.split("_")(0)
+//    
+//    val entitiesWithIdx = entities.zipWithIndex take 2
+//     for ((e, idx) <- entitiesWithIdx) {
+//       val words = e \\ "w" \\ "@form"
+//       val entityText = words.mkString(" ")
+//       println("Now linking entity " + idx + " name: " + entityText)
+//       val query = BookELQueryImpl(docId = bookId, enttype = e.attribute("type").get.text, queryId = bookId+idx, name = entityText, contextTerms =  Seq[String]())
+//       println("Linking query: " + query.name)
+//       val annotation = linker.link(query)
+//       
+//       updateWikiLink(e, annotation.head.title)
+//     }
+    val transformed = EntityRuleTransformer(data)
+    println(transformed)
+    val outputWriter = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(output_filename))))
+    scala.xml.XML.write(outputWriter, transformed,"utf-8",true,null)
+    outputWriter.close()
+  }
+  
+  
+  object LinkTransformer extends RewriteRule {
+    
+      case class GenAttr(pre: Option[String], 
+                   key: String, 
+                   value: Seq[Node], 
+                   next: MetaData) {
+  def toMetaData = Attribute(pre, key, value, next)
+}
 
-      output.close
-   }
+def decomposeMetaData(m: MetaData): Option[GenAttr] = m match {
+  case Null => None
+  case PrefixedAttribute(pre, key, value, next) => 
+    Some(GenAttr(Some(pre), key, value, next))
+  case UnprefixedAttribute(key, value, next) => 
+    Some(GenAttr(None, key, value, next))
+}
+
+def unchainMetaData(m: MetaData): Iterable[GenAttr] = 
+  m flatMap (decomposeMetaData)
+
+def doubleValues(l: Iterable[GenAttr]) = l map {
+  case g @ GenAttr(_, _, Text(v), _) if v matches "\\d+" => 
+    g.copy(value = Text(v.toInt * 2 toString))
+  case other => other
+}
+
+def chainMetaData(l: Iterable[GenAttr]): MetaData = l match {
+  case Nil => Null
+  case head :: tail => head.copy(next = chainMetaData(tail)).toMetaData
+}
+
+def mapMetaData(m: MetaData)(f: GenAttr => GenAttr): MetaData = 
+  chainMetaData(unchainMetaData(m).map(f))
+
+  val cache = new HashMap[String, String]
+  val attribs = "type"  
+  override def transform(n: Node): Seq[Node] = (n match {
+    case e: Elem =>
+      {
+        if (e.label equals "name") {
+          var attributes1 = unchainMetaData(e.attributes)
+          if (attributes1.size > 0) {
+            val entity = linkEntity(e)
+            var newAttrib = GenAttr(None, "Wiki_Title", Text(entity), Null)
+            var newList = attributes1.toBuffer
+            newList += newAttrib
+            var iterableList = newList.toList
+            val newMeta = chainMetaData(iterableList)
+            e.copy(attributes = newMeta)
+          } else {
+            e
+          }
+        } else {
+          e
+        }
+      }
+    case other => other
+  }).toSeq
+  
+    
+
+     def linkEntity(e: Node) : String = {
+       var bookId = ""
+       val words = e \\ "w" \\ "@form"
+       val entityText = words.mkString(" ")
+       
+       def performLinking(query: String) : String = {
+         var cleanQuery = query.replace(".","")
+         if (cleanQuery.trim().length() < 4) {
+           "NIL"
+         } else {
+           val query = BookELQueryImpl(docId = bookId, enttype = e.attribute("type").get.text, queryId = bookId, name = cleanQuery, contextTerms =  Seq[String]())
+                   println("Linking query: " + query.name)
+                   val annotation = linker.link(query)
+                   annotation.head.title
+         }
+       }
+       val result = cache.getOrElseUpdate(entityText, performLinking(entityText))
+
+       result
+     }
+  }
+  
+  object EntityRuleTransformer extends RuleTransformer(LinkTransformer)
+ 
+
 
 }
+
+
+
