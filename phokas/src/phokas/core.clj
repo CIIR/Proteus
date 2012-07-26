@@ -220,7 +220,7 @@
     (.set CoreAnnotations$TokensAnnotation
 	  (ArrayList. (map #(doto (CoreLabel.) (.setWord %)) x)))))
 
-(defn- make-annotated-sentences
+(defn- ^Annotation make-annotated-sentences
   [x]
   (loop [res (ArrayList.)
 	 sens x]
@@ -358,7 +358,9 @@
   [sen]
   (let [words (xml-> sen :w (attr :form))
         spans (EmbedTagger/tagText (s/join " " words))]
-    (map #(vector (.. % head position) (.. % last position) (.. % head nerLabel shortCategoryValue) (.string %)) spans)))
+    (map
+     (fn [^TokenSpan span]
+       [(.. span head position) (.. span last position) (.. span head nerLabel shortCategoryValue) (.string span)]))))
 
 (defn ner-para
   [para]
@@ -441,7 +443,7 @@
 (defn time-parser
   [line]
   (let [start (System/nanoTime)
-	tree (.parse (*annotators* :parser) (make-input-dtree (tag-line line)))
+	tree (.parse ^parser.Parser (*annotators* :parser) (make-input-dtree (tag-line line)))
 	heads (vec (.heads tree))
 	stop (System/nanoTime)
 	msecs (/ (- stop start) 100000.0)]
@@ -535,9 +537,9 @@
 	(let [wsegs (s/split body #"</w>")
 	      wspans (map #(re-find #"^((?:.|\n)*)<w ((?:.|\n)+)$" %) wsegs)
 	      sens (sentence-tagged-tokens body)
-	      trees (map #(.parse (*annotators* :parser) (make-input-dtree %)) sens)
-	      heads (flatten (map #(vec (.heads %)) trees))
-	      deprels (flatten (map #(vec (.deprels %)) trees))]
+	      trees (map #(.parse ^parser.Parser (*annotators* :parser) (make-input-dtree %)) sens)
+	      heads (flatten (map #(vec (.heads ^dependency.DTree %)) trees))
+	      deprels (flatten (map #(vec (.deprels ^dependency.DTree %)) trees))]
 	  (str pref ptag
 	       (apply str		; because map-str doesn't work on multiple colls
 		      (map (fn [orig head deprel]
