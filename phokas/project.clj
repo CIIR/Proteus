@@ -9,5 +9,6 @@
                  [enlive "1.0.0"]
                  [edu.stanford.nlp/stanford-corenlp "1.3.3"]
                  [edu.stanford.nlp/stanford-corenlp "1.3.3" :classifier "models"]
+                 [SamNER/SamNER_2.9.1 "0.1-SNAPSHOT"]
 		 [dparser "2011-01-18"]]
   :main phokas.core)

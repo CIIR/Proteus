@@ -8,7 +8,8 @@
 	    [clojure.zip :as zip])
   (:use [clojure.tools.cli]
 	[clojure.data.xml :only (source-seq parse-str)]
-	[clojure.data.zip.xml]	[ciir.utils])
+	[clojure.data.zip.xml]
+        [ciir.utils])
   (:import (java.io File BufferedInputStream InputStreamReader
 		    BufferedReader PushbackReader)
 	   (java.util ArrayList Properties)
@@ -17,7 +18,9 @@
 	   (edu.stanford.nlp.util ArrayCoreMap)
 	   (edu.stanford.nlp.ling CoreLabel
 				  CoreAnnotations$TokensAnnotation
-				  CoreAnnotations$SentencesAnnotation))
+				  CoreAnnotations$SentencesAnnotation)
+           (cc.factorie.app.nlp Document TokenSpan Token Sentence)
+           (SamNER NER EmbedTagger))
   (:gen-class))
 
 (set! *warn-on-reflection* true)
@@ -267,33 +270,27 @@
 		       (map #(get-phrase % words kids false) (filter #(> % id) k))))))))
 
 (defn- wrap-words
-  [nodes sen start end]
+  [nodes sen start end typea namea]
   (html/transform nodes
                   {[[:s (html/nth-of-type sen)] :> [:w (html/nth-of-type start)]]
                    [[:s (html/nth-of-type sen)] :> [:w (html/nth-of-type end)]]}
-                  (html/wrap "name" {:type "MISC"})))
+                  (html/wrap "name" {:type typea :name namea})))
 
-(defn- name-xform
-  [name-info]
-  [{[[:w (html/nth-of-type (inc (:id (first name-info))))]] [[:w (html/nth-of-type (inc (:id (last name-info))))]]}
-   (html/wrap "name" {:type "MISC"})])
-  
-
-(defn ner-sen
-  [sen]
-  (let [words (->> (xml-> sen :w zip/node)
-		   (map :attrs)
-		   (map-indexed #(assoc %2
-				   :head (-> %2 :head Integer/parseInt dec)
-				   :id %1))
-		   vec)
-	;; Use reverse so that kids get conj'd onto the front in correct order
-	kids (reduce #(assoc %1 (:head %2) (conj (%1 (:head %2)) (:id %2))) {} (reverse words))
-	props (filter #(and ((*annotators* :name-pos) (:type %))
-			    (re-find #"^[A-Z][a-z]*\.?$" (:form %))
-			    (not ((*annotators* :name-deps) (:deprel %)))) words) ; already non-recursive name?
-	names (map #(get-phrase (:id %) words kids true) props)]
-    (map #(map :id %) names)))
+;; (defn ner-sen
+;;   [sen]
+;;   (let [words (->> (xml-> sen :w zip/node)
+;; 		   (map :attrs)
+;; 		   (map-indexed #(assoc %2
+;; 				   :head (-> %2 :head Integer/parseInt dec)
+;; 				   :id %1))
+;; 		   vec)
+;; 	;; Use reverse so that kids get conj'd onto the front in correct order
+;; 	kids (reduce #(assoc %1 (:head %2) (conj (%1 (:head %2)) (:id %2))) {} (reverse words))
+;; 	props (filter #(and ((*annotators* :name-pos) (:type %))
+;; 			    (re-find #"^[A-Z][a-z]*\.?$" (:form %))
+;; 			    (not ((*annotators* :name-deps) (:deprel %)))) words) ; already non-recursive name?
+;; 	names (map #(get-phrase (:id %) words kids true) props)]
+;;     (map #(map :id %) names)))
     
     ;; (map-str
     ;;  #(str "<rs type=\"MISC\""
@@ -301,9 +298,72 @@
     ;;        " coords=\"" (s/join "|" (map :coords %)) "\"></rs>")
     ;;  names)))
 
+;; Need to do it by sentences since nth-of-type only works on a single
+;; child sequence
+
+;; (defn ner-para
+;;   [para]
+;;   (let [;; Wrap in dummy tags to allow stuff before or after main <p>.
+;;         tree (parse-str (str "<text>" para "</text>"))
+;;         words (-> tree
+;;                   zip/xml-zip
+;;                   (xml-> zf/descendants :w (attr :form)))
+;;         spans (EmbedTagger/tagText (s/join " " words))]
+;;     (println words)
+;;     (println (map #(str "@" (.string %) "@") spans))
+;;     (->
+;;      (reduce
+;;       (fn [t span]
+;;         (println (.. span head position) (.. span last position))
+;;         (wrap-words t
+;;                     (inc (.. span head position))
+;;                     (inc (.. span head position))
+;;                     (.. span head nerLabel shortCategoryValue)
+;;                     (.string span)))
+;;       (html/as-nodes tree)
+;;       (reverse spans))
+;;      html/emit*
+;;      s/join
+;;      (s/replace #"^<text>" "")
+;;      (s/replace #"</text>$" ""))))
+
+;; (defn ner-para
+;;   [para]
+;;   (let [;; Wrap in dummy tags to allow stuff before or after main <p>.
+;;         tree (parse-str (str "<text>" para "</text>"))
+;;         tags (-> tree
+;;                  zip/xml-zip
+;;                  (xml-> :p :s)
+;;                  (#(map ner-sen %)))]
+;;     (if (= tags '(()))
+;;       para
+;;       ;; Since we select words by offset, we need to reverse them in each sentence.
+;;       (let [trips (apply concat (map-indexed #(map (fn [x] (vec (concat [%1] x))) (reverse %2)) tags))]
+;;         (->
+;;          (reduce
+;;           (fn [t off]
+;;             (cond (nil? off) t
+;;                   (= 2 (count off)) (wrap-words t (inc (first off)) (inc (second off)) (inc (second off)))
+;;                   :else
+;;                   (let [[sen start end] off]
+;;                     (wrap-words t (inc sen) (inc start) (inc end)))))
+;;           (html/as-nodes tree)
+;;           trips)
+;;          html/emit*
+;;          s/join
+;;          (s/replace #"^<text>" "")
+;;          (s/replace #"</text>$" ""))))))
+
+(defn ner-sen
+  [sen]
+  (let [words (xml-> sen :w (attr :form))
+        spans (EmbedTagger/tagText (s/join " " words))]
+    (map #(vector (.. % head position) (.. % last position) (.. % head nerLabel shortCategoryValue) (.string %)) spans)))
+
 (defn ner-para
   [para]
-  (let [tree (parse-str (str "<text>" para "</text>")) ;; Wrap in dummy tags to allow stuff before or after main <p>.
+  (let [;; Wrap in dummy tags to allow stuff before or after main <p>.
+        tree (parse-str (str "<text>" para "</text>"))
         tags (-> tree
                  zip/xml-zip
                  (xml-> :p :s)
@@ -315,11 +375,9 @@
         (->
          (reduce
           (fn [t off]
-            (cond (nil? off) t
-                  (= 2 (count off)) (wrap-words t (inc (first off)) (inc (second off)) (inc (second off)))
-                  :else
-                  (let [[sen start end] off]
-                    (wrap-words t (inc sen) (inc start) (inc end)))))
+            (if-let [[sen start end typea namea] off]
+              (wrap-words t (inc sen) (inc start) (inc end) typea namea)
+              t))
           (html/as-nodes tree)
           trips)
          html/emit*
@@ -906,12 +964,11 @@
 (defn -main [& args]
   "IA book converter"
   (let [[options remaining banner]
-        (cli args
-             ["-c" "--clobber" "Clobber existing files" :default false :flag true]
-             ["-h" "--help" "Show help" :default false :flag true])]
-    (when (:help options)
-      (println banner)
-      (System/exit 0))
+        (safe-cli args
+                  ["-c" "--clobber" "Clobber existing files" :default false :flag true]
+                  ["-m" "--models" "Models for SamNER" :default "models"]
+                  ["-h" "--help" "Show help" :default false :flag true])]
+    (EmbedTagger/prepModels (:models options))
     (binding [*clobber?* (:clobber options)]
       (if (empty? remaining)
         (dj-convert-file-list
