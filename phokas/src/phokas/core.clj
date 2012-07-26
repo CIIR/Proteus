@@ -95,7 +95,7 @@
 					    (= (:name %) :OBJECT))
 				      s))]
 	(str "<pb n=\""
-	     (nth (re-find #"_0*(\d+).djvu$" ((page-start :attrs) :usemap)) 1)
+	     (nth (re-find #"_0*(\d+).djvu$" (:usemap (:attrs page-start))) 1)
 	     "\" />"))
       (apply
        str
