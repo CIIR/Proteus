@@ -42,11 +42,20 @@ abstract class Handler(val parameters: Parameters) {
     val root = StructuredQuery.parse(srequest.rawQuery);
     val transformed : Node = retrieval.transformQuery(root, searchParams);
     val start = System.currentTimeMillis
-    val scored : Array[ScoredDocument] = retrieval.runQuery(transformed, 
-							    searchParams)
+    printf("Transformed query: %s\n", transformed)
+    if (retrieval == null) println("JESUS");
+    var scored : Array[ScoredDocument] = null
+    try {
+      scored = retrieval.runQuery(transformed, searchParams)
+    } catch {
+      case e => printf("Problem: %s\n", e.getMessage)
+    }
     val finish = System.currentTimeMillis
+    if (scored == null) scored = Array[ScoredDocument]()
+    printf("Whatever\n");
     printf("[q=%s,ms=%d,nr=%d]\n", srequest.rawQuery, (finish-start), scored.length)
     var limit = Math.min(offset + count, scored.length)
+    printf("WAT\n");
     return Tuple2(root, scored.slice(offset, limit))
   }
 }

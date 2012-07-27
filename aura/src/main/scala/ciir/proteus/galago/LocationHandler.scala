@@ -36,7 +36,6 @@ class LocationHandler(p: Parameters) extends Handler(p) {
     c.set("terms", false);
     c.set("tags", false);
     var results = ListBuffer[SearchResult]()
-
     for (scoredDocument <- scored) {
       val identifier = scoredDocument.documentName;
       val document = retrieval.getDocument(identifier, c);
@@ -49,7 +48,6 @@ class LocationHandler(p: Parameters) extends Handler(p) {
       } else {
 	String.format("No Title (%s)", scoredDocument.documentName)
       }
-      val Array(bookId, pageNo) = identifier.split("_")
       var result = SearchResult(id = accessId,
 				score = scoredDocument.score,
 				title = Some(title),

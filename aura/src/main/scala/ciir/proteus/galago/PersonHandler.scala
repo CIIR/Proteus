@@ -29,14 +29,12 @@ class PersonHandler(p: Parameters) extends Handler(p) {
 
   override def search(srequest: SearchRequest): List[SearchResult] = {
     val (root, scored) = runQueryAgainstIndex(srequest)
-    if (scored == null) return List[SearchResult]()        
     val queryTerms = StructuredQuery.findQueryTerms(root);
     generator.setStemming(root.toString().contains("part=stemmedPostings"));
     val c = new Parameters;
     c.set("terms", false);
     c.set("tags", false);
     var results = ListBuffer[SearchResult]()
-
     for (scoredDocument <- scored) {
       val identifier = scoredDocument.documentName;
       val document = retrieval.getDocument(identifier, c);
@@ -49,7 +47,6 @@ class PersonHandler(p: Parameters) extends Handler(p) {
       } else {
 	String.format("No Title (%s)", scoredDocument.documentName)
       }
-      val Array(bookId, pageNo) = identifier.split("_")
       var result = SearchResult(id = accessId,
 				score = scoredDocument.score,
 				title = Some(title),
@@ -78,7 +75,6 @@ class PersonHandler(p: Parameters) extends Handler(p) {
     } else {
       String.format("No title (%s)", id.identifier)
     }
-
     var person = Person(fullName = Some(document.name),
 		      alternateNames = List[String]())    
     var pObject = ProteusObject(id = id,
