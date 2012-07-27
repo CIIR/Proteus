@@ -25,13 +25,12 @@ object PageHandler {
 
 class PageHandler(p: Parameters) extends Handler(p) {
   val archiveReaderUrl = "http://archive.org/stream"
-  val generator = new SnippetGenerator
   val retrieval = RetrievalFactory.instance(parameters)
 
   override def search(srequest: SearchRequest): List[SearchResult] = {
     val (root, scored) = runQueryAgainstIndex(srequest)
     if (scored == null) return List[SearchResult]()        
-    val queryTerms = StructuredQuery.findQueryTerms(root);
+    val queryTerms = StructuredQuery.findQueryTerms(root).toSet;
     generator.setStemming(root.toString().contains("part=stemmedPostings"));
     val c = new Parameters;
     c.set("terms", false);
@@ -45,11 +44,6 @@ class PageHandler(p: Parameters) extends Handler(p) {
 				      `type` = ProteusType.Page, 
 				      resourceId = siteId)
       val summary = ResultSummary(getSummary(document, queryTerms), List())
-      val title = if (document.metadata.containsKey("title")) {
-        generator.highlight(document.metadata.get("title"), queryTerms);
-      } else {
-	String.format("No Title (%s)", scoredDocument.documentName)
-      }
       val Array(bookId, pageNo) = identifier.split("_")
       val externalUrl = String.format("%s/%s#page/n%s/mode/2up",
 				      archiveReaderUrl,
@@ -57,7 +51,7 @@ class PageHandler(p: Parameters) extends Handler(p) {
 				      pageNo)
       var result = SearchResult(id = accessId,
 				score = scoredDocument.score,
-				title = Some(title),
+				title = Some(getDisplayTitle(document, queryTerms)),
 				summary = Some(summary),
 				externalUrl = Some(externalUrl),
 				thumbUrl = getThumbUrl(accessId),
@@ -78,35 +72,16 @@ class PageHandler(p: Parameters) extends Handler(p) {
   c.set("tags", true);    
   private def getPageObject(id: AccessIdentifier): ProteusObject = {
     val document = retrieval.getDocument(id.identifier, c)
-    val title = if (document.metadata.containsKey("title")) {
-      document.metadata.get("title");
-    } else {
-      String.format("No title (%s)", id.identifier)
-    }
-
     var page = Page(fullText = Some(document.text),
 		    creators = List[String](),
 		    pageNumber = Some(id.identifier.split("_").last.toInt))
     
     var pObject = ProteusObject(id = id,
-				title = Some(title),
+				title = Some(getTitle(document)),
 				description = Some("A page in a book"),
 				thumbUrl = getThumbUrl(id),
 				page = Some(page))
     return pObject
-  }
-
-  private def getSummary(document: Document, 
-			 query: java.util.Set[String]): String = {
-    if (document.metadata.containsKey("description")) {
-      val description = document.metadata.get("description");
-
-      if (description.length() > 10) {
-        return generator.highlight(description, query);
-      }
-    }
-
-    return generator.getSnippet(document.text, query);
   }
 
   private def getImgUrl(id: AccessIdentifier): Some[String] = {

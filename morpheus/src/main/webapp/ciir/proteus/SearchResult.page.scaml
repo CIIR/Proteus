@@ -2,18 +2,15 @@
  %td(style="width:103px; max-width:103px")
   %a.thumbnail{:href => {imgUrl.get}}
    %img{:src => {thumbUrl.get}}
- %td  
-  %table
-   %tr
-    %td
-     %u
-      %strong 
-       = title.get
-     %span
-      %a{:href => {externalUrl.get}} 
-       [View at Internet Archive]
-   %tr
-    %td
-     %p 
-      != summary.get.text
+ %td
+  %div  
+   %span
+    %u
+     %strong 
+      = title.get
+   %span
+    %a{:href => {externalUrl.get}} [View at Internet Archive]
+  .span8
+   %p.well
+    != summary.get.text
 

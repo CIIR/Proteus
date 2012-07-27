@@ -24,13 +24,12 @@ object LocationHandler {
 }
 
 class LocationHandler(p: Parameters) extends Handler(p) {
-  val generator = new SnippetGenerator
   val retrieval = RetrievalFactory.instance(parameters)
 
   override def search(srequest: SearchRequest): List[SearchResult] = {
     val (root, scored) = runQueryAgainstIndex(srequest)
     if (scored == null) return List[SearchResult]()        
-    val queryTerms = StructuredQuery.findQueryTerms(root);
+    val queryTerms = StructuredQuery.findQueryTerms(root).toSet;
     generator.setStemming(root.toString().contains("part=stemmedPostings"));
     val c = new Parameters;
     c.set("terms", false);
@@ -43,14 +42,9 @@ class LocationHandler(p: Parameters) extends Handler(p) {
 				      `type` = ProteusType.Location, 
 				      resourceId = siteId)
       val summary = ResultSummary(getSummary(document, queryTerms), List())
-      val title = if (document.metadata.containsKey("title")) {
-        generator.highlight(document.metadata.get("title"), queryTerms);
-      } else {
-	String.format("No Title (%s)", scoredDocument.documentName)
-      }
       var result = SearchResult(id = accessId,
 				score = scoredDocument.score,
-				title = Some(title),
+				title = Some(getDisplayTitle(document, queryTerms)),
 				summary = Some(summary),
 				externalUrl = Some(dummyExtUrl),
 				thumbUrl = Some(dummyThumbUrl),
@@ -71,32 +65,13 @@ class LocationHandler(p: Parameters) extends Handler(p) {
   c.set("tags", true);    
   private def getLocationObject(id: AccessIdentifier): ProteusObject = {
     val document = retrieval.getDocument(id.identifier, c)
-    val title = if (document.metadata.containsKey("title")) {
-      document.metadata.get("title");
-    } else {
-      String.format("No title (%s)", id.identifier)
-    }
-
     var location = Location(fullName = Some(document.name),
 			  alternateNames = List[String]())    
     var pObject = ProteusObject(id = id,
-				title = Some(title),
+				title = Some(getTitle(document)),
 				description = Some("A page in a book"),
 				thumbUrl = Some(dummyThumbUrl),
 				location = Some(location))
     return pObject
-  }
-
-  private def getSummary(document: Document, 
-			 query: java.util.Set[String]): String = {
-    if (document.metadata.containsKey("description")) {
-      val description = document.metadata.get("description");
-
-      if (description.length() > 10) {
-        return generator.highlight(description, query);
-      }
-    }
-
-    return generator.getSnippet(document.text, query);
   }
 }
