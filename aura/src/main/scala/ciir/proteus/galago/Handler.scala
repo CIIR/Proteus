@@ -12,6 +12,8 @@ object Handler {
     return pType match {
       case ProteusType.Page => Some(PageHandler(parameters))
       case ProteusType.Collection => Some(CollectionHandler(parameters))
+      case ProteusType.Person => Some(PersonHandler(parameters))
+      case ProteusType.Location => Some(LocationHandler(parameters))
       case _ => None
     }    
   }
@@ -19,7 +21,9 @@ object Handler {
 
 abstract class Handler(val parameters: Parameters) {
   val siteId = parameters.getString("siteId")
-
+  val dummyThumbUrl = "http://ciir.cs.umass.edu/~irmarc/imgs/opera-house-thumb.JPG"
+  val dummyImgUrl = "http://ciir.cs.umass.edu/~irmarc/imgs/opera-house.JPG"
+  val dummyExtUrl = "http://ciir.cs.umass.edu/~irmarc/etc/placeholder.html"
   def search(srequest : SearchRequest) : List[SearchResult]
   def lookup(ids: Set[AccessIdentifier]) : List[ProteusObject]
 
