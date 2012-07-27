@@ -6,26 +6,12 @@
     %li 
      %a(href="##{resType}tab" data-toggle="tab") #{resType.capitalize} (#{results(resType).size})
   
-  -#  This is a Scaml comment. Everything nested under here is omitted from 
-       output. The static version of the loop code is below, kept for posterity
-       for now. The indent depth of this is *very* important. Left one, and everything
-       in the rest of this div is commented. One right, and the list items below will activate.
-   %li.active
-    %a(href="#pagetab" data-toggle="tab") Pages (#{results("page").size})
-   %li
-    %a(href="#collectiontab" data-toggle="tab") Whole Books (#{results("collection").size})
-   %li
-    %a(href="#persontab" data-toggle="tab") People (#{results("person").size})
-   %li
-    %a(href="#locationtab" data-toggle="tab") Places (#{results("location").size})
-   %li
-    %a(href="#picturetab" data-toggle="tab") Pictures (#{results("picture").size})
-  
+  -# Loop over result types and display by calling "collection" on the set  
   .tab-content
    - for (resType <- results.keys.toList.sorted)
     .tab-pane.fade(id="#{resType}tab")
      %table.table-bordered.table-striped
-      = collection(results(resType), "show")
+      = collection(results(resType), resType)
 
   -# Activate the first result pane and check the types
      we searched for.
