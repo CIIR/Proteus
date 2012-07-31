@@ -1,0 +1,12 @@
+-@ val results : Map[String, Any] = Map[String, Any]()
+.container-fluid
+ .row-fluid
+  .span12
+   %ul.nav.nav-tabs#lookupTabs
+    - for (resType <- results.keys.toList.sorted)
+     %li
+      %a(href="##{resType}tab" data-toggle="tab") #{resType.capitalize} (#{results(resType).size})
+    .tab-content
+     - for (resType <- results.keys.toList.sorted)
+      .tab-pane.fade(id="#{resType}tab")
+      

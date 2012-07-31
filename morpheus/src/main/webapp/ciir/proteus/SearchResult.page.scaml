@@ -5,9 +5,10 @@
  %td
   %div  
    %span
-    %u
-     %strong 
-      = title.get
+    %a{:href => "/lookup?id={id.identifier}&t={id.type}"}
+     %u
+      %strong 
+       = title.get
    %span
     %a{:href => {externalUrl.get}} [View at Internet Archive]
   .span8

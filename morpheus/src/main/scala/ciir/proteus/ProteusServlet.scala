@@ -1,6 +1,5 @@
-package edu.umass.ciir.proteus
+package ciir.proteus
 
-import ciir.proteus._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.util.{Duration,Future}
 import com.twitter.finagle.thrift.ThriftClientFramedCodec
@@ -39,6 +38,32 @@ with FakeDataGenerator {
   get("/index") { renderHTML("index.scaml") }
   get("/about") { renderHTML("about.scaml") }
   get("/contact") { renderHTML("contact.scaml") }
+  get("/lookup-single") {
+    contentType = "text/html"
+    "This will contain content for" + multiParams("pid").toString
+  }
+  get("/lookup") {
+    val accessIds = multiParams("pid") map { pid => decrypt(pid) }
+    val request = LookupRequest(accessIds)
+    val futureResponse = dataClient.lookup(request)
+    val response = futureResponse()
+    // Need to split the results by type
+    var splitResults = Map[String, AnyRef]()
+    for (typeStr : String <- kReturnableTypes) {
+      val filteredByType = response.results.filter { 
+	result : SearchResult => 
+	  result.id.`type` == ProteusType.valueOf(typeStr).get
+      }
+      // If we found any results of that type in the filter,
+      // then add it as a typed result list.
+      if (filteredByType.length > 0) {
+	splitResults += (typeStr -> filteredByType)
+      }
+    }
+    actuals += ("results" -> splitResults)
+    renderHTML("lookup.scaml", actuals)
+  }
+
   get("/search") {
     var actuals = Map[String, Any]() 
     

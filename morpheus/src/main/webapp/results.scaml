@@ -15,22 +15,4 @@
 
   -# Activate the first result pane and check the types
      we searched for.
-  :javascript
-   $(function() {
-    // This activates the first pane
-    $('#resultTabs a:first').tab('show');
-    
-    // Now select the type buttons
-    var resultTypes = $('#resultTabs a');
-    if (resultTypes.size() == 5) {
-      // Previous search did 'all'
-      $('#typeselection button[name="all"]').addClass('active');
-    } else {
-      // Do 'em one by one.
-      var pattern = /#([a-z]+)tab/
-      resultTypes.each(function() {
-       var buttonName = pattern.exec($(this).attr('href'))[1]
-       $('#typeselection button[name="'+buttonName+'"]').addClass('active');
-      });
-    }
-   })
+  %script{:type => "text/javascript", :src => "assets/js/search-functions.js"}
