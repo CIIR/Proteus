@@ -51,6 +51,7 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
   }
   val handlerMap: Map[ProteusType, Handler] = hBuilder.result
   val handlerKeys = handlerMap.keySet
+  val links = LinkProvider(parameters)
   //  End Construction
 
   override def search(srequest: SearchRequest): Future[SearchResponse] = {
@@ -78,6 +79,28 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
   }
 
   override def transform(trequest: TransformRequest): Future[TransformResponse] = {
-    return null
+    val accessIds = links.getTargetIds(trequest).take(50)
+    printf("found %d links\n", accessIds.size)
+    val objects = 
+      accessIds.filter((A) => handlerMap.contains(A.`type`)).map { 
+	aid =>
+	  handlerMap(aid.`type`).lookup(aid)
+      }.filter {
+	obj =>
+	  obj != null
+      }    
+    return Future(TransformResponse(objects))
+  }
+
+  override def status : Future[StatusResponse] = {
+    val colInfo = handlerMap.values.map {
+      handler =>
+	handler.getInfo
+    }.toList
+    val linkInfo = links.getInfo
+    val resp = StatusResponse(siteId = siteIdentifier,
+			      collectionData = colInfo,
+			      linkData = linkInfo)
+    return Future(resp)
   }
 }

@@ -4,17 +4,18 @@
  %td
   %div
    - if (thumbUrl.isDefined)
-      .span1
-         %a.thumbnail{:href => {imgUrl.get}}
-            %img{:src => {thumbUrl.get}}
+    .span1
+     %a.thumbnail{:href => {imgUrl.get}}
+      %img{:src => {thumbUrl.get}}
    .span8
     %span
      %a(href = "/details?id=#{did}")
       %u
        %strong 
         = title.get
-    %span
-     %a{:href => {externalUrl.get}} [View at Internet Archive]
+    - if (externalUrl.isDefined)
+     %span
+      %a{:href => {externalUrl.get}} #{getExternalLinkText(externalUrl.get)}
     %div
      %p.well
       != summary.get.text

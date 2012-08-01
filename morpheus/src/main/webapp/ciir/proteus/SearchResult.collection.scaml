@@ -1,16 +1,19 @@
-%tr
- %td(style="width:103px; max-width:103px")
+- import ciir.proteus.ProteusFunctions._
+%div
+ .span1
   %a.thumbnail{:href => {imgUrl.get}}
    %img{:src => {thumbUrl.get}}
- %td
-  %div  
-   %span
+ .span8
+  %span
+   %a(href = "/details?id=#{displayId(id)}")
     %u
      %strong 
       = title.get
-   %span
-    %a{:href => {externalUrl.get}} [View at Internet Archive]
-  .span8
+  %span
+   %a{:href => {externalUrl.get}} [View at Internet Archive]
+  %div
    %p.well
     != summary.get.text
+ .span3
+  = render("/transformations.scaml", Map('id -> id))
 

@@ -16,19 +16,21 @@ enum ProteusType {
   PERSON = 5,
   LOCATION = 6,
   ORGANIZATION = 7,
+  MISCELLANEOUS = 8,
 }
 
 // Specify containment
 // A mapping of objects to what objects may contain them. A reverse mapping
 // of 'contains', defined below.
-const map<string, list<string> > containedBy = { 
+const map<string, list<string> > isContainedBy = { 
   "page" : [ "collection" ],
-  "picture" : [ "page" ],
-  "video" : [ "page" ],
-  "audio" : [ "page" ],
-  "person" : ["page", "picture", "video", "audio"],
-  "location" : [ "page", "picture", "video", "audio" ],
-  "organization" : [ "page", "picture", "video", "audio" ]
+  "picture" : [ "page", "collection" ],
+  "video" : [ "page", "collection" ],
+  "audio" : [ "page", "collection" ],
+  "person" : ["page", "picture", "video", "audio", "collection"],
+  "location" : [ "page", "picture", "video", "audio", "collection" ],
+  "organization" : [ "page", "picture", "video", "audio", "collection" ],
+  "miscellaneous" : [ "page", "picture", "video", "audio", "collection" ]
 }
 
 // What a given type can have contents of type
@@ -41,12 +43,13 @@ const map<string, list<string> > containedBy = {
 // in the sense of them being mentioned, whereas a page would contain
 // the text of those entities.
 const map<string, list<string>> contains = {
-  "collection" : [ "page" ],
-  "page" : [ "picture", "video", "audio", 
-  "person", "location", "organization"],
-  "picture" : [ "person", "location", "organization" ],
-  "video" : [ "person", "location", "organization" ],
-  "audio" : [ "person", "location", "organization" ]
+  "collection" : [ "page", "picture", "video", "audio",
+  	     "person", "location", "organization", "miscellaneous"],
+  "page" : [ "picture", "video", "audio",
+  	     "person", "location", "organization", "miscellaneous"],
+  "picture" : [ "person", "location", "organization", "miscellaneous" ],
+  "video" : [ "person", "location", "organization", "miscellaneous" ],
+  "audio" : [ "person", "location", "organization", "miscellaneous" ]
 }
 
 // List atomic structs first
@@ -234,7 +237,7 @@ struct ProteusObject {
   14: optional Audio audio,
   15: optional Person person,
   16: optional Location location,
-  17: optional Organization organization,
+  17: optional Organization organization
 }
 
 enum TransformType {
@@ -272,8 +275,29 @@ struct LookupResponse {
   1: list<ProteusObject> objects,
 }
 
+struct CollectionInfo {
+ 1: ProteusType type,
+ 2: i64 num_docs,
+ 3: i64 vocab_size,
+ 4: i64 num_tokens,
+ 5: list<string> fields,
+} 
+
+struct LinkInfo {
+ 1: ProteusType src,
+ 2: ProteusType target,
+ 3: i64 num_links,
+}
+
+struct StatusResponse {
+  1: string siteId,
+  2: list<CollectionInfo> collectionData,
+  3: list<LinkInfo> linkData,
+}
+
 service ProteusProvider {
   SearchResponse search(1:SearchRequest srequest),
   LookupResponse lookup(2:LookupRequest lrequest),
   TransformResponse transform(3:TransformRequest trequest),
+  StatusResponse status(),
 }

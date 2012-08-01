@@ -25,6 +25,7 @@ object LocationHandler {
 
 class LocationHandler(p: Parameters) extends Handler(p) {
   val retrieval = RetrievalFactory.instance(parameters)
+  val retrievalType = ProteusType.Location
 
   override def search(srequest: SearchRequest): List[SearchResult] = {
     val (root, scored) = runQueryAgainstIndex(srequest)
@@ -57,14 +58,18 @@ class LocationHandler(p: Parameters) extends Handler(p) {
     return results.toList
   }
 
+  override def lookup(id: AccessIdentifier) : ProteusObject =
+    getLocationObject(id)
+
   override def lookup(ids: Set[AccessIdentifier]): List[ProteusObject] =
-    ids.map { id => getLocationObject(id) }.toList
+    ids.map { id => getLocationObject(id) }.filter { A => A != null }.toList
 
   val c = new Parameters;
   c.set("terms", true);
   c.set("tags", true);    
   private def getLocationObject(id: AccessIdentifier): ProteusObject = {
     val document = retrieval.getDocument(id.identifier, c)
+    if (document == null) return null
     var location = Location(fullName = Some(document.name),
 			  alternateNames = List[String]())    
     var pObject = ProteusObject(id = id,

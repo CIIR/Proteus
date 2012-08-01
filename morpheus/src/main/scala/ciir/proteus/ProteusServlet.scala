@@ -11,14 +11,21 @@ import scalate.ScalateSupport
 import scala.collection.JavaConversions._
 import org.lemurproject.galago.tupleflow.Parameters
 
+object ProteusServlet {
+  val kReturnableTypes = List("page", 
+			      "collection", 
+			      //"picture", 
+			      "person", 
+			      "location", 
+			      "miscellaneous")
+}
+
 class ProteusServlet extends ScalatraServlet 
 with ScalateSupport 
 with FakeDataGenerator {
-  val kReturnableTypes = List("page", "collection", "picture", "person", "location")
+  import ProteusServlet._
   val kNumSearchResults = 10
-
   val parameters = new Parameters()
-
   val dataService = ClientBuilder()
   .hosts(new InetSocketAddress(parameters.get("host", "ayr.cs.umass.edu"),
 			       parameters.get("port", 8101).toInt))
@@ -38,21 +45,49 @@ with FakeDataGenerator {
   get("/index") { renderHTML("index.scaml") }
   get("/about") { renderHTML("about.scaml") }
   get("/contact") { renderHTML("contact.scaml") }
-  get("/lookup-single") {
-    contentType = "text/html"
-    "This will contain content for" + multiParams("pid").toString
-  }
-  get("/lookup") {
-    val accessIds = multiParams("pid") map { pid => decrypt(pid) }
-    val request = LookupRequest(accessIds)
+  get("/details") {
+    val aid = ProteusFunctions.externalId(params("id"))
+    val request = LookupRequest(List(aid))
     val futureResponse = dataClient.lookup(request)
     val response = futureResponse()
+    val obj = response.objects.head
+    val actuals = Map[String, Any]("pObject" -> obj)
+    renderHTML("details.scaml", actuals)
+  }
+
+  get("/status") {
+    val response = dataClient.status()()
+    printf("linkdata: %s\n", response.linkData.toString)
+    renderHTML("status.scaml", Map("siteId" -> response.siteId,
+				   "collectionData" -> response.collectionData,
+				   "linkData" -> response.linkData))
+  }
+
+  get("/transform") {
+    val transformType = TransformType(params("tv").toInt)
+    val srcAid = ProteusFunctions.externalId(params("f"))
+    val targetType = ProteusType.valueOf(params("t"))
+    val trequest = TransformRequest(transformType = transformType,
+				    referenceId = srcAid,
+				    targetType = targetType)
+    val response = dataClient.transform(trequest)()
+    val objects = response.objects.toList
+    renderHTML("viewobjects.scaml", Map("pObjects" -> objects))
+  }
+
+  get("/lookup") {
+    val accessIds = multiParams("id") map { 
+      pid => 
+	ProteusFunctions.externalId(pid)
+    }
+    val request = LookupRequest(accessIds)
+    val response = dataClient.lookup(request)()
     // Need to split the results by type
     var splitResults = Map[String, AnyRef]()
     for (typeStr : String <- kReturnableTypes) {
-      val filteredByType = response.results.filter { 
-	result : SearchResult => 
-	  result.id.`type` == ProteusType.valueOf(typeStr).get
+      val filteredByType = response.objects.filter { 
+	obj : ProteusObject => 
+	  obj.id.`type` == ProteusType.valueOf(typeStr).get
       }
       // If we found any results of that type in the filter,
       // then add it as a typed result list.
@@ -60,7 +95,7 @@ with FakeDataGenerator {
 	splitResults += (typeStr -> filteredByType)
       }
     }
-    actuals += ("results" -> splitResults)
+    var actuals = Map[String, Any]("result" -> splitResults)
     renderHTML("lookup.scaml", actuals)
   }
 

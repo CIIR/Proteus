@@ -5,7 +5,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns
 	<servlet>
 		<servlet-name>scalatra</servlet-name>
 		<servlet-class>
-			edu.umass.ciir.proteus.ProteusServlet
+			ciir.proteus.ProteusServlet
 		</servlet-class>
 	</servlet>
 

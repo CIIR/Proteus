@@ -1,0 +1,10 @@
+- val p = page.get
+- if (p.creators.size > 0)
+ %ul
+  - for (creator <- p.creators)
+   %li Author: #{creator}
+ %hr
+%b Full text:
+%br
+.well
+ = p.fullText.getOrElse("<None>")

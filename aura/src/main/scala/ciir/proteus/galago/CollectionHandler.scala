@@ -26,6 +26,7 @@ object CollectionHandler {
 class CollectionHandler(p : Parameters) extends Handler(p) {
   val archiveReaderUrl = "http://archive.org/stream"
   val retrieval = RetrievalFactory.instance(parameters)
+  val retrievalType = ProteusType.Collection
 
   override def search(srequest: SearchRequest): List[SearchResult] = {
     val (root, scored) = runQueryAgainstIndex(srequest)
@@ -61,14 +62,18 @@ class CollectionHandler(p : Parameters) extends Handler(p) {
     return results.toList
   }
 
+  override def lookup(id: AccessIdentifier) : ProteusObject =
+    getCollectionObject(id)
+
   override def lookup(ids: Set[AccessIdentifier]): List[ProteusObject] = 
-    ids.map { id => getCollectionObject(id) }.toList
+    ids.map { id => getCollectionObject(id) }.filter { A => A != null }.toList
 
   val c = new Parameters;
   c.set("terms", true);
   c.set("tags", true);    
   private def getCollectionObject(id: AccessIdentifier) : ProteusObject = {
     val document = retrieval.getDocument(id.identifier, c)
+    if (document == null) return null
     var collection = Collection(creators = Seq[String]())
     var pObject = ProteusObject(id = id,
 				title = Some(getTitle(document)),

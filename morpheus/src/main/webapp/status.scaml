@@ -1,0 +1,48 @@
+- import ciir.proteus._
+- import scala.collection.mutable.Buffer
+-@ val siteId : String
+-@ val collectionData : Buffer[CollectionInfo]
+-@ val linkData : Buffer[LinkInfo]
+.container-fluid
+ .row-fluid
+  .span12
+   %h1 Status of site #{siteId}
+  %hr
+  %div
+   %h3 Collection Information
+   %table.table-bordered.table-striped
+    - for (cd <- collectionData)
+     %tr
+      %td
+       %div
+        %b Type:
+        = cd.`type`.name
+       %div
+        %b Number of entries:
+        = cd.numDocs
+       %div
+        %b Number of tokens:
+        = cd.numTokens
+       %div
+        %b Number of Unique Tokens:
+        = cd.vocabSize
+       %div
+        %b Available Fields:
+        %ul
+         - for (f <- cd.fields)
+          %li #{f}
+  %div
+   Link Information
+  %table.table-bordered.table-striped
+   - for (li <- linkData)
+    %tr
+     %td
+      %div
+       %b Source:
+       = li.src.name
+      %div
+       %b Target
+       = li.target.name
+      %div
+       %b Number of links:
+       = li.numLinks

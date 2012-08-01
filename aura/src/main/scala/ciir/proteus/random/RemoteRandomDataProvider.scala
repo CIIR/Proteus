@@ -27,4 +27,10 @@ class RemoteRandomDataProvider extends ProteusProvider.FutureIface with FakeData
   override def transform(trequest: TransformRequest): Future[TransformResponse] = {
     return null
   }
+
+  override def status() : Future[StatusResponse] = {
+    return Future(StatusResponse(siteId = "random",
+				 collectionData = List[CollectionInfo](),
+				 linkData = List[LinkInfo]()))
+  }
 }

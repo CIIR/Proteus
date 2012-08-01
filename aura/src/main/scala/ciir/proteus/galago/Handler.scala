@@ -17,6 +17,7 @@ object Handler {
       case ProteusType.Collection => Some(CollectionHandler(parameters))
       case ProteusType.Person => Some(PersonHandler(parameters))
       case ProteusType.Location => Some(LocationHandler(parameters))
+      case ProteusType.Miscellaneous => Some(MiscHandler(parameters))
       case _ => None
     }    
   }
@@ -29,13 +30,15 @@ abstract class Handler(val parameters: Parameters) {
   val dummyExtUrl = "http://ciir.cs.umass.edu/~irmarc/etc/placeholder.html"
   val generator = new SnippetGenerator
 
+  // Defined by the subclasses
+  val retrievalType : ProteusType
+  val retrieval : Retrieval
   def search(srequest : SearchRequest) : List[SearchResult]
   def lookup(ids: Set[AccessIdentifier]) : List[ProteusObject]
-
+  def lookup(id: AccessIdentifier) : ProteusObject
 
   // Returns the correct subset of the results. Query is run,
   // the subset from [offset, offset+count] is returned
-  val retrieval : Retrieval
   def runQueryAgainstIndex(srequest: SearchRequest) : Tuple2[Node, Array[ScoredDocument]] = {
     val optionalParams = srequest.parameters
     val (count, offset, lang) = srequest.parameters match {
@@ -52,7 +55,11 @@ abstract class Handler(val parameters: Parameters) {
     scored = retrieval.runQuery(transformed, searchParams)
     val finish = System.currentTimeMillis
     if (scored == null) scored = Array[ScoredDocument]()
-    printf("[q=%s,ms=%d,nr=%d]\n", srequest.rawQuery, (finish-start), scored.length)
+    printf("[%s,q=%s,ms=%d,nr=%d]\n", 
+	   retrievalType.name,
+	   srequest.rawQuery, 
+	   (finish-start), 
+	   scored.length)
     var limit = Math.min(offset + count, scored.length)
     return Tuple2(root, scored.slice(offset, limit))
   }
@@ -62,7 +69,7 @@ abstract class Handler(val parameters: Parameters) {
       document.metadata.get("title")
     } else {
       String.format("No Title (%s)", document.name);
-    } 
+    }
     if (title.length > 60) {
       title = String.format("%s ...", title.take(60))
     }
@@ -85,6 +92,23 @@ abstract class Handler(val parameters: Parameters) {
       }
     }
     return generator.getSnippet(document.text, query);
+  }
+
+  def getInfo : CollectionInfo = {
+    val stats = retrieval.getRetrievalStatistics();
+    val parts = retrieval.getAvailableParts.getKeys().filter {
+      partName =>
+	partName.startsWith("field.") && (partName.indexOf("porter") == -1)
+    }.map {
+      partName => 
+	partName.replace("field.","")
+	
+    }
+    return CollectionInfo(`type` = retrievalType,
+			  numDocs = stats.documentCount,
+			  vocabSize = stats.vocabCount,
+			  numTokens = stats.collectionLength,
+			  fields = parts.toList)
   }
 }
 

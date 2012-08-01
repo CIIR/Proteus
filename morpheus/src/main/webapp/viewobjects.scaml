@@ -1,0 +1,7 @@
+- import ciir.proteus.ProteusObject
+-@ val pObjects : List[ProteusObject]
+%table.table-bordered.table-striped.span12
+ - for (pObj <- pObjects)
+  %tr
+   %td
+    = view(pObj, pObj.id.`type`.name)

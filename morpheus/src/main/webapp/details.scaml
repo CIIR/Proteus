@@ -1,0 +1,20 @@
+- import ciir.proteus.ProteusObject
+-# The import below loads the local namespace of pObject's
+-# instance members.
+-@ import val pObject : ProteusObject
+.container-fluid
+ .row-fluid
+  %h1 Details for #{title.getOrElse("<Unknown>")}
+  %hr
+  - if (description.isDefined)
+   .well
+    %b Description:
+    = description.getOrElse("No description found.")
+  - if (imgUrl.isDefined)
+   %div
+    %b Image:
+    %div
+     %img(src={pObject.imgUrl.get} style="border:thin solid black")
+  
+  - val pType = id.`type`.name
+  = view(pObject, pType)

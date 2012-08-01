@@ -17,8 +17,8 @@ object PersonHandler {
 }
 
 class PersonHandler(p: Parameters) extends Handler(p) {
-
   val retrieval = RetrievalFactory.instance(parameters)
+  val retrievalType = ProteusType.Person
 
   override def search(srequest: SearchRequest): List[SearchResult] = {
     val (root, scored) = runQueryAgainstIndex(srequest)
@@ -51,14 +51,18 @@ class PersonHandler(p: Parameters) extends Handler(p) {
     return results.toList
   }
 
+  override def lookup(id: AccessIdentifier): ProteusObject =
+    getPersonObject(id)
+
   override def lookup(ids: Set[AccessIdentifier]): List[ProteusObject] =
-    ids.map { id => getPersonObject(id) }.toList
+    ids.map { id => getPersonObject(id) }.filter { A => A != null }.toList
 
   val c = new Parameters;
   c.set("terms", true);
   c.set("tags", true);    
   private def getPersonObject(id: AccessIdentifier): ProteusObject = {
     val document = retrieval.getDocument(id.identifier, c)
+    if (document == null) return null
     var person = Person(fullName = Some(document.name),
 		      alternateNames = List[String]())    
     var pObject = ProteusObject(id = id,
