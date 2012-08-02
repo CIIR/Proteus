@@ -2,6 +2,7 @@ package ciir.proteus.galago
 
 import java.io.File
 import scala.collection.mutable.MapBuilder
+import scala.collection.immutable.HashMap
 import scala.collection.JavaConversions._
 import ciir.proteus._
 import com.twitter.finagle.builder._
@@ -79,7 +80,8 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
   }
 
   override def transform(trequest: TransformRequest): Future[TransformResponse] = {
-    val accessIds = links.getTargetIds(trequest).take(50)
+    val accessIds = links.getTargetIds(trequest.referenceId,
+				       trequest.targetType.get).take(50)
     printf("found %d links\n", accessIds.size)
     val objects = 
       accessIds.filter((A) => handlerMap.contains(A.`type`)).map { 
@@ -102,5 +104,54 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
 			      collectionData = colInfo,
 			      linkData = linkInfo)
     return Future(resp)
+  }
+
+
+  // Performs a "search" on behalf of the previous results given.
+  override def related(rrequest: RelatedRequest) : Future[SearchResponse] = {
+    var acc = HashMap[AccessIdentifier, Double]()
+    for (belief <- rrequest.beliefs;
+	 targetType <- rrequest.targetTypes) {
+      val targetIds = links.countOccurrences(belief.id, targetType)
+      for ((tid, count) <- targetIds) {
+	if (!acc.containsKey(tid)) {
+	  acc += (tid -> (count * belief.score))
+	} else {
+	  val newscore = acc(tid) + (count * belief.score)
+	  acc += (tid -> newscore)
+	}
+      }
+    }
+
+    val sortedResults = acc.toList.sortWith((A,B) => A._2 > B._2).take(50)
+    val optionalResults : List[Option[SearchResult]] = sortedResults.map { 
+      A => {
+	val aid = A._1
+	val score = A._2
+	if (!handlerMap.containsKey(aid.`type`)) {
+	  None
+	} else {
+	  val handler = handlerMap(aid.`type`)
+	  val d = handler.getDocument(aid)
+	  if (d.isDefined) {
+	    val summary = if (d.get.text != null) {
+	      ResultSummary(d.get.text.take(180), List())
+	    } else {
+	      ResultSummary("No summary", List())
+	    }
+	    Some(SearchResult(id = aid,
+			 title = Some(handler.getTitle(d.get)),
+			 summary = Some(summary),
+			 score = score))
+	  } else {
+	    None
+	  }
+	}
+      }
+    }
+    val finalResults = optionalResults.filter(_.isDefined).map(_.get)
+
+    // Should fill in the results here - do it later.
+    return Future(SearchResponse(results = finalResults))
   }
 }

@@ -94,6 +94,17 @@ abstract class Handler(val parameters: Parameters) {
     return generator.getSnippet(document.text, query);
   }
 
+  def getDocument(aid: AccessIdentifier) : Option[Document] = {
+    val c = new Parameters;
+    c.set("terms", true);
+    c.set("tags", true);
+    val d = retrieval.getDocument(aid.identifier, c)
+    if (d == null)
+      None
+    else
+      Some(d)
+  }
+
   def getInfo : CollectionInfo = {
     val stats = retrieval.getRetrievalStatistics();
     val parts = retrieval.getAvailableParts.getKeys().filter {

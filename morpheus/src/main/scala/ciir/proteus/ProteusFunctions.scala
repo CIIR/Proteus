@@ -4,6 +4,22 @@ import ciir.proteus.Constants._
 import ciir.proteus.ProteusServlet._
 
 object ProteusFunctions {
+  def pluralDisplayName(typeString : String) : String = 
+    typeString.toLowerCase match {
+      case "collection" => "Books"
+      case "location" => "Locations"
+      case "miscellaneous" => "Other"
+      case "page" => "Pages"
+      case "person" => "People"
+      case _ => typeString.capitalize
+  }
+
+  def singleDisplayName(typeString : String) : String = 
+    typeString.toLowerCase match {
+      case "collection" => "Book"
+      case _ => typeString.capitalize
+  }
+
   def displayId(aid: AccessIdentifier) : String = 
     String.format("%s.%s.%s", aid.identifier, aid.`type`.name, aid.resourceId) 
 

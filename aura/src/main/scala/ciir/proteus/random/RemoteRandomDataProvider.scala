@@ -33,4 +33,9 @@ class RemoteRandomDataProvider extends ProteusProvider.FutureIface with FakeData
 				 collectionData = List[CollectionInfo](),
 				 linkData = List[LinkInfo]()))
   }
+
+  override def related(rrequest: RelatedRequest) : Future[SearchResponse] = {
+    return Future(SearchResponse(results = List[SearchResult](), 
+				 error = Some("Not yet implemented.")))
+  }
 }

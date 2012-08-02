@@ -266,6 +266,11 @@ struct TransformResponse {
   1: list<ProteusObject> objects,
 }
 
+struct RelatedRequest {
+  1: list<SearchResult> beliefs,
+  2: list<ProteusType> target_types,
+}
+
 // Something to look up one or more objects
 struct LookupRequest {
   1: list<AccessIdentifier> ids,
@@ -297,7 +302,8 @@ struct StatusResponse {
 
 service ProteusProvider {
   SearchResponse search(1:SearchRequest srequest),
-  LookupResponse lookup(2:LookupRequest lrequest),
-  TransformResponse transform(3:TransformRequest trequest),
+  LookupResponse lookup(1:LookupRequest lrequest),
+  TransformResponse transform(1:TransformRequest trequest),
+  SearchResponse related(1:RelatedRequest rrequest),
   StatusResponse status(),
 }

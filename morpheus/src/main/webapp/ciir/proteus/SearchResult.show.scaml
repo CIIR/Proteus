@@ -7,17 +7,17 @@
     .span1
      %a.thumbnail{:href => {imgUrl.get}}
       %img{:src => {thumbUrl.get}}
-   .span8
+   .span10
     %span
      %a(href = "/details?id=#{did}")
       %u
        %strong 
-        = title.get
+        = title.getOrElse("No Title")
     - if (externalUrl.isDefined)
      %span
       %a{:href => {externalUrl.get}} #{getExternalLinkText(externalUrl.get)}
     %div
      %p.well
-      != summary.get.text
-   .span3
-    = render("/transformations.scaml", Map('id -> id, 'displayId -> did))
+      - if (summary.isDefined)
+       != summary.get.text
+  %input(type="hidden" name="#{did}" value="#{score}")

@@ -1,30 +1,15 @@
 - import ciir.proteus._
 - import ciir.proteus.ProteusFunctions._
--@ val id : AccessIdentifier
--@ val displayId : String
-- val typeName = id.`type`.name
-- val containers : Set[String] = getContainingTypes(typeName)
-- val contents : Set[String] = getContainedTypes(typeName)
-- val up = TransformType.ToContainer.getValue
-- val down = TransformType.ToContents.getValue
-.btn-group
- %a.btn.dropdown-toggle(data-toggle="dropdown" href="#")
-  Links To:
-  %span.caret
- %ul.dropdown-menu
-  - if (!containers.isEmpty)
-   %li Things containing this #{typeName}:
-   - for (container <- containers.toList.sorted)
-    %li
-     %a(href="/transform?f=#{displayId}&t=#{container.toLowerCase}&tv=#{up}")
-      = container.capitalize
-
-  - if (!contents.isEmpty && !containers.isEmpty)
-   %li.divider
-
-  - if (!contents.isEmpty)
-   %li Things this #{typeName} contains:
-   - for (element <- contents.toList.sorted)
-    %li
-     %a(href="/transform?f=#{displayId}&t=#{element.toLowerCase}&tv=#{down}")
-      = element.capitalize
+-@ val typeName : String
+- val translates : Set[String] = getContainingTypes(typeName) ++ getContainedTypes(typeName)
+- if (!translates.isEmpty)
+ %form#relatedForm(method="post" action="related")
+  .btn-group
+   %a.btn.dropdown-toggle(data-toggle="dropdown" href="#")
+    View related...
+    %span.caret
+   %ul.dropdown-menu
+    - for (target <- translates.toList.sorted)
+     %li
+      %a(href="#" onclick="relatedResults('#{target.toLowerCase}')")
+       = pluralDisplayName(target)

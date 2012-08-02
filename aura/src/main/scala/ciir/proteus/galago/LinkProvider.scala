@@ -30,6 +30,8 @@ class LinkProvider(parameters: Parameters) {
     linkMap(src)(target) = new IndexLinkReader(path.getCanonicalPath())
   }
 
+  // TODO: Get rid of these two tables. Requires that we somehow reconcile
+  // things like "PER" to "Person" in some other way.
   val extToInt = Map[ProteusType, String](
     ProteusType.Collection -> "collection",
     ProteusType.Page -> "page",
@@ -46,20 +48,43 @@ class LinkProvider(parameters: Parameters) {
     "ORG" -> ProteusType.Organization,
     "MISC" -> ProteusType.Miscellaneous)
   
-  def getTargetIds(trequest : TransformRequest) : List[AccessIdentifier] = {
-    val srcKey = extToInt(trequest.referenceId.`type`)
-    val targetKey = extToInt(trequest.targetType.get)
+
+
+  def getTargetIds(src: AccessIdentifier, 
+		   targetType: ProteusType) : List[AccessIdentifier] = {
+    val srcKey = extToInt(src.`type`)
+    val targetKey = extToInt(targetType)
     val index = linkMap(srcKey)(targetKey)
     var list = List[AccessIdentifier]()
-    if (index.containsKey(trequest.referenceId.identifier)) {
+    if (index.containsKey(src.identifier)) {
       System.err.printf("Retrieving %s -> %s linkset for %s\n",
-			srcKey, targetKey, trequest.referenceId.identifier)
-      val links = index.getLinks(trequest.referenceId.identifier)
+			srcKey, targetKey, src.identifier)
+      val links = index.getLinks(src.identifier)
       for (t: Target <- links.target) {
 	val aid = AccessIdentifier(identifier = t.id,
-				   `type` = trequest.targetType.get,
+				   `type` = targetType,
 				   resourceId = siteId)
 	list = aid +: list
+      }
+    }
+    return list
+  }
+
+  def countOccurrences(src: AccessIdentifier, 
+		   targetType: ProteusType) : List[Tuple2[AccessIdentifier, Int]] = {
+    val srcKey = extToInt(src.`type`)
+    val targetKey = extToInt(targetType)
+    val index = linkMap(srcKey)(targetKey)
+    var list = List[Tuple2[AccessIdentifier, Int]]()
+    if (index.containsKey(src.identifier)) {
+      System.err.printf("Retrieving %s -> %s counted linkset for %s\n",
+			srcKey, targetKey, src.identifier)
+      val links = index.getLinks(src.identifier)
+      for (t: Target <- links.target) {
+	val aid = AccessIdentifier(identifier = t.id,
+				   `type` = targetType,
+				   resourceId = siteId)
+	list = (aid, t.positions.size) +: list
       }
     }
     return list

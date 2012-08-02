@@ -5,15 +5,17 @@
   %ul.nav.nav-tabs#resultTabs
    - for (resType <- results.keys.toList.sorted)
     %li 
-     %a(href="##{resType}tab" data-toggle="tab") #{resType.capitalize} (#{results(resType).size})
+     %a(href="##{resType}tab" data-toggle="tab") 
+      #{pluralDisplayName(resType)} (#{results(resType).size})
   
   -# Loop over result types and display by calling "collection" on the set  
-  .tab-content
+  .tab-content#resultContent
    - for (resType <- results.keys.toList.sorted)
     .tab-pane.fade(id="#{resType}tab")
-     %table.table-bordered.table-striped
+     %table.table-bordered.table-striped.span9
       = collection(results(resType), "show")
-
+     .span2
+      = render("/transformations.scaml", Map('typeName -> resType))
   -# Activate the first result pane and check the types
      we searched for.
   %script{:type => "text/javascript", :src => "assets/js/proteus/search-functions.js"}

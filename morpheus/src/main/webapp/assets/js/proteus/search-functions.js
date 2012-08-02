@@ -1,5 +1,5 @@
 $(function() {
-      // This activates the first pane
+      // This activates the first result pane
       $('#resultTabs a:first').tab('show');
       
       // Now select the type buttons
@@ -17,13 +17,22 @@ $(function() {
       }
   });
 
-// Sets up a callback for the result links to open a modal for showing
-// index contentx
-function showContent(pid) {
-    var url = "/lookup-single?pid=" + pid;
-    var modalpid = pid + "-modal";
+// Preps the page for transformation.
+function relatedResults(targetType) {
+    // copy the active result elements into the form
+    $("#resultContent .tab-pane.active input")
+	.each(function() {
+		  var newvalue = $(this).attr('name') + ',' + $(this).attr('value');
+		  return jQuery('<input/>', {
+				    type : 'hidden',
+				    name : 'score',
+				    value : newvalue
+				}).appendTo("#relatedForm");
+	      });
 
-    // AJAX MAGIC OR LOOKUP ON THE DOM
-
-    $("#" + modalpid).modal('show');
+    // Append the target type
+    jQuery('<input/>', { 
+	      type: 'hidden', name: 'targetType', value: targetType
+	   }).appendTo("#relatedForm");
+    $('#relatedForm').submit();
 }
