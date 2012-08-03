@@ -65,11 +65,11 @@ object AuraDeps {
   val ostrich = "com.twitter" %% "finagle-ostrich4" % finagleVer
   val scroogeRuntime = "com.twitter" %% "scrooge-runtime" % "1.1.3"
   val galagoCore = "org.lemurproject.galago" % "core" % "3.3-SNAPSHOT"
-  val galagoTupleflow = "org.lemurproject.galago" % "core" % "3.3-SNAPSHOT"
+  val galagoTupleflow = "org.lemurproject.galago" % "tupleflow" % "3.3-SNAPSHOT"
+  val gson = "com.google.code.gson" % "gson" % "2.2.2"
 
   def deps = Seq(thriftLib, finagleCore, finagleThrift, ostrich, scroogeRuntime,
-	       galagoCore, galagoTupleflow)
-
+	       galagoCore, galagoTupleflow, gson)
 }
 
 object MorpheusDeps {
@@ -81,7 +81,7 @@ object MorpheusDeps {
   val jetty = "org.eclipse.jetty" % "jetty-webapp" % "7.6.0.v20120127" % "container"
   val javax = "javax.servlet" % "servlet-api" % "2.5" % "provided"
   val galagoCore = "org.lemurproject.galago" % "core" % "3.3-SNAPSHOT"
-  val galagoTupleflow = "org.lemurproject.galago" % "core" % "3.3-SNAPSHOT"
+  val galagoTupleflow = "org.lemurproject.galago" % "tupleflow" % "3.3-SNAPSHOT"
   def deps = Seq(scalatra, scalate, scalatraSpecs2, logback, jetty, javax, galagoCore, galagoTupleflow)
 }
 

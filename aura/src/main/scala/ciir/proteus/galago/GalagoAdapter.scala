@@ -22,7 +22,7 @@ import org.lemurproject.galago.tupleflow.Parameters;
 // 2) Fanning those requests out to the appropriate hooked up retrieval servers
 // 3) Collecting the responses from each server and composing them as a single 
 //    response to the sender
-// 4) (TODO) reports status on the health of the component indexes
+// 4) reports status on the health of the component indexes
 class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface {
   // Construction
   val siteIdentifier = parameters.getString("siteId")

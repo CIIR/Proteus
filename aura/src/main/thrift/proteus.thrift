@@ -17,6 +17,7 @@ enum ProteusType {
   LOCATION = 6,
   ORGANIZATION = 7,
   MISCELLANEOUS = 8,
+  TOPIC = 9
 }
 
 // Specify containment
@@ -125,7 +126,7 @@ struct WeightedTerm {
 }
 
 // A list of string (term) : weight (frequency) pairs. Used for language models, and other things.
-struct TermHistogram {
+struct TermList {
   1: list<WeightedTerm> terms,
 }
 
@@ -139,7 +140,7 @@ struct Organization {
 // Dates where this object was mentioned (e.g. a person)
 // or dates contained by this object (e.g. collection)
 // A list of long values (dates) : weight (frequency) pairs. Used for date mentions, and other things.
-struct LongValueHistogram {
+struct LongValueList {
   1: list<WeightedDate> dates,
 }
 
@@ -224,8 +225,8 @@ struct ProteusObject {
   4: optional string img_url,
   5: optional string thumb_url,
   6: optional string external_url,
-  7: optional LongValueHistogram date_freq,
-  8: optional TermHistogram language_model,
+  7: optional LongValueList date_freq,
+  8: optional TermList language_model,
   9: string language = "en",
 
   // Each of the composed struct types
