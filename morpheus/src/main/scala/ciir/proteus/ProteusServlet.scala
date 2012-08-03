@@ -12,6 +12,7 @@ import scalate.ScalateSupport
 import scala.collection.JavaConversions._
 import scala.collection.mutable.MapBuilder
 import org.lemurproject.galago.tupleflow.Parameters
+import java.util.ArrayList
 
 object ProteusServlet {
   val kReturnableTypes = List("page", 
@@ -19,17 +20,26 @@ object ProteusServlet {
 			      "person", 
 			      "location", 
 			      "miscellaneous")
+			      
+  var parameters: Parameters = new Parameters()
 }
 
 class ProteusServlet extends ScalatraServlet 
 with ScalateSupport 
 with FakeDataGenerator {
   import ProteusServlet._
+
   val kNumSearchResults = 10
-  val parameters = new Parameters()
+  // Load the first server parameters 
+  val auraServer = ProteusServlet.parameters.getAsList("servers").asInstanceOf[ArrayList[Parameters]].first
+  if(!auraServer.containsKey("host") || !auraServer.containsKey("port")) {
+    println("Please provide both a host and port key value for each server listed in servers list in parameters.")
+    System.exit(1)
+  }
+
   val dataService = ClientBuilder()
-  .hosts(new InetSocketAddress(parameters.get("host", "ayr.cs.umass.edu"),
-			       parameters.get("port", 8101).toInt))
+  .hosts(new InetSocketAddress(auraServer.getString("host"),
+			       auraServer.getLong("port").toInt))
   .codec(ThriftClientFramedCodec())
   .hostConnectionLimit(1)
   .tcpConnectTimeout(Duration(1, TimeUnit.SECONDS))
