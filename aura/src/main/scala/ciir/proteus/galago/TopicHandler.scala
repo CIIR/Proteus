@@ -7,7 +7,6 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import org.lemurproject.galago.tupleflow.Parameters
 import org.lemurproject.galago.tupleflow.Utility
-import org.lemurproject.galago.core.thrift.PrefixedTermMap
 import org.lemurproject.galago.core.index.disk.DiskBTreeReader
 import ciir.proteus._
 import com.twitter.finagle.builder._
@@ -32,9 +31,7 @@ class TopicHandler(p: Parameters) extends Handler(p) {
 
       val transport = new TMemoryInputTransport(iterator.getValueBytes)
       val protocol = factory.getProtocol(transport)
-      val prefixedMap = new PrefixedTermMap
-      prefixedMap.read(protocol)
-      return Some(prefixedMap)
+      return Some(PrefixedTermMap.decoder(protocol))
     }
   }
   
@@ -68,10 +65,17 @@ class TopicHandler(p: Parameters) extends Handler(p) {
   }
 
   override def lookup(id: AccessIdentifier): ProteusObject = {
-    null
+    // Try to find matching stuff from the word Index
+    val words = wordIndex.getEntry(id.identifier)
+    val pages = pageIndex.getEntry(id.identifier)    
+    val topic = Topic(words = words, pages = pages)
+    var pObject = ProteusObject(id = id,
+				title = Some(id.identifier),
+				description = Some("An automatically generated topic"),
+				topic = Some(topic))
+    return pObject
   }
 
-  override def lookup(ids: Set[AccessIdentifier]): List[ProteusObject] = {
-    List[ProteusObject]()
-  }
+  override def lookup(ids: Set[AccessIdentifier]): List[ProteusObject] = 
+    ids.map(lookup(_)).toList
 }

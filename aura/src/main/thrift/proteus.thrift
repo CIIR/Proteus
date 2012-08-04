@@ -130,6 +130,11 @@ struct TermList {
   1: list<WeightedTerm> terms,
 }
 
+// This IS a posting list, but as map entries.
+struct PrefixedTermMap {  
+  1: map<string, TermList> term_lists
+}
+
 // Organization: An organization mentioned on a page
 struct Organization {
   1: optional string full_name,
@@ -142,6 +147,13 @@ struct Organization {
 // A list of long values (dates) : weight (frequency) pairs. Used for date mentions, and other things.
 struct LongValueList {
   1: list<WeightedDate> dates,
+}
+
+// Representation of an abstract collection of ideas.
+// Or something.
+struct Topic {
+ 1: optional TermList words,
+ 2: optional PrefixedTermMap pages
 }
 
 // Collection: Book, Newspaper, Website, etc.
@@ -239,6 +251,7 @@ struct ProteusObject {
   15: optional Person person,
   16: optional Location location,
   17: optional Organization organization
+  18: optional Topic topic
 }
 
 enum TransformType {
