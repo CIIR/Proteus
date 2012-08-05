@@ -23,7 +23,8 @@ object PageHandler {
   def apply(p: Parameters) = new PageHandler(p)
 }
 
-class PageHandler(p: Parameters) extends Handler(p) {
+class PageHandler(p: Parameters) extends Handler(p) 
+with Searchable {
   val archiveReaderUrl = "http://archive.org/stream"
   val retrieval = RetrievalFactory.instance(parameters)
   val retrievalType = ProteusType.Page

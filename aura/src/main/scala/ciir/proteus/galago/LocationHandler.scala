@@ -23,7 +23,8 @@ object LocationHandler {
   def apply(p: Parameters) = new LocationHandler(p)
 }
 
-class LocationHandler(p: Parameters) extends Handler(p) {
+class LocationHandler(p: Parameters) extends Handler(p) 
+with Searchable {
   val retrieval = RetrievalFactory.instance(parameters)
   val retrievalType = ProteusType.Location
 

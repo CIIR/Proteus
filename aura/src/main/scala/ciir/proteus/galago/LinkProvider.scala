@@ -3,8 +3,6 @@ package ciir.proteus.galago
 import java.io.File;
 import ciir.proteus._
 import scala.collection.JavaConversions._
-import org.lemurproject.galago.core.thrift.IndexLink;
-import org.lemurproject.galago.core.thrift.Target;
 import org.lemurproject.galago.core.index.IndexLinkReader;
 import org.lemurproject.galago.tupleflow.Parameters;
 

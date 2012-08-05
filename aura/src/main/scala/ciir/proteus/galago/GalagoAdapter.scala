@@ -58,8 +58,19 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
   override def search(srequest: SearchRequest): Future[SearchResponse] = {
     val activeKeys = handlerKeys & srequest.`types`.toSet
     val resultsSet = activeKeys.map { 
-      key: ProteusType => 
-	handlerMap(key).search(srequest)
+      key: ProteusType => handlerMap(key) match {
+	case s:Searchable => {
+	  var results = s.search(srequest)
+	  if (activeKeys(ProteusType.Picture) &&
+	      key == ProteusType.Page) {
+	    val picHandler : PictureHandler = handlerMap(ProteusType.Picture).asInstanceOf[PictureHandler]
+	    (results ++ picHandler.scorePictures(results)).toList
+	  } else {
+	    results
+	  }
+	}
+	case _ => List()
+      }
     }
     val resultList = resultsSet.reduceLeft { (A, B) => A ++ B }.toList
     return Future(SearchResponse(results = resultList, error = None))
@@ -132,26 +143,22 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
 	  None
 	} else {
 	  val handler = handlerMap(aid.`type`)
-	  val d = handler.getDocument(aid)
-	  if (d.isDefined) {
-	    val summary = if (d.get.text != null) {
-	      ResultSummary(d.get.text.take(180), List())
-	    } else {
-	      ResultSummary("No summary", List())
-	    }
-	    Some(SearchResult(id = aid,
-			 title = Some(handler.getTitle(d.get)),
-			 summary = Some(summary),
-			 score = score))
-	  } else {
-	    None
-	  }
+	  val pObject = handler.lookup(aid)
+	  Some(proteusObjectToSearchResult(pObject, score))
 	}
       }
     }
     val finalResults = optionalResults.filter(_.isDefined).map(_.get)
-
-    // Should fill in the results here - do it later.
     return Future(SearchResponse(results = finalResults))
   }
+
+  def proteusObjectToSearchResult(pObj: ProteusObject, score: Double) : SearchResult =
+    SearchResult(id = pObj.id, 
+		 score = score,
+		 title = pObj.title,
+		 imgUrl = pObj.imgUrl,
+		 thumbUrl = pObj.thumbUrl,
+		 externalUrl = pObj.externalUrl,
+		 summary = Some(ResultSummary(text = pObj.description.getOrElse("No summary"), 
+					      highlights = List())))
 }

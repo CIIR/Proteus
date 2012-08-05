@@ -18,7 +18,7 @@ object ProteusBuild extends Build {
     base = file("aura"),
     settings = buildSettings ++
               CompileThriftScrooge.newSettings ++
-              Seq(resolvers := Resolvers.all,
+              Seq(resolvers := Resolver.withDefaultResolvers(Resolvers.all, true, true), 
                   libraryDependencies ++= AuraDeps.deps,
                   CompileThriftScrooge.scroogeVersion := "2.5.4")
   )
@@ -49,10 +49,12 @@ object BuildSettings {
 object Resolvers {
   val twitter = "twitter" at "http://maven.twttr.com/"
   val sonatype = "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/"
+  val mavenLocal = "Local Maven Repository" at "file://"+Path.userHome+"/.m2/repository"
+  val maven2 = "Maven 2 repo" at "http://repo2.maven.org/maven2"
   val galagoSF = "Galago @ SourceForge" at "http://lemur.sf.net/repo"
   val blikiRepo = "Bliki Google Code Repo" at "http://gwtwiki.googlecode.com/svn/maven-repository/"
 
-  def all = Seq(twitter, sonatype, galagoSF, blikiRepo)
+  def all = Seq(twitter, sonatype, galagoSF, blikiRepo, maven2, mavenLocal)
 }
 
 object AuraDeps {
@@ -64,8 +66,8 @@ object AuraDeps {
   val finagleThrift = "com.twitter" %% "finagle-thrift" % finagleVer
   val ostrich = "com.twitter" %% "finagle-ostrich4" % finagleVer
   val scroogeRuntime = "com.twitter" %% "scrooge-runtime" % "1.1.3"
-  val galagoCore = "org.lemurproject.galago" % "core" % "3.3-SNAPSHOT"
-  val galagoTupleflow = "org.lemurproject.galago" % "tupleflow" % "3.3-SNAPSHOT"
+  val galagoCore = "org.lemurproject.galago" % "core" % "3.3-PROTEUS"
+  val galagoTupleflow = "org.lemurproject.galago" % "tupleflow" % "3.3-PROTEUS"
   val gson = "com.google.code.gson" % "gson" % "2.2.2"
 
   def deps = Seq(thriftLib, finagleCore, finagleThrift, ostrich, scroogeRuntime,
@@ -77,13 +79,13 @@ object MorpheusDeps {
   val scalatra = "org.scalatra" %% "scalatra" % "2.0.4"
   val scalate = "org.scalatra" %% "scalatra-scalate" % "2.0.4"
   val scalatraSpecs2 = "org.scalatra" %% "scalatra-specs2" % "2.0.4" % "test"
-  val logback = "ch.qos.logback" % "logback-classic" % "1.0.0" % "runtime"  // is this shit really necessary, it's in every project I've ever seen and only seems to clutter shit up  /rant
+  val logback = "ch.qos.logback" % "logback-classic" % "1.0.0" % "runtime"
   val jetty = "org.eclipse.jetty" % "jetty-webapp" % "7.6.0.v20120127" % "container"
-  val jettyComp = "org.eclipse.jetty" % "jetty-webapp" % "7.6.0.v20120127" % "compile"
   val javax = "javax.servlet" % "servlet-api" % "2.5" % "provided"
-  val galagoCore = "org.lemurproject.galago" % "core" % "3.3-SNAPSHOT"
-  val galagoTupleflow = "org.lemurproject.galago" % "tupleflow" % "3.3-SNAPSHOT"
+  val galagoCore = "org.lemurproject.galago" % "core" % "3.3-PROTEUS"
+  val galagoTupleflow = "org.lemurproject.galago" % "tupleflow" % "3.3-PROTEUS"
   def deps = Seq(scalatra, scalate, scalatraSpecs2, logback, jetty, javax, galagoCore, galagoTupleflow)
+
 }
 
 

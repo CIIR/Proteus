@@ -23,19 +23,42 @@ object Handler {
   }
 }
 
-abstract class Handler(val parameters: Parameters) {
-  val siteId = parameters.getString("siteId")
-  val dummyThumbUrl = "http://ciir.cs.umass.edu/~irmarc/imgs/opera-house-thumb.JPG"
-  val dummyImgUrl = "http://ciir.cs.umass.edu/~irmarc/imgs/opera-house.JPG"
-  val dummyExtUrl = "http://ciir.cs.umass.edu/~irmarc/etc/placeholder.html"
-  val generator = new SnippetGenerator
-
-  // Defined by the subclasses
+trait TypedStore {
   val retrievalType : ProteusType
+}
+
+trait Searchable extends TypedStore {
   val retrieval : Retrieval
+
   def search(srequest : SearchRequest) : List[SearchResult]
-  def lookup(ids: Set[AccessIdentifier]) : List[ProteusObject]
-  def lookup(id: AccessIdentifier) : ProteusObject
+
+  def getInfo : CollectionInfo = {
+    val stats = retrieval.getRetrievalStatistics();
+    val parts = retrieval.getAvailableParts.getKeys().filter {
+      partName =>
+	partName.startsWith("field.") && (partName.indexOf("porter") == -1)
+    }.map {
+      partName => 
+	partName.replace("field.","")
+	
+    }
+    return CollectionInfo(`type` = retrievalType,
+			  numDocs = stats.documentCount,
+			  vocabSize = stats.vocabCount,
+			  numTokens = stats.collectionLength,
+			  fields = parts.toList)
+  }
+
+  def getDocument(aid: AccessIdentifier) : Option[Document] = {
+    val c = new Parameters;
+    c.set("terms", true);
+    c.set("tags", true);
+    val d = retrieval.getDocument(aid.identifier, c)
+    if (d == null)
+      None
+    else
+      Some(d)
+  }
 
   // Returns the correct subset of the results. Query is run,
   // the subset from [offset, offset+count] is returned
@@ -63,6 +86,19 @@ abstract class Handler(val parameters: Parameters) {
     var limit = Math.min(offset + count, scored.length)
     return Tuple2(root, scored.slice(offset, limit))
   }
+}
+
+abstract class Handler(val parameters: Parameters) {
+  val siteId = parameters.getString("siteId")
+  val dummyThumbUrl = "http://ciir.cs.umass.edu/~irmarc/imgs/opera-house-thumb.JPG"
+  val dummyImgUrl = "http://ciir.cs.umass.edu/~irmarc/imgs/opera-house.JPG"
+  val dummyExtUrl = "http://ciir.cs.umass.edu/~irmarc/etc/placeholder.html"
+  val generator = new SnippetGenerator
+
+  // Defined by the subclasses
+  def lookup(ids: Set[AccessIdentifier]) : List[ProteusObject]
+  def lookup(id: AccessIdentifier) : ProteusObject
+  def getInfo() : CollectionInfo
 
   def getDisplayTitle(document : Document, queryTerms: Set[String]) : String = {
     var title = if (document.metadata.containsKey("title")) {
@@ -92,34 +128,6 @@ abstract class Handler(val parameters: Parameters) {
       }
     }
     return generator.getSnippet(document.text, query);
-  }
-
-  def getDocument(aid: AccessIdentifier) : Option[Document] = {
-    val c = new Parameters;
-    c.set("terms", true);
-    c.set("tags", true);
-    val d = retrieval.getDocument(aid.identifier, c)
-    if (d == null)
-      None
-    else
-      Some(d)
-  }
-
-  def getInfo : CollectionInfo = {
-    val stats = retrieval.getRetrievalStatistics();
-    val parts = retrieval.getAvailableParts.getKeys().filter {
-      partName =>
-	partName.startsWith("field.") && (partName.indexOf("porter") == -1)
-    }.map {
-      partName => 
-	partName.replace("field.","")
-	
-    }
-    return CollectionInfo(`type` = retrievalType,
-			  numDocs = stats.documentCount,
-			  vocabSize = stats.vocabCount,
-			  numTokens = stats.collectionLength,
-			  fields = parts.toList)
   }
 }
 

@@ -198,6 +198,10 @@ struct Picture {
   3: list<string> creators,
 }
 
+struct PictureList {
+  1: list<Picture> pictures
+}
+
 // Video: Video contained on a web page, or other page instance
 // (Zero or more per page)
 struct Video {
@@ -321,3 +325,16 @@ service ProteusProvider {
   SearchResponse related(1:RelatedRequest rrequest),
   StatusResponse status(),
 }
+
+struct Target {
+  1: string id,
+  2: string type,
+  3: optional list<i32> positions,
+}
+
+struct IndexLink {
+  1: string srcid,
+  2: string srctype,
+  3: list<Target> target,
+}
+

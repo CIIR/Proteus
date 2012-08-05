@@ -19,7 +19,8 @@ object TopicHandler {
   def apply(p: Parameters) = new TopicHandler(p)
 }
 
-class TopicHandler(p: Parameters) extends Handler(p) {
+class TopicHandler(p: Parameters) extends Handler(p) 
+with TypedStore {
   val factory = new TCompactProtocol.Factory
 
   // These are simple wrappers to deserialize the stored classes in the indexes
@@ -38,10 +39,7 @@ class TopicHandler(p: Parameters) extends Handler(p) {
   class WordsReader(index: DiskBTreeReader) {
     def getEntry(key: String) : Option[TermList] = {
       val iterator = index.getIterator(Utility.fromString(key))
-      if (iterator == null) {
-	return None
-      }
-     
+      if (iterator == null) return None
       val transport = new TMemoryInputTransport(iterator.getValueBytes)
       val protocol = factory.getProtocol(transport)
       return Some(TermList.decoder(protocol))
@@ -49,7 +47,6 @@ class TopicHandler(p: Parameters) extends Handler(p) {
   }
 
   val retrievalType = ProteusType.Topic
-  val retrieval = null
   val indexPath = p.getString("index")
   
   // Load pages if they exist
@@ -59,10 +56,6 @@ class TopicHandler(p: Parameters) extends Handler(p) {
   // Load words if possible
   val wordFile = new File(indexPath, "words")
   val wordIndex = new WordsReader(new DiskBTreeReader(wordFile))
-
-  override def search(srequest: SearchRequest): List[SearchResult] = {
-   return List[SearchResult]() 
-  }
 
   override def lookup(id: AccessIdentifier): ProteusObject = {
     // Try to find matching stuff from the word Index
@@ -78,4 +71,10 @@ class TopicHandler(p: Parameters) extends Handler(p) {
 
   override def lookup(ids: Set[AccessIdentifier]): List[ProteusObject] = 
     ids.map(lookup(_)).toList
+
+  override def getInfo() : CollectionInfo = CollectionInfo(`type` = ProteusType.Topic,
+							   numDocs = 0,
+							   vocabSize = 0,
+							   numTokens = 0,
+							   fields = List())
 }

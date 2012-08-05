@@ -16,7 +16,8 @@ object MiscHandler {
   def apply(p: Parameters) = new MiscHandler(p)
 }
 
-class MiscHandler(p: Parameters) extends Handler(p) {
+class MiscHandler(p: Parameters) extends Handler(p) 
+with Searchable {
   val wikiSearchUrl = "http://en.wikipedia.org/w/index.php?search="
   val retrieval = RetrievalFactory.instance(parameters)
   val retrievalType = ProteusType.Miscellaneous

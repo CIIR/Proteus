@@ -23,7 +23,8 @@ object CollectionHandler {
   def apply(p : Parameters) = new CollectionHandler(p)
 }
 
-class CollectionHandler(p : Parameters) extends Handler(p) {
+class CollectionHandler(p : Parameters) extends Handler(p) 
+with Searchable {
   val archiveReaderUrl = "http://archive.org/stream"
   val retrieval = RetrievalFactory.instance(parameters)
   val retrievalType = ProteusType.Collection

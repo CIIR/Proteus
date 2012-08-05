@@ -16,7 +16,8 @@ object PersonHandler {
   def apply(p: Parameters) = new PersonHandler(p)
 }
 
-class PersonHandler(p: Parameters) extends Handler(p) {
+class PersonHandler(p: Parameters) extends Handler(p) 
+with Searchable {
   val retrieval = RetrievalFactory.instance(parameters)
   val retrievalType = ProteusType.Person
 
