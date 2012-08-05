@@ -81,10 +81,11 @@ object MorpheusDeps {
   val scalatraSpecs2 = "org.scalatra" %% "scalatra-specs2" % "2.0.4" % "test"
   val logback = "ch.qos.logback" % "logback-classic" % "1.0.0" % "runtime"
   val jetty = "org.eclipse.jetty" % "jetty-webapp" % "7.6.0.v20120127" % "container"
+  val jettyComp = "org.eclipse.jetty" % "jetty-webapp" % "7.6.0.v20120127" % "compile"
   val javax = "javax.servlet" % "servlet-api" % "2.5" % "provided"
   val galagoCore = "org.lemurproject.galago" % "core" % "3.3-PROTEUS"
   val galagoTupleflow = "org.lemurproject.galago" % "tupleflow" % "3.3-PROTEUS"
-  def deps = Seq(scalatra, scalate, scalatraSpecs2, logback, jetty, javax, galagoCore, galagoTupleflow)
+  def deps = Seq(scalatra, scalate, scalatraSpecs2, logback, jetty, jettyComp, javax, galagoCore, galagoTupleflow)
 
 }
 
