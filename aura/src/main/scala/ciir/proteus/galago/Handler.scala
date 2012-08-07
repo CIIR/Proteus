@@ -9,6 +9,7 @@ import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.core.index.corpus.SnippetGenerator;
+import scala.collection.mutable.ListBuffer
 
 object Handler {
   def apply(pType: ProteusType, 
@@ -72,7 +73,8 @@ trait Searchable extends TypedStore {
     
     val searchParams = new Parameters
     searchParams.set("count", count+offset)
-    val root = StructuredQuery.parse(srequest.rawQuery);
+    val cleanQueryString = cleanQuery(srequest.rawQuery)
+    val root = StructuredQuery.parse(cleanQueryString);
     val transformed : Node = retrieval.transformQuery(root, searchParams);
     val start = System.currentTimeMillis
     var scored : Array[ScoredDocument] = null
@@ -87,6 +89,19 @@ trait Searchable extends TypedStore {
     var limit = Math.min(offset + count, scored.length)
     return Tuple2(root, scored.slice(offset, limit))
   }
+  
+  def cleanQuery(request:String) : String = {
+          val normalizedTokens = new ListBuffer[String]()
+          val cleanQuery = request.replace("-", " ").toLowerCase.replaceAll("[^a-z01-9 ]", " ").replaceAll("\\s+", " ").trim
+          val tokens = cleanQuery.split("\\s+")
+          for (term <- tokens) {
+              if (term.length() > 0) {
+                  normalizedTokens.add(term);
+              }
+          }
+         val normalizedQuery = "#combine(" + normalizedTokens.mkString(" ") + ")"
+         normalizedQuery
+    }
 }
 
 abstract class Handler(val parameters: Parameters) {
@@ -105,16 +120,22 @@ abstract class Handler(val parameters: Parameters) {
     var title = if (document.metadata.containsKey("title")) {
       document.metadata.get("title")
     } else {
-      String.format("No Title (%s)", document.name);
+      String.format("%s", document.name);
     }
-    String.format("%s ...", title.take(60))
+    
+    if (title.length > 60) {
+        title = String.format("%s ...", title.take(60))
+    }
+    
+    generator.highlight(title, queryTerms);
+
   }
 
   def getTitle(document : Document) : String = {
     if (document.metadata.containsKey("title")) {
       document.metadata.get("title");
     } else {
-      String.format("No Title (%s)", document.name)
+      String.format("%s", document.name)
     }    
   }
 
@@ -126,22 +147,29 @@ abstract class Handler(val parameters: Parameters) {
       }
     }
     document match {
-      case pd:PseudoDocument => generator.getSnippet(pd.samples.get(0).content,
-						     query)
-      case sd:Document => generator.getSnippet(sd.text, query)
-    }
-  }
-
-  def extractContexts(d: Document) : List[KeywordsInContext] = 
-    d match {
-      case pseudo: PseudoDocument => pseudo.samples.toList.take(20).map {
-	sample => KeywordsInContext(id = AccessIdentifier(identifier = sample.source,
-							  `type` = ProteusType.Page,
-							  resourceId = siteId),
-				    content = sample.content)
+    case pd:PseudoDocument => {
+      val pdsamples = pd.samples
+      if (pdsamples.size() > 0) {
+        val result = generator.getSnippet(pdsamples.get(0).content, query)
+        result
+      } else {
+        ""
       }
-      case simple: Document => List()
     }
+    case sd:Document => generator.getSnippet(sd.text, query)
+  }
+}
+
+def extractContexts(d: Document) : List[KeywordsInContext] = 
+  d match {
+    case pseudo: PseudoDocument => pseudo.samples.toList.take(20).map {
+  sample => KeywordsInContext(id = AccessIdentifier(identifier = sample.source,
+                            `type` = ProteusType.Page,
+                            resourceId = siteId),
+                  content = sample.content)
+    }
+    case simple: Document => List()
+  }
 }
 
 

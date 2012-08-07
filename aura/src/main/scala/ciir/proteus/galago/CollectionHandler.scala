@@ -1,5 +1,9 @@
 package ciir.proteus.galago
 
+import scala.xml.Node
+import scala.xml.NodeSeq
+import scala.xml.XML
+
 import java.io.File
 
 import scala.collection.mutable.ListBuffer
@@ -40,10 +44,12 @@ with Searchable {
     var results = ListBuffer[SearchResult]()
     for (scoredDocument <- scored) {
       val identifier = scoredDocument.documentName;
+       try {
       val document = retrieval.getDocument(identifier, c);
       val accessId = AccessIdentifier(identifier = identifier, 
 				      `type` = ProteusType.Collection, 
 				      resourceId = siteId)
+	  println("getting summary for document: " + document.identifier + " ")
       val summary = ResultSummary(getSummary(document, queryTerms), List())
       val externalUrl = String.format("%s/%s#page/cover/mode/2up",
 				      archiveReaderUrl,
@@ -59,6 +65,13 @@ with Searchable {
 	result = result.copy(externalUrl = Some(document.metadata.get("url")));
       }
       results += result
+       } catch {
+      case e => { e.printStackTrace()
+        if (identifier != null) {
+          println("Error handling result " + identifier)
+        }
+      }
+    }
     }
     return results.toList
   }
@@ -75,7 +88,36 @@ with Searchable {
   private def getCollectionObject(id: AccessIdentifier) : ProteusObject = {
     val document = retrieval.getDocument(id.identifier, c)
     if (document == null) return null
-    var collection = Collection(creators = Seq[String]())
+    val creatorList = new ListBuffer[String]
+    var publicationD = None
+    var publisher = None
+    var numPages = None
+      
+//    try {
+//      val bookXml = XML.loadString(document.text)
+//      val metadata = bookXml \\ "metadata"
+//      val creators = (metadata \\ "creator").mkString(" ")
+//      val subject = metadata \\ "subject"
+//      val description = metadata \\ "description"
+//      val publisher = metadata \\ "publisher"
+//      val date = metadata \\ "date"
+//      val language = metadata \\ "language"
+//      
+//    } catch {
+//      case e => println("Error parsing text from book " + id + "\n" + e.printStackTrace())
+//    }
+    
+    
+    // TODO!!!  These metadata fields are important.  We need to fix these up!
+    // We should to parse earlier, or produce valid XML to extract them from.
+    val creator = document.metadata.getOrElse("creator", "")
+    creatorList += creator
+    
+    val subject = Some(document.metadata.getOrElse("subject",""))
+    val pages = Some(document.metadata.getOrElse("numPages","-1").toInt)
+    val publicationYear = Some(document.metadata.getOrElse("date", "-1").toLong)
+    
+    var collection = Collection(creators = creatorList.toList, publicationDate = publicationYear)
     var pObject = ProteusObject(id = id,
 				title = Some(getTitle(document)),
 				description = Some("A book"),

@@ -1,4 +1,9 @@
-%tr
- %td
-  %div
-   = title
+-val c = it.collection.get
+- if (c.creators.size > 0)
+ %ul
+  - for (creator <- c.creators)
+   %li Author: #{creator}
+  - if (c.publicationDate.isDefined)
+   %li Published in: #{c.publicationDate.get.toString}
+ %hr
+ 

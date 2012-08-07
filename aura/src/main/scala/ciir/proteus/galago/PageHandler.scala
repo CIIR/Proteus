@@ -53,7 +53,7 @@ with Searchable {
 				      pageNo)
       var result = SearchResult(id = accessId,
 				score = scoredDocument.score,
-				title = Some(getDisplayTitle(document, queryTerms)),
+				title = Some(getDisplayTitle(document, queryTerms) + ", Page: " + pageNo),
 				summary = Some(summary),
 				externalUrl = Some(externalUrl),
 				thumbUrl = getThumbUrl(accessId),
@@ -83,8 +83,8 @@ with Searchable {
 		    pageNumber = Some(id.identifier.split("_").last.toInt))
     
     var pObject = ProteusObject(id = id,
-				title = Some(getTitle(document)),
-				description = Some("A page in a book"),
+				title = Some(getTitle(document) + ", Page " + page.pageNumber.get ),
+				description = Some("Page Number:" + page.pageNumber.get),
 				thumbUrl = getThumbUrl(id),
 				imgUrl = getImgUrl(id),
 				page = Some(page))

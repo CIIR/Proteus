@@ -27,11 +27,13 @@ with Searchable {
     val queryTerms = StructuredQuery.findQueryTerms(root).toSet;
     generator.setStemming(root.toString().contains("part=stemmedPostings"));
     val c = new Parameters;
+    c.set("pseudo", true);
     c.set("terms", false);
     c.set("tags", false);
     var results = ListBuffer[SearchResult]()
     for (scoredDocument <- scored) {
       val identifier = scoredDocument.documentName;
+      try {
       val document = retrieval.getDocument(identifier, c);
       val accessId = AccessIdentifier(identifier = identifier, 
 				      `type` = ProteusType.Miscellaneous, 
@@ -44,9 +46,16 @@ with Searchable {
 				summary = Some(summary),
 				externalUrl = Some(externalUrl))
       if (document.metadata.containsKey("url")) {
-	result = result.copy(externalUrl = Some(document.metadata.get("url")));
+          result = result.copy(externalUrl = Some(document.metadata.get("url")));
       }
       results += result
+    } catch {
+      case e => { e.printStackTrace()
+        if (identifier != null) {
+          println("Error handling result " + identifier)
+        }
+      }
+    }
     }
     return results.toList
   }
@@ -58,6 +67,7 @@ with Searchable {
     ids.map { id => getMiscObject(id) }.filter { (A) => A != null }.toList
 
   val c = new Parameters;
+  c.set("pseudo", true);
   c.set("terms", true);
   c.set("tags", true);    
   private def getMiscObject(id: AccessIdentifier): ProteusObject = {

@@ -39,7 +39,10 @@ with Searchable {
     c.set("tags", false);
     var results = ListBuffer[SearchResult]()
     for (scoredDocument <- scored) {
-      val identifier = scoredDocument.documentName;
+       val identifier = scoredDocument.documentName;
+      try {
+     
+      println("Fetching doc with ID: " + identifier);
       val document = retrieval.getDocument(identifier, c);
       val accessId = AccessIdentifier(identifier = identifier, 
 				      `type` = ProteusType.Location, 
@@ -56,7 +59,15 @@ with Searchable {
 	result = result.copy(externalUrl = Some(document.metadata.get("url")));
       }
       results += result
+    } catch {
+      case e => { e.printStackTrace()
+        if (identifier != null) {
+          println("Error handling result " + identifier)
+        }
+      }
     }
+    }
+    println("returning results " + results.size);
     return results.toList
   }
 
@@ -67,6 +78,7 @@ with Searchable {
     ids.map { id => getLocationObject(id) }.filter { A => A != null }.toList
 
   val c = new Parameters;
+  c.set("pseudo", true);
   c.set("terms", true);
   c.set("tags", true);    
   private def getLocationObject(id: AccessIdentifier): ProteusObject = {
@@ -76,7 +88,7 @@ with Searchable {
 			  alternateNames = List[String]())    
     var pObject = ProteusObject(id = id,
 				title = Some(getTitle(document)),
-				description = Some("A page in a book"),
+				description = Some("A location"),
 				thumbUrl = Some(dummyThumbUrl),
 				location = Some(location))
     return pObject

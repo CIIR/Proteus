@@ -8,16 +8,16 @@
      %a.thumbnail{:href => {imgUrl.get}}
       %img{:src => {thumbUrl.get}}
    .span10
-    %span(id=did)
-     %i.icon-tag(onclick="markItem('#{did}')")
+    %span
      %a(href = "/details?id=#{did}")
       %u
-       != title.getOrElse("No Title")
-    - if (externalUrl.isDefined)
-     %span
-      %a{:href => {externalUrl.get}} #{getExternalLinkText(externalUrl.get)}
+       != title.getOrElse("Untitled")
+    %span
+     = "score: " + score
     %div
      %p.well
       - if (summary.isDefined)
        != summary.get.text
-  %input(type="hidden" name="#{did}" value="#{score}")
+    - if (externalUrl.isDefined)
+     %div
+      %a{:href => {externalUrl.get}} #{externalUrl.get}

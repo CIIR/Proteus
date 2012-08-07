@@ -1,5 +1,6 @@
 package ciir.proteus.entitylinking
 
+import java.io.File
 import java.io.Writer
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
@@ -12,6 +13,9 @@ import cc.refectorie.user.dietz.tacco.data.WikipediaEntity
 import scala.xml._
 import scala.xml.transform._
 import scala.collection.mutable.HashMap
+import cc.refectorie.user.dietz.tacco.entitylinking.loader.TextNormalizer
+import cc.factorie.app.strings.Stopwords
+import scala.collection.mutable.ListBuffer
 
 object TEIAnnotator {
 
@@ -27,6 +31,7 @@ object TEIAnnotator {
        }
       
   def processTeiFile(input_filename: String, output_filename: String) {
+    println("Starting to process input file: " + input_filename)
     val input = new java.io.InputStreamReader(new GZIPInputStream(new FileInputStream(input_filename)))
     var data = XML.load(reader = input)
 //    var entities = data \\ "name"
@@ -44,10 +49,15 @@ object TEIAnnotator {
 //       updateWikiLink(e, annotation.head.title)
 //     }
     val transformed = EntityRuleTransformer(data)
-    println(transformed)
-    val outputWriter = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(output_filename))))
+   // println(transformed)
+    val outputFile = new File(output_filename)
+    if (!outputFile.exists) {
+      outputFile.getParentFile().mkdirs
+    }
+    val outputWriter = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(outputFile))))
     scala.xml.XML.write(outputWriter, transformed,"utf-8",true,null)
     outputWriter.close()
+    println("Successfully wrote output file " + output_filename);
   }
   
   
@@ -94,7 +104,7 @@ def mapMetaData(m: MetaData)(f: GenAttr => GenAttr): MetaData =
           var attributes1 = unchainMetaData(e.attributes)
           if (attributes1.size > 0) {
             val entity = linkEntity(e)
-            var newAttrib = GenAttr(None, "Wiki_Title", Text(entity), Null)
+            var newAttrib = GenAttr(None, "Wiki_Title", Text(entity.wikiTitle), Null)
             var newList = attributes1.toBuffer
             newList += newAttrib
             var iterableList = newList.toList
@@ -112,31 +122,72 @@ def mapMetaData(m: MetaData)(f: GenAttr => GenAttr): MetaData =
   
     
 
-     def linkEntity(e: Node) : String = {
+     def linkEntity(e: Node) : LinkedEntity = {
        var bookId = ""
        val words = e \\ "w" \\ "@form"
-       val entityText = words.mkString(" ")
+       val filtered = words
+       
+       val cleanTokens = new ListBuffer[String]
+       for (token <- words) {
+        val text = token.text
+        val normalToken = normalizeText(text)
+          if (normalToken.length() > 0 && !Stopwords.contains(normalToken)) {
+            cleanTokens += normalToken
+          }
+        }
+       
+       val prunedTokens = prune(cleanTokens, true)
+       val entityText = prunedTokens.mkString(" ")
        
        def performLinking(query: String) : String = {
          var cleanQuery = query.replace(".","")
          if (cleanQuery.trim().length() < 4) {
-           "NIL"
+           "IGNORE"
          } else {
            val query = BookELQueryImpl(docId = bookId, enttype = e.attribute("type").get.text, queryId = bookId, name = cleanQuery, contextTerms =  Seq[String]())
                    println("Linking query: " + query.name)
                    val annotation = linker.link(query)
-                   annotation.head.title
+                   if (annotation.length > 0) {
+                       annotation.head.title
+                   } else {
+                     "NIL"
+                   }
          }
        }
        val result = cache.getOrElseUpdate(entityText, performLinking(entityText))
 
-       result
+       new LinkedEntity(result, entityText)
      }
+  }
+  
+  def prune(buffer: ListBuffer[String], stopStructure: Boolean): ListBuffer[String] =  {
+    if (buffer.size > 0 && (Stopwords.contains(normalizeText(buffer.last)))) {
+       buffer.remove(buffer.size-1)
+       prune(buffer, stopStructure)
+    }
+    buffer
+  }
+  
+  def normalizeText(name:String):String = {
+    val replacedName = replaceChars(name)
+    val lower = replacedName.toLowerCase
+    val symbolsToSpace = lower.replaceAll("[^a-z01-9 ]", " ").replaceAll("\\s+", " ").trim
+    symbolsToSpace
+  }
+  
+  def replaceChars(word: String) : String = word match {
+        case "-LRB-" => "("
+        case "-RRB-" => ")"
+        case "-RSB-" => "]"
+        case "-LSB-" => "["
+        case "-LCB-" => "{"
+        case "-RCB-" => "}"
+        case x => x
   }
   
   object EntityRuleTransformer extends RuleTransformer(LinkTransformer)
  
-
+  case class LinkedEntity(wikiTitle:String, cleanName:String)
 
 }
 
