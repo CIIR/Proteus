@@ -4,6 +4,14 @@ import ciir.proteus.Constants._
 import ciir.proteus.ProteusServlet._
 
 object ProteusFunctions {
+  val kReturnableTypes = List("page", 
+			      "collection",
+			      "person", 
+			      "location", 
+			      "miscellaneous",
+			      "picture",
+			      "topic")
+
   def pluralDisplayName(typeString : String) : String = 
     typeString.toLowerCase match {
       case "collection" => "Books"
@@ -11,6 +19,8 @@ object ProteusFunctions {
       case "miscellaneous" => "Other"
       case "page" => "Pages"
       case "person" => "People"
+      case "topic" => "Topics"
+      case "picture" => "Pictures"
       case _ => typeString.capitalize
   }
 
@@ -21,10 +31,10 @@ object ProteusFunctions {
   }
 
   def displayId(aid: AccessIdentifier) : String = 
-    String.format("%s.%s.%s", aid.identifier, aid.`type`.name, aid.resourceId) 
+    String.format("%s-%s-%s", aid.identifier, aid.`type`.name, aid.resourceId) 
 
   def externalId(did: String) : AccessIdentifier = {
-    val Array(id, t, r) = did.split("\\.")
+    val Array(id, t, r) = did.split("-")
     AccessIdentifier(identifier = id, 
 		     `type` = ProteusType.valueOf(t).get,
 		     resourceId = r)

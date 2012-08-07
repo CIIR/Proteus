@@ -3,6 +3,7 @@ package ciir.proteus.galago
 import scala.collection.JavaConversions._
 import ciir.proteus._
 import org.lemurproject.galago.core.parse.Document
+import org.lemurproject.galago.core.parse.PseudoDocument
 import org.lemurproject.galago.core.retrieval._
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
@@ -106,10 +107,7 @@ abstract class Handler(val parameters: Parameters) {
     } else {
       String.format("No Title (%s)", document.name);
     }
-    if (title.length > 60) {
-      title = String.format("%s ...", title.take(60))
-    }
-    generator.highlight(title, queryTerms);
+    String.format("%s ...", title.take(60))
   }
 
   def getTitle(document : Document) : String = {
@@ -127,8 +125,23 @@ abstract class Handler(val parameters: Parameters) {
         return generator.highlight(description, query);
       }
     }
-    return generator.getSnippet(document.text, query);
+    document match {
+      case pd:PseudoDocument => generator.getSnippet(pd.samples.get(0).content,
+						     query)
+      case sd:Document => generator.getSnippet(sd.text, query)
+    }
   }
+
+  def extractContexts(d: Document) : List[KeywordsInContext] = 
+    d match {
+      case pseudo: PseudoDocument => pseudo.samples.toList.take(20).map {
+	sample => KeywordsInContext(id = AccessIdentifier(identifier = sample.source,
+							  `type` = ProteusType.Page,
+							  resourceId = siteId),
+				    content = sample.content)
+      }
+      case simple: Document => List()
+    }
 }
 
 

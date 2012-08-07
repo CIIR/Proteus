@@ -14,13 +14,7 @@ import scala.collection.mutable.MapBuilder
 import org.lemurproject.galago.tupleflow.Parameters
 import java.util.ArrayList
 
-object ProteusServlet {
-  val kReturnableTypes = List("page", 
-			      "collection",
-			      "person", 
-			      "location", 
-			      "miscellaneous")
-			      
+object ProteusServlet {			      
   var parameters: Parameters = new Parameters()
 }
 

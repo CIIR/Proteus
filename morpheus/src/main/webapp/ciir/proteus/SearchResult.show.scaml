@@ -8,7 +8,8 @@
      %a.thumbnail{:href => {imgUrl.get}}
       %img{:src => {thumbUrl.get}}
    .span10
-    %span
+    %span(id=did)
+     %i.icon-tag(onclick="markItem('#{did}')")
      %a(href = "/details?id=#{did}")
       %u
        %strong 

@@ -1,6 +1,16 @@
+- import ciir.proteus.ProteusFunctions._
 %div
  %b Title
  = title.get
 %div
  %b Description
  = description.get
+%div
+ %table.table-bordered
+  - for (context <- contexts)
+   %tr
+    %td
+     %b
+      = displayId(context.id)
+     %p.well
+      = context.content

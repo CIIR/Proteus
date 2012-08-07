@@ -14,7 +14,7 @@
     .tab-pane.fade(id="#{resType}tab")
      %table.table-bordered.table-striped.span9
       = collection(results(resType), "show")
-     .span2
+     .span3
       = render("/transformations.scaml", Map('typeName -> resType))
   -# Activate the first result pane and check the types
      we searched for.

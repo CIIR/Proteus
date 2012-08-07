@@ -1,3 +1,4 @@
+- import ciir.proteus.ProteusFunctions._
 -@ val results : Map[String, Any] = Map[String, Any]()
 -@ val q : String = ""
 -@ val error : String = ""
@@ -15,12 +16,9 @@
        %span Types to find:
       %td
        %span.btn-group#typeselection(data-toggle="buttons-checkbox")
-        %button.btn{:type => "button", :name => "page"} Pages
-        %button.btn{:type => "button", :name => "collection"} Books
-        %button.btn{:type => "button", :name => "person"} People
-        %button.btn{:type => "button", :name => "location"} Places
-        %button.btn{:type => "button", :name => "miscellaneous"} Other
-        %button.btn{:type => "button", :name => "topic"} Topics
+        - for (retType <- kReturnableTypes.sorted)
+         %button.btn(type="button" name="#{retType}") 
+          = pluralDisplayName(retType)
         %button.btn{:type => "button", :name => "all" } Whatever you Got
   %script{:src => "assets/js/proteus/search-validate.js"}
  -# This either renders an error or the result page. Not both.

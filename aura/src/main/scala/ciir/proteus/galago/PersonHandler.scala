@@ -7,6 +7,7 @@ import ciir.proteus._
 
 import org.lemurproject.galago.core.retrieval._
 import org.lemurproject.galago.core.parse.Document
+import org.lemurproject.galago.core.parse.PseudoDocument
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.core.retrieval.RetrievalFactory
@@ -31,12 +32,11 @@ with Searchable {
     var results = ListBuffer[SearchResult]()
     for (scoredDocument <- scored) {
       val identifier = scoredDocument.documentName;
-      val document = retrieval.getDocument(identifier, c);
+      val document = retrieval.getDocument(identifier, c).asInstanceOf[PseudoDocument];
       val accessId = AccessIdentifier(identifier = identifier, 
 				      `type` = ProteusType.Person, 
 				      resourceId = siteId)
       val summary = ResultSummary(getSummary(document, queryTerms), List())
-
       var result = SearchResult(id = accessId,
 				score = scoredDocument.score,
 				title = Some(getDisplayTitle(document, queryTerms)),
@@ -65,12 +65,13 @@ with Searchable {
     val document = retrieval.getDocument(id.identifier, c)
     if (document == null) return null
     var person = Person(fullName = Some(document.name),
-		      alternateNames = List[String]())    
+		      alternateNames = List[String]())
+    val contexts = extractContexts(document)
     var pObject = ProteusObject(id = id,
 				title = Some(getTitle(document)),
-				description = Some("A page in a book"),
 				thumbUrl = Some(dummyThumbUrl),
-				person = Some(person))
+				person = Some(person),
+				contexts = Some(contexts))
     return pObject
   }
 }

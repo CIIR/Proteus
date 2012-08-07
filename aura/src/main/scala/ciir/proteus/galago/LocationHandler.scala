@@ -34,6 +34,7 @@ with Searchable {
     val queryTerms = StructuredQuery.findQueryTerms(root).toSet;
     generator.setStemming(root.toString().contains("part=stemmedPostings"));
     val c = new Parameters;
+    c.set("pseudo", true);
     c.set("terms", false);
     c.set("tags", false);
     var results = ListBuffer[SearchResult]()

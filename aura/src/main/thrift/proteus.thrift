@@ -230,6 +230,11 @@ struct Location {
   5: optional double latitude,
 }
 
+struct KeywordsInContext {
+ 1: AccessIdentifier id,
+ 2: string content
+}
+
 // **** Proteus Typed Data Structures ****
 // We create a single ProteusObject struct, that is
 // then specialized via composition with lower level
@@ -254,8 +259,11 @@ struct ProteusObject {
   14: optional Audio audio,
   15: optional Person person,
   16: optional Location location,
-  17: optional Organization organization
-  18: optional Topic topic
+  17: optional Organization organization,
+  18: optional Topic topic,
+
+  // Leave room for Jeff to expand
+  50: optional list<KeywordsInContext> contexts
 }
 
 enum TransformType {
