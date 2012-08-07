@@ -232,7 +232,7 @@ struct Location {
 
 struct KeywordsInContext {
  1: AccessIdentifier id,
- 2: string content
+ 2: string text_content
 }
 
 // **** Proteus Typed Data Structures ****
@@ -261,7 +261,7 @@ struct ProteusObject {
   16: optional Location location,
   17: optional Organization organization,
   18: optional Topic topic,
-
+    
   // Leave room for Jeff to expand
   50: optional list<KeywordsInContext> contexts
 }

@@ -73,10 +73,13 @@ with Searchable {
   private def getMiscObject(id: AccessIdentifier): ProteusObject = {
     val document = retrieval.getDocument(id.identifier, c)
     if (document == null) return null
+        val contexts = extractContexts(document)
+
     var pObject = ProteusObject(id = id,
 				title = Some(getTitle(document)),
 				description = Some("A description of misc"),
-				thumbUrl = Some(dummyThumbUrl))
+				thumbUrl = Some(dummyThumbUrl),
+				contexts = Some(contexts))
     return pObject
   }
 }

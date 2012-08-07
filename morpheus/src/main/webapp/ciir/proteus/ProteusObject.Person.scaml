@@ -1,16 +1,15 @@
 - import ciir.proteus.ProteusFunctions._
 %div
- %b Title
+ %b Entity Name:
  = title.get
-%div
- %b Description
- = description.get
+
 %div
  %table.table-bordered
-  - for (context <- contexts)
-   %tr
-    %td
-     %b
-      = displayId(context.id)
-     %p.well
-      = context.content
+  -if (contexts.isDefined) 
+   -for (context <- contexts.get)
+    %tr
+     %td
+      %b
+       = displayId(context.id)
+      %p.well
+       = context.textContent

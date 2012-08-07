@@ -85,12 +85,16 @@ with Searchable {
     val document = retrieval.getDocument(id.identifier, c)
     if (document == null) return null
     var location = Location(fullName = Some(document.name),
-			  alternateNames = List[String]())    
+			  alternateNames = List[String]())
+			  
+	val contexts = extractContexts(document)
+
     var pObject = ProteusObject(id = id,
 				title = Some(getTitle(document)),
 				description = Some("A location"),
 				thumbUrl = Some(dummyThumbUrl),
-				location = Some(location))
+				location = Some(location),
+				contexts = Some(contexts))
     return pObject
   }
 }

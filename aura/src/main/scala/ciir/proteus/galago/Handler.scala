@@ -149,8 +149,10 @@ abstract class Handler(val parameters: Parameters) {
     document match {
     case pd:PseudoDocument => {
       val pdsamples = pd.samples
+      val subset = pd.samples.toList.take(50)
+      val textSubset = subset.map(s => s.content).mkString(" ")
       if (pdsamples.size() > 0) {
-        val result = generator.getSnippet(pdsamples.get(0).content, query)
+        val result = generator.getSnippet(textSubset, query)
         result
       } else {
         ""
@@ -162,11 +164,11 @@ abstract class Handler(val parameters: Parameters) {
 
 def extractContexts(d: Document) : List[KeywordsInContext] = 
   d match {
-    case pseudo: PseudoDocument => pseudo.samples.toList.take(20).map {
+    case pseudo: PseudoDocument => pseudo.samples.toList.take(50).map {
   sample => KeywordsInContext(id = AccessIdentifier(identifier = sample.source,
                             `type` = ProteusType.Page,
                             resourceId = siteId),
-                  content = sample.content)
+                  textContent = sample.content)
     }
     case simple: Document => List()
   }
