@@ -13,6 +13,7 @@ import org.apache.thrift.protocol._
 
 import org.lemurproject.galago.core.retrieval._
 import org.lemurproject.galago.core.parse.Document
+import org.lemurproject.galago.core.parse.PseudoDocument
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.core.retrieval.RetrievalFactory
@@ -43,18 +44,43 @@ with Searchable {
       try {
      
       println("Fetching doc with ID: " + identifier);
-      val document = retrieval.getDocument(identifier, c);
+      val document = retrieval.getDocument(identifier, c).asInstanceOf[PseudoDocument]
       val accessId = AccessIdentifier(identifier = identifier, 
 				      `type` = ProteusType.Location, 
 				      resourceId = siteId)
       val summary = ResultSummary(getSummary(document, queryTerms), List())
+      
+      
+      val externalId = WikipediaEntityUtil.determineExternalId(document)
+      
+      var wikiEntity : Option[WikipediaEntity] = None
+      var externalUrl : Option[String] = None
+      
+      if (externalId != None) {
+         externalUrl = Some(WikipediaEntityUtil.wikipediaIdToUrl(externalId.get))
+         
+         var thumbUrls = List[String]()
+         var dbpediaData = Seq[Tuple3[String, String, String]]()
+         try {
+            dbpediaData = WikipediaEntityUtil.fetchDbpediaData(externalId.get)
+            thumbUrls = WikipediaEntityUtil.extractThumbUrl(dbpediaData)
+         } catch {
+             case e => { e.printStackTrace()  }
+         }
+         wikiEntity = Some(WikipediaEntity(externalId.get, 
+             WikipediaEntityUtil.getDisplayTitle(externalId.get), 
+             WikipediaEntityUtil.wikipediaIdToUrl(externalId.get), 
+             thumbUrls, 
+             Some(dbpediaData.mkString("\n"))))
+      }
+        
       var result = SearchResult(id = accessId,
 				score = scoredDocument.score,
 				title = Some(getDisplayTitle(document, queryTerms)),
 				summary = Some(summary),
-				externalUrl = Some(dummyExtUrl),
-				thumbUrl = Some(dummyThumbUrl),
-				imgUrl = Some(dummyImgUrl))
+				externalUrl = externalUrl,
+				thumbUrl = getThumb(wikiEntity),
+				imgUrl = None)
       if (document.metadata.containsKey("url")) {
 	result = result.copy(externalUrl = Some(document.metadata.get("url")));
       }
@@ -70,6 +96,7 @@ with Searchable {
     println("returning results " + results.size);
     return results.toList
   }
+ 
 
   override def lookup(id: AccessIdentifier) : ProteusObject =
     getLocationObject(id)
@@ -82,19 +109,44 @@ with Searchable {
   c.set("terms", true);
   c.set("tags", true);    
   private def getLocationObject(id: AccessIdentifier): ProteusObject = {
-    val document = retrieval.getDocument(id.identifier, c)
+    val document = retrieval.getDocument(id.identifier, c).asInstanceOf[PseudoDocument]
     if (document == null) return null
     var location = Location(fullName = Some(document.name),
 			  alternateNames = List[String]())
 			  
 	val contexts = extractContexts(document)
 
+	 val externalId = WikipediaEntityUtil.determineExternalId(document)
+      
+      var wikiEntity : Option[WikipediaEntity] = None
+      var externalUrl : Option[String] = None
+      
+       if (externalId != None) {
+         externalUrl = Some(WikipediaEntityUtil.wikipediaIdToUrl(externalId.get))
+         
+         var thumbUrls = List[String]()
+         var dbpediaData = Seq[Tuple3[String, String, String]]()
+         try {
+            dbpediaData = WikipediaEntityUtil.fetchDbpediaData(externalId.get)
+            thumbUrls = WikipediaEntityUtil.extractThumbUrl(dbpediaData)
+         } catch {
+             case e => { e.printStackTrace()  }
+         }
+         wikiEntity = Some(WikipediaEntity(externalId.get, 
+             WikipediaEntityUtil.getDisplayTitle(externalId.get), 
+             WikipediaEntityUtil.wikipediaIdToUrl(externalId.get), 
+             thumbUrls, 
+             Some(dbpediaData.mkString("\n"))))
+      }
+    
     var pObject = ProteusObject(id = id,
 				title = Some(getTitle(document)),
-				description = Some("A location"),
-				thumbUrl = Some(dummyThumbUrl),
+				description = None,
+				thumbUrl = getThumb(wikiEntity),
 				location = Some(location),
-				contexts = Some(contexts))
+				externalUrl = externalUrl,
+				contexts = Some(contexts),
+				externalEntity = wikiEntity)
     return pObject
   }
 }

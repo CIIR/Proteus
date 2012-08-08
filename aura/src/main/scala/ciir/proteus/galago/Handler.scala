@@ -72,6 +72,12 @@ trait Searchable extends TypedStore {
     }
     
     val searchParams = new Parameters
+    
+    searchParams.set("mu", 8000D)
+    searchParams.set("odw",0.21D)
+    searchParams.set("uniw", 0.29D)
+    searchParams.set("uww", 0.50D)
+    
     searchParams.set("count", count+offset)
     val cleanQueryString = cleanQuery(srequest.rawQuery)
     val root = StructuredQuery.parse(cleanQueryString);
@@ -87,7 +93,7 @@ trait Searchable extends TypedStore {
 	   (finish-start), 
 	   scored.length)
     var limit = Math.min(offset + count, scored.length)
-    return Tuple2(root, scored.slice(offset, limit))
+    return Tuple2(transformed, scored.slice(offset, limit))
   }
   
   def cleanQuery(request:String) : String = {
@@ -99,7 +105,7 @@ trait Searchable extends TypedStore {
                   normalizedTokens.add(term);
               }
           }
-         val normalizedQuery = "#combine(" + normalizedTokens.mkString(" ") + ")"
+         val normalizedQuery = "#seqdep(" + normalizedTokens.mkString(" ") + ")"
          normalizedQuery
     }
 }
@@ -116,6 +122,25 @@ abstract class Handler(val parameters: Parameters) {
   def lookup(id: AccessIdentifier) : ProteusObject
   def getInfo() : CollectionInfo
 
+  
+   def getThumb(wikiEntity:Option[WikipediaEntity]) : Option[String] = {
+        wikiEntity match {
+        case None => Some(dummyThumbUrl)
+        case Some(r) => {
+          val imgs = r.imageLinks
+          if (imgs == None) {
+            Some(dummyThumbUrl)
+          } else {
+            if (imgs.size > 0) {
+              Some(imgs.head)
+            } else {
+              Some(dummyThumbUrl)
+            }
+          }
+        }
+      }
+      }
+  
   def getDisplayTitle(document : Document, queryTerms: Set[String]) : String = {
     var title = if (document.metadata.containsKey("title")) {
       document.metadata.get("title")
@@ -140,12 +165,12 @@ abstract class Handler(val parameters: Parameters) {
   }
 
   def getSummary(document : Document, query: Set[String]) : String = {
-    if (document.metadata.containsKey("description")) {
-      val description = document.metadata.get("description");
-      if (description.length() > 10) {
-        return generator.highlight(description, query);
-      }
-    }
+//    if (document.metadata.containsKey("description")) {
+//      val description = document.metadata.get("description");
+//      if (description.length() > 10) {
+//        return generator.highlight(description, query);
+//      }
+//    }
     document match {
     case pd:PseudoDocument => {
       val pdsamples = pd.samples
@@ -168,7 +193,8 @@ def extractContexts(d: Document) : List[KeywordsInContext] =
   sample => KeywordsInContext(id = AccessIdentifier(identifier = sample.source,
                             `type` = ProteusType.Page,
                             resourceId = siteId),
-                  textContent = sample.content)
+                  textContent = sample.content,
+                  externalId = sample.externalLink)
     }
     case simple: Document => List()
   }

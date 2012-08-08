@@ -101,25 +101,6 @@ struct ResultSummary {
   2: list<TextRegion> highlights,
 }
 
-// Defines a single result item from a search query
-struct SearchResult {
-  1: AccessIdentifier id,
-  2: double score;
-  3: optional string title,
-  4: optional ResultSummary summary,
-  5: optional string img_url,
-  6: optional string thumb_url,
-  // URL for visiting the original data source for this item
-  7: optional string external_url,
-}
-
-// **** Response Type Structs ****
-// The response struct to a search query
-struct SearchResponse {
-  1: list<SearchResult> results,
-  2: optional string error,
-}
-
 struct WeightedTerm {
   1: string term,
   2: double weight = 1.0,
@@ -164,6 +145,7 @@ struct Collection {
   3: optional string edition,
   4: optional i32 num_pages,
   5: list<string> creators,
+  6: optional string full_text
 }
 
 // Page: Page in a book, page of a newspaper, web page on a site, etc.
@@ -230,9 +212,20 @@ struct Location {
   5: optional double latitude,
 }
 
+
+struct WikipediaEntity {
+ 1: string wikipedia_id,
+ 2: string display_name,
+ 3: string external_link,
+ 4: list<string> image_links,
+ 5: optional string rdf_triples
+ 6: optional i32 num_mentions
+}
+
 struct KeywordsInContext {
  1: AccessIdentifier id,
- 2: string text_content
+ 2: string text_content,
+ 3: string external_id
 }
 
 // **** Proteus Typed Data Structures ****
@@ -261,9 +254,30 @@ struct ProteusObject {
   16: optional Location location,
   17: optional Organization organization,
   18: optional Topic topic,
+  19: optional WikipediaEntity external_entity
     
   // Leave room for Jeff to expand
   50: optional list<KeywordsInContext> contexts
+}
+
+// Defines a single result item from a search query
+struct SearchResult {
+  1: AccessIdentifier id,
+  2: double score;
+  3: optional string title,
+  4: optional ResultSummary summary,
+  5: optional string img_url,
+  6: optional string thumb_url,
+  // URL for visiting the original data source for this item
+  7: optional string external_url,
+  8: optional ProteusObject full_object
+}
+
+// **** Response Type Structs ****
+// The response struct to a search query
+struct SearchResponse {
+  1: list<SearchResult> results,
+  2: optional string error,
 }
 
 enum TransformType {

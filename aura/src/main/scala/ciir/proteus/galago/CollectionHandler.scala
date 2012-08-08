@@ -117,7 +117,7 @@ with Searchable {
     val pages = Some(document.metadata.getOrElse("numPages","-1").toInt)
     val publicationYear = Some(document.metadata.getOrElse("date", "-1").toLong)
     
-    var collection = Collection(creators = creatorList.toList, publicationDate = publicationYear)
+    var collection = Collection(fullText = Some(document.text), creators = creatorList.toList, publicationDate = publicationYear)
     var pObject = ProteusObject(id = id,
 				title = Some(getTitle(document)),
 				description = Some("A book"),

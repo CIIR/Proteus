@@ -5,7 +5,7 @@
   %div
    - if (thumbUrl.isDefined)
     .span2
-     %a.thumbnail{:href => {imgUrl.get}}
+     %a.thumbnail{:href => {if (externalUrl != None) externalUrl.get}}
       %img{:src => {thumbUrl.get}}
    .span10
     %span(id=did)

@@ -31,10 +31,10 @@ object ProteusFunctions {
   }
 
   def displayId(aid: AccessIdentifier) : String = 
-    String.format("%s-%s-%s", aid.identifier, aid.`type`.name, aid.resourceId) 
+    String.format("%s--s%s--s%s", aid.identifier, aid.`type`.name, aid.resourceId) 
 
   def externalId(did: String) : AccessIdentifier = {
-    val Array(id, t, r) = did.split("-")
+    val Array(id, t, r) = did.split("--s")
     AccessIdentifier(identifier = id, 
 		     `type` = ProteusType.valueOf(t).get,
 		     resourceId = r)

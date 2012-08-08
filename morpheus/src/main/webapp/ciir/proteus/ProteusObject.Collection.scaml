@@ -6,4 +6,8 @@
   - if (c.publicationDate.isDefined)
    %li Published in: #{c.publicationDate.get.toString}
  %hr
+ %b Full text:
+%br
+.well
+ = c.fullText.getOrElse("<None>")
  

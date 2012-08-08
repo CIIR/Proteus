@@ -4,12 +4,8 @@
 -@ import val pObject : ProteusObject
 .container-fluid
  .row-fluid
-  %h1 Details for #{title.getOrElse("<Unknown>")}
+  %h1 #{id.`type`}: #{title.getOrElse("<Unknown>")}
   %hr
-  - if (description.isDefined)
-   .well
-    %b Description:
-    = description.getOrElse("No description found.")
   - if (imgUrl.isDefined)
    %div
     %b Image:
