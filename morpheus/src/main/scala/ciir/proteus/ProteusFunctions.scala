@@ -2,9 +2,6 @@ package ciir.proteus
 
 import ciir.proteus.Constants._
 import ciir.proteus.ProteusServlet._
-import ciir.proteus.galago.AccessIdentifier;
-import ciir.proteus.galago.ProteusType;
-import ciir.proteus.galago.Constants.*;
 
 object ProteusFunctions {
   val kReturnableTypes = List("page", 

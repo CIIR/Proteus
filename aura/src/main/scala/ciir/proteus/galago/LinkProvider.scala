@@ -2,6 +2,8 @@ package ciir.proteus.galago
 
 import java.io.File;
 import ciir.proteus._
+import ciir.proteus.galago.thrift.IndexLink
+import ciir.proteus.galago.thrift.Target
 import scala.collection.JavaConversions._
 import org.lemurproject.galago.core.index.IndexLinkReader;
 import org.lemurproject.galago.tupleflow.Parameters;
@@ -58,8 +60,8 @@ class LinkProvider(parameters: Parameters) {
       System.err.printf("Retrieving %s -> %s linkset for %s\n",
 			srcKey, targetKey, src.identifier)
       val links = index.getLinks(src.identifier)
-      for (t: Target <- links.target) {
-	val aid = AccessIdentifier(identifier = t.id,
+      for (t <- links.target) {
+          val aid = AccessIdentifier(identifier = t.id,
 				   `type` = targetType,
 				   resourceId = siteId)
 	list = aid +: list
@@ -78,7 +80,7 @@ class LinkProvider(parameters: Parameters) {
       System.err.printf("Retrieving %s -> %s counted linkset for %s\n",
 			srcKey, targetKey, src.identifier)
       val links = index.getLinks(src.identifier)
-      for (t: Target <- links.target) {
+      for (t <- links.target) {
 	val aid = AccessIdentifier(identifier = t.id,
 				   `type` = targetType,
 				   resourceId = siteId)
