@@ -18,25 +18,32 @@ $(function() {
   });
 
 function markItem(id) {
-    $("span#"+id+ " i").removeClass("icon-tag");
-    $("span#"+id+ " i").addClass("icon-ok");
-    $("span#"+id+ " i").removeAttr("onclick");
+    $("span[id='"+id+ "'] i").removeClass("icon-tag");
+    $("span[id='"+id+ "'] i").addClass("icon-ok");
+    $("span[id='"+id+ "'] i").removeAttr("onclick");
     // Add the entry to the "tagged items bag"
-    var shorthand = $("span#" + id + " strong").text().trim().substr(0, 20) + "...";
-    $("#taggedBag table").append("<tr id='"+id+"'><td><i class=\"icon-remove\" onclick=\"unMarkItem('"+id+"');\"></i></td><td>" + shorthand + "</td></tr>");
+    var shorthand = $("span[id='" + id + "'] u").text().trim();
+    if (shorthand.length > 25) {
+	shorthand = shorthand.substr(0, 20) + "...";
+    }
+    $("#taggedBag table").append("<tr id='"+id+"'><td><i class=\"icon-remove\" onclick=\"unMarkItem('"+id+"');\"></i></td><td>" + shorthand + "<input type='hidden' name='chosenResult' value='"+id+"'></input></td></tr>");
 }
 
 function unMarkItem(id) {
-    $("#taggedBag table tr#" + id).remove();
-    $("span#"+id+ " i").attr("onclick", "markItem('"+id+"')");
-    $("span#"+id+ " i").removeClass("icon-ok");
-    $("span#"+id+ " i").addClass("icon-tag");
+    $("#taggedBag table tr[id='" + id + "']").remove();
+    $("span[id='"+id+ "'] i").attr("onclick", "markItem('"+id+"')");
+    $("span[id='"+id+ "'] i").removeClass("icon-ok");
+    $("span[id='"+id+ "'] i").addClass("icon-tag");
 }
 
 // Preps the page for transformation.
-function relatedResults(targetType) {
-    alert("Submitting!");
-    // copy the active result elements into the form
+function prepRelatedSearch() {
+    // Should do some validation here:
+    // Make sure at least one returnable type is checked,
+    // Make sure at least one result is chosen
+    return true;
+    
+    // THIS IS ALL OLD AND BAD - NEEDS TO BE REPLACED
     $("#resultContent .tab-pane.active input")
 	.each(function() {
 		  var newvalue = $(this).attr('name') + ',' + $(this).attr('value');

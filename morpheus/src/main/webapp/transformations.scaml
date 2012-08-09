@@ -1,29 +1,27 @@
 - import ciir.proteus._
 - import ciir.proteus.ProteusFunctions._
--@ val typeName : String
-- val translates : Set[String] = getContainingTypes(typeName) ++ getContainedTypes(typeName)
-- if (!translates.isEmpty)
- %form#relatedForm(method="post" action="related")
-  %ul.nav.nav-tabs#relatedTabs
-   %li
-    %a(href="#taggedBag" data-toggle="tab")
-     Tagged Bag
-   %li
-    %a(href="#targetBag" data-toggle="tab")
-     Look For
-  .tab-content#relatedContent
-   .tab-pane.fade.in.active#taggedBag
-    %table
-   .tab-pane.fade#targetBag
-    %table
-     - for (retType <- kReturnableTypes.sorted)
-      %tr
-       %td
-        = pluralDisplayName(retType)
-       %td
-        %input(type="checkbox")
+%form#relatedForm(method="post" action="related" onsubmit="prepRelatedSearch()")
+ %ul.nav.nav-tabs#relatedTabs
+  %li
+   %a(href="#taggedBag" data-toggle="tab")
+    Tagged Bag
+  %li
+   %a(href="#targetBag" data-toggle="tab")
+    Look For
+ .tab-content#relatedContent
+  .tab-pane.fade.in.active#taggedBag
+   %table
+  .tab-pane.fade#targetBag
+   %table
+    - for (retType <- kReturnableTypes.sorted)
      %tr
-      %td 
-       All of 'Em
       %td
-       %input(type="checkbox")
+       = pluralDisplayName(retType)
+      %td
+       %input(type="checkbox" name=retType)
+    %tr
+     %td 
+      All of 'Em
+     %td
+      %input(type="checkbox" name="all")
+   %button(type="submit") Go For It
