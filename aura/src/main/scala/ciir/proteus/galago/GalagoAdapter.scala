@@ -121,19 +121,21 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
   // Performs a "search" on behalf of the previous results given.
   override def related(rrequest: RelatedRequest) : Future[SearchResponse] = {
     var acc = HashMap[AccessIdentifier, Double]()
-    for (belief <- rrequest.beliefs;
-	 targetType <- rrequest.targetTypes) {
+    try {
+    for (belief <- rrequest.beliefs; targetType <- rrequest.targetTypes) {
       val targetIds = links.countOccurrences(belief.id, targetType)
       for ((tid, count) <- targetIds) {
-	if (!acc.containsKey(tid)) {
-	  acc += (tid -> (count * belief.score))
-	} else {
-	  val newscore = acc(tid) + (count * belief.score)
-	  acc += (tid -> newscore)
-	}
+	    if (!acc.containsKey(tid)) {
+	      acc += (tid -> (count * belief.score))
+	    } else {
+	      val newscore = acc(tid) + (count * belief.score)
+	      acc += (tid -> newscore)
+	    }
       }
     }
-
+    } catch {
+      case e => { e.printStackTrace() }
+    }
     val sortedResults = acc.toList.sortWith((A,B) => A._2 > B._2).take(50)
     val optionalResults : List[Option[SearchResult]] = sortedResults.map { 
       A => {

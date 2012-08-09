@@ -21,7 +21,7 @@ object ProteusServlet {
 class ProteusServlet extends ScalatraServlet 
 with ScalateSupport 
 with FakeDataGenerator {
-  import ProteusServlet._
+import ProteusServlet._
 
   val kNumSearchResults = 10
   // Load the first server parameters 
@@ -70,11 +70,10 @@ with FakeDataGenerator {
 
   post("/related") {
     printf("multiParams: %s\n", multiParams.toString)
-    val beliefs = multiParams("score").map {
+    val beliefs = multiParams("chosenResult").map {
       scoreElement => {
-	val Array(did, sc) = scoreElement.split(",")
-	val aid = externalId(did)
-	SearchResult(id = aid, score = sc.toDouble)
+	val aid = externalId(scoreElement)
+	SearchResult(id = aid, score = (1.0).toDouble)
       }
     }
     val targetTypes = multiParams("targetType").map {

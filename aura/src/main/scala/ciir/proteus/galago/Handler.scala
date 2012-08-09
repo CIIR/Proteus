@@ -20,6 +20,7 @@ object Handler {
       case ProteusType.Person => Some(PersonHandler(parameters))
       case ProteusType.Location => Some(LocationHandler(parameters))
       case ProteusType.Miscellaneous => Some(MiscHandler(parameters))
+      case ProteusType.Topic => Some(TopicHandler(parameters))
       case _ => None
     }    
   }

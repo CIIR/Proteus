@@ -26,7 +26,7 @@ function markItem(id) {
     if (shorthand.length > 25) {
 	shorthand = shorthand.substr(0, 20) + "...";
     }
-    $("#taggedBag table").append("<tr id='"+id+"'><td><i class=\"icon-remove\" onclick=\"unMarkItem('"+id+"');\"></i></td><td>" + shorthand + "<input type='hidden' name='chosenResult' value='"+id+"'></input></td></tr>");
+    $("#taggedBag table").append("<tr id='"+id+"'><td><i class=\"icon-remove\" onclick=\"unMarkItem('"+id+"');\"></i></td><td>" + shorthand + "<input type='hidden' name='chosenResult[]' value='"+id+"'></input></td></tr>");
 }
 
 function unMarkItem(id) {
