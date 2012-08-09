@@ -54,7 +54,7 @@ object Resolvers {
   val galagoSF = "Galago @ SourceForge" at "http://lemur.sf.net/repo"
   val blikiRepo = "Bliki Google Code Repo" at "http://gwtwiki.googlecode.com/svn/maven-repository/"
 
-  def all = Seq(twitter, sonatype, galagoSF, blikiRepo, maven2, mavenLocal)
+  def all = Seq(twitter, sonatype, blikiRepo, maven2, mavenLocal)
 }
 
 object AuraDeps {

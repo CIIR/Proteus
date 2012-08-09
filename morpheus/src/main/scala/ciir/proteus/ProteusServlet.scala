@@ -69,6 +69,7 @@ with FakeDataGenerator {
   }
 
   post("/related") {
+    printf("multiParams: %s\n", multiParams.toString)
     val beliefs = multiParams("score").map {
       scoreElement => {
 	val Array(did, sc) = scoreElement.split(",")
