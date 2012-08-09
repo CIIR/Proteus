@@ -1,8 +1,12 @@
 - import ciir.proteus.ProteusFunctions._
-%div
- %b Entity Name:
- = title.get
 
+%div
+ %table.table-bordered
+  - if (externalEntity.isDefined)
+   = view(it, "WikipediaEntity")
+
+%div
+ %h2 Context occurrences in book pages
 %div
  %table.table-bordered
   -if (contexts.isDefined) 
@@ -10,6 +14,10 @@
     %tr
      %td
       %b
-       = displayId(context.id)
+       %a(href = "/details?id=#{displayId(context.id)}") 
+        = context.id.identifier
+      %span  
+       = "Wiki Entity Id:" + context.externalId
       %p.well
        = context.textContent
+      %div

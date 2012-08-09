@@ -145,7 +145,8 @@ struct Collection {
   3: optional string edition,
   4: optional i32 num_pages,
   5: list<string> creators,
-  6: optional string full_text
+  6: optional string full_text,
+  7: optional string title
 }
 
 // Page: Page in a book, page of a newspaper, web page on a site, etc.
@@ -153,6 +154,8 @@ struct Page {
   1: optional string full_text,
   2: list<string> creators,
   3: optional i32 page_number,
+  4: optional string book_id,
+  5: optional Collection book
 }
 
 // Coordinates of something on a page

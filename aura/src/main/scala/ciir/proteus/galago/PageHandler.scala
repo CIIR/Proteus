@@ -47,17 +47,18 @@ with Searchable {
 				      resourceId = siteId)
       val summary = ResultSummary(getSummary(document, queryTerms), List())
       val Array(bookId, pageNo) = identifier.split("_")
+      val iaPageNumber = (pageNo.toInt - 1)
       val externalUrl = String.format("%s/%s#page/n%s/mode/2up",
 				      archiveReaderUrl,
 				      bookId,
-				      pageNo)
+				      iaPageNumber.toString)
       var result = SearchResult(id = accessId,
 				score = scoredDocument.score,
 				title = Some(getDisplayTitle(document, queryTerms) + ", Page: " + pageNo),
 				summary = Some(summary),
 				externalUrl = Some(externalUrl),
-				thumbUrl = getThumbUrl(accessId),
-				imgUrl = getImgUrl(accessId))
+				thumbUrl = getThumbUrl(accessId, iaPageNumber),
+				imgUrl = getImgUrl(accessId, iaPageNumber))
       if (document.metadata.containsKey("url")) {
 	result = result.copy(externalUrl = Some(document.metadata.get("url")));
       }
@@ -78,31 +79,52 @@ with Searchable {
   private def getPageObject(id: AccessIdentifier): ProteusObject = {
     val document = retrieval.getDocument(id.identifier, c)
     if (document == null) return null
+    
+    val bookAccessId = new AccessIdentifier(identifier = id.identifier.split("_").head, 
+                      `type` = ProteusType.Collection, 
+                      resourceId = siteId)
+    
+    val parentBookDocument = retrieval.getDocument(bookAccessId.identifier, c)
+    val creatorList = new ListBuffer[String]
+    val creator = document.metadata.getOrElse("creator", "")
+    creatorList += creator
+    
+    val subject = Some(document.metadata.getOrElse("subject",""))
+    val pages = Some(document.metadata.getOrElse("numPages","-1").toInt)
+    val publicationYear = Some(document.metadata.getOrElse("date", "-1").toLong)
+    
+    var bookDocument = Collection(fullText = Some(document.text), creators = creatorList.toList, publicationDate = publicationYear, title = Some(document.name))
+    
+    
     var page = Page(fullText = Some(document.text),
 		    creators = List[String](),
-		    pageNumber = Some(id.identifier.split("_").last.toInt))
+		    pageNumber = Some(id.identifier.split("_").last.toInt),
+		    bookId = Some(id.identifier.split("_").head),
+            book = Some(bookDocument))
     
+	val iaPageNumber = (page.pageNumber.get - 1)
+
     var pObject = ProteusObject(id = id,
 				title = Some(getTitle(document) + ", Page " + page.pageNumber.get ),
 				description = Some("Page Number:" + page.pageNumber.get),
-				thumbUrl = getThumbUrl(id),
-				imgUrl = getImgUrl(id),
+				thumbUrl = getThumbUrl(id, iaPageNumber),
+				imgUrl = getImgUrl(id, iaPageNumber),
 				page = Some(page))
     return pObject
   }
 
-  private def getImgUrl(id: AccessIdentifier): Some[String] = {
+  private def getImgUrl(id: AccessIdentifier, pageNumber: Int): Some[String] = {
     val Array(archiveId, pageNo) = id.identifier.split("_")
     return Some(String.format("http://www.archive.org/download/%s/page/n%s.jpg",
 		     archiveId,
-		     pageNo))
+		     (pageNumber).toString()))
   }
 
-  private def getThumbUrl(id: AccessIdentifier): Some[String] = {
+  private def getThumbUrl(id: AccessIdentifier, pageNumber: Int): Some[String] = {
     val Array(archiveId, pageNo) = id.identifier.split("_")
     return Some(
       String.format("http://www.archive.org/download/%s/page/n%s_thumb.jpg",
 		    archiveId,
-		     pageNo))
+		     (pageNumber).toString()))
   }
 }

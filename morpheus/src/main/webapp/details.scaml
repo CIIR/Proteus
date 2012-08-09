@@ -6,12 +6,6 @@
  .row-fluid
   %h1 #{id.`type`}: #{title.getOrElse("<Unknown>")}
   %hr
-  - if (imgUrl.isDefined)
-   %div
-    %b Image:
-    %div
-     %img(src={pObject.imgUrl.get} style="border:thin solid black")
-  
   -# The remainder the information is rendered specific to the
      type held.
   = view(pObject, id.`type`.name)

@@ -36,7 +36,6 @@ function unMarkItem(id) {
 // Preps the page for transformation.
 function relatedResults(targetType) {
     alert("Submitting!");
-    return;
     // copy the active result elements into the form
     $("#resultContent .tab-pane.active input")
 	.each(function() {

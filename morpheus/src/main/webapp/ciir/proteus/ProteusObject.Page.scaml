@@ -1,4 +1,28 @@
+- import ciir.proteus.ProteusFunctions._
+
 - val p = page.get
+
+%div
+ %b
+  - val bookAccessId = displayId(new AccessIdentifier(identifier = p.bookId.get, `type` = ProteusType.Collection, resourceId = it.id.resourceId))
+  %a(href = "/details?id=#{bookAccessId}")
+   = "See full book"
+%div
+ %b
+  - val prevPageId = p.bookId.get + "_" + (p.pageNumber.get -1) + "--sPage--sportland"
+  - val nextPageId = p.bookId.get + "_" + (p.pageNumber.get +1) + "--sPage--sportland"
+  - if (p.pageNumber.get > 1)
+   %a(href = "/details?id=#{prevPageId}") 
+    = "Previous Page"
+  - if (p.pageNumber.get < 100000)
+   %a(href = "/details?id=#{nextPageId}") 
+    = "Next Page"
+- if (imgUrl.isDefined)
+ %div
+  %b Image:
+  %div
+   %img(src={it.imgUrl.get} style="border:thin solid black")
+  
 - if (p.creators.size > 0)
  %ul
   - for (creator <- p.creators)
