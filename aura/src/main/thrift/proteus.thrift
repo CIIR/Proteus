@@ -79,6 +79,7 @@ struct SearchRequest {
   1: string raw_query,
   2: list<ProteusType> types,
   3: optional RequestParameters parameters,
+  4: optional string raw_galago_query
 }
 
 struct WeightedDate {

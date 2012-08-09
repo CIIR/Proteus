@@ -129,7 +129,11 @@ with FakeDataGenerator {
     // If we have a query, put together a SearchRequest and ship it
     if (params.contains("q")) {
       // Request this many
-      val count = kNumSearchResults
+      var count = kNumSearchResults
+      if (params.contains("n")) {
+        count = params("n").toInt
+      }
+      
       val requestedTypes = if (multiParams("st").contains("all")) {
 	kReturnableTypes.map { rt : String => ProteusType.valueOf(rt).get }
       } else {
@@ -138,10 +142,16 @@ with FakeDataGenerator {
 	    ProteusType.valueOf(str).get
 	}
       }
+      
+      var rgq : Option[String] = None
+      if (params.contains("rgq")) {
+        rgq = Some(params("rgq"))
+      }
       val parameters = RequestParameters(count, 0)
       val request = SearchRequest(rawQuery = params("q"), 
 				  types = requestedTypes, 
-				  parameters = Some(parameters))
+				  parameters = Some(parameters),
+				  rawGalagoQuery = rgq)
 
       val futureResponse = dataClient.search(request)
       val response = futureResponse()

@@ -79,8 +79,14 @@ trait Searchable extends TypedStore {
     searchParams.set("uww", 0.50D)
     
     searchParams.set("count", count+offset)
-    val cleanQueryString = cleanQuery(srequest.rawQuery)
-    val root = StructuredQuery.parse(cleanQueryString);
+    
+   
+    val galagoQuery =  srequest.rawGalagoQuery match {
+      case None => rawQueryToGalagoQuery(srequest.rawQuery)
+      case Some(result) => result
+    }
+   
+    val root = StructuredQuery.parse(galagoQuery);
     val transformed : Node = retrieval.transformQuery(root, searchParams);
     val start = System.currentTimeMillis
     var scored : Array[ScoredDocument] = null
@@ -96,7 +102,7 @@ trait Searchable extends TypedStore {
     return Tuple2(transformed, scored.slice(offset, limit))
   }
   
-  def cleanQuery(request:String) : String = {
+  def rawQueryToGalagoQuery(request:String) : String = {
           val normalizedTokens = new ListBuffer[String]()
           val cleanQuery = request.replace("-", " ").toLowerCase.replaceAll("[^a-z01-9 ]", " ").replaceAll("\\s+", " ").trim
           val tokens = cleanQuery.split("\\s+")
