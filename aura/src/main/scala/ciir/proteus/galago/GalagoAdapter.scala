@@ -145,8 +145,13 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
 	  None
 	} else {
 	  val handler = handlerMap(aid.`type`)
+	  try {
 	  val pObject = handler.lookup(aid)
 	  Some(proteusObjectToSearchResult(pObject, score))
+	  } catch {
+          case e => { e.printStackTrace()}
+      None
+	  }
 	}
       }
     }

@@ -30,6 +30,8 @@ with Searchable {
     c.set("pseudo", true);
     c.set("terms", false);
     c.set("tags", false);
+      c.set("sampleLimit", 50)
+
     var results = ListBuffer[SearchResult]()
     for (scoredDocument <- scored) {
       
@@ -41,13 +43,37 @@ with Searchable {
 				      `type` = ProteusType.Person, 
 				      resourceId = siteId)
       val summary = ResultSummary(getSummary(document, queryTerms), List())
+      
+           val externalId = WikipediaEntityUtil.determineExternalId(document)
+      
+      var wikiEntity : Option[WikipediaEntity] = None
+      var externalUrl : Option[String] = None
+      
+      if (externalId != None) {
+         externalUrl = Some(WikipediaEntityUtil.wikipediaIdToUrl(externalId.get))
+         
+         var thumbUrls = List[String]()
+         var dbpediaData = Seq[Tuple3[String, String, String]]()
+         try {
+            dbpediaData = WikipediaEntityUtil.fetchDbpediaData(externalId.get)
+            thumbUrls = WikipediaEntityUtil.extractThumbUrl(dbpediaData)
+         } catch {
+             case e => { e.printStackTrace()  }
+         }
+         wikiEntity = Some(WikipediaEntity(externalId.get, 
+             WikipediaEntityUtil.getDisplayTitle(externalId.get), 
+             WikipediaEntityUtil.wikipediaIdToUrl(externalId.get), 
+             thumbUrls, 
+             Some(dbpediaData.mkString("\n"))))
+      }
+      
       var result = SearchResult(id = accessId,
-				score = scoredDocument.score,
-				title = Some(getDisplayTitle(document, queryTerms)),
-				summary = Some(summary),
-				externalUrl = Some(dummyExtUrl),
-				thumbUrl = Some(dummyThumbUrl),
-				imgUrl = Some(dummyImgUrl))
+                score = scoredDocument.score,
+                title = Some(getDisplayTitle(document, queryTerms)),
+                summary = Some(summary),
+                externalUrl = externalUrl,
+                thumbUrl = getThumb(wikiEntity),
+                imgUrl = None)
       if (document.metadata.containsKey("url")) {
 	result = result.copy(externalUrl = Some(document.metadata.get("url")));
       }
@@ -72,17 +98,44 @@ with Searchable {
 
   val c = new Parameters;
   c.set("pseudo", true);
-  c.set("terms", true);
-  c.set("tags", true);    
+  c.set("terms", false);
+  c.set("tags", true);
   private def getPersonObject(id: AccessIdentifier): ProteusObject = {
-    val document = retrieval.getDocument(id.identifier, c)
+    val document = retrieval.getDocument(id.identifier, c).asInstanceOf[PseudoDocument]
     if (document == null) return null
     var person = Person(fullName = Some(document.name),
 		      alternateNames = List[String]())
     val contexts = extractContexts(document)
+    
+     val externalId = WikipediaEntityUtil.determineExternalId(document)
+      
+      var wikiEntity : Option[WikipediaEntity] = None
+      var externalUrl : Option[String] = None
+      
+       if (externalId != None) {
+         externalUrl = Some(WikipediaEntityUtil.wikipediaIdToUrl(externalId.get))
+         
+         var thumbUrls = List[String]()
+         var dbpediaData = Seq[Tuple3[String, String, String]]()
+         try {
+            dbpediaData = WikipediaEntityUtil.fetchDbpediaData(externalId.get)
+            thumbUrls = WikipediaEntityUtil.extractThumbUrl(dbpediaData)
+         } catch {
+             case e => { e.printStackTrace()  }
+         }
+         wikiEntity = Some(WikipediaEntity(externalId.get, 
+             WikipediaEntityUtil.getDisplayTitle(externalId.get), 
+             WikipediaEntityUtil.wikipediaIdToUrl(externalId.get), 
+             thumbUrls, 
+             Some(dbpediaData.mkString("\n"))))
+      }
+    
     var pObject = ProteusObject(id = id,
+                        description = None,
+                thumbUrl = getThumb(wikiEntity),
+                externalUrl = externalUrl,
+                externalEntity = wikiEntity,    
 				title = Some(getTitle(document)),
-				thumbUrl = Some(dummyThumbUrl),
 				person = Some(person),
 				contexts = Some(contexts))
     return pObject

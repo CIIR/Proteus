@@ -106,8 +106,9 @@ with Searchable {
 
   val c = new Parameters;
   c.set("pseudo", true);
-  c.set("terms", true);
-  c.set("tags", true);    
+  c.set("terms", false);
+  c.set("tags", true);
+  c.set("sampleLimit", 50)
   private def getLocationObject(id: AccessIdentifier): ProteusObject = {
     val document = retrieval.getDocument(id.identifier, c).asInstanceOf[PseudoDocument]
     if (document == null) return null
