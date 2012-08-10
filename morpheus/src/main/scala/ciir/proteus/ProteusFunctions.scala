@@ -16,7 +16,7 @@ object ProteusFunctions {
     typeString.toLowerCase match {
       case "collection" => "Books"
       case "location" => "Locations"
-      case "miscellaneous" => "Other"
+      case "miscellaneous" => "Misc"
       case "page" => "Pages"
       case "person" => "People"
       case "topic" => "Topics"

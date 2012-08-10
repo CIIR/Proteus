@@ -123,6 +123,8 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
     var acc = HashMap[AccessIdentifier, Double]()
     try {
     for (belief <- rrequest.beliefs; targetType <- rrequest.targetTypes) {
+      if (!((belief.id.`type` == ProteusType.Collection && targetType == ProteusType.Collection) 
+          || (belief.id.`type` == ProteusType.Page && targetType == ProteusType.Page))) {
       val targetIds = links.countOccurrences(belief.id, targetType)
       for ((tid, count) <- targetIds) {
 	    if (!acc.containsKey(tid)) {
@@ -131,6 +133,7 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
 	      val newscore = acc(tid) + (count * belief.score)
 	      acc += (tid -> newscore)
 	    }
+      }
       }
     }
     } catch {

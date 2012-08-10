@@ -82,7 +82,7 @@ class LinkProvider(parameters: Parameters) {
 			srcKey, targetKey, src.identifier)
       val links = index.getLinks(src.identifier)
       for (t <- links.target) {
-	val aid = AccessIdentifier(identifier = normalizeText(t.id),
+	val aid = AccessIdentifier(identifier = t.id,
 				   `type` = targetType,
 				   resourceId = siteId)
 	list = (aid, t.positions.size) +: list
@@ -91,22 +91,7 @@ class LinkProvider(parameters: Parameters) {
     return list
   }
 
-   def normalizeText(name:String):String = {
-    val replacedName = replaceChars(name)
-    val lower = replacedName.toLowerCase
-    val symbolsToSpace = lower.replaceAll("[^a-z01-9 ]", " ").replaceAll("\\s+", " ").trim
-    symbolsToSpace
-  }
   
-  def replaceChars(word: String) : String = word match {
-        case "-LRB-" => "("
-        case "-RRB-" => ")"
-        case "-RSB-" => "]"
-        case "-LSB-" => "["
-        case "-LCB-" => "{"
-        case "-RCB-" => "}"
-        case x => x
-  }
   def getInfo : List[LinkInfo] = {
     var list = List[LinkInfo]()
     for ((intSrcType, innerMap) <- linkMap;

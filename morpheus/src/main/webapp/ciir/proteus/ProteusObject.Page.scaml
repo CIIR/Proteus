@@ -17,18 +17,18 @@
   - if (p.pageNumber.get < 100000)
    %a(href = "/details?id=#{nextPageId}") 
     = "Next Page"
+%b Full text:
+%br
+.well
+ = p.fullText.getOrElse("<None>")
 - if (imgUrl.isDefined)
- %div
+ %div(style="align:center")
   %b Image:
-  %div
-   %img(src={it.imgUrl.get} style="border:thin solid black")
+  %div(width="500" style="align:center")
+   %img(src={it.imgUrl.get} style="align:center; max-width:65%; border:thin solid black")
   
 - if (p.creators.size > 0)
  %ul
   - for (creator <- p.creators)
    %li Author: #{creator}
  %hr
-%b Full text:
-%br
-.well
- = p.fullText.getOrElse("<None>")
