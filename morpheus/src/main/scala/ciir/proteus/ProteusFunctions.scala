@@ -2,6 +2,7 @@ package ciir.proteus
 
 import ciir.proteus.Constants._
 import ciir.proteus.ProteusServlet._
+import scala.util.matching.Regex._
 
 object ProteusFunctions {
   val kReturnableTypes = List("page", 
@@ -64,5 +65,23 @@ object ProteusFunctions {
     case archivePattern(url) => "[View at Internet Archive]"
     case wikipediaPattern(url) => "[Search Wikipedia]"
     case _ => "[View external Source]"
+  }
+
+  val openPattern = """<(\w+)>""".r
+  val closePattern = """</(\w+)>""".r
+  def replaceNLPTagsForViewing(rawString: String, itemName: String) : String = {
+    val backReplaced = closePattern.replaceAllIn(rawString, (m : Match) => "</span>")
+    val frontReplaced = openPattern.replaceAllIn(backReplaced, (m: Match) =>
+      if (m.group(1) == "text") {
+	"<span>"
+      } else {
+	m.group(1) match {
+	  case "per" => """<span style="color: DarkRed">"""
+	  case "loc" => """<span style="color: Navy">"""
+	  case "org" => """<span style="color: LightSeaGreen">"""
+	  case "misc" => """<span style="color: GoldenRod">"""
+	}
+      })
+    return ("(?i)"+itemName).r.replaceAllIn(frontReplaced, (m: Match) => String.format("<b>%s</b>", m.group(0)))
   }
 }

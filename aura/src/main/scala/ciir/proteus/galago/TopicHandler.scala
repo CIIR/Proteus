@@ -20,7 +20,8 @@ object TopicHandler {
 }
 
 class TopicHandler(p: Parameters) extends Handler(p) 
-with TypedStore {
+with Searchable {
+  val retrieval = null
   val factory = new TCompactProtocol.Factory
 
   // These are simple wrappers to deserialize the stored classes in the indexes
@@ -57,6 +58,31 @@ with TypedStore {
   val wordFile = new File(indexPath, "words")
   val wordIndex = new WordsReader(new DiskBTreeReader(wordFile))
 
+  override def search(srequest: SearchRequest) : List[SearchResult] = {
+    val unigrams = srequest.rawQuery.split(" ").map(_.toLowerCase)
+    // Turn the query terms into lists of weighted terms
+    val partialScores = unigrams.map {
+      term => 
+	wordIndex.getEntry(term) match {
+	  case None => List()
+	  case Some(t: TermList) => t.terms
+	}
+    }.flatten
+    // Group by the topic and sum the partial contributions, and sort on sums
+    val totalScores = partialScores.groupBy(_.term).toList.map {
+      tuple => WeightedTerm(term = tuple._1, weight = tuple._2.map(_.weight).sum)
+    }.sortBy(_.weight).take(10)
+    // convert the sorted list of weighted topic scores into results
+    return totalScores.map {
+      weightedTopic => 
+	SearchResult(id = AccessIdentifier(identifier = weightedTopic.term,
+					   `type` = ProteusType.Topic,
+					   resourceId = siteId),
+		     score = weightedTopic.weight,
+		     title = Some(weightedTopic.term.capitalize))
+    }
+  }
+
   override def lookup(id: AccessIdentifier): ProteusObject = {
     // Try to find matching stuff from the word Index
     val words = wordIndex.getEntry(id.identifier)
@@ -72,9 +98,18 @@ with TypedStore {
   override def lookup(ids: Set[AccessIdentifier]): List[ProteusObject] = 
     ids.map(lookup(_)).toList
 
-  override def getInfo() : CollectionInfo = CollectionInfo(`type` = ProteusType.Topic,
-							   numDocs = 0,
-							   vocabSize = 0,
-							   numTokens = 0,
-							   fields = List())
+  override def getInfo() : Option[CollectionInfo] = None
+  def getTopicInfo() : List[TopicInfo] = {
+    var list = List[TopicInfo]()
+    for (i <- 1 to 50) {
+      val key = "topic" + i.toString
+      val pages = pageIndex.getEntry(key).getOrElse(PrefixedTermMap(Map()))
+      val words = wordIndex.getEntry(key).getOrElse(TermList(List()))
+      val topicInfo = TopicInfo(name = key,
+				numWords = words.terms.size,
+				numPages = pages.termLists.size)
+      list = topicInfo +: list
+    }
+    return list
+  }
 }

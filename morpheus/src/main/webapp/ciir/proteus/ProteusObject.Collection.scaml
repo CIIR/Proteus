@@ -9,5 +9,5 @@
  %b Full text:
 %br
 .well
- = c.fullText.getOrElse("<None>")
+ != replaceNLPTagsForViewing(c.fullText.getOrElse("<None>"), id.identifier)
  

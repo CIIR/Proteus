@@ -19,5 +19,5 @@
       %span  
        = "Wiki Entity Id:" + context.externalId
       %p.well
-       = context.textContent
+       != replaceNLPTagsForViewing(context.textContent, id.identifier)
       %div

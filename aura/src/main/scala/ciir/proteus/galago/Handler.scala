@@ -35,7 +35,7 @@ trait Searchable extends TypedStore {
 
   def search(srequest : SearchRequest) : List[SearchResult]
 
-  def getInfo : CollectionInfo = {
+  def getInfo : Option[CollectionInfo] = {
     val stats = retrieval.getRetrievalStatistics();
     val parts = retrieval.getAvailableParts.getKeys().filter {
       partName =>
@@ -45,11 +45,11 @@ trait Searchable extends TypedStore {
 	partName.replace("field.","")
 	
     }
-    return CollectionInfo(`type` = retrievalType,
-			  numDocs = stats.documentCount,
-			  vocabSize = stats.vocabCount,
-			  numTokens = stats.collectionLength,
-			  fields = parts.toList)
+    return Some(CollectionInfo(`type` = retrievalType,
+			       numDocs = stats.documentCount,
+			       vocabSize = stats.vocabCount,
+			       numTokens = stats.collectionLength,
+			       fields = parts.toList))
   }
 
   def getDocument(aid: AccessIdentifier) : Option[Document] = {
@@ -127,7 +127,7 @@ abstract class Handler(val parameters: Parameters) {
   // Defined by the subclasses
   def lookup(ids: Set[AccessIdentifier]) : List[ProteusObject]
   def lookup(id: AccessIdentifier) : ProteusObject
-  def getInfo() : CollectionInfo
+  def getInfo() : Option[CollectionInfo]
 
   
    def getThumb(wikiEntity:Option[WikipediaEntity]) : Option[String] = {

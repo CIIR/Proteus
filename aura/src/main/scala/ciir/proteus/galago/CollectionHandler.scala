@@ -106,8 +106,7 @@ with Searchable {
 //    } catch {
 //      case e => println("Error parsing text from book " + id + "\n" + e.printStackTrace())
 //    }
-    
-    
+        
     // TODO!!!  These metadata fields are important.  We need to fix these up!
     // We should to parse earlier, or produce valid XML to extract them from.
     val creator = document.metadata.getOrElse("creator", "")
@@ -115,9 +114,10 @@ with Searchable {
     
     val subject = Some(document.metadata.getOrElse("subject",""))
     val pages = Some(document.metadata.getOrElse("numPages","-1").toInt)
-    val publicationYear = Some(document.metadata.getOrElse("date", "-1").toLong)
-    
-    var collection = Collection(fullText = Some(document.text), creators = creatorList.toList, publicationDate = publicationYear)
+    val publicationYear = Some(document.metadata.getOrElse("date", "-1").toLong)   
+    var collection = Collection(fullText = Some(document.text), 
+				creators = creatorList.toList, 
+				publicationDate = publicationYear)
     var pObject = ProteusObject(id = id,
 				title = Some(getTitle(document)),
 				description = Some("A book"),

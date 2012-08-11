@@ -62,10 +62,10 @@ import ProteusServlet._
 
   get("/status") {
     val response = dataClient.status()()
-    printf("linkdata: %s\n", response.linkData.toString)
     renderHTML("status.scaml", Map("siteId" -> response.siteId,
 				   "collectionData" -> response.collectionData,
-				   "linkData" -> response.linkData))
+				   "linkData" -> response.linkData,
+				 "topicData" -> response.topicData))
   }
 
   post("/related") {

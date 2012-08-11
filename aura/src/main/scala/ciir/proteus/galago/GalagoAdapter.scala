@@ -109,11 +109,13 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
     val colInfo = handlerMap.values.map {
       handler =>
 	handler.getInfo
-    }.toList
+    }.toList.filter(_.isDefined).map(_.get)
     val linkInfo = links.getInfo
+    val topicInfo = handlerMap(ProteusType.Topic).asInstanceOf[TopicHandler].getTopicInfo
     val resp = StatusResponse(siteId = siteIdentifier,
 			      collectionData = colInfo,
-			      linkData = linkInfo)
+			      linkData = linkInfo,
+			      topicData = topicInfo)
     return Future(resp)
   }
 
@@ -122,20 +124,20 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
   override def related(rrequest: RelatedRequest) : Future[SearchResponse] = {
     var acc = HashMap[AccessIdentifier, Double]()
     try {
-    for (belief <- rrequest.beliefs; targetType <- rrequest.targetTypes) {
-      if (!((belief.id.`type` == ProteusType.Collection && targetType == ProteusType.Collection) 
-          || (belief.id.`type` == ProteusType.Page && targetType == ProteusType.Page))) {
-      val targetIds = links.countOccurrences(belief.id, targetType)
-      for ((tid, count) <- targetIds) {
-	    if (!acc.containsKey(tid)) {
-	      acc += (tid -> (count * belief.score))
-	    } else {
-	      val newscore = acc(tid) + (count * belief.score)
-	      acc += (tid -> newscore)
-	    }
+      for (belief <- rrequest.beliefs; targetType <- rrequest.targetTypes) {
+	if (!((belief.id.`type` == ProteusType.Collection && targetType == ProteusType.Collection) 
+              || (belief.id.`type` == ProteusType.Page && targetType == ProteusType.Page))) {
+		val targetIds = links.countOccurrences(belief.id, targetType)
+		for ((tid, count) <- targetIds) {
+		  if (!acc.containsKey(tid)) {
+		    acc += (tid -> (count * belief.score))
+		  } else {
+		    val newscore = acc(tid) + (count * belief.score)
+		    acc += (tid -> newscore)
+		  }
+		}
+	      }
       }
-      }
-    }
     } catch {
       case e => { e.printStackTrace() }
     }
@@ -149,11 +151,11 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
 	} else {
 	  val handler = handlerMap(aid.`type`)
 	  try {
-	  val pObject = handler.lookup(aid)
-	  Some(proteusObjectToSearchResult(pObject, score))
+	    val pObject = handler.lookup(aid)
+	    Some(proteusObjectToSearchResult(pObject, score))
 	  } catch {
-          case e => { e.printStackTrace()}
-      None
+            case e => { e.printStackTrace()}
+	    None
 	  }
 	}
       }

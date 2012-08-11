@@ -3,12 +3,13 @@
 -@ val siteId : String
 -@ val collectionData : Buffer[CollectionInfo]
 -@ val linkData : Buffer[LinkInfo]
+-@ val topicData : Buffer[TopicInfo]
 .container-fluid
  .row-fluid
   .span12
    %h1 Status of site #{siteId}
   %hr
-  %div
+  .span3
    %h3 Collection Information
    %table.table-bordered.table-striped
     - for (cd <- collectionData)
@@ -31,18 +32,49 @@
         %ul
          - for (f <- cd.fields)
           %li #{f}
-  %div
-   Link Information
-  %table.table-bordered.table-striped
-   - for (li <- linkData)
+  .span3
+   %h3 Link Information
+   %table.table-bordered.table-striped
+    - for (li <- linkData)
+     %tr
+      %td
+       %div
+        %b Source:
+        = li.src.name
+       %div
+        %b Target
+        = li.target.name
+       %div
+        %b Number of links:
+        = li.numLinks
+  .span3
+   %h3 Topic Information
+   %table
     %tr
+     %td		
+      %b Number of Topics:
      %td
-      %div
-       %b Source:
-       = li.src.name
-      %div
-       %b Target
-       = li.target.name
-      %div
-       %b Number of links:
-       = li.numLinks
+      = topicData.size
+    %tr
+     %td 
+      %b Avg. Words / Topic:
+     %td
+      = topicData.map(_.numWords).sum.toDouble / topicData.size
+    %tr
+     %td 
+      %b Avg. Pages / Topic:
+     %td
+      = topicData.map(_.numPages).sum.toDouble / topicData.size
+   %table.table-bordered.table-striped
+    - for (ti <- topicData)
+     %tr
+      %td
+       %div
+        %b Name:
+        = ti.name
+       %div
+        %b Num Words:
+        = ti.numWords
+       %div
+        %b Num Pages:
+        = ti.numPages

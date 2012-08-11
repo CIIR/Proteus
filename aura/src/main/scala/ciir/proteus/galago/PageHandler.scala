@@ -91,11 +91,10 @@ with Searchable {
     
     val subject = Some(document.metadata.getOrElse("subject",""))
     val pages = Some(document.metadata.getOrElse("numPages","-1").toInt)
-    val publicationYear = Some(document.metadata.getOrElse("date", "-1").toLong)
-    
-    var bookDocument = Collection(fullText = Some(document.text), creators = creatorList.toList, publicationDate = publicationYear, title = Some(document.name))
-    
-    
+    val publicationYear = Some(document.metadata.getOrElse("date", "-1").toLong)   
+    var bookDocument = Collection(fullText = Some(document.text), 
+				  creators = creatorList.toList, 
+				  publicationDate = publicationYear)        
     var page = Page(fullText = Some(document.text),
 		    creators = List[String](),
 		    pageNumber = Some(id.identifier.split("_").last.toInt),

@@ -1,6 +1,13 @@
+// Causes the url to be updated when changing result tabs
+$('ul#resultTabs li a').click(function () {location.hash = $(this).attr('href');});
 $(function() {
-      // This activates the first result pane
-      $('#resultTabs a:first').tab('show');
+      // If a hash location is defined that matches a tab, select that.
+      // Otherwise select the first tab
+      if (location.hash != "") {
+	  $("ul#resultTabs li a[href='" + location.hash + "']").tab('show');
+      } else {
+	  $('ul#resultTabs a:first').tab('show');
+      }
       
       // Now select the type buttons
       var resultTypes = $('#resultTabs a');

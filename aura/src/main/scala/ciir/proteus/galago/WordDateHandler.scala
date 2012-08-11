@@ -28,9 +28,5 @@ class WordDateHandler(p: Parameters) extends Handler(p) {
   
   override def lookup(id: AccessIdentifier): ProteusObject = null
   override def lookup(ids: Set[AccessIdentifier]): List[ProteusObject] = List()
-  override def getInfo() : CollectionInfo = CollectionInfo(`type` = ProteusType.Miscellaneous,
-							   numDocs = 0,
-							   vocabSize = 0,
-							   numTokens = 0,
-							   fields = List())  
+  override def getInfo() : Option[CollectionInfo] = None
 }

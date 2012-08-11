@@ -135,7 +135,7 @@ struct LongValueList {
 // Or something.
 struct Topic {
  1: optional TermList words,
- 2: optional PrefixedTermMap pages
+ 2: optional PrefixedTermMap pages,
 }
 
 // Collection: Book, Newspaper, Website, etc.
@@ -147,7 +147,6 @@ struct Collection {
   4: optional i32 num_pages,
   5: list<string> creators,
   6: optional string full_text,
-  7: optional string title
 }
 
 // Page: Page in a book, page of a newspaper, web page on a site, etc.
@@ -338,10 +337,17 @@ struct LinkInfo {
  3: i64 num_links,
 }
 
+struct TopicInfo {
+ 1: string name,
+ 2: i64 num_words,
+ 3: i64 num_pages,
+}
+
 struct StatusResponse {
   1: string siteId,
   2: list<CollectionInfo> collectionData,
   3: list<LinkInfo> linkData,
+  4: list<TopicInfo> topicData,
 }
 
 service ProteusProvider {
