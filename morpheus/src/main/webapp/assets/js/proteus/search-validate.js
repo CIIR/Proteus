@@ -24,6 +24,6 @@ $('#searchform').submit(
 		    });
 			     return true;
 			 });
-	    $('#selectedType')
+	    //$('#selectedType')
 	}
 });

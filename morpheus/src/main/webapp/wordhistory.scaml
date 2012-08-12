@@ -1,0 +1,37 @@
+- import ciir.proteus.ProteusFunctions._
+- import ciir.proteus._
+-@ val w : String = ""
+-@ val frequencies : Map[String, LongValueList] = Map()
+-@ val error : String = ""
+.container-fluid
+ .row-fluid
+  %form.well.form-search#wordForm(method="get" action="wordhistory")
+   %div
+    %input.input-medium.search-query#w(type="text" name="w" value={w}
+    				       placeholder="Enter Term")
+    %button.btn.btn-primary(type="submit") Look
+    %script(src="assets/js/proteus/wordhistory-validate.js")
+    %script(src="assets/js/highcharts/highstock.js")
+  - if (!frequencies.isEmpty)
+   %div
+    %h1 Frequencies for '#{w}'
+   %hr
+   %div#wordFreqs
+   - val data = prepareHighStockData(frequencies)
+   :!javascript
+    var chart1; // globally available
+    $(document).ready(function() {
+      chart1 = new Highcharts.StockChart({
+         chart: {
+            renderTo: 'wordFreqs',
+         },
+         rangeSelector: { enabled : false },
+         scrollbar : { enabled: false },
+         navigator : { enabled: false },
+         tooltip: { xDateFormat: '%Y' },
+         title: {
+            text: 'Word Use Over Time'
+         },
+         series: [#{data}]         
+      });
+    });

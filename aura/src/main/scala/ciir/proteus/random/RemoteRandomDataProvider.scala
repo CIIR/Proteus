@@ -39,4 +39,8 @@ class RemoteRandomDataProvider extends ProteusProvider.FutureIface with FakeData
     return Future(SearchResponse(results = List[SearchResult](), 
 				 error = Some("Not yet implemented.")))
   }
+
+  override def wordFrequencies(words: Seq[String]) : Future[Map[String, LongValueList]] = {
+    Future(Map())
+  }
 }

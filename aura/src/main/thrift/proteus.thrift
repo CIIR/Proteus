@@ -356,6 +356,7 @@ service ProteusProvider {
   TransformResponse transform(1:TransformRequest trequest),
   SearchResponse related(1:RelatedRequest rrequest),
   StatusResponse status(),
+  map<string, LongValueList> wordFrequencies(1: list<string> words),
 }
 
 struct Target {

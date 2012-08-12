@@ -162,6 +162,17 @@ import ProteusServlet._
     renderHTML("search.scaml", actuals)
   }
 
+  get("/wordhistory") {
+    var actuals = Map[String, Any]()
+    if (params.contains("w")) {
+      val words = params("w").split(" ").toList
+      val response = dataClient.wordFrequencies(words)()
+      actuals += ("frequencies" -> response.toMap)
+      actuals += ("w" -> params("w"))
+    }
+    renderHTML("wordhistory.scaml", actuals)
+  }
+
   notFound {
     serveStaticResource()
   }

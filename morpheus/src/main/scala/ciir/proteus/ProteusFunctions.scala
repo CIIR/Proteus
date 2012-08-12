@@ -3,6 +3,7 @@ package ciir.proteus
 import ciir.proteus.Constants._
 import ciir.proteus.ProteusServlet._
 import scala.util.matching.Regex._
+import java.util.Calendar
 
 object ProteusFunctions {
   val kReturnableTypes = List("page", 
@@ -83,5 +84,21 @@ object ProteusFunctions {
 	}
       })
     return ("(?i)"+itemName).r.replaceAllIn(frontReplaced, (m: Match) => String.format("<b>%s</b>", m.group(0)))
+  }
+
+  lazy val calendar = Calendar.getInstance
+  def prepareHighStockData(frequencies: Map[String, LongValueList]) : String = {
+    frequencies.toList.map {
+      entry => {
+	val (name, values) = entry
+	val valueStrings = values.dates.map {
+	  weightedDate => {
+	    calendar.set(weightedDate.date.toInt, 1, 1)
+	    "[%d,%f]" format (calendar.getTimeInMillis, weightedDate.weight)
+	  }
+	}.mkString(",")
+	"{name: '%s', data: [%s]}" format (name, valueStrings)
+      }
+    }.mkString(",")
   }
 }
