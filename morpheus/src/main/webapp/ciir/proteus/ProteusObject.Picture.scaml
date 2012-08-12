@@ -1,4 +1,10 @@
-%tr
- %td
-  %div
-   = title
+- import ciir.proteus.ProteusFunctions._
+- val pic = picture.get
+- if (externalUrl.isDefined)
+ %div
+  %a(href = {externalUrl}) See full page at Internet Archive
+ %br
+- if (imgUrl.isDefined)
+ %div
+  %img(src={imgUrl.get} style="height: 600px; align:center; border:thin solid black")
+ 

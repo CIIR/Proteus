@@ -21,6 +21,7 @@ object Handler {
       case ProteusType.Location => Some(LocationHandler(parameters))
       case ProteusType.Miscellaneous => Some(MiscHandler(parameters))
       case ProteusType.Topic => Some(TopicHandler(parameters))
+      case ProteusType.Picture => Some(PictureHandler(parameters))
       case _ => None
     }    
   }
