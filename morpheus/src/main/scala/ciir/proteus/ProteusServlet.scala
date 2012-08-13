@@ -76,11 +76,14 @@ import ProteusServlet._
 	SearchResult(id = aid, score = (1.0).toDouble)
       }
     }
-    val targetTypes = multiParams("targetType").map {
-      tElem =>
-	ProteusType.valueOf(tElem)
-    }.filter(_.isDefined).map(_.get)
-
+    val targetTypes = if (multiParams("targetType").contains("all")) {
+      kReturnableTypes.map { rt: String => ProteusType.valueOf(rt).get }
+    } else {
+      multiParams("targetType").map {
+	tElem =>
+	  ProteusType.valueOf(tElem)
+      }.filter(_.isDefined).map(_.get)
+    }
     val rrequest = RelatedRequest(beliefs = beliefs,
 				  targetTypes = targetTypes)
     val response = dataClient.related(rrequest)()

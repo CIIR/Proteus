@@ -101,4 +101,21 @@ object ProteusFunctions {
       }
     }.mkString(",")
   }
+
+  def normalizeText(name:String):String = {
+    val replacedName = replaceChars(name)
+    val lower = replacedName.toLowerCase
+    val symbolsToSpace = lower.replaceAll("[^a-z01-9 ]", " ").replaceAll("\\s+", " ").trim
+    symbolsToSpace
+  }
+  
+  def replaceChars(word: String) : String = word match {
+        case "-LRB-" => "("
+        case "-RRB-" => ")"
+        case "-RSB-" => "]"
+        case "-LSB-" => "["
+        case "-LCB-" => "{"
+        case "-RCB-" => "}"
+        case x => x
+  }
 }

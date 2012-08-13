@@ -6,7 +6,7 @@
    - if (thumbUrl.isDefined)
     .span2
      %a.thumbnail{:href => {if (externalUrl != None) externalUrl.get}}
-      %img{:src => {thumbUrl.get}}
+      %img{:src => {thumbUrl.get}, :onerror => "assets/img/no_image.gif"}
    .span10
     %span(id=did)
      %i.icon-tag(onclick="markItem('#{did}')")
