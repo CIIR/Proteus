@@ -74,12 +74,18 @@ with Searchable {
     }.sortBy(_.weight).take(10)
     // convert the sorted list of weighted topic scores into results
     return totalScores.map {
-      weightedTopic => 
+      weightedTopic => {
+	val summary = wordIndex.getEntry(weightedTopic.term) match {
+	  case None => "No summary found"
+	  case Some(t: TermList) => t.terms.take(5).map(_.term).mkString(", ")
+	}
 	SearchResult(id = AccessIdentifier(identifier = weightedTopic.term,
 					   `type` = ProteusType.Topic,
 					   resourceId = siteId),
 		     score = weightedTopic.weight,
+		     summary = Some(ResultSummary(summary, List())),
 		     title = Some(weightedTopic.term.capitalize))
+      }
     }
   }
 

@@ -74,15 +74,12 @@ trait Searchable extends TypedStore {
     }
     
     val searchParams = new Parameters
-    
     searchParams.set("mu", 8000D)
     searchParams.set("odw",0.21D)
     searchParams.set("uniw", 0.29D)
     searchParams.set("uww", 0.50D)
-    
     searchParams.set("count", count+offset)
-    
-   
+       
     val galagoQuery =  srequest.rawGalagoQuery match {
       case None => rawQueryToGalagoQuery(srequest.rawQuery)
       case Some(result) => result

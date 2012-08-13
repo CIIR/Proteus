@@ -58,13 +58,24 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
 
   override def search(srequest: SearchRequest): Future[SearchResponse] = {
     val activeKeys = handlerKeys & srequest.`types`.toSet
-    val resultsSet = activeKeys.map { 
+
+    // This is a hack to make sure we get picture results even if pages aren't
+    // asked for
+    val picHandler : PictureHandler = handlerMap(ProteusType.Picture).asInstanceOf[PictureHandler]
+    val picResults =
+      if (activeKeys(ProteusType.Picture) && !activeKeys(ProteusType.Page)) {
+	val pageResults = handlerMap(ProteusType.Page).asInstanceOf[Searchable].search(srequest)
+	picHandler.scorePictures(pageResults).toList
+      } else {
+	List()
+      }
+
+    var resultsSet = activeKeys.map { 
       key: ProteusType => handlerMap(key) match {
 	case s:Searchable => {
 	  var results = s.search(srequest)
 	  if (activeKeys(ProteusType.Picture) &&
 	      key == ProteusType.Page) {
-	    val picHandler : PictureHandler = handlerMap(ProteusType.Picture).asInstanceOf[PictureHandler]
 	    (results ++ picHandler.scorePictures(results)).toList
 	  } else {
 	    results
@@ -73,6 +84,7 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
 	case _ => List()
       }
     }
+    resultsSet = resultsSet + picResults
     val resultList = resultsSet.reduceLeft { (A, B) => A ++ B }.toList
     return Future(SearchResponse(results = resultList, error = None))
   }
