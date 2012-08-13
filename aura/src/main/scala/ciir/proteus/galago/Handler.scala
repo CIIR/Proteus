@@ -117,9 +117,8 @@ trait Searchable extends TypedStore {
 
 abstract class Handler(val parameters: Parameters) {
   val siteId = parameters.getString("siteId")
-  val dummyThumbUrl = "http://ciir.cs.umass.edu/~irmarc/imgs/opera-house-thumb.JPG"
-  val dummyImgUrl = "http://ciir.cs.umass.edu/~irmarc/imgs/opera-house.JPG"
-  val dummyExtUrl = "http://ciir.cs.umass.edu/~irmarc/etc/placeholder.html"
+  val dummyThumbUrl = "/assets/img/no_image.gif"
+  val dummyImgUrl = "/assets/img/no_image.gif"
   val generator = new SnippetGenerator
 
   // Defined by the subclasses
