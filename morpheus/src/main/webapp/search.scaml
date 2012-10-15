@@ -1,29 +1,31 @@
 - import ciir.proteus.ProteusFunctions._
+- import scala.collection.mutable.Set
 -@ val results : Map[String, Any] = Map[String, Any]()
 -@ val q : String = ""
 -@ val error : String = ""
-.container-fluid
- .row-fluid
-  .span12
+-@ val items : Set[String] = Set[String]()
+.container(style="width:100%;")
+ .row(style="width:100%;")
+  .span2(data-spy="affix" data-offset-top="40")
+   = render("transformations.scaml", Map("items" -> items))
+  .span10
    %form.well.form-search#searchform{:method => "get", :action => "search"}
-    %table
-     %tr
-      %td
-       %input.input-medium.search-query#q(type="text" name="q"
-       					  value={q} placeholder="Enter Query")
-       %button.btn.btn-primary{:type => "submit"} Search
-      %td
-       %span Types to find:
-      %td
-       %span.btn-group#typeselection(data-toggle="buttons-checkbox")
-        - for (retType <- kReturnableTypes.sorted)
-         %button.btn(type="button" name="#{retType}") 
-          = pluralDisplayName(retType)
-        %button.btn{:type => "button", :name => "all" } All
-  %script{:src => "assets/js/proteus/search-validate.js"}
- -# This either renders an error or the result page. Not both.
- %br
- - if (!error.isEmpty)
-  = render("error.scaml", Map("error" -> error))
- - else if (!results.isEmpty)
-  = render("results.scaml", Map("results" -> results))
+    %input.input-medium.search-query#q(type="text" name="q"
+       				value={q} placeholder="Enter Query")
+    %button.btn.btn-primary{:type => "submit"} Search
+    %span Types to find:
+    %span.btn-group#typeselection(data-toggle="buttons-checkbox")
+     - for (retType <- kReturnableTypes.sorted)
+      %button.btn(type="button" name="#{retType}") 
+       = pluralDisplayName(retType)
+     %button.btn{:type => "button", :name => "all" } All
+   %script{:src => "assets/js/proteus/search-validate.js"}
+   -# This either renders an error or the result page. Not both.
+   %br
+   - if (!error.isEmpty)
+    = render("error.scaml", Map("error" -> error))
+   - else if (!results.isEmpty)
+    = render("results.scaml", Map("results" -> results))
+    -# Activate the first result pane and check the types
+       we searched for.
+   %script{:type => "text/javascript", :src => "assets/js/proteus/search-functions.js"}

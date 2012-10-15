@@ -7,7 +7,7 @@
         :content => "width=device-width, initial-scale=1.0"}
   %meta{:name => "description", :content => ""}
   %meta{:name => "author", :content => ""}
-  %link{:href=> "assets/css/bootstrap.css", :rel => "stylesheet"}
+  %link{:href=> "assets/css/bootstrap.min.css", :rel => "stylesheet"}
   :css
    body {
     padding-top: 60px;
@@ -17,7 +17,8 @@
     padding: 9px 0;
    }
   %script{:src => "assets/js/jquery-1.8.0.min.js"}
-  %link{:href => "assets/css/bootstrap-responsive.css", :rel => "stylesheet"}
+  %script{:src => "assets/js/bootstrap.min.js"}
+  %link{:href => "assets/css/bootstrap-responsive.min.css", :rel => "stylesheet"}
   /[if lt IF 9]
    %script{:src => "http://html5shim.googlecode.com/svn/trunk/html5.js"}
   %link{:rel => "assets/ico/shortcut icon", :href => "favicon.ico"}
@@ -30,27 +31,28 @@
   %link{:rel => "apple-touch-icon-prcomposed", 
         :href => "assets/ico/apple-touch-icon-57-precomposed.png"}
  %body
-  .navbar.navbar-fixed-top
+  .navbar.navbar-inverse.navbar-fixed-top
    .navbar-inner
-    .container-fluid
-     %a.btn.btn-navbar(data-toggle="collapse" data-target=".nav-collapse")
-      %span.icon-bar
-      %span.icon-bar
-      %span.icon-bar
+    .container
+     %a.btn.btn-navbar(type="button" data-toggle="collapse" data-target=".nav-collapse")
+     %a.brand(href="/index") Proteus
      .nav-collapse
       %ul.nav
-       %li.active
-        %a{:href => "/index"} Home
        %li
-        %a{:href => "/search"} Search
+        %a(href="/index") Home
        %li
-        %a{:href => "/wordhistory"} Word Frequencies
+        %a(href="/search") Search
        %li
-        %a{:href => "/about"} Contributors
+        %a(href="/wordhistory") Word Frequencies
+       %li
+        %a(href="/about") Contributors
        -# %li
-        %a{:href => "/contact"} Contact
+        %a(href="/contact") Contact
        %li
-        %a{:href => "/status"} Status
+        %a(href="/status") Status
+  :javascript
+   // Use this to activate the correct entry from the navbar above.
+   $('.nav-collapse ul.nav li a[href="'+location.pathname+'"]').parent().addClass('active');
   != body
   .span12
    %hr
@@ -74,16 +76,3 @@
        %a{:href => "http://www.nsf.gov"}
         %img{:alt => "National Science Foundation", :src => "assets/img/nsf_logo.gif"}
     %p &copy; CIIR 2012
-
-  %script{:src => "assets/js/bootstrap-transition.js"}
-  %script{:src => "assets/js/bootstrap-alert.js"}
-  %script{:src => "assets/js/bootstrap-modal.js"}
-  %script{:src => "assets/js/bootstrap-dropdown.js"}
-  %script{:src => "assets/js/bootstrap-scrollspy.js"}
-  %script{:src => "assets/js/bootstrap-tab.js"}
-  %script{:src => "assets/js/bootstrap-tooltip.js"}
-  %script{:src => "assets/js/bootstrap-popover.js"}
-  %script{:src => "assets/js/bootstrap-button.js"}
-  %script{:src => "assets/js/bootstrap-collapse.js"}
-  %script{:src => "assets/js/bootstrap-carousel.js"}
-  %script{:src => "assets/js/bootstrap-typeahead.js"}

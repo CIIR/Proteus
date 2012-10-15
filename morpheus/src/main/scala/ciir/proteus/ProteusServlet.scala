@@ -11,8 +11,10 @@ import org.scalatra._
 import scalate.ScalateSupport
 import scala.collection.JavaConversions._
 import scala.collection.mutable.MapBuilder
+import scala.collection.mutable.Set
 import org.lemurproject.galago.tupleflow.Parameters
 import java.util.ArrayList
+import org.slf4j.{Logger, LoggerFactory}
 
 object ProteusServlet {			      
   var parameters: Parameters = new Parameters()
@@ -23,6 +25,7 @@ with ScalateSupport
 with FakeDataGenerator {
 import ProteusServlet._
 
+  val logger = LoggerFactory.getLogger(this.getClass)
   val kNumSearchResults = 10
   // Load the first server parameters 
   val auraServer = ProteusServlet.parameters.getAsList("servers").asInstanceOf[ArrayList[Parameters]].first
@@ -40,9 +43,16 @@ import ProteusServlet._
   .retries(2)
   .build()
   val dataClient = new ProteusProvider.FinagledClient(dataService)
+  logger.info("Started listening to aura server " + auraServer.getString("host")
+	      + " on port " + auraServer.getLong("port").toString)
 
-  def renderHTML(template: String, args: Map[String, Any] = Map[String,Any]()) = {
+
+  def renderHTML(template: String, originalArgs: Map[String, Any] = Map[String,Any]()) = {
     contentType = "text/html"
+    val args = session.contains("items") match {
+      case true => originalArgs + ("items" -> session("items"))
+      case false => originalArgs
+    }
     templateEngine.layout(template, args)
   }
 
@@ -88,6 +98,23 @@ import ProteusServlet._
 				  targetTypes = targetTypes)
     val response = dataClient.related(rrequest)()
     renderHTML("search.scaml", Map("results" -> splitResults(response.results)))
+  }
+
+  get("/addItemToSession") {
+    val id = params("id")
+    logger.info("Adding item {} to session", id)
+    if (!session.contains("items")) {
+      session("items") = Set[String]()
+    }
+    session("items").asInstanceOf[Set[String]].add(id)
+  }
+
+  get("/removeItemFromSession") {
+    val id = params("id")
+    logger.info("Removing item {} from session", id)
+    if (session.contains("items")) {
+      session("items").asInstanceOf[Set[String]].remove(id)
+    }
   }
 
   get("/transform") {
@@ -163,6 +190,10 @@ import ProteusServlet._
       actuals += ("q" -> params("q"))
     }
     renderHTML("search.scaml", actuals)
+  }
+
+  get("/graphview") {
+    renderHTML("graphview.scaml", Map())
   }
 
   get("/wordhistory") {

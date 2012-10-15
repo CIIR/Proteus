@@ -49,7 +49,6 @@ with Searchable {
       val accessId = AccessIdentifier(identifier = identifier, 
 				      `type` = ProteusType.Collection, 
 				      resourceId = siteId)
-	  println("getting summary for document: " + document.identifier + " ")
       val summary = ResultSummary(getSummary(document, queryTerms), List())
       val externalUrl = String.format("%s/%s#page/cover/mode/2up",
 				      archiveReaderUrl,

@@ -1,7 +1,7 @@
 - import ciir.proteus.ProteusFunctions._
 -@ val results : Map[String, List[AnyRef]]
 .row-fluid
- .span9
+ .span12
   %ul.nav.nav-tabs#resultTabs
    - for (resType <- results.keys.toList.sorted)
     %li 
@@ -14,8 +14,3 @@
     .tab-pane.fade(id="#{resType}tab")
      %table.table-bordered.table-striped.span12
       = collection(results(resType), "show")
- .span3
-  = render("/transformations.scaml")
-  -# Activate the first result pane and check the types
-     we searched for.
-  %script{:type => "text/javascript", :src => "assets/js/proteus/search-functions.js"}

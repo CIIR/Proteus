@@ -42,8 +42,6 @@ with Searchable {
     for (scoredDocument <- scored) {
        val identifier = scoredDocument.documentName;
       try {
-     
-      println("Fetching doc with ID: " + identifier);
       val document = retrieval.getDocument(identifier, c).asInstanceOf[PseudoDocument]
       val accessId = AccessIdentifier(identifier = identifier, 
 				      `type` = ProteusType.Location, 

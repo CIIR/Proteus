@@ -24,6 +24,5 @@ $('#searchform').submit(
 		    });
 			     return true;
 			 });
-	    //$('#selectedType')
 	}
 });

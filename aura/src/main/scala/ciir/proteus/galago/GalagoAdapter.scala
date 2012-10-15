@@ -16,6 +16,7 @@ import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.core.retrieval.RetrievalFactory
 import org.lemurproject.galago.core.index.corpus.SnippetGenerator;
 import org.lemurproject.galago.tupleflow.Parameters;
+import org.slf4j.{Logger, LoggerFactory}
 
 // This class handles:
 // 1) Receiving requests
@@ -23,8 +24,10 @@ import org.lemurproject.galago.tupleflow.Parameters;
 // 3) Collecting the responses from each server and composing them as a single 
 //    response to the sender
 // 4) reports status on the health of the component indexes
-class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface {
+class GalagoAdapter(parameters: Parameters) 
+extends ProteusProvider.FutureIface {
   // Construction
+  val logger = LoggerFactory.getLogger(this.getClass)
   val siteIdentifier = parameters.getString("siteId")
   val handlersSection = parameters.getMap("handlers")
   val hBuilder = Map.newBuilder[ProteusType, Handler]
@@ -57,7 +60,7 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
   //  End Construction
 
   override def search(srequest: SearchRequest): Future[SearchResponse] = {
-    val activeKeys = handlerKeys & srequest.`types`.toSet
+    val activeKeys = handlerKeys & srequest.`types`.toSet.par
 
     // This is a hack to make sure we get picture results even if pages aren't
     // asked for
@@ -70,6 +73,7 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
 	List()
       }
 
+    val start = System.currentTimeMillis
     var resultsSet = activeKeys.map { 
       key: ProteusType => handlerMap(key) match {
 	case s:Searchable => {
@@ -84,7 +88,9 @@ class GalagoAdapter(parameters: Parameters) extends ProteusProvider.FutureIface 
 	case _ => List()
       }
     }
-    resultsSet = resultsSet + picResults
+    val end = System.currentTimeMillis
+    Console.printf("Retrieval took a total of %s ms\n", end-start)
+    resultsSet = resultsSet + picResults    
     val resultList = resultsSet.reduceLeft { (A, B) => A ++ B }.toList
     return Future(SearchResponse(results = resultList, error = None))
   }
