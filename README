@@ -17,3 +17,10 @@ from root directory enter sbt
 To start webapp:
 >> project morpheus
 >> container:start
+
+
+DEPENDENCIES
+====
+- LevelDB, Snappy, and LevelDBJni (if you want to use LevelDB to manage user/collection data).
+- Thrift 0.8.0, Finagle (for RPCs)
+- Scala 2.9+

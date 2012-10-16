@@ -46,6 +46,8 @@ const map<string, list<string> > isContainedBy = {
 const map<string, list<string>> contains = {
   "collection" : [ "page", "picture", "video", "audio",
   	     "person", "location", "organization", "miscellaneous"],
+  "book" : [ "page", "picture", "video", "audio",
+  	     "person", "location", "organization", "miscellaneous"],
   "page" : [ "picture", "video", "audio",
   	     "person", "location", "organization", "miscellaneous"],
   "picture" : [ "person", "location", "organization", "miscellaneous" ],

@@ -42,7 +42,7 @@ function markItem(id) {
     $("#taggedBag table").append("<tr id='"+id+"'><td><i class=\"icon-remove\" onclick=\"unMarkItem('"+id+"');\"></i></td><td>" 
 				 +"<a href=\"#\" onclick=\"launchModal('"+id+"');\">"+shorthand+"</a>" 
 				 +"<input type='hidden' name='chosenResult[]' value='"+id+"'></input></td></tr>");
-    $.ajax('http://ayr.cs.umass.edu:9009/addItemToSession?id='+id);
+    $.ajax('http://ayr.cs.umass.edu:9009/addItemToSession/'+id);
 }
 
 function unMarkItem(id) {
@@ -50,7 +50,7 @@ function unMarkItem(id) {
     $("span[id='"+id+ "'] i").attr("onclick", "markItem('"+id+"')");
     $("span[id='"+id+ "'] i").removeClass("icon-ok");
     $("span[id='"+id+ "'] i").addClass("icon-tag");
-    $.ajax('http://ayr.cs.umass.edu:9009/removeItemFromSession?id='+id);
+    $.ajax('http://ayr.cs.umass.edu:9009/removeItemFromSession/'+id);
 }
 
 // Creates a modal page for reviewing stored dat

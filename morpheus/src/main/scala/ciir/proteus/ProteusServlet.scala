@@ -16,6 +16,16 @@ import org.lemurproject.galago.tupleflow.Parameters
 import java.util.ArrayList
 import org.slf4j.{Logger, LoggerFactory}
 
+// For json response handling (to AJAX requests)
+import net.liftweb.json.compact
+import net.liftweb.json.render
+import net.liftweb.json.JsonDSL._
+import net.liftweb.json.Serialization.{read, write}
+import net.liftweb.json.Serialization
+import net.liftweb.json.NoTypeHints
+import org.scalatra.Ok
+import org.scalatra.NotFound
+
 object ProteusServlet {			      
   var parameters: Parameters = new Parameters()
 }
@@ -99,9 +109,38 @@ import ProteusServlet._
     val response = dataClient.related(rrequest)()
     renderHTML("search.scaml", Map("results" -> splitResults(response.results)))
   }
+  
 
-  get("/addItemToSession") {
-    val id = params("id")
+  // TEMP HACK to store users
+  val users = Set[String]()
+
+  get("/createUser/:username") {
+    contentType = "application/json"
+    logger.info("Creating user '{}'", username)
+    users.add(username)
+    Ok(write(username))
+  }
+
+  get("/login/:username") {
+    contentType = "application/json"
+    users(username) match {
+      case true => Ok(write(username))
+      case false => NotFound(write(username))
+    }
+  }
+
+  get("/deleteUser/:username") {
+    contentType = "application/json"
+    users(username) match {
+      case false => NotFound(write(username))
+      case true => {
+	users.remove(username)
+	Ok(write(username))
+      }
+    }
+  }
+
+  get("/addItemToSession/:id") {
     logger.info("Adding item {} to session", id)
     if (!session.contains("items")) {
       session("items") = Set[String]()
@@ -109,8 +148,7 @@ import ProteusServlet._
     session("items").asInstanceOf[Set[String]].add(id)
   }
 
-  get("/removeItemFromSession") {
-    val id = params("id")
+  get("/removeItemFromSession/:id") {
     logger.info("Removing item {} from session", id)
     if (session.contains("items")) {
       session("items").asInstanceOf[Set[String]].remove(id)
