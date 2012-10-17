@@ -12,7 +12,6 @@ import scalate.ScalateSupport
 import scala.collection.JavaConversions._
 import scala.collection.mutable.MapBuilder
 import scala.collection.mutable.Set
-import org.lemurproject.galago.tupleflow.Parameters
 import java.util.ArrayList
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -25,9 +24,14 @@ import net.liftweb.json.Serialization
 import net.liftweb.json.NoTypeHints
 import org.scalatra.Ok
 import org.scalatra.NotFound
+import org.scalatra.servlet.RichSession
+
+// For configuration
+case class Site(host: String, port: Int)
 
 object ProteusServlet {			      
-  var parameters: Parameters = new Parameters()
+  var port : Int = 8080
+  var hosts : Seq[Site] = Seq[Site](Site("nowhere", 80))
 }
 
 class ProteusServlet extends ScalatraServlet 
@@ -35,61 +39,57 @@ with ScalateSupport
 with FakeDataGenerator {
 import ProteusServlet._
 
+  // implicit value for json serialization format
+  implicit val formats = Serialization.formats(NoTypeHints);
   val logger = LoggerFactory.getLogger(this.getClass)
   val kNumSearchResults = 10
-  // Load the first server parameters 
-  val auraServer = ProteusServlet.parameters.getAsList("servers").asInstanceOf[ArrayList[Parameters]].first
-  if(!auraServer.containsKey("host") || !auraServer.containsKey("port")) {
-    println("Please provide both a host and port key value for each server listed in servers list in parameters.")
-    System.exit(1)
-  }
 
+  // Load the first server parameters 
+  val auraServer = ProteusServlet.hosts.first
   val dataService = ClientBuilder()
-  .hosts(new InetSocketAddress(auraServer.getString("host"),
-			       auraServer.getLong("port").toInt))
+  .hosts(new InetSocketAddress(auraServer.host, auraServer.port))
   .codec(ThriftClientFramedCodec())
   .hostConnectionLimit(1)
   .tcpConnectTimeout(Duration(1, TimeUnit.SECONDS))
   .retries(2)
   .build()
   val dataClient = new ProteusProvider.FinagledClient(dataService)
-  logger.info("Started listening to aura server " + auraServer.getString("host")
-	      + " on port " + auraServer.getLong("port").toString)
+  logger.info("Started listening to aura server " + auraServer.host
+	      + " on port " + auraServer.port.toString)
 
 
-  def renderHTML(template: String, originalArgs: Map[String, Any] = Map[String,Any]()) = {
+  def renderHTML(template: String, originalArgs: (String, Any)*) = {
     contentType = "text/html"
     val args = session.contains("items") match {
-      case true => originalArgs + ("items" -> session("items"))
+      case true => ("items" -> session("items")) +: originalArgs
       case false => originalArgs
     }
-    templateEngine.layout(template, args)
+    scaml(template, args:_*)
   }
 
-  get("/") { renderHTML("index.scaml") }
-  get("/index") { renderHTML("index.scaml") }
-  get("/about") { renderHTML("about.scaml") }
-  get("/contact") { renderHTML("contact.scaml") }
+  get("/") { renderHTML("index") }
+  get("/index") { renderHTML("index") }
+  get("/about") { renderHTML("about") }
+  get("/contact") { renderHTML("contact") }
   get("/details") {
     val aid = ProteusFunctions.externalId(params("id"))
     val request = LookupRequest(List(aid))
     val futureResponse = dataClient.lookup(request)
     val response = futureResponse()
     val obj = response.objects.head
-    val actuals = Map[String, Any]("pObject" -> obj)
-    renderHTML("details.scaml", actuals)
+    renderHTML("details", "pObject" -> obj)
   }
 
   get("/status") {
     val response = dataClient.status()()
-    renderHTML("status.scaml", Map("siteId" -> response.siteId,
-				   "collectionData" -> response.collectionData,
-				   "linkData" -> response.linkData,
-				 "topicData" -> response.topicData))
+    renderHTML("status", 
+	       "siteId" -> response.siteId,
+	       "collectionData" -> response.collectionData,
+	       "linkData" -> response.linkData,
+	       "topicData" -> response.topicData)
   }
 
   post("/related") {
-    printf("multiParams: %s\n", multiParams.toString)
     val beliefs = multiParams("chosenResult").map {
       scoreElement => {
 	val aid = externalId(scoreElement)
@@ -107,7 +107,7 @@ import ProteusServlet._
     val rrequest = RelatedRequest(beliefs = beliefs,
 				  targetTypes = targetTypes)
     val response = dataClient.related(rrequest)()
-    renderHTML("search.scaml", Map("results" -> splitResults(response.results)))
+    renderHTML("search", "results" -> splitResults(response.results))
   }
   
 
@@ -115,6 +115,7 @@ import ProteusServlet._
   val users = Set[String]()
 
   get("/createUser/:username") {
+    val username = params("username")
     contentType = "application/json"
     logger.info("Creating user '{}'", username)
     users.add(username)
@@ -122,6 +123,7 @@ import ProteusServlet._
   }
 
   get("/login/:username") {
+    val username : String = params("username")
     contentType = "application/json"
     users(username) match {
       case true => Ok(write(username))
@@ -130,6 +132,7 @@ import ProteusServlet._
   }
 
   get("/deleteUser/:username") {
+    val username : String = params("username")
     contentType = "application/json"
     users(username) match {
       case false => NotFound(write(username))
@@ -141,6 +144,7 @@ import ProteusServlet._
   }
 
   get("/addItemToSession/:id") {
+    val id = params("id")
     logger.info("Adding item {} to session", id)
     if (!session.contains("items")) {
       session("items") = Set[String]()
@@ -149,6 +153,7 @@ import ProteusServlet._
   }
 
   get("/removeItemFromSession/:id") {
+    val id = params("id")
     logger.info("Removing item {} from session", id)
     if (session.contains("items")) {
       session("items").asInstanceOf[Set[String]].remove(id)
@@ -164,7 +169,7 @@ import ProteusServlet._
 				    targetType = targetType)
     val response = dataClient.transform(trequest)()
     val objects = response.objects.toList
-    renderHTML("viewobjects.scaml", Map("pObjects" -> objects))
+    renderHTML("viewobjects", "pObjects" -> objects)
   }
 
   get("/lookup") {
@@ -187,12 +192,11 @@ import ProteusServlet._
 	splitResults += (typeStr -> filteredByType)
       }
     }
-    var actuals = Map[String, Any]("result" -> splitResults)
-    renderHTML("lookup.scaml", actuals)
+    renderHTML("lookup", "result" -> splitResults)
   }
 
   get("/search") {
-    var actuals = Map[String, Any]() 
+    var actuals = Seq[(String, Any)]() 
     
     // If we have a query, put together a SearchRequest and ship it
     if (params.contains("q")) {
@@ -222,31 +226,27 @@ import ProteusServlet._
 				  rawGalagoQuery = rgq)
 
       val futureResponse = dataClient.search(request)
-      val response = futureResponse()
+      val actualResponse = futureResponse()
       // Need to split the results by type
-      actuals += ("results" -> splitResults(response.results))
-      actuals += ("q" -> params("q"))
+      actuals = ("results" -> splitResults(actualResponse.results)) +: actuals
+      actuals = ("q" -> params("q")) +: actuals
     }
-    renderHTML("search.scaml", actuals)
+    renderHTML("search", actuals:_*)
   }
 
   get("/graphview") {
-    renderHTML("graphview.scaml", Map())
+    renderHTML("graphview")
   }
 
   get("/wordhistory") {
-    var actuals = Map[String, Any]()
+    var actuals = Seq[(String, Any)]()
     if (params.contains("w")) {
       val words = params("w").split(" ").toList
       val response = dataClient.wordFrequencies(words)()
-      actuals += ("frequencies" -> response.toMap)
-      actuals += ("w" -> params("w"))
+      actuals = ("frequencies" -> response.toMap) +: actuals
+      actuals = ("w" -> params("w")) +: actuals
     }
-    renderHTML("wordhistory.scaml", actuals)
-  }
-
-  notFound {
-    serveStaticResource()
+    renderHTML("wordhistory", actuals:_*)
   }
 
   def splitResults(results: Seq[SearchResult]) : Map[String, AnyRef] = {
@@ -263,5 +263,9 @@ import ProteusServlet._
       }
     }
     return splitBuilder.result
+  }
+
+  notFound {
+    serveStaticResource() getOrElse resourceNotFound()
   }
 }

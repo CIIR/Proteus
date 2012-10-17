@@ -52,7 +52,7 @@
        %li
         %a(href="/status") Status
        %li.pull-right
-        = render("account-status.scaml", Map("user" => user))
+        = render("account-status.scaml", Map("user" -> user))
   :javascript
    // Use this to activate the correct entry from the navbar above.
    $('.nav-collapse ul.nav li a[href="'+location.pathname+'"]').parent().addClass('active');

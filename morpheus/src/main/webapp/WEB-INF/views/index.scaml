@@ -1,0 +1,26 @@
+.span12
+ .hero-unit
+  %h1 Welcome to Proteus
+  %p
+   This exploratory search system demonstrates ways to find and browse multiple retrieval types in a collection of books.
+  %p
+   The sample set of over 650,000 pages from just less than 2,200 books mentioning "Portland" can be searched from the 
+   perspective of the books themselves, but also pages, entity names, topics, and pictures.  The books were made available 
+   courtesy of the Internet Archive.
+  %p
+   In addition to allowing you to search one or more retrieval types, Proteus allows you to shift perspective at any 
+   point to show important objects from a different type. Give it a try to see it in action. Some sample queries:
+  %p 
+   %ul
+    %li
+     %a{:href => "/search?q=Oregon+Trail&st=all"} Oregon Trail
+     , particularly the related entities for a list of related names
+    %li
+     %a{:href => "/search?q=Portland&st=all"} Portland
+     , particularly the pictures and the related entities
+    %li
+     %a{:href => "/search?q=Lewis+Clark+Expedition&st=all"} Lewis and Clark Expedition
+   %p 
+    or:
+    %a.btn.btn-primary.btn-large{:href => "/search" }
+     Try Your Own Search &raquo;

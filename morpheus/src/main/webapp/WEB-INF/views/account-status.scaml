@@ -1,12 +1,12 @@
 -@ val user : Option[String]
-- val btnText = if user.isDefined() user.get else "Not Logged In"
+- val btnText = if (user.isDefined) user.get else "Not Logged In"
 %script(src="assets/js/proteus/useractions.js")
 .btn-group
  %button.btn.btn-inverse.dropdown-toggle#userBtn(data-toggle="dropdown") 
   = btnText
   %span.caret
  %ul.dropdown-menu
-  - if user.isDefined
+  - if (user.isDefined)
    %li 
     %a(href="#" onclick="logout();") Log Out
   - else
