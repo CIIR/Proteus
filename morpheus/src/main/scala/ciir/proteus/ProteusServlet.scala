@@ -30,8 +30,7 @@ import org.scalatra.servlet.RichSession
 case class Site(host: String, port: Int)
 
 object ProteusServlet {			      
-  var port : Int = 8080
-  var hosts : Seq[Site] = Seq[Site](Site("nowhere", 80))
+  var hosts : Seq[Site] = Seq[Site]()
 }
 
 class ProteusServlet extends ScalatraServlet 

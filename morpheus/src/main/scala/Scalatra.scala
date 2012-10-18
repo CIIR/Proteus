@@ -24,11 +24,9 @@ class Scalatra extends LifeCycle {
     val configuration =  System.getenv("org.scalatra.environment")
     if (configuration == null || configuration.startsWith("dev")) {
       // dev configuration
-      port = 9009
       hosts = Site("ayr.cs.umass.edu", 8201) +: hosts
     } else {
       // prod configuration
-      port = 9000
       hosts = Site("ayr.cs.umass.edu", 8200) +: hosts
     }
 

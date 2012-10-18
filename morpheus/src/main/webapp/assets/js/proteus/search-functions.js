@@ -57,10 +57,11 @@ function unMarkItem(id) {
 function launchModal(id) {
     // Really need to call another page with better formatting.
     var response = $.ajax({
-			      url: 'http://ayr.cs.umass.edu:9009/details?id='+id,
+			      url: 'http://ayr.cs.umass.edu:8080/details?id='+id,
 			      async : false
 			  });
-    $('#detailsModal').empty();
-    $('#detailsModal').append(response.responseText);
+    $('#detailsModal .modal-body')
+	.empty()
+	.append(response.responseText);
     $('#detailsModal').modal('show');
 }
