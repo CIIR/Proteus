@@ -2,11 +2,8 @@
 - import ciir.proteus.ProteusFunctions._
 - import scala.collection.mutable.Set
 -@ val items : Set[String]
-%h4 Workspace
-%div.modal#detailsModal(aria-hidden="true" tabindex="-1" role="dialog")
-:javascript
- $('#detailsModal').modal('hide');
-%div.well#taggedBag(style="border: 1px; margin-top: 40px;")
+%h3 Workspace
+%div#taggedBag(style="border: 1px; margin-top: 40px;")
  %table.table-bordered.table-striped
   - for (id <- items.toList.sorted)
    %tr(id="#{id}")

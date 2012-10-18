@@ -1,7 +1,5 @@
 Cronos - Code for temporal language modeling
 Pharos - Named entity recognition and linking
-Triton - Backend search service that collects responses from multiple sharded search servers
-Pontus - Front-end web service written in the Lift web framework
 Temporal - Some exploratory work on temporal data mining 
 Phokas - Wrap book text in <strike>putrid sealskin</strike> TEI XML
 Morpheus - New front-end web service using the Scalatra lightweight router, and Scalate for templating.
@@ -14,6 +12,7 @@ To compile the thrift code:
 from root directory enter sbt
 >> project aura
 >> scrooge-gen
+>> run <configuration file in json>
 To start webapp:
 >> project morpheus
 >> container:start
@@ -21,6 +20,22 @@ To start webapp:
 
 DEPENDENCIES
 ====
-- LevelDB, Snappy, and LevelDBJni (if you want to use LevelDB to manage user/collection data).
+- MongoDB (for persistence storage)
 - Thrift 0.8.0, Finagle (for RPCs)
 - Scala 2.9+
+
+GOTCHAS
+====
+- Unfortunately, configuration for the servers is spread over several scopes.
+  This is particularly true for morpheus, which must itself serve data, and speak
+  to at least two other data sources (an Aura installation and a persistence layer):
+
+  To configure what port the web server itself serves from, see morpheus/build.sbt.
+  To configure what hosts/ports the ProteusServlet inside morpheus listens to, look
+  at morpheus/src/main/scala/Scalatra.scala. 
+
+NAMES TO USE
+====
+Pontus
+Triton
+Homer

@@ -17,8 +17,14 @@
    .sidebar-nav {
     padding: 9px 0;
    }
-  %script{:src => "assets/js/jquery-1.8.0.min.js"}
-  %script{:src => "assets/js/bootstrap.min.js"}
+  %script(src="assets/js/jquery-1.8.0.min.js")
+  %script(src="assets/js/bootstrap.min.js")
+  %script(src="assets/js/noty/jquery.noty.js")
+  %script(src="assets/js/noty/layouts/top.js")
+  %script(src="assets/js/noty/layouts/topCenter.js")
+  %script(src="assets/js/noty/layouts/topLeft.js")
+  %script(src="assets/js/noty/layouts/topRight.js")
+  %script(src="assets/js/noty/themes/default.js")
   %link{:href => "assets/css/bootstrap-responsive.min.css", :rel => "stylesheet"}
   /[if lt IF 9]
    %script{:src => "http://html5shim.googlecode.com/svn/trunk/html5.js"}
@@ -79,3 +85,4 @@
        %a{:href => "http://www.nsf.gov"}
         %img{:alt => "National Science Foundation", :src => "assets/img/nsf_logo.gif"}
     %p &copy; CIIR 2012
+= render("modals.scaml")

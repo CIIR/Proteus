@@ -9,16 +9,7 @@
   </appender>
   <appender name="MORPHEUS"
 	    class="ch.qos.logback.core.FileAppender">
-    <file>morpheus.log</file>
-    <encoder>
-      <pattern>
-        %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
-      </pattern>
-    </encoder>
-  </appender>
-  <appender name="AURA"
-	    class="ch.qos.logback.core.FileAppender">
-    <file>aura.log</file>
+    <file>data/logs/morpheus.log</file>
     <encoder>
       <pattern>
         %d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
@@ -30,12 +21,6 @@
 	  level="INFO"
 	  additivity="false">
     <appender-ref ref="MORPHEUS" />
-  </logger>
-
-  <logger name="ciir.proteus.GalagoAdapter" 
-	  level="INFO"
-	  additivity="false">
-    <appender-ref ref="AURA" />
   </logger>
 
   <root level="INFO">

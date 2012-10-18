@@ -1,1 +1,0 @@
-echo "Creating location database... (Pranav's code)"

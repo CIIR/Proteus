@@ -126,18 +126,36 @@ import ProteusServlet._
     val username : String = params("username")
     contentType = "application/json"
     users(username) match {
-      case true => Ok(write(username))
+      case true => {
+	logger.info("Logging in user '{}'", username)
+	session("userid") = username
+	Ok(write(username))
+      }
       case false => NotFound(write(username))
     }
   }
 
-  get("/deleteUser/:username") {
+  get("/logout/:username") {
+    contentType = "application/json"
+    session.contains("userid") match {
+      case true => {
+	session.remove("userid")
+	Ok()
+      }
+      case false => {
+	NotFound(write("No one is logged in/"))
+      }
+    }
+  }
+
+  get("/delete/:username") {
     val username : String = params("username")
     contentType = "application/json"
     users(username) match {
-      case false => NotFound(write(username))
+      case false => NotFound(write(String.format("%s is not a valid user.", username)))
       case true => {
 	users.remove(username)
+	session.remove("userid")
 	Ok(write(username))
       }
     }

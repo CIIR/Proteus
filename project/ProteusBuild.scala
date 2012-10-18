@@ -86,9 +86,9 @@ object MorpheusDeps {
   val galagoCore = "org.lemurproject.galago" % "core" % "3.3-PROTEUS"
   val galagoTupleflow = "org.lemurproject.galago" % "tupleflow" % "3.3-PROTEUS"
   val liftjson = "net.liftweb" %% "lift-json" % "2.4"
+  val casbah = "org.mongodb" %% "casbah" % "2.4.1"
   def deps = Seq(scalatra, scalate, scalatraSpecs2, logback, jetty, jettyOrbit,
-		 galagoCore, galagoTupleflow, liftjson)
-
+		 galagoCore, galagoTupleflow, liftjson, casbah)
 }
 
 

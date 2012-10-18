@@ -6,8 +6,9 @@
 -@ val items : Set[String] = Set[String]()
 .container(style="width:100%;")
  .row(style="width:100%;")
-  .span2(data-spy="affix" data-offset-top="40")
-   = render("transformations.scaml", Map("items" -> items))
+  .span2
+   %div(data-spy="affix" data-offset-top="40")
+    = render("transformations.scaml", Map("items" -> items))
   .span10
    %form.well.form-search#searchform{:method => "get", :action => "search"}
     %input.input-medium.search-query#q(type="text" name="q"
