@@ -77,10 +77,10 @@ object ProteusFunctions {
 	"<span>"
       } else {
 	m.group(1) match {
-	  case "per" => """<span style="color: DarkRed">"""
-	  case "loc" => """<span style="color: Navy">"""
-	  case "org" => """<span style="color: LightSeaGreen">"""
-	  case "misc" => """<span style="color: GoldenRod">"""
+	  case "per" => """<span class="person">"""
+	  case "loc" => """<span class="location">"""
+	  case "org" => """<span class="organization">"""
+	  case "misc" => """<span class="miscellaneous">"""
 	}
       })
     return ("(?i)"+itemName).r.replaceAllIn(frontReplaced, (m: Match) => String.format("<b>%s</b>", m.group(0)))

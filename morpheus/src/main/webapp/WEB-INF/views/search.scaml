@@ -17,7 +17,7 @@
     %span Types to find:
     %span.btn-group#typeselection(data-toggle="buttons-checkbox")
      - for (retType <- kReturnableTypes.sorted)
-      %button.btn(type="button" name="#{retType}") 
+      %button(class="btn #{retType}" type="button" name="#{retType}") 
        = pluralDisplayName(retType)
      %button.btn{:type => "button", :name => "all" } All
    %script{:src => "assets/js/proteus/search-validate.js"}

@@ -1,16 +1,8 @@
--@ val user : Option[String]
-- val btnText = if (user.isDefined) user.get else "Not Logged In"
-%script(src="assets/js/proteus/useractions.js")
 .btn-group.dropdown
  %a.btn.btn-inverse.dropdown-toggle#userBtn(data-toggle="dropdown" href="#") 
-  = btnText
+  %span#accountStatusText
   %span.caret
  %ul.dropdown-menu#userBtnDropdown
-  - if (user.isDefined)
-   %li 
-    %a(href="#" onclick="logout();") Log Out
-  - else
-   %li
-    %a(href="#userCreateModal" data-toggle="modal") Create New User
-   %li
-    %a(href="#userLoginModal" data-toggle="modal") Log In
+%script(src="assets/js/proteus/useractions.js")
+:javascript
+ refreshAccountUI();

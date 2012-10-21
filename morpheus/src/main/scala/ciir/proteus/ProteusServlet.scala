@@ -26,11 +26,18 @@ import org.scalatra.Ok
 import org.scalatra.NotFound
 import org.scalatra.servlet.RichSession
 
+// For monogodb access
+import com.mongodb.casbah.Imports._
+
 // For configuration
 case class Site(host: String, port: Int)
 
-object ProteusServlet {			      
+object ProteusServlet {
   var hosts : Seq[Site] = Seq[Site]()
+  
+  // Connect to MongoDB, select the proteus database
+  val mongoConn = MongoConnection()
+  val mongoColl = mongoConn("proteus")
 }
 
 class ProteusServlet extends ScalatraServlet 
@@ -43,7 +50,8 @@ import ProteusServlet._
   val logger = LoggerFactory.getLogger(this.getClass)
   val kNumSearchResults = 10
 
-  // Load the first server parameters 
+  // Load the first server parameters
+  // TODO: extend these to work from multiple sites
   val auraServer = ProteusServlet.hosts.first
   val dataService = ClientBuilder()
   .hosts(new InetSocketAddress(auraServer.host, auraServer.port))
@@ -109,53 +117,93 @@ import ProteusServlet._
     renderHTML("search", "results" -> splitResults(response.results))
   }
   
-
-  // TEMP HACK to store users
-  val users = Set[String]()
-
-  get("/createUser/:username") {
-    val username = params("username")
-    contentType = "application/json"
-    logger.info("Creating user '{}'", username)
-    users.add(username)
-    Ok(write(username))
-  }
-
-  get("/login/:username") {
-    val username : String = params("username")
-    contentType = "application/json"
-    users(username) match {
-      case true => {
-	logger.info("Logging in user '{}'", username)
-	session("userid") = username
-	Ok(write(username))
+  // Create user
+  put("/users/:username") {
+    val newUser = MongoDBObject("user" -> params("username"))
+    mongoColl("users").findOne(newUser) match {
+      case Some(foundUser) => {
+	Conflict(write(String.format("User '%s' already exists.", params("username"))))
       }
-      case false => NotFound(write(username))
+      case None => {
+	mongoColl("users") += newUser
+	logger.info("Creating user '{}'", newUser("user"))
+	Created()
+      }    
     }
   }
 
-  get("/logout/:username") {
+  // Get the user information given a session key
+  get("/users/:sessionid") {
     contentType = "application/json"
-    session.contains("userid") match {
-      case true => {
-	session.remove("userid")
+    mongoColl("sessions").findOne(MongoDBObject("key" -> params("sessionid"))) match {
+      case Some(session) => {
+	mongoColl("users").findOne(MongoDBObject("user" -> session("user"))) match {
+	  case Some(userdata) => {
+	    println("Userdata: " + userdata.toString)
+	    Ok(userdata)
+	  }
+	  case None => NotFound(write("No user found for session."))
+	}
+      }
+      case None => NotFound(write("No session found."))
+    }
+  }
+
+  // Delete the user with the given session key (i.e. must be logged in to delete.)
+  delete("/users/:sessionid") {
+    contentType = "application/json"
+    mongoColl("sessions").findOne(MongoDBObject("key" -> params("sessionid"))) match {
+      case Some(session) => {
+	val username = session("user").asInstanceOf[String]
+	mongoColl("sessions") -= session  // end session
+	mongoColl("users") -= MongoDBObject("user" -> username) // remove user
 	Ok()
       }
-      case false => {
-	NotFound(write("No one is logged in/"))
+      case None => {
+	Conflict(write("Unable to delete user. No session found."))
       }
     }
   }
 
-  get("/delete/:username") {
-    val username : String = params("username")
+  // Log in the user (establish a 'session' key).
+  put("/sessions/:username") {
+    val username = params("username")
     contentType = "application/json"
-    users(username) match {
-      case false => NotFound(write(String.format("%s is not a valid user.", username)))
-      case true => {
-	users.remove(username)
-	session.remove("userid")
-	Ok(write(username))
+    mongoColl("users").findOne(MongoDBObject("user" -> username)) match {
+      case Some(foundUser) => {
+	logger.info("Logging in user '{}'", username)
+	// Currently a hack to use the object id as the session key.
+	// I from a security standpoint this is wildly irresponsible
+	// but hey, nothing too important or private here yet.
+	val initialRecord = MongoDBObject("user" -> username)
+	mongoColl("sessions") += initialRecord
+	mongoColl("sessions").findOne(initialRecord) match {
+	  case Some(found) => {
+	    val key = found("_id").toString
+	    found += "key" -> key
+	    mongoColl("sessions").update(initialRecord, found)
+	    Created(write(key))
+	  }
+	  case None => {
+	    InternalServerError(write("Unable to create session."))
+	  }
+	}
+      }
+      case None => {
+	Conflict(write("User not found."))
+      }
+    }
+  }
+
+  // End a session
+  delete("/sessions/:key") {
+    mongoColl("sessions").findOne(MongoDBObject("key" -> params("key"))) match {
+      case Some(session) => {
+	mongoColl("sessions") -= session
+	Ok()
+      }
+      case None => {
+	NotFound(write("Key is invalid."))
       }
     }
   }
