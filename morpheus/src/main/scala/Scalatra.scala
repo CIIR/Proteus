@@ -25,9 +25,11 @@ class Scalatra extends LifeCycle {
     if (configuration == null || configuration.startsWith("dev")) {
       // dev configuration
       hosts = Site("ayr.cs.umass.edu", 8201) +: hosts
+      dbport = 27018
     } else {
       // prod configuration
       hosts = Site("ayr.cs.umass.edu", 8200) +: hosts
+      dbport = 27017
     }
 
     val servlet = new ProteusServlet

@@ -34,9 +34,10 @@ case class Site(host: String, port: Int)
 
 object ProteusServlet {
   var hosts : Seq[Site] = Seq[Site]()
+  var dbport : Int = 27017
   
   // Connect to MongoDB, select the proteus database
-  val mongoConn = MongoConnection()
+  val mongoConn = MongoConnection("localhost", ProteusServlet.dbport)
   val mongoColl = mongoConn("proteus")
 }
 
