@@ -8,14 +8,14 @@ function createUserWithName() {
 	       success: function() {
 		   noty({text: 'Created user ' + name, 
 			 type: 'success', 
-			 layout: 'topCenter',
+			 layout: 'topRight',
 			 timeout: 1000});		   
 	       },
 	       error: function(data) {
 		   noty({text: 'Could not create user ' 
 			 + name + ':' + data, 
 			 type: 'error',
-			 layout: 'topCenter',
+			 layout: 'topRight',
 			 timeout: 1000});
 	       }	   
 	   });
@@ -36,7 +36,7 @@ function loginWithUserName() {
 	    error: function(data) {
 		noty({text: 'Could not log in user ' + name, 
 		      type: 'error',
-		      layout: 'topCenter',
+		      layout: 'topRight',
 		      timeout: 1000});
 	    }
 	   }); 
@@ -55,7 +55,7 @@ function logout(action) {
 	    error: function(data) {
 		noty({text: 'Could not log out user: ' + data, 
 		      type: 'error',
-		      layout: 'topCenter',
+		      layout: 'topRight',
 		      timeout: 1000});
 	    }
 	   }); 

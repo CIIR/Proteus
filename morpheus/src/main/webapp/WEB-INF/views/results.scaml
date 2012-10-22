@@ -5,7 +5,7 @@
   %ul.nav.nav-tabs#resultTabs
    - for (resType <- results.keys.toList.sorted)
     %li 
-     %a(href="##{resType}tab" data-toggle="tab") 
+     %a(href="##{resType}tab" data-toggle="tab" class="#{resType}") 
       #{pluralDisplayName(resType)} (#{results(resType).size})
   
   -# Loop over result types and display by calling "collection" on the set  

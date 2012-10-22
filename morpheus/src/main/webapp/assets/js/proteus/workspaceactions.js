@@ -1,4 +1,4 @@
-function markItem(id) {
+function markItem(id, datatype) {
     var listname = $.cookie('list');
     var sessionkey = $.cookie('session');
     if (listname == null || sessionkey == null) return;
@@ -12,10 +12,13 @@ function markItem(id) {
 	shorthand = shorthand.substr(0, 20) + "...";
     }
     $("#listDisplay").append("<tr id='"+id+"'><td><i class=\"icon-remove\" onclick=\"unMarkItem('"+id+"');\"></i></td><td>" 
-			     +"<a href=\"#\" onclick=\"launchModal('"+id+"');\">"+shorthand+"</a>" 
+			     +"<a href=\"#\" class=\""+datatype+"\" onclick=\"launchModal('"+id+"');\">"+shorthand+"</a>" 
 			     +"</td></tr>");
     $.ajax({url: document.location.origin 
 	    +'/items/'+id+'/'+listname+'/'+sessionkey,
+	    data: { title: shorthand,
+		    datatype: datatype
+		  },
 	    type: 'put'});
 }
 
@@ -135,9 +138,19 @@ function getLists() {
 }
 
 function refreshWorkspaceUI() {
+    $('#listBtnDropdown').empty();
+    $('#listDisplay').empty();
+
+    // Make sure we have a user
+    if ($.cookie('session') == null) {
+	// Do not allow list management if a user is not logged in
+	$.removeCookie('list');
+	$('#listStatusText').text('Log in to use lists.');
+	return;
+    }
+
     // Load the lists for this user
     var lists = getLists();
-    $('#listBtnDropdown').empty();
     if (lists != null) {
 	for (var i = 0; i < lists.length; ++i) {
 	    var item = lists[i];
@@ -150,14 +163,14 @@ function refreshWorkspaceUI() {
 
     // Now try to populate a chosen list
     var listname = $.cookie('list');
-    $('#listDisplay').empty();
     if (listname != null) {
 	$('#listStatusText').text(listname);
 	var items = getListItems();
 	for (var i = 0; i < items.length; ++i) {
-	    var newHTML = '<tr id="'+items[i]+'"><td>'
-		+ '<i class="icon-remove" onclick="unMarkItem(\''+items[i]+'\');"></i></td>'
-		+ '<td><a href="#" onclick="launchModal();">' + items[i] + '</a>'
+	    var data = items[i];
+	    var newHTML = '<tr id="'+data.itemid+'"><td>'
+		+ '<i class="icon-remove" onclick="unMarkItem(\''+data.itemid+'\');"></i></td>'
+		+ '<td><a href="#" class="'+data.datatype+'" onclick="launchModal();">' +data.title+ '</a>'
 		+ '</td></tr>';
 	    $('#listDisplay').append(newHTML);
 	}

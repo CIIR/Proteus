@@ -19,6 +19,7 @@ import org.slf4j.{Logger, LoggerFactory}
 import net.liftweb.json.compact
 import net.liftweb.json.render
 import net.liftweb.json.JsonDSL._
+import net.liftweb.json.JsonAST._
 import net.liftweb.json.Serialization.{read, write}
 import net.liftweb.json.Serialization
 import net.liftweb.json.NoTypeHints
@@ -34,17 +35,17 @@ case class Site(host: String, port: Int)
 
 object ProteusServlet {
   var hosts : Seq[Site] = Seq[Site]()
-  var dbport : Int = 27017
-  
-  // Connect to MongoDB, select the proteus database
-  val mongoConn = MongoConnection("localhost", ProteusServlet.dbport)
-  val mongoColl = mongoConn("proteus")
+  var dbport : Int
 }
 
 class ProteusServlet extends ScalatraServlet 
 with ScalateSupport 
 with FakeDataGenerator {
 import ProteusServlet._
+
+  // Connect to MongoDB, select the proteus database
+  val mongoConn = MongoConnection("localhost", ProteusServlet.dbport)
+  val mongoColl = mongoConn("proteus")
 
   // implicit value for json serialization format
   implicit val formats = Serialization.formats(NoTypeHints);
@@ -238,13 +239,16 @@ import ProteusServlet._
     contentType = "application/json"
     getUserForSession(params("sessionid")) match {
       case Some(userid) => {
-	var contents = List[String]()
+	var contents = List[JObject]()
 	for (item <- mongoColl("lists").find(
 	  MongoDBObject("user" -> userid, "listname" -> params("listname")) ++
 	  ("itemid" $exists true))) {
-	    contents = item("itemid").asInstanceOf[String] +: contents
+	    val json = ("itemid" -> item("itemid").asInstanceOf[String]) ~
+	    ("title" -> item("title").asInstanceOf[String]) ~
+	    ("datatype" -> item("datatype").asInstanceOf[String])
+	    contents = json +: contents
 	  }
-	Ok(write(contents.toList.sorted))	
+	Ok(write(contents))
       }
       case None => NotFound(write("Session not found."))
     }
@@ -281,7 +285,9 @@ import ProteusServlet._
 	// The intended operation, post-placeholder cleanout.
 	mongoColl("lists") += MongoDBObject("user" -> userid,
 					    "listname" -> params("listname"),
-					    "itemid" -> params("itemid"))
+					    "itemid" -> params("itemid"),
+					    "title" -> params("title"),
+					    "datatype" -> params("datatype"))
 	logger.info("Adding item {} to list {} of user {}",
 		    Array[Object](
 		      params("itemid"),

@@ -1,5 +1,6 @@
 - import ciir.proteus.ProteusFunctions._
 - val did = displayId(id)
+- val datatype = id.`type`.name.toLowerCase
 %tr
  %td.span2
   - if (thumbUrl.isDefined)
@@ -7,7 +8,7 @@
     %img{:src => {thumbUrl.get}, :onerror => "assets/img/no_image.gif"}
  %td.span10
   %span(id=did)
-   %i.icon-tag(onclick="markItem('#{did}')")
+   %i.icon-tag(onclick="markItem('#{did}', '#{datatype}')")
    %a(href = "/details?id=#{did}")
     %u
      != title.getOrElse("No Title")
