@@ -170,7 +170,7 @@ function refreshWorkspaceUI() {
 	    var data = items[i];
 	    var newHTML = '<tr id="'+data.itemid+'"><td>'
 		+ '<i class="icon-remove" onclick="unMarkItem(\''+data.itemid+'\');"></i></td>'
-		+ '<td><a href="#" class="'+data.datatype+'" onclick="launchModal();">' +data.title+ '</a>'
+		+ '<td><a href="/details?id='+data.itemid+'" class="'+data.datatype+'">' +data.title+ '</a>'
 		+ '</td></tr>';
 	    $('#listDisplay').append(newHTML);
 	}
