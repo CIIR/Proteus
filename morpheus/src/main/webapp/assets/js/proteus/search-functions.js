@@ -30,38 +30,3 @@ $(function() {
 // Causes the url to be updated when changing result tabs
 $('ul#resultTabs li a').click(function () {location.hash = $(this).attr('href');});
 
-function markItem(id) {
-    $("span[id='"+id+ "'] i").removeClass("icon-tag");
-    $("span[id='"+id+ "'] i").addClass("icon-ok");
-    $("span[id='"+id+ "'] i").removeAttr("onclick");
-    // Add the entry to the "tagged items bag"
-    var shorthand = $("span[id='" + id + "'] u").text().trim();
-    if (shorthand.length > 25) {
-	shorthand = shorthand.substr(0, 20) + "...";
-    }
-    $("#taggedBag table").append("<tr id='"+id+"'><td><i class=\"icon-remove\" onclick=\"unMarkItem('"+id+"');\"></i></td><td>" 
-				 +"<a href=\"#\" onclick=\"launchModal('"+id+"');\">"+shorthand+"</a>" 
-				 +"<input type='hidden' name='chosenResult[]' value='"+id+"'></input></td></tr>");
-    $.ajax('http://ayr.cs.umass.edu:8080/addItemToSession/'+id);
-}
-
-function unMarkItem(id) {
-    $("#taggedBag table tr[id='" + id + "']").remove();
-    $("span[id='"+id+ "'] i").attr("onclick", "markItem('"+id+"')");
-    $("span[id='"+id+ "'] i").removeClass("icon-ok");
-    $("span[id='"+id+ "'] i").addClass("icon-tag");
-    $.ajax('http://ayr.cs.umass.edu:8080/removeItemFromSession/'+id);
-}
-
-// Creates a modal page for reviewing stored dat
-function launchModal(id) {
-    // Really need to call another page with better formatting.
-    var response = $.ajax({
-			      url: 'http://ayr.cs.umass.edu:8080/details?id='+id,
-			      async : false
-			  });
-    $('#detailsModal .modal-body')
-	.empty()
-	.append(response.responseText);
-    $('#detailsModal').modal('show');
-}

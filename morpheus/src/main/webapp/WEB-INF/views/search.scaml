@@ -3,12 +3,11 @@
 -@ val results : Map[String, Any] = Map[String, Any]()
 -@ val q : String = ""
 -@ val error : String = ""
--@ val items : Set[String] = Set[String]()
 .container(style="width:100%;")
  .row(style="width:100%;")
   .span2
    %div(data-spy="affix" data-offset-top="40")
-    = render("transformations.scaml", Map("items" -> items))
+    = render("workspace.scaml")
   .span10
    %form.well.form-search#searchform{:method => "get", :action => "search"}
     %input.input-medium.search-query#q(type="text" name="q"

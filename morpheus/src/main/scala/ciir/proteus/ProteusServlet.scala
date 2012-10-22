@@ -138,10 +138,7 @@ import ProteusServlet._
     mongoColl("sessions").findOne(MongoDBObject("key" -> params("sessionid"))) match {
       case Some(session) => {
 	mongoColl("users").findOne(MongoDBObject("user" -> session("user"))) match {
-	  case Some(userdata) => {
-	    println("Userdata: " + userdata.toString)
-	    Ok(userdata)
-	  }
+	  case Some(userdata) => Ok(userdata)
 	  case None => NotFound(write("No user found for session."))
 	}
       }
@@ -208,20 +205,107 @@ import ProteusServlet._
     }
   }
 
-  get("/addItemToSession/:id") {
-    val id = params("id")
-    logger.info("Adding item {} to session", id)
-    if (!session.contains("items")) {
-      session("items") = Set[String]()
+  // Create a list -- this is a hack to make sure there's something in there
+  // when the lists are requested. Need to rethink...when there's time to think.
+  put("/lists/:listname/:sessionid") {
+    getUserForSession(params("sessionid")) match {
+      case Some(userid) => {
+	mongoColl("lists") += MongoDBObject("user" -> userid,
+					    "listname" -> params("listname"),
+					    "placeholder" -> true)
+	Ok()
+      }
+      case None => InternalServerError(write("Unable to create list: no session found."))
     }
-    session("items").asInstanceOf[Set[String]].add(id)
   }
 
-  get("/removeItemFromSession/:id") {
-    val id = params("id")
-    logger.info("Removing item {} from session", id)
-    if (session.contains("items")) {
-      session("items").asInstanceOf[Set[String]].remove(id)
+  // delete a list -- does this by deleting all list entries that match the
+  // template query.
+  delete("/lists/:listname/:sessionid") {
+    getUserForSession(params("sessionid")) match {
+      case Some(userid) => {
+	mongoColl("lists") -= MongoDBObject("user" -> userid,
+					    "listname" -> params("listname"))
+	Ok()
+      }
+      case None => InternalServerError(write("Unable to delete list."))
+    }
+  }
+
+  // Get the contents of a specific list
+  get("/lists/:listname/:sessionid") {
+    contentType = "application/json"
+    getUserForSession(params("sessionid")) match {
+      case Some(userid) => {
+	var contents = List[String]()
+	for (item <- mongoColl("lists").find(
+	  MongoDBObject("user" -> userid, "listname" -> params("listname")) ++
+	  ("itemid" $exists true))) {
+	    contents = item("itemid").asInstanceOf[String] +: contents
+	  }
+	Ok(write(contents.toList.sorted))	
+      }
+      case None => NotFound(write("Session not found."))
+    }
+  }
+
+  // Get the names of the lists the logged in user has
+  get("/lists/:sessionid") {
+    contentType = "application/json"
+    getUserForSession(params("sessionid")) match {
+      case Some(userid) => {
+	var listnames = Set[String]()
+	for (list <- mongoColl("lists").find(MongoDBObject("user" -> userid))) {
+	  listnames.add(list("listname").asInstanceOf[String])
+	}
+	Ok(write(listnames.toList.sorted))
+	
+      }
+      case None => NotFound(write("Session not found."))
+    }
+  }
+
+  // Add an item to an existing list
+  put("/items/:itemid/:listname/:sessionid") {
+    val sid = params("sessionid")
+    getUserForSession(sid) match {
+      case None => NotFound(write("No session established"))
+      case Some(userid) => {
+	// Have to do this to guarantee the placeholder is gone.
+	// Not the most intelligent, but at this scale it's ok.
+	mongoColl("lists") -= MongoDBObject("user" -> userid,
+					    "listname" -> params("listname"),
+					    "placeholder" -> true)
+	
+	// The intended operation, post-placeholder cleanout.
+	mongoColl("lists") += MongoDBObject("user" -> userid,
+					    "listname" -> params("listname"),
+					    "itemid" -> params("itemid"))
+	logger.info("Adding item {} to list {} of user {}",
+		    Array[Object](
+		      params("itemid"),
+		      params("listname"),
+		      userid))
+	Ok()
+      }
+    }
+  }
+
+  // delete item from list
+  delete("/items/:itemid/:listname/:sessionid") {
+    val sid = params("sessionid")
+    getUserForSession(sid) match {
+      case None => NotFound(write("No session established"))
+      case Some(userid) => {
+	mongoColl("lists") -= MongoDBObject("user" -> userid,
+					    "listname" -> params("listname"),
+					    "itemid" -> params("itemid"))
+	logger.info("Removing item {} from list {} of user {}", 
+		    Array[Object](params("itemid"),
+				  params("listname"),
+				  userid))
+	Ok()
+      }
     }
   }
 
@@ -333,4 +417,11 @@ import ProteusServlet._
   notFound {
     serveStaticResource() getOrElse resourceNotFound()
   }
+
+
+  def getUserForSession(key : String) : Option[String] =
+    mongoColl("sessions").findOne(MongoDBObject("key" -> key)) match {
+      case Some(session) => Some(session("user").asInstanceOf[String])
+      case None => None
+    }
 }

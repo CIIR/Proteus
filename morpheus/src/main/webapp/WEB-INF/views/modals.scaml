@@ -1,3 +1,12 @@
+%div#listCreateModal.modal.modal-form.hide.fade
+ .modal-header
+  %button.close(type="button" data-dismiss="modal" aria-hidden="true") &times;
+  %h3 Create New List
+ .modal-body
+  %span List Name:
+  %input#listCreateName(type="text")
+ .modal-footer
+  %a.btn.btn-primary(href="#" onclick="createList()") Create
 %div#detailsModal.modal.modal-form.hide.fade
  .modal-header
   %button.close(type="button" data-dismiss="modal" aria-hidden="true") &times;

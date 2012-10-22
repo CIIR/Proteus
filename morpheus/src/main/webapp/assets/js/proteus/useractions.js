@@ -31,6 +31,7 @@ function loginWithUserName() {
 		// User is logged in. Must replace interface items
 		$.cookie('session', data, {expires: 7, path: '/'});
 		refreshAccountUI();
+		refreshWorkspaceUI();
 	    },
 	    error: function(data) {
 		noty({text: 'Could not log in user ' + name, 
@@ -47,7 +48,9 @@ function logout(action) {
 	    async: true,
 	    success: function() {
 		$.removeCookie('session');
+		$.removeCookie('list');
 		refreshAccountUI();
+		refreshWorkspaceUI();
 	    },
 	    error: function(data) {
 		noty({text: 'Could not log out user: ' + data, 
@@ -66,7 +69,9 @@ function deleteLoggedInUser() {
 		async: true,
 		success: function () {
 		    $.removeCookie('session');
+		    $.removeCookie('list');
 		    refreshAccountUI();
+		    refreshWorkspaceUI();
 		},
 		error: function(data) {
 		    noty({text: 'Unable to delete user: ' + data,
@@ -87,19 +92,19 @@ function getUserData() {
     var sessionkey = $.cookie('session');
     var receiver = null;
     if (sessionkey != null) {
-	var response = $.ajax({url : document.location.origin + '/users/' + sessionkey,
-			       type: 'get',
-			       async: false,
-			       dataType: 'json',
-			       success: function(data) { receiver = data; },
-			       error: function(data) {
-				   noty({text: 'Could not retrieve user data: ' + data,
-					 type: 'error',
-					 layout: 'topRight`',
-					 timeout: 1000});
-				   receiver = null;
-			       }
-			      });
+	$.ajax({url : document.location.origin + '/users/' + sessionkey,
+		type: 'get',
+		async: false,
+		dataType: 'json',
+		success: function(data) { receiver = data; },
+		error: function(data) {
+		    noty({text: 'Could not retrieve user data: ' + data,
+			  type: 'error',
+			  layout: 'topRight`',
+			  timeout: 1000});
+		    receiver = null;
+		}
+	       });
 	return receiver;
     } else {
 	return null;
