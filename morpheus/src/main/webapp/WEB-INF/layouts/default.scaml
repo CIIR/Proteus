@@ -17,7 +17,8 @@
    .sidebar-nav {
     padding: 9px 0;
    }
-  %script(src="assets/js/jquery-1.8.0.min.js")
+  %script(src="assets/js/jquery-1.8.2.min.js")
+  %script(src="assets/js/jquery-ui-1.9.0.custom.min.js")
   %script(src="assets/js/jquery.cookie.js")
   %script(src="assets/js/bootstrap.min.js")
   %script(src="assets/js/noty/jquery.noty.js")
@@ -26,7 +27,8 @@
   %script(src="assets/js/noty/layouts/topLeft.js")
   %script(src="assets/js/noty/layouts/topRight.js")
   %script(src="assets/js/noty/themes/default.js")
-  %link{:href => "assets/css/bootstrap-responsive.min.css", :rel => "stylesheet"}
+  %link(href="assets/css/jquery-ui-1.9.0.custom.min.css" rel="stylesheet")
+  %link(href="assets/css/bootstrap-responsive.min.css" rel="stylesheet")
   /[if lt IF 9]
    %script{:src => "http://html5shim.googlecode.com/svn/trunk/html5.js"}
   %link{:rel => "assets/ico/shortcut icon", :href => "favicon.ico"}
@@ -61,10 +63,9 @@
         %a(href="/status") Status
        %li.pull-right
         = render("account-status.scaml", Map("user" -> user))
-  :javascript
-   // Use this to activate the correct entry from the navbar above.
-   $('.nav-collapse ul.nav li a[href="'+location.pathname+'"]').parent().addClass('active');
   != body
+  / Include all functions specific to proteus
+  %script(type="text/javascript" src="assets/js/proteus.js")
   .span12
    %hr
    %footer

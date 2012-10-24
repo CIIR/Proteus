@@ -1,0 +1,27 @@
+- import ciir.proteus.ProteusFunctions._
+- val did = displayId(result.id)
+- val datatype = result.id.`type`.name.toLowerCase
+%tr
+ %td.span2
+  - if (result.thumbUrl.isDefined)
+   %a.thumbnail{:href => {if (result.externalUrl != None) result.externalUrl.get}}
+    %img{:src => {result.thumbUrl.get}, :onerror => "assets/img/no_image.gif"}
+ %td.span10
+  %span(id=did)
+   %a.icon-tag(onclick="markItem('#{did}', '#{datatype}')")
+   %a(href = "/details?id=#{did}")
+    %u
+     != result.title.getOrElse("No Title")
+  - if (result.externalUrl.isDefined)
+   %span
+    %a{:href => {result.externalUrl.get}} #{getExternalLinkText(result.externalUrl.get)}
+  %span(id="#{did}-labels")
+   - for (listname <- lists)
+    %span.badge
+     != listname
+     %i.icon-remove.icon-white(onclick="unMarkItem('#{did}', '#{listname}');")
+  %div
+   %p.well
+    - if (result.summary.isDefined)
+     != result.summary.get.text
+ %input(type="hidden" name="#{did}" value="#{result.score}")

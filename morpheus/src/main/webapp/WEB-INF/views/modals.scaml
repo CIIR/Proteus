@@ -1,3 +1,12 @@
+%div#listRenameModal.modal.modal-form.hide.fade
+ .modal-header
+  %button.close(type="button" data-dismiss="modal" aria-hidden="true") &times;
+  %h3 Rename List
+ .modal-body
+  %span New name for list:
+  %input#listNewName(type="text")
+ .modal-footer
+  %a.btn.btn-primary(href="#" onclick="renameList()") Rename
 %div#listCreateModal.modal.modal-form.hide.fade
  .modal-header
   %button.close(type="button" data-dismiss="modal" aria-hidden="true") &times;

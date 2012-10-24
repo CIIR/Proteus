@@ -33,9 +33,13 @@ import com.mongodb.casbah.Imports._
 // For configuration
 case class Site(host: String, port: Int)
 
+// Augments the SearchResults to have
+// non-Aura data
+case class RichSearchResult(result: SearchResult, lists: List[String])
+
 object ProteusServlet {
   var hosts : Seq[Site] = Seq[Site]()
-  var dbport : Int
+  var dbport : Int = 27017
 }
 
 class ProteusServlet extends ScalatraServlet 
@@ -116,7 +120,9 @@ import ProteusServlet._
     val rrequest = RelatedRequest(beliefs = beliefs,
 				  targetTypes = targetTypes)
     val response = dataClient.related(rrequest)()
-    renderHTML("search", "results" -> splitResults(response.results))
+    renderHTML("search", 
+	       "results" -> enrichenAndSplitResults(getUserForSession(params.get("sessionid")),
+								      response.results))
   }
   
   // Create user
@@ -137,9 +143,9 @@ import ProteusServlet._
   // Get the user information given a session key
   get("/users/:sessionid") {
     contentType = "application/json"
-    mongoColl("sessions").findOne(MongoDBObject("key" -> params("sessionid"))) match {
-      case Some(session) => {
-	mongoColl("users").findOne(MongoDBObject("user" -> session("user"))) match {
+    getUserForSession(params.get("sessionid")) match {
+      case Some(userid) => {
+	mongoColl("users").findOne(MongoDBObject("user" -> userid)) match {
 	  case Some(userdata) => Ok(userdata)
 	  case None => NotFound(write("No user found for session."))
 	}
@@ -151,11 +157,10 @@ import ProteusServlet._
   // Delete the user with the given session key (i.e. must be logged in to delete.)
   delete("/users/:sessionid") {
     contentType = "application/json"
-    mongoColl("sessions").findOne(MongoDBObject("key" -> params("sessionid"))) match {
+    mongoColl("session").findOne(MongoDBObject("key" -> params("sessionid"))) match {
       case Some(session) => {
-	val username = session("user").asInstanceOf[String]
 	mongoColl("sessions") -= session  // end session
-	mongoColl("users") -= MongoDBObject("user" -> username) // remove user
+	mongoColl("users") -= MongoDBObject("user" -> session("user")) // remove user
 	Ok()
       }
       case None => {
@@ -210,7 +215,7 @@ import ProteusServlet._
   // Create a list -- this is a hack to make sure there's something in there
   // when the lists are requested. Need to rethink...when there's time to think.
   put("/lists/:listname/:sessionid") {
-    getUserForSession(params("sessionid")) match {
+    getUserForSession(params.get("sessionid")) match {
       case Some(userid) => {
 	mongoColl("lists") += MongoDBObject("user" -> userid,
 					    "listname" -> params("listname"),
@@ -221,10 +226,25 @@ import ProteusServlet._
     }
   }
 
+  // Rename a list
+  post("/lists/:listname/:sessionid") {
+    getUserForSession(params.get("sessionid")) match {
+      case Some(userid) => {
+	mongoColl("lists").update(MongoDBObject("user" -> userid,
+						"listname" -> params("listname")),
+				  $set("listname" -> params("newname")),
+				  false, /* upsert? */
+				  true /* multiple records? */)
+	Ok()
+      }
+      case None => InternalServerError(write("Unable to update list: no session found."))
+    }
+  }
+
   // delete a list -- does this by deleting all list entries that match the
   // template query.
   delete("/lists/:listname/:sessionid") {
-    getUserForSession(params("sessionid")) match {
+    getUserForSession(params.get("sessionid")) match {
       case Some(userid) => {
 	mongoColl("lists") -= MongoDBObject("user" -> userid,
 					    "listname" -> params("listname"))
@@ -237,15 +257,17 @@ import ProteusServlet._
   // Get the contents of a specific list
   get("/lists/:listname/:sessionid") {
     contentType = "application/json"
-    getUserForSession(params("sessionid")) match {
+    getUserForSession(params.get("sessionid")) match {
       case Some(userid) => {
 	var contents = List[JObject]()
 	for (item <- mongoColl("lists").find(
 	  MongoDBObject("user" -> userid, "listname" -> params("listname")) ++
 	  ("itemid" $exists true))) {
-	    val json = ("itemid" -> item("itemid").asInstanceOf[String]) ~
+	    val itemid = item.as[String]("itemid")
+	    var json = ("itemid" -> itemid) ~
 	    ("title" -> item("title").asInstanceOf[String]) ~
-	    ("datatype" -> item("datatype").asInstanceOf[String])
+	    ("datatype" -> item("datatype").asInstanceOf[String]) ~
+	    ("fulltitle" -> item.getAsOrElse[String]("fulltitle", null))
 	    contents = json +: contents
 	  }
 	Ok(write(contents))
@@ -257,7 +279,7 @@ import ProteusServlet._
   // Get the names of the lists the logged in user has
   get("/lists/:sessionid") {
     contentType = "application/json"
-    getUserForSession(params("sessionid")) match {
+    getUserForSession(params.get("sessionid")) match {
       case Some(userid) => {
 	var listnames = Set[String]()
 	for (list <- mongoColl("lists").find(MongoDBObject("user" -> userid))) {
@@ -272,7 +294,7 @@ import ProteusServlet._
 
   // Add an item to an existing list
   put("/items/:itemid/:listname/:sessionid") {
-    val sid = params("sessionid")
+    val sid = params.get("sessionid")
     getUserForSession(sid) match {
       case None => NotFound(write("No session established"))
       case Some(userid) => {
@@ -287,7 +309,9 @@ import ProteusServlet._
 					    "listname" -> params("listname"),
 					    "itemid" -> params("itemid"),
 					    "title" -> params("title"),
-					    "datatype" -> params("datatype"))
+					    "datatype" -> params("datatype"),
+					  "fulltitle" -> params("fulltitle")
+					  )
 	logger.info("Adding item {} to list {} of user {}",
 		    Array[Object](
 		      params("itemid"),
@@ -300,7 +324,7 @@ import ProteusServlet._
 
   // delete item from list
   delete("/items/:itemid/:listname/:sessionid") {
-    val sid = params("sessionid")
+    val sid = params.get("sessionid")
     getUserForSession(sid) match {
       case None => NotFound(write("No session established"))
       case Some(userid) => {
@@ -384,7 +408,8 @@ import ProteusServlet._
       val futureResponse = dataClient.search(request)
       val actualResponse = futureResponse()
       // Need to split the results by type
-      actuals = ("results" -> splitResults(actualResponse.results)) +: actuals
+      actuals = ("results" -> enrichenAndSplitResults(getUserForSession(params.get("sessionid")), 
+						      actualResponse.results)) +: actuals
       actuals = ("q" -> params("q")) +: actuals
     }
     renderHTML("search", actuals:_*)
@@ -405,30 +430,58 @@ import ProteusServlet._
     renderHTML("wordhistory", actuals:_*)
   }
 
-  def splitResults(results: Seq[SearchResult]) : Map[String, AnyRef] = {
+ def enrichenAndSplitResults(userid: Option[String], results: Seq[SearchResult]) : Map[String, AnyRef] = {
+    // If there's a userid, we get the item/list pairs of the results.
+    val memberships = userid match {
+      case None => None
+      case Some(user) => Some(getListsForItems(user, results.map(_.id)))
+    }
     val splitBuilder = Map.newBuilder[String, AnyRef]
     for (typeStr : String <- kReturnableTypes) {
       val filteredByType = results.filter { 
 	result => 
 	  result.id.`type` == ProteusType.valueOf(typeStr).get
       }
-      // If we found any results of that type in the filter,
-      // then add it as a typed result list.
       if (filteredByType.length > 0) {
-	splitBuilder += (typeStr -> filteredByType)
+	// do it here to look for memberships
+	val displayReady : AnyRef = memberships match {
+	  case None => filteredByType
+	  case Some(m) => filteredByType.map {	    
+	    A : SearchResult => 	      
+	      RichSearchResult(A, m(displayId(A.id)))
+	  }
+	}
+	splitBuilder += (typeStr -> displayReady)
       }
     }
     return splitBuilder.result
   }
-
+  
   notFound {
     serveStaticResource() getOrElse resourceNotFound()
   }
 
-
-  def getUserForSession(key : String) : Option[String] =
-    mongoColl("sessions").findOne(MongoDBObject("key" -> key)) match {
-      case Some(session) => Some(session("user").asInstanceOf[String])
-      case None => None
+  def getUserForSession(key : Option[String]) : Option[String] = key match {
+    case Some(keystr) => {
+      mongoColl("sessions").findOne(MongoDBObject("key" -> key)) match {
+	case Some(session) => Some(session("user").asInstanceOf[String])
+	case None => None
+      }
     }
+    case None => None
+  }
+
+  def getListsForItems(userid: String, items: Seq[AccessIdentifier]) : Map[String, List[String]] = {
+    val builder = Map.newBuilder[String, List[String]]
+    for (aid <- items) {
+      val did = displayId(aid)
+      var listnames = List[String]()
+      for (entry <- mongoColl("lists").find(MongoDBObject("user" -> userid,
+							  "itemid" -> did))) {
+	listnames = entry.as[String]("listname") +: listnames
+      }
+      builder += (did -> listnames.sorted)
+    }
+    return builder.result
+  }
 }
