@@ -123,6 +123,7 @@ function loginWithUserName() {
 		var sessionData = Object();
 		sessionData.key = data;
 		$.cookie('session', sessionData, {expires: 1, path: '/'});
+		markResults();
 		refreshAccountUI();
 		refreshWorkspaceUI();
 	    },
@@ -418,6 +419,8 @@ function refreshWorkspaceUI() {
     if ($.cookie('session') == null) {
 	// Do not allow list management if a user is not logged in
 	$('#listStatusText').text('Log in to use lists.');
+	// Make sure the badges are all gone
+	$('span.badge').remove();
 	return;
     }
 
@@ -482,6 +485,20 @@ function toggleExpansion(expander) {
 	sessionData.expanders.push(expander);
 	$.cookie('session', sessionData);
     }
+}
+
+// Used to mark search results when a user logs in (otherwise
+// labeling doesn't apply until a new search is submitted).
+var whatever;
+function markResults() {
+    // Look for results
+    if ($.cookie('session') == null) return;
+    var resultSpans = $('#resultContent td.span10 span');
+    if (resultSpans.size() == 0) return;
+
+    // Simple solution - if we have results and have just logged in,
+    // reload the damn page
+    $('#searchform').submit();
 }
 
 // Update stuff based on current cookie contents
