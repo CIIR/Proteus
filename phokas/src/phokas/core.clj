@@ -33,6 +33,8 @@
 
 (def ^:dynamic *clobber?* true)
 
+(def ^:dynamic *ner-models* "models")
+
 (def ^:dynamic *language* "eng")
 
 (def ^:dynamic *languages* #{"eng" "fre" "ger" "ita" "lat"})
@@ -157,7 +159,7 @@
       (s/replace #"<w ([^>]+>)([ ]*)</w>" "$2") ; remove empty words
       (s/replace #"<w ([^>]+>)([^<]+)</w>" fix-word)
       (s/replace
-       #"<w form=\"([^\"]*[A-Za-z])-\" coords=\"([^\"]+)\"([^>]*>[^<]+)</w>(\n?(?:<(?:lb|pb)[^>]+>)*?)<w form=\"([^\"]+)\" coords=\"([^\"]+)\"([^>]*)>"
+       #"<w form=\"([^\"]*[A-Za-z])-\" coords=\"([^\"]+)\"([^>]*>[^<]+)</w>(\n?(?:<[lp]b[^>]*>(?:</[lp]b>)?)*?)<w form=\"([^\"]+)\" coords=\"([^\"]+)\"([^>]*)>"
        ;; NB: we merge form and coords, but keep extra attributes from
        ;; both tags; could be overkill
        #(str "<w form=\"" (dehyph (% 1) (% 5)) "\" coords=\"" (% 2) ";" (% 6) "\"" (% 7) (% 3) (% 4)))
@@ -237,38 +239,6 @@
 	      (ArrayList.
 	       (mapcat #(vec (.get % CoreAnnotations$TokensAnnotation)) res)))))))
 
-(defn- make-tree-labels
-  [sen]
-  (let [a (map :attrs (xml-> sen :w zip/node))
-	stext (s/join " " (map :form a))
-	toks
-	(ArrayList. [(doto (Annotation. stext)
-		       (.set CoreAnnotations$TokensAnnotation
-			     (map #(doto (CoreLabel.)
-				     (.setDocID (:coords %))
-				     (.setWord (:form %))
-				     (.setTag (:type %))
-				     (.setLemma (:lemma %)))
-				  a)))])]
-    (doto (Annotation. stext)
-      (.set CoreAnnotations$SentencesAnnotation toks)
-      (.set
-       CoreAnnotations$TokensAnnotation
-       (ArrayList. (mapcat #(vec (.get % CoreAnnotations$TokensAnnotation)) toks))))))
-
-(defn get-phrase
-  [id words kids root?]
-  (let [cur (words id)
-	form (cur :form)
-	k (kids id)]
-    ;;(when (not= (:deprel cur) "P")	; cut recursion at punctuation?
-    (when (or root? ((*annotators* :name-deps) (:deprel cur)))
-      (filter not-empty
-	      (flatten
-	       (vector (map #(get-phrase % words kids false) (filter #(< % id) k))
-		       cur
-		       (map #(get-phrase % words kids false) (filter #(> % id) k))))))))
-
 (defn- wrap-words
   [nodes sen start end typea namea]
   (html/transform nodes
@@ -288,7 +258,7 @@
 (defn ner-para
   [para]
   (let [;; Wrap in dummy tags to allow stuff before or after main <p>.
-        tree (parse-str (str "<text>" para "</text>"))
+        tree (parse-str (str "<wrapper>" para "</wrapper>"))
         tags (-> tree
                  zip/xml-zip
                  (xml-> :p :s)
@@ -307,8 +277,8 @@
           trips)
          html/emit*
          s/join
-         (s/replace #"^<text>" "")
-         (s/replace #"</text>$" ""))))))
+         (s/replace #"^<wrapper>" "")
+         (s/replace #"</wrapper>$" ""))))))
 
 ;;      (s/join "</s>" (map str (s/split para #"</s>") (concat tags [""]))))))
 
@@ -509,7 +479,8 @@
 (defn tei-paras
   [s]
   (->> s
-       source-seq
+       (drop-while #(not= (:name %) :text))
+       (drop 1)
        (partition-when
         #(and (= (:name %) :p)
               (= (:type %) :end-element)))
@@ -620,7 +591,7 @@
        (drop-while #(re-find #"^\n" %))
        ;;(take-while #(empty? (re-find #"END OF THE PROJECT GUTENBERG EBOOK" %)))
        (map-indexed gut-forms)
-       ;;(map-indexed #(if (re-find #"^<p>\n+</p>$" %2) (str "<pb n=\"" %1 "\" />") %2))
+       (map-indexed #(if (re-find #"^<p>\n+</p>$" %2) (str "<pb n=\"" %1 "\" />") %2))
        ))
 
 (defn ^String annotate-para
@@ -646,21 +617,18 @@
   [lang]
   (condp = lang
       "eng" {:annotate
-	     #(-> % tokenize-para tag-para parse-para );; ner-para)
+	     #(-> % tokenize-para tag-para parse-para ner-para)
 	     :tokenizer
 	     (edu.stanford.nlp.pipeline.PTBTokenizerAnnotator.
 	      false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")
 	     :tagger
 	     (edu.stanford.nlp.pipeline.POSTaggerAnnotator.
-              ;; "/home2/dasmith/src/stanford-corenlp-2012-05-22/edu/stanford/nlp/models/pos-tagger/wsj-left3words/wsj-0-18-left3words-distsim.tagger"
-              ;; "/home2/dasmith/src/umass-models/edu/stanford/nlp/models/pos-tagger/wsj3t0-18-left3words/left3words-distsim-wsj-0-18.tagger"
-              ;;"edu/stanford/nlp/models/pos-tagger/wsj3t0-18-left3words/left3words-distsim-wsj-0-18.tagger"
               "edu/stanford/nlp/models/pos-tagger/wsj-left3words/wsj-0-18-left3words-distsim.tagger"
 	      false 500)
+             :ner
+             (EmbedTagger/prepModels *ner-models*)
 	     :parser
-	     (parser.Parser/pretrained)
-	     :name-deps #{"NAME" "TITLE"}
-	     :name-pos #{"NNP" "NNPS"}}
+	     (parser.Parser/pretrained)}
       "fre" {:annotate
 	     #(-> % tokenize-para
 		  (s/replace #"-LRB-" "(")
@@ -673,10 +641,7 @@
 	     (edu.stanford.nlp.pipeline.POSTaggerAnnotator.
 	      "ciir/models/fre.pos" false 500)
 	     :parser
-	     (parser.Parser/read "/home2/dasmith/src/iabooks/fre.dep")
-	     ;; (parser.Parser/read (.toString (ClassLoader/getSystemResource "ciir/models/fre.dep")))
-	     :name-deps #{"mod"}
-	     :name-pos #{"NPP"}}
+	     (parser.Parser/read "/home2/dasmith/src/iabooks/fre.dep")}
       "ger" {:annotate
 	     #(-> % tokenize-para
 		  (s/replace #"-([LR])RB-" "*$1RB*")
@@ -688,9 +653,7 @@
 	     (edu.stanford.nlp.pipeline.POSTaggerAnnotator.
 	      "ciir/models/ger.pos" false 500)
 	     :parser
-	     (parser.Parser/read "/home2/dasmith/src/iabooks/ger.dep")
-	     :name-deps #{"PNC"}
-	     :name-pos #{"NE"}}
+	     (parser.Parser/read "/home2/dasmith/src/iabooks/ger.dep")}
       "ita" {:annotate
 	     #(-> % tokenize-para
 		  (s/replace #"-LRB-" "(")
@@ -703,9 +666,7 @@
 	     (edu.stanford.nlp.pipeline.POSTaggerAnnotator.
 	      "ciir/models/ita.pos" false 500)
 	     :parser
-	     (parser.Parser/read "/home2/dasmith/src/iabooks/ita.dep")
-	     :name-deps #{"mod"}
-	     :name-pos #{"SP"}}
+	     (parser.Parser/read "/home2/dasmith/src/iabooks/ita.dep")}
       "lat" {:annotate
 	     #(-> % tokenize-para
 		  (s/replace #"-LRB-" "(")
@@ -720,14 +681,7 @@
              :lem-dict
 	     (into {}
 		   (->> "dict/lat-lems.clj.gz" gzresource PushbackReader. read
-			(map top-lemma)))
-	     ;; :parser
-	     ;; (parser.Parser/read "/home2/dasmith/src/iabooks/lat.dep")
-	     :name-deps #{"ATR"}
-             :name-pos (set (for [n ["s" "p"]
-                                  g ["m" "f" "n"]
-                                  c ["-" "n" "g" "d" "a" "b" "v" "l"]]
-                              (str "n-" n g c)))}
+			(map top-lemma)))}
       {:annotate
        #(tokenize-para %)
        :tokenizer
@@ -746,67 +700,6 @@
 		  (reduce + 0.0 (vals stops)))
 	       toks)]))]
     (assoc props "unk" (- 1 (reduce + (vals props))))))
-
-(defn dj-convert-file
-  "Convert the given book transcription to the Megabooks project's TEI
-  XML.  Inline the metadata from the _meta.xml.bz2 file in the same
-  directory.  Put the output in the source directory with the
-  extension _mbtei.xml.gz.
-
-  Try to detect if it's a Project Gutenberg book and perform the
-  initial stages of conversion differently -- e.g. by removing
-  Gutenberg header and footer.
-
-  Return the path to the output file.  If an exception is encountered,
-  remove the output file and return the empty string."
-
-  [^String ipath]
-  (let [ifile (File. ipath)
-	idir (.getParent ifile)
-	bid (.getName (File. idir))
-	ofile (jio/file idir (str bid "_mbtei.xml.gz"))
-	mfile (jio/file idir (str bid "_meta.xml.bz2"))
-	opath (.getPath ofile)]
-    (println opath)
-    (if (and (not *clobber?*) (.exists ofile))
-      ""
-      (try
-	(let [metadata (-> mfile bzreader slurp (s/replace #"^<\?xml [^>]+\?>\n*" "") dc-fix)
-	      encoding (if (re-find #"-8\." (.getName ifile)) "ISO-8859-1" "UTF-8")
-	      file-read #(jio/reader (if (re-find #"\.bz2$" %) (bzreader %) %) :encoding encoding)
-	      para-seq (if (re-find #"gut$" bid) gut-paras dj-paras)
-	      raw-counts (with-open [in ^BufferedReader (file-read ipath)]
-	      		   (if (re-find #"gut$" bid)
-	      		     (gut-words in)
-	      		     (dj-words in)))
-	      langs (sort-by second > (stopword-langid raw-counts))
-	      top-lang (first langs)
-	      meta-lang (dc-language metadata)
-	      lang (if (> (second top-lang) 0.5)
-	       	     (first top-lang)
-	       	     "unk")]
-	  (println "# meta-lang:" meta-lang)
-	  (println "# sw-lang:" langs)
-	  (if (and (not-empty *languages*) (not (*languages* lang)))
-	    (do (println "# unprocessed language: " lang) "")
-	    (with-bindings {#'*language* lang
-			    #'*lang-annotators* {lang (init-annotators lang)}
-			    #'*dict* (clojure.set/union
-				      *dict*
-				      (set (filter #(re-find #"^[A-Za-z]+$" %) (keys raw-counts))))}
-	      (with-open [in ^BufferedReader (file-read ipath)
-			  out (-> ofile java.io.FileOutputStream. GZIPOutputStream. (jio/writer :encoding "UTF-8"))]
-		(.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TEI>\n")
-		(.write out metadata)
-		(.write out (str "<text lang=\"" *language* "\">\n"))
-		(doseq [para (para-seq in)] (.write out (annotate-para para)))
-		(.write out "\n</text></TEI>\n")
-		opath))))
-	(catch Exception e
-	  (println "# Error with " ifile ":" e)
-	  (if (and (.exists ofile) (.canWrite ofile))
-	    (do (.delete ofile)
-		"")))))))
 
 (defn raw-file
   [para-seq mpath ipath opath]
@@ -844,10 +737,17 @@
                                 (set (filter #(re-find #"^[A-Za-z]+$" %) (keys raw-counts))))}
         (with-open [in ^BufferedReader (gzreader ipath)
                     out (-> opath java.io.FileOutputStream. GZIPOutputStream. (jio/writer :encoding "UTF-8"))]
-          (.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-          (doseq [para (tei-paras in)] (.write out (annotate-para (word-forms para))))
-          (.write out "\n</text></TEI>\n")
-          opath)))))
+          (let [event-seq (source-seq in)]
+            ;;(.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+            (.write out
+                    (->> event-seq
+                        (take-while #(not= (:name %) :text))
+                        event-tree emit-str
+                        (#(s/replace % #"</TEI>$" ""))))
+            (.write out (str "<text lang=\"" lang "\">\n"))
+            (doseq [para (tei-paras event-seq)] (.write out (annotate-para (word-forms para))))
+            (.write out "\n</text></TEI>\n")
+            opath))))))
 
 (defn convert-listed-files
   [fname-seq]
@@ -885,8 +785,8 @@
                   ["-c" "--clobber" "Clobber existing files" :default false :flag true]
                   ["-m" "--models" "Models for SamNER" :default "models"]
                   ["-h" "--help" "Show help" :default false :flag true])]
-    (EmbedTagger/prepModels (:models options))
-    (binding [*clobber?* (:clobber options)]
+    (binding [*clobber?* (:clobber options)
+              *ner-models* (or (:models options) *ner-models*)]
       (if (empty? remaining)
         (-> System/in InputStreamReader. BufferedReader. line-seq convert-listed-files)
         (doseq [ff remaining]
