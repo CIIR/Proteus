@@ -1,0 +1,12 @@
+package org.lemurproject.galago.core.types;
+
+type NumberedExtent {
+    bytes extentName;
+    long number;
+    int begin;
+    int end;
+
+    order: +number +begin;
+    order: +extentName +number +begin;
+    order: +extentName;
+}
