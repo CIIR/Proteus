@@ -142,14 +142,12 @@ public class PseudoDocument extends Document {
     int samplesSize = 0;
     if (p.get("samples", true)) {
       samplesSize = dataIStream.readInt();
-      System.err.printf("Size of sample data: %d\n", samplesSize);
       byte[] sampleData = new byte[samplesSize];
       dataIStream.readFully(sampleData);
       ByteArrayInputStream sampleBytes = new ByteArrayInputStream(sampleData);
       DataInputStream sampleIStream = new DataInputStream(new SnappyInputStream(sampleBytes));
       int count = sampleIStream.readInt();
       int sampleLimit = (int) p.get("sampleLimit", Integer.MAX_VALUE);
-      System.err.printf("Number of samples: %d, limit: %d\n", count, sampleLimit);
       int stop = Math.min(count, sampleLimit);
       byte[] buffer;
       for (int i = 0; i < stop; ++i) {

@@ -59,7 +59,6 @@ class MBTEIBookParser extends MBTEIParserBase {
 	// Collect everything else
 	//addStartElementAction(matchAll, "echo");
 	//addEndElementAction(matchAll, "echo");
-
     }
 
     public void moveToS1(int ignored) {
