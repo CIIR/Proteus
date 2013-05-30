@@ -42,8 +42,8 @@ object ProteusServlet {
   var dbport : Int = 27017
 }
 
-class ProteusServlet extends ScalatraServlet 
-with ScalateSupport 
+class ProteusServlet extends ScalatraServlet
+with ScalateSupport
 with FakeDataGenerator {
 import ProteusServlet._
 
@@ -95,7 +95,7 @@ import ProteusServlet._
 
   get("/status") {
     val response = dataClient.status()()
-    renderHTML("status", 
+    renderHTML("status",
 	       "siteId" -> response.siteId,
 	       "collectionData" -> response.collectionData,
 	       "linkData" -> response.linkData,
@@ -120,11 +120,11 @@ import ProteusServlet._
     val rrequest = RelatedRequest(beliefs = beliefs,
 				  targetTypes = targetTypes)
     val response = dataClient.related(rrequest)()
-    renderHTML("search", 
+    renderHTML("search",
 	       "results" -> enrichenAndSplitResults(getUserForSession(params.get("sessionid")),
 								      response.results))
   }
-  
+
   // Create user
   put("/users/:username") {
     val newUser = MongoDBObject("user" -> params("username"))
@@ -136,7 +136,7 @@ import ProteusServlet._
 	mongoColl("users") += newUser
 	logger.info("Creating user '{}'", newUser("user"))
 	Created()
-      }    
+      }
     }
   }
 
@@ -286,7 +286,7 @@ import ProteusServlet._
 	  listnames.add(list("listname").asInstanceOf[String])
 	}
 	Ok(write(listnames.toList.sorted))
-	
+
       }
       case None => NotFound(write("Session not found."))
     }
@@ -303,7 +303,7 @@ import ProteusServlet._
 	mongoColl("lists") -= MongoDBObject("user" -> userid,
 					    "listname" -> params("listname"),
 					    "placeholder" -> true)
-	
+
 	// The intended operation, post-placeholder cleanout.
 	mongoColl("lists") += MongoDBObject("user" -> userid,
 					    "listname" -> params("listname"),
@@ -331,7 +331,7 @@ import ProteusServlet._
 	mongoColl("lists") -= MongoDBObject("user" -> userid,
 					    "listname" -> params("listname"),
 					    "itemid" -> params("itemid"))
-	logger.info("Removing item {} from list {} of user {}", 
+	logger.info("Removing item {} from list {} of user {}",
 		    Array[Object](params("itemid"),
 				  params("listname"),
 				  userid))
@@ -353,8 +353,8 @@ import ProteusServlet._
   }
 
   get("/lookup") {
-    val accessIds = multiParams("id") map { 
-      pid => 
+    val accessIds = multiParams("id") map {
+      pid =>
 	ProteusFunctions.externalId(pid)
     }
     val request = LookupRequest(accessIds)
@@ -362,8 +362,8 @@ import ProteusServlet._
     // Need to split the results by type
     var splitResults = Map[String, AnyRef]()
     for (typeStr : String <- kReturnableTypes) {
-      val filteredByType = response.objects.filter { 
-	obj : ProteusObject => 
+      val filteredByType = response.objects.filter {
+	obj : ProteusObject =>
 	  obj.id.`type` == ProteusType.valueOf(typeStr).get
       }
       // If we found any results of that type in the filter,
@@ -376,8 +376,8 @@ import ProteusServlet._
   }
 
   get("/search") {
-    var actuals = Seq[(String, Any)]() 
-    
+    var actuals = Seq[(String, Any)]()
+
     // If we have a query, put together a SearchRequest and ship it
     if (params.contains("q")) {
       // Request this many
@@ -385,30 +385,30 @@ import ProteusServlet._
       if (params.contains("n")) {
         count = params("n").toInt
       }
-      
+
       val requestedTypes = if (multiParams("st").contains("all")) {
 	kReturnableTypes.map { rt : String => ProteusType.valueOf(rt).get }
       } else {
-	multiParams("st") map { 
-	  str => 
+	multiParams("st") map {
+	  str =>
 	    ProteusType.valueOf(str).get
 	}
       }
-      
+
       var rgq : Option[String] = None
       if (params.contains("rgq")) {
         rgq = Some(params("rgq"))
       }
       val parameters = RequestParameters(count, 0)
-      val request = SearchRequest(rawQuery = params("q"), 
-				  types = requestedTypes, 
+      val request = SearchRequest(rawQuery = params("q"),
+				  types = requestedTypes,
 				  parameters = Some(parameters),
 				  rawGalagoQuery = rgq)
 
       val futureResponse = dataClient.search(request)
       val actualResponse = futureResponse()
       // Need to split the results by type
-      actuals = ("results" -> enrichenAndSplitResults(getUserForSession(params.get("sessionid")), 
+      actuals = ("results" -> enrichenAndSplitResults(getUserForSession(params.get("sessionid")),
 						      actualResponse.results)) +: actuals
       actuals = ("q" -> params("q")) +: actuals
     }
@@ -438,16 +438,16 @@ import ProteusServlet._
     }
     val splitBuilder = Map.newBuilder[String, AnyRef]
     for (typeStr : String <- kReturnableTypes) {
-      val filteredByType = results.filter { 
-	result => 
+      val filteredByType = results.filter {
+	result =>
 	  result.id.`type` == ProteusType.valueOf(typeStr).get
       }
       if (filteredByType.length > 0) {
 	// do it here to look for memberships
 	val displayReady : AnyRef = memberships match {
 	  case None => filteredByType
-	  case Some(m) => filteredByType.map {	    
-	    A : SearchResult => 	      
+	  case Some(m) => filteredByType.map {
+	    A : SearchResult =>
 	      RichSearchResult(A, m(displayId(A.id)))
 	  }
 	}
@@ -456,7 +456,7 @@ import ProteusServlet._
     }
     return splitBuilder.result
   }
-  
+
   notFound {
     serveStaticResource() getOrElse resourceNotFound()
   }

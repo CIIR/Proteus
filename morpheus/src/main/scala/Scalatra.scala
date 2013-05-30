@@ -1,8 +1,6 @@
 import ciir.proteus._
 import org.scalatra._
 import javax.servlet.ServletContext
-//import org.eclipse.jetty.webapp.WebAppContext
-//import org.eclipse.jetty.webapp.WebAppContext._
 
 /**
  * This is the Scalatra bootstrap file. You can use it to mount servlets or

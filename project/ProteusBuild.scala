@@ -18,7 +18,7 @@ object ProteusBuild extends Build {
     base = file("aura"),
     settings = buildSettings ++
               CompileThriftScrooge.newSettings ++
-              Seq(resolvers := Resolver.withDefaultResolvers(Resolvers.all, true, true), 
+              Seq(resolvers := Resolver.withDefaultResolvers(Resolvers.all, true, true),
                   libraryDependencies ++= AuraDeps.deps,
                   CompileThriftScrooge.scroogeVersion := "2.5.4")
   )
