@@ -1,0 +1,60 @@
+UMassNoNLPEntityLinkingFeatures . altNameAvgDice	0
+UMassNoNLPEntityLinkingFeatures . fieldProbability_title	1
+UMassNoNLPEntityLinkingFeatures . exactMatchBool_stanf_anchor-exact	2
+UMassNoNLPEntityLinkingFeatures . exactMatchCount_stanf_anchor-exact	3
+LLCSurfaceEntityLinkingFeatures . acroTestFirstLetter	4
+UMassNoNLPEntityLinkingFeatures . totalSourcesMatching	5
+UMassNoNLPEntityLinkingFeatures . fieldLikelihood_redirect	6
+LLCSurfaceEntityLinkingFeatures . diceTestFullWordScore	7
+UMassNoNLPEntityLinkingFeatures . substringMatch2 norm=	8
+UMassNoNLPEntityLinkingFeatures . fieldProbability_fbname	9
+LLCSurfaceEntityLinkingFeatures . diceTestAlignedCharacter	10
+LLCSurfaceEntityLinkingFeatures . SUBSTR_TEST	11
+LLCSurfaceEntityLinkingFeatures . acroTestRandom=	12
+LLCSurfaceEntityLinkingFeatures . diceTestFullCharacterScore	13
+UMassNoNLPEntityLinkingFeatures . jsdivergenceFeature-doc	14
+UMassNoNLPEntityLinkingFeatures . exactMatchBool_fbname-exact	15
+UMassNoNLPEntityLinkingFeatures . substringMatch1 norm=	16
+UMassNoNLPEntityLinkingFeatures . fieldProbability_anchor	17
+UMassNoNLPEntityLinkingFeatures . altNameEquals	18
+UMassNoNLPEntityLinkingFeatures . fieldProbability_stanf_anchor	19
+UMassNoNLPEntityLinkingFeatures . altNameAvgEditDistance	20
+UMassNoNLPEntityLinkingFeatures . externalLinkProb	21
+LLCSurfaceEntityLinkingFeatures . diceTestAlignedWordScore	22
+LLCSurfaceEntityLinkingFeatures . diceTestAlignedCharacterScore	23
+UMassNoNLPEntityLinkingFeatures . tokenDice norm	24
+UMassNoNLPEntityLinkingFeatures . tokenJaccard norm	25
+UMassNoNLPEntityLinkingFeatures . surfaceMatch norm=	26
+UMassNoNLPEntityLinkingFeatures . altNameAvgJaccard	27
+UMassNoNLPEntityLinkingFeatures . exactMatchBool_title-exact	28
+UMassNoNLPEntityLinkingFeatures . altNameMaxJaccard	29
+UMassNoNLPEntityLinkingFeatures . exactMatchCount_fbname-exact	30
+UMassNoNLPEntityLinkingFeatures . galagoscoreNorm	31
+UMassNoNLPEntityLinkingFeatures . galagoscore1	32
+UMassNoNLPEntityLinkingFeatures . fieldLikelihood_fbname	33
+UMassNoNLPEntityLinkingFeatures . wordMatch norm	34
+UMassNoNLPEntityLinkingFeatures . inlinks	35
+UMassNoNLPEntityLinkingFeatures . cosineFeature-doc	36
+UMassNoNLPEntityLinkingFeatures . fieldLikelihood_title	37
+LLCSurfaceEntityLinkingFeatures . diceTestFullWord	38
+UMassNoNLPEntityLinkingFeatures . fieldLikelihood_stanf_anchor	39
+UMassNoNLPEntityLinkingFeatures . exactMatchCount_anchor-exact	40
+UMassNoNLPEntityLinkingFeatures . exactMatchCount_title-exact	41
+UMassNoNLPEntityLinkingFeatures . altNameMaxDice	42
+LLCSurfaceEntityLinkingFeatures . diceTestAlignedWord	43
+UMassNoNLPEntityLinkingFeatures . exactMatchBool_anchor-exact	44
+UMassNoNLPEntityLinkingFeatures . altnameMinEditDistance	45
+UMassNoNLPEntityLinkingFeatures . linkProb	46
+UMassNoNLPEntityLinkingFeatures . exactMatchBool_redirect-exact	47
+UMassNoNLPEntityLinkingFeatures . fieldProbability_redirect	48
+UMassNoNLPEntityLinkingFeatures . jaccardFeature-doc	49
+UMassNoNLPEntityLinkingFeatures . klfFeature-doc	50
+LLCSurfaceEntityLinkingFeatures . diceTestFullCharacter	51
+UMassNoNLPEntityLinkingFeatures . altNameContains	52
+UMassNoNLPEntityLinkingFeatures . stanfExternalinlinks	53
+UMassNoNLPEntityLinkingFeatures . editDistance norm	54
+UMassNoNLPEntityLinkingFeatures . exactMatchCount_redirect-exact	55
+LLCSurfaceEntityLinkingFeatures . WEAK_ALIAS	56
+UMassNoNLPEntityLinkingFeatures . wordMiss norm	57
+GalagoEntityLinkingFeatures . galagoscore	58
+UMassNoNLPEntityLinkingFeatures . fieldLikelihood_anchor	59

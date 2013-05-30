@@ -16,11 +16,14 @@ import scala.collection.mutable.HashMap
 import cc.refectorie.user.dietz.tacco.entitylinking.loader.TextNormalizer
 import cc.factorie.app.strings.Stopwords
 import scala.collection.mutable.ListBuffer
+import cc.refectorie.user.dietz.tacco.data.BookELQueryImpl
 
 object TEIAnnotator {
 
       val linker = new BooksEntityLinker
      
+      var text = ""
+        
        def main(args: Array[String]) {
        	   if (args.length < 1) {
 	      println("Usage: scala TEIAnnotator inputFile outputFile")
@@ -34,6 +37,10 @@ object TEIAnnotator {
     println("Starting to process input file: " + input_filename)
     val input = new java.io.InputStreamReader(new GZIPInputStream(new FileInputStream(input_filename)))
     var data = XML.load(reader = input)
+    
+    
+    text = (data \\ "w" \\ "@form").map(t => t.text).mkString(" ")
+    
 //    var entities = data \\ "name"
 //    val bookId = input_filename.split("/").last.split("_")(0)
 //    
@@ -144,11 +151,12 @@ def mapMetaData(m: MetaData)(f: GenAttr => GenAttr): MetaData =
          if (cleanQuery.trim().length() < 4) {
            "IGNORE"
          } else {
-           val query = BookELQueryImpl(docId = bookId, enttype = e.attribute("type").get.text, queryId = bookId, name = cleanQuery, contextTerms =  Seq[String]())
+           val query = BookELQueryImpl(docId = bookId, enttype = e.attribute("type").get.text, 
+               queryId = bookId, name = cleanQuery, context =  Seq[String](), text=text, nerContext=Seq(), contextTokens=Seq())
                    println("Linking query: " + query.name)
                    val annotation = linker.link(query)
-                   if (annotation.length > 0) {
-                       annotation.head.title
+                   if (annotation != None) {
+                       annotation.head.docId
                    } else {
                      "NIL"
                    }
