@@ -1,0 +1,12 @@
+package ciir.proteus.types;
+
+type IndexLink {
+     bytes id;
+     int pos;
+     String srctype;
+     String targetid;
+     int targetpos;
+     String targettype;
+
+     order: +srctype +targettype +id +targetid +targetpos;
+};
