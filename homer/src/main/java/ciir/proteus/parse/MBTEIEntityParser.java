@@ -1,5 +1,4 @@
-// BSD License (http://lemurproject.org/galago-license)
-package org.lemurproject.galago.core.parse;
+package ciir.proteus.parse;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +6,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 import javax.xml.stream.XMLStreamConstants;
+import org.lemurproject.galago.core.parse.Document;
+import org.lemurproject.galago.core.parse.StringPooler;
+import org.lemurproject.galago.core.parse.TagTokenizer;
 import org.lemurproject.galago.core.types.DocumentSplit;
+import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
 // Fundamentally operates differently than the book and page parsers,
@@ -16,7 +19,7 @@ import org.lemurproject.galago.tupleflow.Utility;
 // Assumptions
 // - Names cannot be nested
 class MBTEIEntityParser extends MBTEIParserBase {
-    public static final int WINDOW_SIZE = 30; 
+    public static final int WINDOW_SIZE = 30;
     Pattern pageBreakTag = Pattern.compile("pb");
     protected StringPooler pooler = new StringPooler();
     class Context {
@@ -36,7 +39,7 @@ class MBTEIEntityParser extends MBTEIParserBase {
 	String externalLink;
 	List<String> tokens;
 	int numTrailingWords;
-    }   
+    }
 
     // number of words before and after a name tag to associate
     public LinkedList<String> slidingWindow;
@@ -46,12 +49,12 @@ class MBTEIEntityParser extends MBTEIParserBase {
     int pageNumber = 0;
     int pagePosition = 0;
 
-    public MBTEIEntityParser(DocumentSplit split, InputStream is) {
-	super(split, is);
+    public MBTEIEntityParser(DocumentSplit split, Parameters p) {
+	super(split, p);
 	openContexts = new LinkedList<Context>();
 	slidingWindow = new LinkedList<String>();
 	S0();
-    } 
+    }
 
     // Override to check for "finished" documents (contexts)
     // before moving on. This handles a case where two contexts
@@ -77,7 +80,7 @@ class MBTEIEntityParser extends MBTEIParserBase {
     public void moveToS1(int ignored) {
 	echo(XMLStreamConstants.START_ELEMENT);
 	clearStartElementActions();
-	
+
 	addStartElementAction(wordTag, "updateContexts");
 	addStartElementAction(nameTag, "openNewContext");
 	addEndElementAction(textTag, "removeActionsAndEmit");
@@ -122,14 +125,14 @@ class MBTEIEntityParser extends MBTEIParserBase {
 	while (slidingWindow.size() > WINDOW_SIZE) {
 	    slidingWindow.poll();
 	}
-	
+
 	for (Context c : openContexts) {
 	    c.tokens.add(scrubbed);
 	    --c.numTrailingWords;
 	}
 
 	// Finally check for a finished context
-	if (openContexts.size() > 0 && 
+	if (openContexts.size() > 0 &&
 	    openContexts.peek().numTrailingWords == 0) {
 	    buildDocument();
 	}
@@ -173,7 +176,7 @@ class MBTEIEntityParser extends MBTEIParserBase {
 		c.numTrailingWords = 0;
 	    }
 	    // immediately put a document up
-	    buildDocument();	    
+	    buildDocument();
 	}
     }
 }

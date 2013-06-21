@@ -27,7 +27,7 @@
   </scm>
   <properties>
     <skipTests>false</skipTests>
-  </properties> 
+  </properties>
   <reporting>
     <plugins>
       <plugin>
@@ -70,7 +70,7 @@
       <site>
 	<id>lemur.sf.net</id>
 	<name>Lemur Repository</name>
-	<url>scp://shell.sourceforge.net/home/project-web/lemur/htdocs/repo/${project.name}</url>	
+	<url>scp://shell.sourceforge.net/home/project-web/lemur/htdocs/repo/${project.name}</url>
       </site>
     </distributionManagement>
   <repositories>
@@ -99,6 +99,11 @@
     </repository>
   </repositories>
   <dependencies>
+    <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr4-runtime</artifactId>
+      <version>4.0</version>
+    </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
@@ -168,6 +173,18 @@
   </dependencies>
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-maven-plugin</artifactId>
+        <version>4.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>antlr4</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <version>2.7.1</version>
         <artifactId>maven-surefire-plugin</artifactId>

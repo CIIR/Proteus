@@ -1,5 +1,4 @@
-// BSD License (http://lemurproject.org/galago-license)
-package org.lemurproject.galago.core.tools;
+package ciir.proteus.jobs;
 
 import java.io.IOException;
 import java.io.File;
@@ -8,7 +7,6 @@ import java.util.List;
 import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.tupleflow.Order;
-import org.lemurproject.galago.core.tools.App.AppFunction;
 import org.lemurproject.galago.tupleflow.execution.ConnectionAssignmentType;
 import org.lemurproject.galago.tupleflow.execution.InputStep;
 import org.lemurproject.galago.tupleflow.execution.Job;
@@ -20,10 +18,12 @@ import org.lemurproject.galago.core.types.DocumentSplit;
 import org.lemurproject.galago.core.types.WordDateCount;
 import org.lemurproject.galago.core.index.WordDateCountWriter;
 import org.lemurproject.galago.core.parse.*;
+import org.lemurproject.galago.core.tools.*;
+import org.lemurproject.galago.core.tools.apps.*;
 
 public class BuildWordDateIndex extends AppFunction {
 
-    public Stage getGenerateWordDatesStage(String name, 
+    public Stage getGenerateWordDatesStage(String name,
 					   String inStream,
 					   String outStream,
 					   Parameters p) {
@@ -54,12 +54,12 @@ public class BuildWordDateIndex extends AppFunction {
 
     public Job getWordDateJob(Parameters jobParameters) throws Exception {
 	Job job = new Job();
-	
+
 	String wdPath = jobParameters.getString("indexPath");
 	File manifest = new File(wdPath, "buildManifest.json");
 	Utility.makeParentDirectories(manifest);
 	Utility.copyStringToFile(jobParameters.toPrettyString(), manifest);
-	
+
 	List<String> inputPaths = jobParameters.getAsList("inputPath");
 	Parameters splitParameters = jobParameters.get("parser", new Parameters()).clone();
 	job.add(BuildStageTemplates.getSplitStage(inputPaths,
@@ -86,15 +86,19 @@ public class BuildWordDateIndex extends AppFunction {
 	  output.println(getHelpString());
 	  return;
       }
-      
+
       Job job;
       BuildWordDateIndex dIndex = new BuildWordDateIndex();
       job = dIndex.getWordDateJob(p);
-      
+
       if (job != null) {
-	  App.runTupleFlowJob(job, p, output);
+	  AppFunction.runTupleFlowJob(job, p, output);
       }
   }
+
+    public String getName() {
+	return "build-word-dates";
+    }
 
   @Override
   public String getHelpString() {
@@ -105,6 +109,6 @@ public class BuildWordDateIndex extends AppFunction {
             + "          arc (Heritrix), warc, trectext, trecweb and corpus files.\n"
             + "          Files may be gzip compressed (.gz|.bz).\n"
 	    + "<dir>:    The directory path for the produced pictures.\n\n"
-            + App.getTupleFlowParameterString();
+            + AppFunction.getTupleFlowParameterString();
   }
 }

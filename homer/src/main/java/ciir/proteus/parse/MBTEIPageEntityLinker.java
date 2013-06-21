@@ -1,5 +1,4 @@
-// BSD License (http://lemurproject.org/galago-license)
-package org.lemurproject.galago.core.parse;
+package ciir.proteus.parse;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +14,10 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.util.StreamReaderDelegate;
 import org.lemurproject.galago.core.types.DocumentSplit;
+import org.lemurproject.galago.tupleflow.Parameters;
+
+import org.lemurproject.galago.core.parse.Document;
+import org.lemurproject.galago.core.parse.Tag;
 
 class MBTEIPageEntityLinker extends MBTEIParserBase {
     LinkedList<Document> entitiesInScope;
@@ -26,8 +29,8 @@ class MBTEIPageEntityLinker extends MBTEIParserBase {
     LinkedList<Document> finishedDocumentQueue;
     Pattern pageBreakTag = Pattern.compile("pb");
 
-    public MBTEIPageEntityLinker(DocumentSplit split, InputStream is) {
-	super(split, is);
+    public MBTEIPageEntityLinker(DocumentSplit split, Parameters p) {
+	super(split, p);
 	S0();
 	entitiesInScope = new LinkedList<Document>();
 	bookLinks = new Document();
@@ -49,7 +52,7 @@ class MBTEIPageEntityLinker extends MBTEIParserBase {
 	    return null;
 	}
     }
-    
+
     @Override
     protected boolean documentReady() {
 	return finishedDocumentQueue.size() > 0;
@@ -64,7 +67,7 @@ class MBTEIPageEntityLinker extends MBTEIParserBase {
 
 	// Last page if needed
 	if (pageLinks != null) {
-	    emitLinks(pageLinks);	    
+	    emitLinks(pageLinks);
 	}
 
 	// Finally emit links for the whole book.
@@ -95,17 +98,17 @@ class MBTEIPageEntityLinker extends MBTEIParserBase {
 	attributes.put("type", innerType);
 	attributes.put("pos", Integer.toString(pagePosition));
 	Tag pageLink = new Tag(String.format("%s-LINK", innerType.toUpperCase()),
-			       attributes, 
-			       pagePosition, 
+			       attributes,
+			       pagePosition,
 			       pagePosition+length);
 	pageLinks.tags.add(pageLink);
 	updateInterEntityLinks(identifier, innerType, bookPosition, length);
 	Tag bookLink = new Tag(String.format("%s-LINK", innerType.toUpperCase()),
-			       null, 
-			       bookPosition, 
+			       null,
+			       bookPosition,
 			       bookPosition+length);
 	// Make a deep copy of the attributes and then replace entries.
-	// It's wasteful, but it makes the mapping between documents and tags 
+	// It's wasteful, but it makes the mapping between documents and tags
 	// and links less painful.
 	bookLink.attributes = new HashMap<String, String>();
 	bookLink.attributes.putAll(attributes);
@@ -113,7 +116,7 @@ class MBTEIPageEntityLinker extends MBTEIParserBase {
 	bookLinks.tags.add(bookLink);
     }
 
-    public void updateInterEntityLinks(String identifier, 
+    public void updateInterEntityLinks(String identifier,
 				       String type,
 				       int position,
 				       int length) {
@@ -129,7 +132,7 @@ class MBTEIPageEntityLinker extends MBTEIParserBase {
 	for (Document scopedEntity : entitiesInScope) {
 	    scopedEntity.tags.add(entityLink);
 	}
-				 
+
 	// Add it into the open scope
 	Document entityDocument = new Document();
 	entityDocument.name = String.format("%s-LINK", type);
@@ -161,8 +164,8 @@ class MBTEIPageEntityLinker extends MBTEIParserBase {
 	}
 	pageNumber = reader.getAttributeValue(null, "n");
 	pagePosition = 0;
-	String pageId = String.format("%s_%s", 
-				      getArchiveIdentifier(), 
+	String pageId = String.format("%s_%s",
+				      getArchiveIdentifier(),
 				      pageNumber);
 	pageLinks = new Document();
 	pageLinks.name = "PAGE-LINK";
@@ -176,8 +179,8 @@ class MBTEIPageEntityLinker extends MBTEIParserBase {
 	attributes.put("id", pageId);
 	attributes.put("type", "page");
 	attributes.put("pos", Integer.toString(bookPosition));
-	Tag pageToBookLink = new Tag("PAGE-LINK", 
-				     attributes, 
+	Tag pageToBookLink = new Tag("PAGE-LINK",
+				     attributes,
 				     bookPosition,
 				     bookPosition);
 	bookLinks.tags.add(pageToBookLink);

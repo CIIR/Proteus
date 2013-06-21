@@ -1,19 +1,18 @@
-// BSD License (http://lemurproject.org/galago-license)
-package org.lemurproject.galago.core.tools;
+package ciir.proteus.jobs;
 
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import org.lemurproject.galago.core.index.PictureStoreWriter;
-import org.lemurproject.galago.core.index.PictureDocumentWriter;
+
+import ciir.proteus.index.*;
+import ciir.proteus.parse.*;
+import ciir.proteus.types.PictureOccurrence;
 import org.lemurproject.galago.core.parse.DocumentSource;
-import org.lemurproject.galago.core.parse.PictureDocumentSerializer;
-import org.lemurproject.galago.core.parse.PictureOccurrenceGenerator;
-import org.lemurproject.galago.core.tools.App.AppFunction;
+import org.lemurproject.galago.core.tools.AppFunction;
+import org.lemurproject.galago.core.tools.BuildStageTemplates;
 import org.lemurproject.galago.core.types.DocumentSplit;
-import org.lemurproject.galago.core.types.PictureOccurrence;
 import org.lemurproject.galago.core.types.KeyValuePair;
 import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
@@ -36,7 +35,7 @@ public class BuildPictureStore extends AppFunction {
 	stage.addInput(inStream, new DocumentSplit.FileIdOrder());
 	stage.addOutput(outStream, new PictureOccurrence.IdOrdinalTopLeftOrder());
 	stage.addOutput(outStream+"-docs", new KeyValuePair.KeyOrder());
-	
+
 	stage.add(new InputStep(inStream));
 	stage.add(BuildStageTemplates.getParserStep(parameters));
 
@@ -46,13 +45,13 @@ public class BuildPictureStore extends AppFunction {
 	writeDocuments.add(new Step(PictureDocumentSerializer.class, parameters));
 	writeDocuments.add(Utility.getSorter(new KeyValuePair.KeyOrder()));
 	writeDocuments.add(new OutputStep(outStream+"-docs"));
-	fork.groups.add(writeDocuments);
+	fork.addGroup(writeDocuments);
 
 	ArrayList<Step> outputOccurrences = new ArrayList<Step>();
 	outputOccurrences.add(new Step(PictureOccurrenceGenerator.class));
 	outputOccurrences.add(Utility.getSorter(new PictureOccurrence.IdOrdinalTopLeftOrder()));
 	outputOccurrences.add(new OutputStep(outStream));
-	fork.groups.add(outputOccurrences);
+	fork.addGroup(outputOccurrences);
 
 	stage.add(fork);
 	return stage;
@@ -81,14 +80,14 @@ public class BuildPictureStore extends AppFunction {
 
   public Job getPicturesJob(Parameters jobParameters) throws Exception {
       Job job = new Job();
-      
+
       String picturesPath = jobParameters.getString("picturesPath");
       File manifest = new File(picturesPath, "buildManifest.json");
       Utility.makeParentDirectories(manifest);
       Utility.copyStringToFile(jobParameters.toPrettyString(), manifest);
 
       List<String> inputPaths = jobParameters.getAsList("inputPath");
-      Parameters splitParameters = jobParameters.get("parser", new Parameters()).clone();
+      Parameters splitParameters = jobParameters.getMap("parser").clone();
       job.add(BuildStageTemplates.getSplitStage(inputPaths,
 						DocumentSource.class,
 						new DocumentSplit.FileIdOrder(),
@@ -117,14 +116,18 @@ public class BuildPictureStore extends AppFunction {
 	  output.println(getHelpString());
 	  return;
       }
-           
+
     Job job;
     BuildPictureStore pStore = new BuildPictureStore();
     job = pStore.getPicturesJob(p);
 
     if (job != null) {
-	App.runTupleFlowJob(job, p, output);
+	AppFunction.runTupleFlowJob(job, p, output);
     }
+  }
+
+  public String getName() {
+      return "build-pictures";
   }
 
   @Override
@@ -136,6 +139,6 @@ public class BuildPictureStore extends AppFunction {
             + "          arc (Heritrix), warc, trectext, trecweb and corpus files.\n"
             + "          Files may be gzip compressed (.gz|.bz).\n"
 	    + "<dir>:    The directory path for the produced pictures.\n\n"
-            + App.getTupleFlowParameterString();
+            + AppFunction.getTupleFlowParameterString();
   }
 }

@@ -2,10 +2,12 @@ package ciir.proteus.index;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import org.lemurproject.galago.core.index.BTreeFactory;
+import org.lemurproject.galago.core.index.BTreeReader;
 import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
-import ciir.proteus.galago.thrift.IndexLink;
+import ciir.proteus.thrift.IndexLink;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;

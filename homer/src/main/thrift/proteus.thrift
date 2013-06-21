@@ -4,7 +4,7 @@
 // - LookupResponse
 // - TransformRequest
 // - TransformResponse
-namespace java ciir.proteus
+namespace java ciir.proteus.thrift
 
 // The Core Proteus Types
 enum ProteusType {
@@ -23,7 +23,7 @@ enum ProteusType {
 // Specify containment
 // A mapping of objects to what objects may contain them. A reverse mapping
 // of 'contains', defined below.
-const map<string, list<string> > isContainedBy = { 
+const map<string, list<string> > isContainedBy = {
   "page" : [ "collection" ],
   "picture" : [ "page", "collection" ],
   "video" : [ "page", "collection" ],
@@ -40,7 +40,7 @@ const map<string, list<string> > isContainedBy = {
 // and so on.
 //
 // Note that we define "contains" w.r.t. the modality in question,
-// for example an audio object may contain persons, locations, but 
+// for example an audio object may contain persons, locations, but
 // in the sense of them being mentioned, whereas a page would contain
 // the text of those entities.
 const map<string, list<string>> contains = {
@@ -115,7 +115,7 @@ struct TermList {
 }
 
 // This IS a posting list, but as map entries.
-struct PrefixedTermMap {  
+struct PrefixedTermMap {
   1: map<string, TermList> term_lists
 }
 
@@ -260,7 +260,7 @@ struct ProteusObject {
   17: optional Organization organization,
   18: optional Topic topic,
   19: optional WikipediaEntity external_entity
-    
+
   // Leave room for Jeff to expand
   50: optional list<KeywordsInContext> contexts
 }
@@ -331,7 +331,7 @@ struct CollectionInfo {
  3: i64 vocab_size,
  4: i64 num_tokens,
  5: list<string> fields,
-} 
+}
 
 struct LinkInfo {
  1: ProteusType src,

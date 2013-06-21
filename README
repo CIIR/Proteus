@@ -1,13 +1,14 @@
 Cronos - Code for temporal language modeling
 Pharos - Named entity recognition and linking
-Temporal - Some exploratory work on temporal data mining 
+Temporal - Some exploratory work on temporal data mining
 Phokas - Wrap book text in <strike>putrid sealskin</strike> TEI XML
 Morpheus - New front-end web service using the Scalatra lightweight router, and Scalate for templating.
 Aura - New proteus service using finagle/thrift
+Homer - Subproject built to contain all the indexing code necessary for Proteus. Uses Galago 3.5
 
 Morpheus and Aura:
 These two subprojects compose a single SBT subproject.  All dependencies and settings for each are
-contained in the root project directory, in ProteusBuild.scala (if you'd like to "t" search it). 
+contained in the root project directory, in ProteusBuild.scala (if you'd like to "t" search it).
 To compile the thrift code:
 from root directory enter sbt
 >> project aura
@@ -32,7 +33,7 @@ GOTCHAS
 
   To configure what port the web server itself serves from, see morpheus/build.sbt.
   To configure what hosts/ports the ProteusServlet inside morpheus listens to, look
-  at morpheus/src/main/scala/Scalatra.scala. 
+  at morpheus/src/main/scala/Scalatra.scala.
 
 NAMES TO USE
 ====

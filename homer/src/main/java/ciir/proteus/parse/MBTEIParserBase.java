@@ -1,5 +1,4 @@
-// BSD License (http://lemurproject.org/galago-license)
-package org.lemurproject.galago.core.parse;
+package ciir.proteus.parse;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,13 +11,16 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.util.StreamReaderDelegate;
+import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.types.DocumentSplit;
+import org.lemurproject.galago.core.parse.DocumentStreamParser;
+import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
 /**
  * Generic superclass for dealing with events.
  * You can instantiate this and run it, but it will do nothing.
- * Subclass and use the provided methods to set actions to 
+ * Subclass and use the provided methods to set actions to
  * process start/end and character events in the XML stream.
  * Attributes should be handled while handling the start event
  * that the attributes are inside.
@@ -30,7 +32,7 @@ import org.lemurproject.galago.tupleflow.Utility;
  *
  * Methods that can serve as actions must fit one of the following
  * signatures:
- * 
+ *
  * - public void methodName(int eventType);
  * - public void methodName(int eventType, Pattern matchingPattern);
  *
@@ -40,7 +42,7 @@ import org.lemurproject.galago.tupleflow.Utility;
  *
  * @author irmarc
  */
-abstract class MBTEIParserBase implements DocumentStreamParser {
+abstract class MBTEIParserBase extends DocumentStreamParser {
     // For XML stream processing
     protected StreamReaderDelegate reader;
     protected XMLInputFactory factory;
@@ -69,9 +71,11 @@ abstract class MBTEIParserBase implements DocumentStreamParser {
     protected HashSet<String> stopwords;
     protected Document parsedDocument;
     protected StringBuilder buffer;
- 
-    public MBTEIParserBase(DocumentSplit split, InputStream is) {
+
+    public MBTEIParserBase(DocumentSplit split, Parameters p) {
+	super(split, p); // DUMB call...
 	try {
+	    InputStream is = getBufferedInputStream(split);
 	    this.split = split;
 	    System.out.printf("Processing split: %s\n", split.fileName);
 	    startElementActions = new LinkedList<Action>();
@@ -79,8 +83,8 @@ abstract class MBTEIParserBase implements DocumentStreamParser {
 	    factory = XMLInputFactory.newInstance();
 	    factory.setProperty(XMLInputFactory.IS_COALESCING, true);
 	    reader = new StreamReaderDelegate(factory.createXMLStreamReader(is));
-	    stopwords = 
-		Utility.readStreamToStringSet(getClass().getResourceAsStream("/stopwords/inquery"));	    
+	    stopwords =
+		Utility.readStreamToStringSet(getClass().getResourceAsStream("/stopwords/inquery"));
 	} catch (Exception e) {
 	    System.err.printf("SKIPPING %s: Caught exception %s\n", split.fileName, e.getMessage());
 	    reader = null;
@@ -119,7 +123,7 @@ abstract class MBTEIParserBase implements DocumentStreamParser {
 	    throw new IllegalArgumentException(e);
 	}
     }
-    
+
     protected void clearStartElementActions() {
 	startElementActions.clear();
     }
@@ -240,12 +244,12 @@ abstract class MBTEIParserBase implements DocumentStreamParser {
 	int status;
 	parsedDocument = null;
 	buffer = new StringBuilder();
-	
+
 	// Try to be pre-emptive
 	if (documentReady()) {
 	    return getParsedDocument();
 	}
-      
+
 	try {
 	    // If the reader is empty, then nothing to do.
 	    if (!reader.hasNext()) {
@@ -259,35 +263,35 @@ abstract class MBTEIParserBase implements DocumentStreamParser {
 		    for (Action a : startElementActions) {
 			if (a.labelRE.matcher(label).matches()) {
 			    switch (a.arity) {
-			    case 1: 
-				a.todo.invoke(this, status); 
+			    case 1:
+				a.todo.invoke(this, status);
 				break;
-			    case 2: 
-				a.todo.invoke(this, status, a.labelRE); 
+			    case 2:
+				a.todo.invoke(this, status, a.labelRE);
 				break;
 			    }
 			    break;
 			}
 		    }
 		}
-		    break;		
+		    break;
 		case XMLStreamConstants.END_ELEMENT: {
 		    String label = reader.getLocalName();
 		    for (Action a : endElementActions) {
 			if (a.labelRE.matcher(label).matches()) {
 			    switch (a.arity) {
-			    case 1: 
-				a.todo.invoke(this, status); 
+			    case 1:
+				a.todo.invoke(this, status);
 				break;
-			    case 2: 
-				a.todo.invoke(this, status, a.labelRE); 
+			    case 2:
+				a.todo.invoke(this, status, a.labelRE);
 				break;
 			    }
 			    break;
 			}
 		    }
 		}
-		    break;		    
+		    break;
 		case XMLStreamConstants.CHARACTERS: {
 		    if (charactersAction != null) {
 			charactersAction.invoke(this, status);
@@ -306,13 +310,13 @@ abstract class MBTEIParserBase implements DocumentStreamParser {
 	    // the buffer is non-empty, try to emit the
 	    // last document.
 	    if (!reader.hasNext()) {
-		cleanup();		
+		cleanup();
 	    }
 
 	    return getParsedDocument();
 	} catch (Exception e) {
-	    System.err.printf("EXCEPTION [%s,%s]: %s\n", 
-			      getArchiveIdentifier(), 
+	    System.err.printf("EXCEPTION [%s,%s]: %s\n",
+			      getArchiveIdentifier(),
 			      buffer.toString(),
 			      e.getMessage());
 	    e.printStackTrace(System.err);
@@ -323,11 +327,11 @@ abstract class MBTEIParserBase implements DocumentStreamParser {
     protected Document getParsedDocument() {
 	return parsedDocument;
     }
-    
+
     protected boolean documentReady() {
 	return (parsedDocument != null);
     }
-    
+
     @Override
     public void close() throws IOException {
 	if (reader != null) {
@@ -429,7 +433,7 @@ abstract class MBTEIParserBase implements DocumentStreamParser {
 	cleaned = cleaned.replaceAll("(-LRB-|-RRB-)", "");
 	return cleaned.trim();
     }
-    
+
     public String getArchiveIdentifier() {
 	File f = new File(split.fileName);
 	String basename = f.getName();

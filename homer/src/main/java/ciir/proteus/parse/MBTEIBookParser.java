@@ -1,5 +1,4 @@
-// BSD License (http://lemurproject.org/galago-license)
-package org.lemurproject.galago.core.parse;
+package ciir.proteus.parse;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +12,9 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.util.StreamReaderDelegate;
+import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.types.DocumentSplit;
+import org.lemurproject.galago.tupleflow.Parameters;
 
 /**
  * STATES:
@@ -21,7 +22,7 @@ import org.lemurproject.galago.core.types.DocumentSplit;
  * S0 = starting state. Reads in header information. Stay in this state until
  * you see the "text" open tag, then head to S1.
  *
- * S1 = "w" tags trigger a read from the "form" attribute, which is the 
+ * S1 = "w" tags trigger a read from the "form" attribute, which is the
  *          outputted string.
  *      "name" opening and closing tags are echoed to the output string.
  *      "text" and "TEI" closing tags are also echoed to the output.
@@ -36,8 +37,8 @@ class MBTEIBookParser extends MBTEIParserBase {
     String currentMetaTag = null;
     StringBuilder tagBuilder;
 
-    public MBTEIBookParser(DocumentSplit split, InputStream is) {
-	super(split, is);
+    public MBTEIBookParser(DocumentSplit split, Parameters p) {
+	super(split, p);
 	// set up to parse the header
 	metadata = new HashMap<String, String>();
 	S0();
@@ -85,7 +86,7 @@ class MBTEIBookParser extends MBTEIParserBase {
     public void transformNameTag(int event) {
 	switch (event) {
 	case XMLStreamConstants.START_ELEMENT:
-	    String entityType = reader.getAttributeValue(null, "type").toLowerCase(); 
+	    String entityType = reader.getAttributeValue(null, "type").toLowerCase();
 	    buffer.append("<").append(entityType).append(">");
 	    lastSeenNameTag = entityType;
 	    break;
@@ -105,7 +106,7 @@ class MBTEIBookParser extends MBTEIParserBase {
     public void captureMetadata(int ignored) {
 	currentMetaTag = reader.getLocalName();
 	tagBuilder = new StringBuilder();
-    } 
+    }
 
     public void stopCaptureMetadata(int ignored) {
 	if (currentMetaTag != null && tagBuilder != null) {
@@ -123,16 +124,16 @@ class MBTEIBookParser extends MBTEIParserBase {
 	}
     }
 
-    // This should only be called once but there isn't really a way 
+    // This should only be called once but there isn't really a way
     // to handle that gracefully other than removing all the handlers.
     public void emitFinalDocument(int ignored) {
 	if (contentLength > 0) {
 	    // Echo "</tei>" or whatever it is.
-	    echo(XMLStreamConstants.END_ELEMENT);		
-	    
+	    echo(XMLStreamConstants.END_ELEMENT);
+
 	    //StringBuilder documentContent = new StringBuilder(header);
 	    String bookIdentifier = getArchiveIdentifier();
-	    parsedDocument = new Document(bookIdentifier, 
+	    parsedDocument = new Document(bookIdentifier,
 					  buffer.toString().trim());
 	    parsedDocument.metadata = metadata;
 	}

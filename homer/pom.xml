@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.lemurproject.galago</groupId>
-  <artifactId>core</artifactId>
+  <groupId>ciir.proteus</groupId>
+  <artifactId>homer</artifactId>
+  <version>0.2</version>
   <packaging>jar</packaging>
-  <version>3.5</version>
-  <name>core</name>
+  <name>homer</name>
   <url>http://github.com/CIIR/Proteus</url>
   <description>
     Contains Tupleflow parsing and indexing code extensions for dealing
@@ -36,6 +36,12 @@
       </plugin>
     </plugins>
   </reporting>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>dtrott</id>
+      <url>http://maven.davidtrott.com/repository</url>
+    </pluginRepository>
+  </pluginRepositories>
   <repositories>
     <repository>
       <id>CIIR</id>
@@ -48,9 +54,14 @@
   </repositories>
   <dependencies>
     <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.2.2</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.thrift</groupId>
       <artifactId>libthrift</artifactId>
-      <version>0.8.0</version>
+      <version>0.9.0</version>
     </dependency>
     <dependency>
       <groupId>net.sf.trove4j</groupId>
@@ -143,6 +154,52 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+	<groupId>org.apache.thrift.tools</groupId>
+	<artifactId>maven-thrift-plugin</artifactId>
+	<version>0.1.10</version>
+        <executions>
+          <execution>
+            <id>thrift-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>thrift-test-sources</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!--
+      <plugin>
+        <groupId>com.twitter</groupId>
+        <artifactId>scrooge-maven-plugin</artifactId>
+        <version>3.1.9</version>
+        <configuration>
+          <language>java</language>
+        </configuration>
+        <executions>
+          <execution>
+            <id>thrift-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>thrift-test-sources</id>
+            <phase>generate-test-sources</phase>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin> -->
     </plugins>
   </build>
 </project>

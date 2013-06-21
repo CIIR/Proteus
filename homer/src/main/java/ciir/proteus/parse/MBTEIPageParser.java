@@ -1,5 +1,4 @@
-// BSD License (http://lemurproject.org/galago-license)
-package org.lemurproject.galago.core.parse;
+package ciir.proteus.parse;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +8,9 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.util.StreamReaderDelegate;
+import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.types.DocumentSplit;
+import org.lemurproject.galago.tupleflow.Parameters;
 
 /**
  * STATES:
@@ -17,7 +18,7 @@ import org.lemurproject.galago.core.types.DocumentSplit;
  * S0 = starting state. Reads in header information. Stay in this state until
  * you see the "text" open tag, then head to S1.
  *
- * S1 = "w" tags trigger a read from the "form" attribute, which is the 
+ * S1 = "w" tags trigger a read from the "form" attribute, which is the
  *          outputted string.
  *      "pb" open tag triggers a document emission unless there's no content.
  *      "name" opening and closing tags are echoed to the output string.
@@ -29,9 +30,9 @@ import org.lemurproject.galago.core.types.DocumentSplit;
 class MBTEIPageParser extends MBTEIBookParser {
     Pattern pageBreakTag = Pattern.compile("pb");
     String pageNumber;
-    
-    public MBTEIPageParser(DocumentSplit split, InputStream is) {
-	super(split, is);
+
+    public MBTEIPageParser(DocumentSplit split, Parameters p) {
+	super(split, p);
 	// set up to parse the header
     }
 
@@ -68,7 +69,7 @@ class MBTEIPageParser extends MBTEIBookParser {
 	String documentIdentifier = String.format("%s_%s",
 						  getArchiveIdentifier(),
 						  pageNumber);
-	parsedDocument = new Document(documentIdentifier, 
+	parsedDocument = new Document(documentIdentifier,
 				      documentContent.toString());
 	parsedDocument.metadata = metadata;
 	contentLength = 0;

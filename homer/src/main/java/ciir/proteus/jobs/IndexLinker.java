@@ -1,15 +1,13 @@
-// BSD License (http://lemurproject.org/galago-license)
-package org.lemurproject.galago.core.tools;
+package ciir.proteus.jobs;
 
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import org.lemurproject.galago.core.index.IndexLinkWriter;
+import ciir.proteus.index.IndexLinkWriter;
 import org.lemurproject.galago.core.parse.DocumentSource;
 import org.lemurproject.galago.core.parse.IndexLinkGenerator;
-import org.lemurproject.galago.core.tools.App.AppFunction;
 import org.lemurproject.galago.core.types.DocumentSplit;
 import org.lemurproject.galago.core.types.IndexLink;
 import org.lemurproject.galago.tupleflow.Parameters;
@@ -21,6 +19,8 @@ import org.lemurproject.galago.tupleflow.execution.Job;
 import org.lemurproject.galago.tupleflow.execution.OutputStep;
 import org.lemurproject.galago.tupleflow.execution.Stage;
 import org.lemurproject.galago.tupleflow.execution.Step;
+import org.lemurproject.galago.core.tools.*;
+import org.lemurproject.galago.core.tools.apps.*;
 
 public class IndexLinker extends AppFunction {
 
@@ -54,7 +54,7 @@ public class IndexLinker extends AppFunction {
 
   public Job getLinkJob(Parameters jobParameters) throws Exception {
       Job job = new Job();
-      
+
       String linksPath = jobParameters.getString("linksPath");
       File manifest = new File(linksPath, "buildManifest.json");
       Utility.makeParentDirectories(manifest);
@@ -84,14 +84,18 @@ public class IndexLinker extends AppFunction {
 	  output.println(getHelpString());
 	  return;
       }
-           
+
     Job job;
     IndexLinker linker = new IndexLinker();
     job = linker.getLinkJob(p);
 
     if (job != null) {
-	App.runTupleFlowJob(job, p, output);
+	AppFunction.runTupleFlowJob(job, p, output);
     }
+  }
+
+  public String getName() {
+      return "link-indexes";
   }
 
   @Override
@@ -103,7 +107,7 @@ public class IndexLinker extends AppFunction {
             + "          arc (Heritrix), warc, trectext, trecweb and corpus files.\n"
             + "          Files may be gzip compressed (.gz|.bz).\n"
 	    + "<dir>:    The directory path for the produced links.\n\n"
-            + App.getTupleFlowParameterString();
+            + AppFunction.getTupleFlowParameterString();
     //TODO: need to design parameters for field indexes + stemming for field indexes
   }
 }

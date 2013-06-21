@@ -1,7 +1,7 @@
-// BSD License (http://lemurproject.org/galago-license)
-package org.lemurproject.galago.core.parse;
+package ciir.proteus.parse;
 
 import java.io.IOException;
+import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.types.KeyValuePair;
 import org.lemurproject.galago.tupleflow.InputClass;
 import org.lemurproject.galago.tupleflow.Parameters;
@@ -11,7 +11,7 @@ import org.lemurproject.galago.tupleflow.TupleFlowParameters;
 import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.tupleflow.execution.Verified;
 
-/** 
+/**
  * @author irmarc
  */
 @Verified
@@ -19,14 +19,12 @@ import org.lemurproject.galago.tupleflow.execution.Verified;
 @OutputClass(className = "org.lemurproject.galago.core.types.KeyValuePair")
 public class PictureDocumentSerializer extends StandardStep<Document, KeyValuePair> {
 
-    Parameters ignored = new Parameters();
-
   @Override
   public void process(Document document) throws IOException {
       String key = String.format("%s_%s",
 				 document.name,
 				 document.metadata.get("ordinal"));
       processor.process(new KeyValuePair(Utility.fromString(key),
-					 Document.serialize(ignored, document)));
+					 Document.serialize(document)));
   }
 }

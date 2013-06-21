@@ -1,6 +1,6 @@
 package ciir.proteus.index;
 
-import ciir.proteus.galago.thrift.Constants;
+import ciir.proteus.thrift.proteusConstants;
 import java.io.IOException;
 import java.io.File;
 import java.io.ByteArrayOutputStream;
@@ -15,7 +15,8 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TIOStreamTransport;
 import org.lemurproject.galago.core.types.IndexLink;
 
-import ciir.proteus.galago.thrift.Target;
+import ciir.proteus.thrift.Target;
+import org.lemurproject.galago.core.index.GenericElement;
 
 import org.lemurproject.galago.tupleflow.InputClass;
 import org.lemurproject.galago.tupleflow.Parameters;
@@ -25,7 +26,7 @@ import org.lemurproject.galago.tupleflow.TupleFlowParameters;
 import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.core.index.disk.DiskBTreeWriter;
 import org.lemurproject.galago.tupleflow.Counter;
-import org.lemurproject.galago.tupleflow.execution.ErrorHandler;
+import org.lemurproject.galago.tupleflow.execution.ErrorStore;
 import org.lemurproject.galago.tupleflow.execution.Verification;
 
 /**
@@ -40,7 +41,7 @@ public class IndexLinkWriter implements Processor<IndexLink> {
     String to;
     String filePrefix;
     Counter linkCounter, listCounter;
-    ciir.proteus.galago.thrift.IndexLink postingList;
+    ciir.proteus.thrift.IndexLink postingList;
     byte[] lastPrimaryKey;
     Parameters parameters;
     TTransport transport;
@@ -94,11 +95,11 @@ public class IndexLinkWriter implements Processor<IndexLink> {
 	    String internalFrom = extToInt.get(link.srctype);
 	    String internalTo = extToInt.get(link.targettype);
 
-	    if (Constants.contains.containsKey(internalFrom) &&
-		Constants.contains.get(internalFrom).contains(internalTo)) {
+	    if (proteusConstants.contains.containsKey(internalFrom) &&
+		proteusConstants.contains.get(internalFrom).contains(internalTo)) {
 		direction = Direction.Has;
-	    } else if (Constants.isContainedBy.containsKey(internalFrom) &&
-		       Constants.isContainedBy.get(internalFrom).contains(internalTo)) {
+	    } else if (proteusConstants.isContainedBy.containsKey(internalFrom) &&
+		       proteusConstants.isContainedBy.get(internalFrom).contains(internalTo)) {
 		direction = Direction.In;
 	    } else {
 		direction = Direction.Near;
@@ -140,7 +141,7 @@ public class IndexLinkWriter implements Processor<IndexLink> {
 		}
 	    }
 	}
-	postingList = new ciir.proteus.galago.thrift.IndexLink();
+	postingList = new ciir.proteus.thrift.IndexLink();
     }
 
     public void process(IndexLink link) throws IOException {
@@ -166,12 +167,12 @@ public class IndexLinkWriter implements Processor<IndexLink> {
 	}
     }
 
-    public static void verify(TupleFlowParameters parameters, ErrorHandler handler) {
+    public static void verify(TupleFlowParameters parameters, ErrorStore store) {
 	if (!parameters.getJSON().isString("filename")) {
-	    handler.addError("IndexLinkWriter requires a 'filename' parameter.");
+	    store.addError("IndexLinkWriter requires a 'filename' parameter.");
 	    return;
 	}
 	String index = parameters.getJSON().getString("filename");
-	Verification.requireWriteableDirectory(index, handler);
+	Verification.requireWriteableDirectory(index, store);
     }
 }

@@ -13,9 +13,9 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TIOStreamTransport;
 import org.lemurproject.galago.core.types.PictureOccurrence;
 
-import ciir.proteus.galago.thrift.Coordinates;
-import ciir.proteus.galago.thrift.Picture;
-import ciir.proteus.galago.thrift.PictureList;
+import ciir.proteus.thrift.Coordinates;
+import ciir.proteus.thrift.Picture;
+import ciir.proteus.thrift.PictureList;
 
 import org.lemurproject.galago.tupleflow.InputClass;
 import org.lemurproject.galago.tupleflow.Parameters;
@@ -24,8 +24,9 @@ import org.lemurproject.galago.tupleflow.FakeParameters;
 import org.lemurproject.galago.tupleflow.TupleFlowParameters;
 import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.core.index.disk.DiskBTreeWriter;
+import org.lemurproject.galago.core.index.GenericElement;
 import org.lemurproject.galago.tupleflow.Counter;
-import org.lemurproject.galago.tupleflow.execution.ErrorHandler;
+import org.lemurproject.galago.tupleflow.execution.ErrorStore;
 import org.lemurproject.galago.tupleflow.execution.Verification;
 
 /**
@@ -106,12 +107,12 @@ public class PictureStoreWriter implements Processor<PictureOccurrence> {
 	}
     }
 
-    public static void verify(TupleFlowParameters parameters, ErrorHandler handler) {
+    public static void verify(TupleFlowParameters parameters, ErrorStore store) {
 	if (!parameters.getJSON().isString("filename")) {
-	    handler.addError("PictureStoreWriter requires a 'filename' parameter.");
+	    store.addError("PictureStoreWriter requires a 'filename' parameter.");
 	    return;
 	}
 	String index = parameters.getJSON().getString("filename");
-	Verification.requireWriteableDirectory(index, handler);
+	Verification.requireWriteableDirectory(index, store);
     }
 }

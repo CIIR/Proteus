@@ -1,4 +1,4 @@
-package org.lemurproject.galago.core.types;
+package ciir.proteus.types;
 
 type PictureOccurrence {
      bytes id;

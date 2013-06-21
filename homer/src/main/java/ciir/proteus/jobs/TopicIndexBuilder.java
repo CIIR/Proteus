@@ -1,5 +1,4 @@
-// BSD License (http://lemurproject.org/galago-license)
-package org.lemurproject.galago.core.tools;
+package ciir.proteus.jobs;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.TBase;
@@ -15,7 +14,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import ciir.proteus.galago.thrift.*;
+import ciir.proteus.thrift.*;
 
 import org.lemurproject.galago.core.types.KeyValuePair;
 import org.lemurproject.galago.core.index.disk.DiskBTreeWriter;
@@ -24,24 +23,29 @@ import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.tupleflow.Processor;
 import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Sorter;
-import org.lemurproject.galago.core.tools.App.AppFunction;
+import org.lemurproject.galago.core.tools.App;
+import org.lemurproject.galago.core.tools.AppFunction;
 import java.io.ByteArrayOutputStream;
 
 /**
  * @author irmarc
  */
 public class TopicIndexBuilder extends AppFunction {
+    public String getName() {
+	return "build-topics";
+    }
+
     public String getHelpString() {
 	return "galago build-topics --input=<path> --output=<path>";
     }
-    
+
     public class KVWriter implements Processor<KeyValuePair> {
 	DiskBTreeWriter destination;
 
 	public KVWriter(String path) throws Exception {
 	    destination = new DiskBTreeWriter(path);
 	}
-	
+
 	public void process(KeyValuePair kvp) throws IOException {
 	    destination.add(new GenericElement(kvp.key, kvp.value));
 	}
@@ -56,7 +60,7 @@ public class TopicIndexBuilder extends AppFunction {
     HashMap<String, TermList> wordsToTopics;
     ByteArrayOutputStream byteStream = new ByteArrayOutputStream(32768);
     TTransport transport = new TIOStreamTransport(byteStream);
-    TCompactProtocol.Factory protocolFactory = new TCompactProtocol.Factory(); 
+    TCompactProtocol.Factory protocolFactory = new TCompactProtocol.Factory();
     public void run(Parameters p, PrintStream output) throws Exception {
 
 	if (p.isMap("pages")) {
@@ -64,7 +68,7 @@ public class TopicIndexBuilder extends AppFunction {
 	    String inputPath = pagesP.getString("input");
 	    String outputPath = pagesP.getString("output");
 	    output.printf("Pages indexing: %s --> %s\n", inputPath, outputPath);
-	    sorter = new Sorter<KeyValuePair>(new KeyValuePair.KeyOrder(), 
+	    sorter = new Sorter<KeyValuePair>(new KeyValuePair.KeyOrder(),
 					      null,
 					      new KVWriter(outputPath));
 	    topicsToPages = new HashMap<String, PrefixedTermMap>();
@@ -87,7 +91,7 @@ public class TopicIndexBuilder extends AppFunction {
 	    String inputPath = wordsP.getString("input");
 	    String outputPath = wordsP.getString("output");
 	    output.printf("Words indexing: %s --> %s\n", inputPath, outputPath);
-	    sorter = new Sorter<KeyValuePair>(new KeyValuePair.KeyOrder(), 
+	    sorter = new Sorter<KeyValuePair>(new KeyValuePair.KeyOrder(),
 					      null,
 					      new KVWriter(outputPath));
 	    wordsToTopics = new HashMap<String, TermList>();
@@ -132,15 +136,15 @@ public class TopicIndexBuilder extends AppFunction {
 	while (reader.hasNext()) {
 	    String topicName = reader.nextName();
 	    double score = reader.nextDouble();
-	    tl.addToTerms(new WeightedTerm(topicName.replace("topic",""), 
+	    tl.addToTerms(new WeightedTerm(topicName.replace("topic",""),
 					   score));
 	    // Insert into the reverse mapping
 	    if (!topicsToPages.containsKey(topicName)) {
-		PrefixedTermMap p = 
-		    new PrefixedTermMap(new HashMap<String, TermList>());	       
+		PrefixedTermMap p =
+		    new PrefixedTermMap(new HashMap<String, TermList>());
 		topicsToPages.put(topicName, p);
 	    }
-	    Map<String, TermList> reverseMaps = 
+	    Map<String, TermList> reverseMaps =
 		topicsToPages.get(topicName).getTerm_lists();
 	    if (!reverseMaps.containsKey(bookName)) {
 		reverseMaps.put(bookName, new TermList());
@@ -154,7 +158,8 @@ public class TopicIndexBuilder extends AppFunction {
     }
 
     // Write to the sorter, which will put them in order and flush to disk.
-    public void writeEntry(String key, TBase postingList) throws Exception {
+    public void writeEntry(String key, TBase postingList)
+	throws Exception {
 	TProtocol protocol = protocolFactory.getProtocol(transport);
 	postingList.write(protocol);
 	KeyValuePair kvp = new KeyValuePair(Utility.fromString(key),

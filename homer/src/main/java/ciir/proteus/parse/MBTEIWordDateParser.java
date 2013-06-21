@@ -1,5 +1,4 @@
-// BSD License (http://lemurproject.org/galago-license)
-package org.lemurproject.galago.core.parse;
+package ciir.proteus.parse;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,15 +9,17 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.util.StreamReaderDelegate;
+import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.types.DocumentSplit;
+import org.lemurproject.galago.tupleflow.Parameters;
 
 class MBTEIWordDateParser extends MBTEIParserBase {
     Pattern dateTag = Pattern.compile("date");
-    
+
     Document wholeDocument;
-    
-    public MBTEIWordDateParser(DocumentSplit split, InputStream is) {
-	super(split, is);
+
+    public MBTEIWordDateParser(DocumentSplit split, Parameters p) {
+	super(split, p);
 	wholeDocument = new Document();
 	wholeDocument.terms = new ArrayList<String>();
 	S0();
@@ -39,7 +40,7 @@ class MBTEIWordDateParser extends MBTEIParserBase {
 	clearAllActions();
 	addStartElementAction(wordTag, "recordFormAttribute");
     }
-    
+
     public void recordFormAttribute(int ignored) {
 	String formValue = reader.getAttributeValue(null, "form");
 	String normalized = normalize(formValue);

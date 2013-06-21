@@ -1,5 +1,4 @@
-// BSD License (http://lemurproject.org/galago-license)
-package org.lemurproject.galago.core.parse;
+package ciir.proteus.parse;
 
 import java.io.IOException;
 import org.lemurproject.galago.tupleflow.Counter;
@@ -9,14 +8,16 @@ import org.lemurproject.galago.tupleflow.StandardStep;
 import org.lemurproject.galago.tupleflow.TupleFlowParameters;
 import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.tupleflow.execution.Verified;
+import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.types.PictureOccurrence;
 
 @Verified
 @InputClass(className = "org.lemurproject.galago.core.parse.Document")
 @OutputClass(className = "org.lemurproject.galago.core.types.PictureOccurrence")
-public class PictureOccurrenceGenerator extends StandardStep<Document, PictureOccurrence> {
+public class PictureOccurrenceGenerator
+    extends StandardStep<Document, PictureOccurrence> {
     private Counter pictureCounter;
-    
+
     public PictureOccurrenceGenerator(TupleFlowParameters parameters) {
 	pictureCounter = parameters.getCounter("Pictures Generated");
     }

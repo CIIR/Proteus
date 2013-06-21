@@ -1,6 +1,8 @@
 package ciir.proteus.parse;
 
 import java.io.IOException;
+import org.lemurproject.galago.core.parse.Document;
+import org.lemurproject.galago.core.parse.Tag;
 import org.lemurproject.galago.tupleflow.Counter;
 import org.lemurproject.galago.tupleflow.InputClass;
 import org.lemurproject.galago.tupleflow.OutputClass;
