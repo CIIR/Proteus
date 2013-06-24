@@ -1,5 +1,8 @@
 .history
 *~
+dependency-reduced-pom.xml
+homer/src/main/java/ciir/proteus/types
+data/logs
 target
 *.iml
 *.ipr

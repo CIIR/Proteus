@@ -11,7 +11,7 @@ import ciir.proteus.parse.*;
 import ciir.proteus.types.PictureOccurrence;
 import org.lemurproject.galago.core.parse.DocumentSource;
 import org.lemurproject.galago.core.tools.AppFunction;
-import org.lemurproject.galago.core.tools.BuildStageTemplates;
+import org.lemurproject.galago.core.tools.apps.BuildStageTemplates;
 import org.lemurproject.galago.core.types.DocumentSplit;
 import org.lemurproject.galago.core.types.KeyValuePair;
 import org.lemurproject.galago.tupleflow.Parameters;

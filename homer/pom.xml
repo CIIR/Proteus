@@ -11,6 +11,16 @@
     Contains Tupleflow parsing and indexing code extensions for dealing
     with mbtei-format xml data.
   </description>
+  <!--<repositories>
+    <repository>
+      <id>CIIR</id>
+      <url>http://scm-ciir.cs.umass.edu/maven</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+    </repository>
+  </repositories>-->
   <reporting>
     <plugins>
       <plugin>
@@ -42,16 +52,6 @@
       <url>http://maven.davidtrott.com/repository</url>
     </pluginRepository>
   </pluginRepositories>
-  <repositories>
-    <repository>
-      <id>CIIR</id>
-      <url>http://scm-ciir.cs.umass.edu/maven</url>
-      <snapshots>
-	<enabled>true</enabled>
-	<updatePolicy>always</updatePolicy>
-      </snapshots>
-    </repository>
-  </repositories>
   <dependencies>
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -155,9 +155,9 @@
         </executions>
       </plugin>
       <plugin>
-	<groupId>org.apache.thrift.tools</groupId>
-	<artifactId>maven-thrift-plugin</artifactId>
-	<version>0.1.10</version>
+        <groupId>org.apache.thrift.tools</groupId>
+        <artifactId>maven-thrift-plugin</artifactId>
+        <version>0.1.10</version>
         <executions>
           <execution>
             <id>thrift-sources</id>

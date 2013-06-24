@@ -1,0 +1,9 @@
+package ciir.proteus.types;
+
+type WordDateCount {
+     bytes word;
+     int date;
+     long count;
+     
+     order: +word +date;
+}
