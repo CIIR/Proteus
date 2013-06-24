@@ -36,16 +36,16 @@ extends ProteusProvider.FutureIface {
       val handlerParameters = handlersSection.getMap(key)
       handlerParameters.set("siteId", siteIdentifier)      
       ProteusType.valueOf(key) match {
-	case None => System.err.printf("'%s' is not a valid handler key.\n", key)
-	case Some(pKey: ProteusType) => {
-	  Handler(pKey, handlerParameters) match {
-	    case Some(h: Handler) => {
-	      hBuilder += (pKey -> h)
-	      System.out.printf("Loaded handler '%s'\n", key)
-	    }
-	    case None => System.err.printf("Not handling '%s' yet.\n", key)
-	  }
-	}
+        case None => System.err.printf("'%s' is not a valid handler key.\n", key)
+        case Some(pKey: ProteusType) => {
+          Handler(pKey, handlerParameters) match {
+            case Some(h: Handler) => {
+              hBuilder += (pKey -> h)
+              System.out.printf("Loaded handler '%s'\n", key)
+            }
+            case None => System.err.printf("Not handling '%s' yet.\n", key)
+          }
+        }
       }
     } catch {
       case e => System.err.printf("Unable to load handler '%s': %s\n",
@@ -67,25 +67,25 @@ extends ProteusProvider.FutureIface {
     val picHandler : PictureHandler = handlerMap(ProteusType.Picture).asInstanceOf[PictureHandler]
     val picResults =
       if (activeKeys(ProteusType.Picture) && !activeKeys(ProteusType.Page)) {
-	val pageResults = handlerMap(ProteusType.Page).asInstanceOf[Searchable].search(srequest)
-	picHandler.scorePictures(pageResults).toList
+        val pageResults = handlerMap(ProteusType.Page).asInstanceOf[Searchable].search(srequest)
+        picHandler.scorePictures(pageResults).toList
       } else {
-	List()
+        List()
       }
 
     val start = System.currentTimeMillis
     var resultsSet = activeKeys.map { 
       key: ProteusType => handlerMap(key) match {
-	case s:Searchable => {
-	  var results = s.search(srequest)
-	  if (activeKeys(ProteusType.Picture) &&
-	      key == ProteusType.Page) {
-	    (results ++ picHandler.scorePictures(results)).toList
-	  } else {
-	    results
-	  }
-	}
-	case _ => List()
+        case s:Searchable => {
+          var results = s.search(srequest)
+          if (activeKeys(ProteusType.Picture) &&
+              key == ProteusType.Page) {
+            (results ++ picHandler.scorePictures(results)).toList
+          } else {
+            results
+          }
+        }
+        case _ => List()
       }
     }
     val end = System.currentTimeMillis
@@ -98,11 +98,10 @@ extends ProteusProvider.FutureIface {
   override def lookup(lrequest: LookupRequest): Future[LookupResponse] = {
     val foundObjects : Set[List[ProteusObject]]= handlerKeys.map {
       key: ProteusType => {
-	val typedLookupRequests = lrequest.ids.filter { 
-	  id: AccessIdentifier =>
-	    id.`type` == key
-	}
-	handlerMap(key).lookup(typedLookupRequests.toSet)
+        val typedLookupRequests = lrequest.ids.filter { 
+          id: AccessIdentifier => id.`type` == key
+        }
+        handlerMap(key).lookup(typedLookupRequests.toSet)
       }
     }
     val objectList = foundObjects.reduceLeft { (A, B) => A ++ B }.toList
@@ -115,19 +114,16 @@ extends ProteusProvider.FutureIface {
     printf("found %d links\n", accessIds.size)
     val objects = 
       accessIds.filter((A) => handlerMap.contains(A.`type`)).map { 
-	aid =>
-	  handlerMap(aid.`type`).lookup(aid)
+        aid => handlerMap(aid.`type`).lookup(aid)
       }.filter {
-	obj =>
-	  obj != null
+        obj => obj != null
       }    
     return Future(TransformResponse(objects))
   }
 
   override def status : Future[StatusResponse] = {
     val colInfo = handlerMap.values.map {
-      handler =>
-	handler.getInfo
+      handler => handler.getInfo
     }.toList.filter(_.isDefined).map(_.get)
     val linkInfo = links.getInfo
     val topicInfo = handlerMap(ProteusType.Topic).asInstanceOf[TopicHandler].getTopicInfo
@@ -144,42 +140,41 @@ extends ProteusProvider.FutureIface {
     var acc = HashMap[AccessIdentifier, Double]()
     try {
       for (belief <- rrequest.beliefs; targetType <- rrequest.targetTypes) {
-	if (!((belief.id.`type` == ProteusType.Collection && targetType == ProteusType.Collection) 
-              || (belief.id.`type` == ProteusType.Page && targetType == ProteusType.Page))) {
-		val targetIds = links.countOccurrences(belief.id, targetType)
-		for ((tid, count) <- targetIds) {
-		  if (!acc.containsKey(tid)) {
-		    acc += (tid -> (count * belief.score))
-		  } else {
-		    val newscore = acc(tid) + (count * belief.score)
-		    acc += (tid -> newscore)
-		  }
-		}
+        val beliefKind = belief.id.`type`
+        if (!((beliefKind == ProteusType.Collection && targetType == ProteusType.Collection) 
+          || (beliefKind == ProteusType.Page && targetType == ProteusType.Page))) {
+
+          val targetIds = links.countOccurrences(belief.id, targetType)
+          for ((tid, count) <- targetIds) {
+            if (!acc.containsKey(tid)) {
+              acc += (tid -> (count * belief.score))
+            } else {
+              val newscore = acc(tid) + (count * belief.score)
+              acc += (tid -> newscore)
+            }
+          }
 	      }
       }
     } catch {
       case e => { e.printStackTrace() }
     }
     val sortedResults = acc.toList.sortWith((A,B) => A._2 > B._2).take(50)
-    val optionalResults : List[Option[SearchResult]] = sortedResults.map { 
-      A => {
-	val aid = A._1
-	val score = A._2
-	if (!handlerMap.containsKey(aid.`type`)) {
-	  None
-	} else {
-	  val handler = handlerMap(aid.`type`)
-	  try {
-	    val pObject = handler.lookup(aid)
-	    Some(proteusObjectToSearchResult(pObject, score))
-	  } catch {
-            case e => { e.printStackTrace()}
-	    None
-	  }
-	}
+    
+    val finalResults = sortedResults.flatMap( pr => {
+      val (aid, score) = pr
+      if (!handlerMap.containsKey(aid.`type`)) {
+        None
+      } else {
+        val handler = handlerMap(aid.`type`)
+        try {
+          val pObject = handler.lookup(aid)
+          Some(proteusObjectToSearchResult(pObject, score))
+        } catch {
+                case e => { e.printStackTrace()}
+          None
+        }
       }
-    }
-    val finalResults = optionalResults.filter(_.isDefined).map(_.get)
+    })
     return Future(SearchResponse(results = finalResults))
   }
 
