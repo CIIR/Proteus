@@ -1,12 +1,11 @@
 {
-    "jobs" :[{ "command" : "build", "parameters" : "/work1/allan/irmarc/projects/lemur/linked/buildBooks.json", "active":false},
-	     { "command" : "build", "parameters" : "/work1/allan/irmarc/projects/lemur/linked/buildPages.json", "active":false},
-	     { "command" : "chain-jobs", "parameters" : "/work1/allan/irmarc/projects/lemur/linked/buildPerson.json", "active":true},
-	     { "command" : "chain-jobs", "parameters" : "/work1/allan/irmarc/projects/lemur/linked/buildLocation.json", "active":true},
-	     { "command" : "chain-jobs", "parameters" : "/work1/allan/irmarc/projects/lemur/linked/buildMisc.json","active":true},
-	     { "command" : "build-pictures", "parameters" : "/work1/allan/irmarc/projects/lemur/linked/buildPictures.json","active":false},
-	     { "command" : "build-dates", "parameters" : "/work1/allan/irmarc/projects/lemur/linked/buildDates.json", "active":false},
-	     { "command" : "build-topics", "parameters" : "/work1/allan/irmarc/projects/lemur/linked/buildTopics.json", "active":false},
-	     { "command" : "link-indexes", "parameters" : "/work1/allan/irmarc/projects/lemur/linked/buildLinks.json", "active":false}
+    "jobs" :[{ "command" : "build", "parameters" : "./buildBooks.json", "active":false},
+	     { "command" : "build", "parameters" : "./buildPages.json", "active":false},
+	     { "command" : "chain-jobs", "parameters" : "./buildPerson.json", "active":true},
+	     { "command" : "chain-jobs", "parameters" : "./buildLocation.json", "active":true},
+	     { "command" : "chain-jobs", "parameters" : "./buildMisc.json","active":true},
+	     { "command" : "build-pictures", "parameters" : "./buildPictures.json","active":false},
+	     { "command" : "build-dates", "parameters" : "./buildDates.json", "active":false},
+	     { "command" : "link-indexes", "parameters" : "./buildLinks.json", "active":false}
     ]
 }

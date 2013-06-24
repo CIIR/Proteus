@@ -27,107 +27,107 @@ import org.lemurproject.galago.tupleflow.execution.Step;
 
 public class BuildPictureStore extends AppFunction {
 
-    public Stage getGeneratePicturesStage(String stageName,
-					  String inStream,
-					  String outStream,
-					  Parameters parameters) {
-	Stage stage = new Stage(stageName);
-	stage.addInput(inStream, new DocumentSplit.FileIdOrder());
-	stage.addOutput(outStream, new PictureOccurrence.IdOrdinalTopLeftOrder());
-	stage.addOutput(outStream+"-docs", new KeyValuePair.KeyOrder());
+  public Stage getGeneratePicturesStage(String stageName,
+          String inStream,
+          String outStream,
+          Parameters parameters) {
+    Stage stage = new Stage(stageName);
+    stage.addInput(inStream, new DocumentSplit.FileIdOrder());
+    stage.addOutput(outStream, new PictureOccurrence.IdOrdinalTopLeftOrder());
+    stage.addOutput(outStream + "-docs", new KeyValuePair.KeyOrder());
 
-	stage.add(new InputStep(inStream));
-	stage.add(BuildStageTemplates.getParserStep(parameters));
+    stage.add(new InputStep(inStream));
+    stage.add(BuildStageTemplates.getParserStep(parameters));
 
-	MultiStep fork = new MultiStep();
+    MultiStep fork = new MultiStep();
 
-	ArrayList<Step> writeDocuments = new ArrayList<Step>();
-	writeDocuments.add(new Step(PictureDocumentSerializer.class, parameters));
-	writeDocuments.add(Utility.getSorter(new KeyValuePair.KeyOrder()));
-	writeDocuments.add(new OutputStep(outStream+"-docs"));
-	fork.addGroup(writeDocuments);
+    ArrayList<Step> writeDocuments = new ArrayList<Step>();
+    writeDocuments.add(new Step(PictureDocumentSerializer.class, parameters));
+    writeDocuments.add(Utility.getSorter(new KeyValuePair.KeyOrder()));
+    writeDocuments.add(new OutputStep(outStream + "-docs"));
+    fork.addGroup(writeDocuments);
 
-	ArrayList<Step> outputOccurrences = new ArrayList<Step>();
-	outputOccurrences.add(new Step(PictureOccurrenceGenerator.class));
-	outputOccurrences.add(Utility.getSorter(new PictureOccurrence.IdOrdinalTopLeftOrder()));
-	outputOccurrences.add(new OutputStep(outStream));
-	fork.addGroup(outputOccurrences);
+    ArrayList<Step> outputOccurrences = new ArrayList<Step>();
+    outputOccurrences.add(new Step(PictureOccurrenceGenerator.class));
+    outputOccurrences.add(Utility.getSorter(new PictureOccurrence.IdOrdinalTopLeftOrder()));
+    outputOccurrences.add(new OutputStep(outStream));
+    fork.addGroup(outputOccurrences);
 
-	stage.add(fork);
-	return stage;
-    }
+    stage.add(fork);
+    return stage;
+  }
 
-    public Stage getWritePicturesStage(String stageName,
-				    String inStream,
-				    Parameters parameters) {
-	Stage stage = new Stage(stageName);
-	stage.addInput(inStream, new PictureOccurrence.IdOrdinalTopLeftOrder());
+  public Stage getWritePicturesStage(String stageName,
+          String inStream,
+          Parameters parameters) {
+    Stage stage = new Stage(stageName);
+    stage.addInput(inStream, new PictureOccurrence.IdOrdinalTopLeftOrder());
 
-	stage.add(new InputStep(inStream));
-	stage.add(new Step(PictureStoreWriter.class, parameters));
-	return stage;
-    }
+    stage.add(new InputStep(inStream));
+    stage.add(new Step(PictureStoreWriter.class, parameters));
+    return stage;
+  }
 
-    public Stage writePictureDocumentsStage(String stageName,
-					    String inStream,
-					    Parameters jobParameters) {
-	Stage stage = new Stage(stageName);
-	stage.addInput(inStream, new KeyValuePair.KeyOrder());
-	stage.add(new InputStep(inStream));
-	stage.add(new Step(PictureDocumentWriter.class, jobParameters));
-	return stage;
-    }
+  public Stage writePictureDocumentsStage(String stageName,
+          String inStream,
+          Parameters jobParameters) {
+    Stage stage = new Stage(stageName);
+    stage.addInput(inStream, new KeyValuePair.KeyOrder());
+    stage.add(new InputStep(inStream));
+    stage.add(new Step(PictureDocumentWriter.class, jobParameters));
+    return stage;
+  }
 
   public Job getPicturesJob(Parameters jobParameters) throws Exception {
-      Job job = new Job();
+    Job job = new Job();
 
-      String picturesPath = jobParameters.getString("picturesPath");
-      File manifest = new File(picturesPath, "buildManifest.json");
-      Utility.makeParentDirectories(manifest);
-      Utility.copyStringToFile(jobParameters.toPrettyString(), manifest);
+    String picturesPath = jobParameters.getString("picturesPath");
+    File manifest = new File(picturesPath, "buildManifest.json");
+    Utility.makeParentDirectories(manifest);
+    Utility.copyStringToFile(jobParameters.toPrettyString(), manifest);
 
-      List<String> inputPaths = jobParameters.getAsList("inputPath");
-      Parameters splitParameters = jobParameters.getMap("parser").clone();
-      job.add(BuildStageTemplates.getSplitStage(inputPaths,
-						DocumentSource.class,
-						new DocumentSplit.FileIdOrder(),
-						splitParameters));
-      job.add(getGeneratePicturesStage("generatePictures",
-				    "splits",
-				    "pictures",
-				    jobParameters));
-      Parameters writeParameters = new Parameters();
-      writeParameters.set("filename", jobParameters.getString("picturesPath"));
-      job.add(getWritePicturesStage("writePictures", "pictures", writeParameters));
+    List<String> inputPaths = jobParameters.getAsList("inputPath");
+    Parameters splitParameters = jobParameters.getMap("parser").clone();
+    job.add(BuildStageTemplates.getSplitStage(inputPaths,
+            DocumentSource.class,
+            new DocumentSplit.FileIdOrder(),
+            splitParameters));
+    job.add(getGeneratePicturesStage("generatePictures",
+            "splits",
+            "pictures",
+            jobParameters));
+    Parameters writeParameters = new Parameters();
+    writeParameters.set("filename", jobParameters.getString("picturesPath"));
+    job.add(getWritePicturesStage("writePictures", "pictures", writeParameters));
 
-      Parameters docParams = writeParameters.clone();
-      String corpusPath = new File(jobParameters.getString("picturesPath"), "pictures.corpus").getCanonicalPath();
-      docParams.set("filename", corpusPath);
-      job.add(writePictureDocumentsStage("writeDocs", "pictures-docs", docParams));
-      job.connect("inputSplit", "generatePictures", ConnectionAssignmentType.Each);
-      job.connect("generatePictures", "writePictures", ConnectionAssignmentType.Combined);
-      job.connect("generatePictures", "writeDocs", ConnectionAssignmentType.Combined);
-      return job;
+    Parameters docParams = writeParameters.clone();
+    String corpusPath = new File(jobParameters.getString("picturesPath"), "pictures.corpus").getCanonicalPath();
+    docParams.set("filename", corpusPath);
+    job.add(writePictureDocumentsStage("writeDocs", "pictures-docs", docParams));
+    job.connect("inputSplit", "generatePictures", ConnectionAssignmentType.Each);
+    job.connect("generatePictures", "writePictures", ConnectionAssignmentType.Combined);
+    job.connect("generatePictures", "writeDocs", ConnectionAssignmentType.Combined);
+    return job;
   }
 
   @Override
   public void run(Parameters p, PrintStream output) throws Exception {
-      if (!p.isString("picturesPath") && !p.isList("inputPath")) {
-	  output.println(getHelpString());
-	  return;
-      }
+    if (!p.isString("picturesPath") && !p.isList("inputPath")) {
+      output.println(getHelpString());
+      return;
+    }
 
     Job job;
     BuildPictureStore pStore = new BuildPictureStore();
     job = pStore.getPicturesJob(p);
 
     if (job != null) {
-	AppFunction.runTupleFlowJob(job, p, output);
+      AppFunction.runTupleFlowJob(job, p, output);
     }
   }
 
   public String getName() {
-      return "build-pictures";
+    return "build-pictures";
   }
 
   @Override
@@ -138,7 +138,7 @@ public class BuildPictureStore extends AppFunction {
             + "          specified as you like.  Galago can read html, xml, txt, \n"
             + "          arc (Heritrix), warc, trectext, trecweb and corpus files.\n"
             + "          Files may be gzip compressed (.gz|.bz).\n"
-	    + "<dir>:    The directory path for the produced pictures.\n\n"
+            + "<dir>:    The directory path for the produced pictures.\n\n"
             + AppFunction.getTupleFlowParameterString();
   }
 }
