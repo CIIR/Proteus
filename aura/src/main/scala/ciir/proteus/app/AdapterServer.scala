@@ -4,7 +4,8 @@ import java.io.File
 
 import scala.collection.mutable.ListBuffer
 
-import ciir.proteus._
+import ciir.proteus.RemoteRandomDataProvider
+import ciir.proteus.thrift._
 import ciir.proteus.galago.GalagoAdapter
 import com.twitter.finagle.builder._
 import com.twitter.finagle.thrift.ThriftServerFramedCodec

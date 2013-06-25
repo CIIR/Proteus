@@ -1,5 +1,7 @@
 package ciir.proteus
 
+import ciir.proteus.thrift._
+
 import com.twitter.util.Future
 
 class RemoteRandomDataProvider extends ProteusProvider.FutureIface with FakeDataGenerator {

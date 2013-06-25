@@ -4,7 +4,7 @@
 // - LookupResponse
 // - TransformRequest
 // - TransformResponse
-namespace java ciir.proteus
+namespace java ciir.proteus.thrift
 
 // The Core Proteus Types
 enum ProteusType {

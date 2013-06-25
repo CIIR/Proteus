@@ -1,6 +1,7 @@
 package ciir.proteus
 
-import ciir.proteus.Constants._
+import ciir.proteus.thrift._
+import ciir.proteus.thrift.Constants._
 import ciir.proteus.ProteusServlet._
 import scala.util.matching.Regex._
 import java.util.Calendar

@@ -1,5 +1,6 @@
 package ciir.proteus
 
+import ciir.proteus.thrift._
 import ciir.proteus.ProteusFunctions._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.util.{Duration,Future}
@@ -439,19 +440,17 @@ import ProteusServlet._
     val splitBuilder = Map.newBuilder[String, AnyRef]
     for (typeStr : String <- kReturnableTypes) {
       val filteredByType = results.filter {
-	result =>
-	  result.id.`type` == ProteusType.valueOf(typeStr).get
+        result => result.id.`type` == ProteusType.valueOf(typeStr).get
       }
       if (filteredByType.length > 0) {
-	// do it here to look for memberships
-	val displayReady : AnyRef = memberships match {
-	  case None => filteredByType
-	  case Some(m) => filteredByType.map {
-	    A : SearchResult =>
-	      RichSearchResult(A, m(displayId(A.id)))
-	  }
-	}
-	splitBuilder += (typeStr -> displayReady)
+        // do it here to look for memberships
+        val displayReady : AnyRef = memberships match {
+          case None => filteredByType
+          case Some(m) => filteredByType.map {
+            sr : SearchResult => RichSearchResult(sr, m(displayId(A.id)))
+          }
+        }
+        splitBuilder += (typeStr -> displayReady)
       }
     }
     return splitBuilder.result
@@ -464,8 +463,8 @@ import ProteusServlet._
   def getUserForSession(key : Option[String]) : Option[String] = key match {
     case Some(keystr) => {
       mongoColl("sessions").findOne(MongoDBObject("key" -> key)) match {
-	case Some(session) => Some(session("user").asInstanceOf[String])
-	case None => None
+        case Some(session) => Some(session("user").asInstanceOf[String])
+        case None => None
       }
     }
     case None => None
@@ -476,9 +475,8 @@ import ProteusServlet._
     for (aid <- items) {
       val did = displayId(aid)
       var listnames = List[String]()
-      for (entry <- mongoColl("lists").find(MongoDBObject("user" -> userid,
-							  "itemid" -> did))) {
-	listnames = entry.as[String]("listname") +: listnames
+      for (entry <- mongoColl("lists").find(MongoDBObject("user" -> userid, "itemid" -> did))) {
+        listnames = entry.as[String]("listname") +: listnames
       }
       builder += (did -> listnames.sorted)
     }

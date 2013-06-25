@@ -3,7 +3,7 @@ package ciir.proteus.galago
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 
-import ciir.proteus._
+import ciir.proteus.thrift._
 
 import org.lemurproject.galago.core.retrieval._
 import org.lemurproject.galago.core.parse.Document

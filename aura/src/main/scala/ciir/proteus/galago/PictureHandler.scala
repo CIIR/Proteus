@@ -5,7 +5,7 @@ import java.io.File
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 
-import ciir.proteus._
+import ciir.proteus.thrift._
 import com.twitter.util.Future
 import org.apache.thrift.protocol._
 import org.lemurproject.galago.tupleflow.Parameters;

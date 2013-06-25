@@ -1,7 +1,7 @@
 package ciir.proteus.galago
 
 import java.io.File;
-import ciir.proteus._
+import ciir.proteus.thrift._
 import ciir.proteus.galago.thrift.IndexLink
 import ciir.proteus.galago.thrift.Target
 import scala.collection.JavaConversions._
