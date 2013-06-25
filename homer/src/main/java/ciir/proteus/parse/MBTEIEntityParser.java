@@ -1,7 +1,6 @@
 package ciir.proteus.parse;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -11,7 +10,6 @@ import org.lemurproject.galago.core.parse.StringPooler;
 import org.lemurproject.galago.core.parse.TagTokenizer;
 import org.lemurproject.galago.core.types.DocumentSplit;
 import org.lemurproject.galago.tupleflow.Parameters;
-import org.lemurproject.galago.tupleflow.Utility;
 
 // Fundamentally operates differently than the book and page parsers,
 // so it is subclassed higher up the hierarchy

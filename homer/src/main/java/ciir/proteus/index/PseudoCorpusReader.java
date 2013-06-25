@@ -15,6 +15,7 @@ import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.parse.TagTokenizer;
 import org.lemurproject.galago.core.retrieval.iterator.BaseIterator;
 import org.lemurproject.galago.core.retrieval.iterator.DataIterator;
+import org.lemurproject.galago.core.retrieval.processing.ScoringContext;
 import org.lemurproject.galago.core.retrieval.query.AnnotatedNode;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.NodeType;
@@ -124,7 +125,7 @@ public class PseudoCorpusReader extends KeyValueReader {
     }
   }
 
-  public class CorpusIterator extends KeyToListIterator implements DataIterator<Document> {
+  public class CorpusIterator extends KeyToListIterator implements DataIterator<PseudoDocument> {
 
     PseudoDocumentComponents docParams;
 
@@ -134,8 +135,12 @@ public class PseudoCorpusReader extends KeyValueReader {
     }
 
     @Override
-    public String getValueString() throws IOException {
-      return ((PseudoCorpusReader.KeyIterator) iterator).getValueString();
+    public String getValueString(ScoringContext context) throws IOException {
+      PseudoDocument doc = data(context);
+      if(doc == null) {
+        return "null-pseudo-doc";
+      }
+      return doc.toString();
     }
 
     @Override
@@ -144,7 +149,7 @@ public class PseudoCorpusReader extends KeyValueReader {
     }
 
     @Override
-    public Document getData() {
+    public PseudoDocument data(ScoringContext context) {
       if (context.document != this.currentCandidate()) {
         try {
           return ((PseudoCorpusReader.KeyIterator) iterator).getDocument(docParams);
@@ -167,14 +172,14 @@ public class PseudoCorpusReader extends KeyValueReader {
     }
 
     @Override
-    public AnnotatedNode getAnnotatedNode() {
+    public AnnotatedNode getAnnotatedNode(ScoringContext context) {
       String type = "corpus";
       String className = this.getClass().getSimpleName();
       String parameters = "";
-      int document = currentCandidate();
-      boolean atCandidate = hasMatch(this.context.document);
-      String returnValue = getData().name;
-      String extraInfo = getData().toString();
+      long document = currentCandidate();
+      boolean atCandidate = hasMatch(context.document);
+      String returnValue = data(context).name;
+      String extraInfo = data(context).toString();
       List<AnnotatedNode> children = Collections.EMPTY_LIST;
 
       return new AnnotatedNode(type, className, parameters, document, atCandidate, returnValue, extraInfo, children);
