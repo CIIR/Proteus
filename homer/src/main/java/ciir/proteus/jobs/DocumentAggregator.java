@@ -1,15 +1,15 @@
 // BSD License (http://lemurproject.org/galago-license)
 package ciir.proteus.jobs;
 
+import ciir.proteus.index.PseudoCorpusMerger;
+import ciir.proteus.index.PseudoCorpusReader;
+import ciir.proteus.index.PseudoDocument;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import org.lemurproject.galago.core.index.GenericElement;
-import org.lemurproject.galago.core.index.corpus.CorpusReader;
 import org.lemurproject.galago.core.parse.Document;
-import org.lemurproject.galago.core.parse.PseudoDocument;
 import org.lemurproject.galago.core.index.disk.DiskBTreeWriter;
-import org.lemurproject.galago.core.index.merge.CorpusMerger;
 import org.lemurproject.galago.core.types.KeyValuePair;
 import org.lemurproject.galago.tupleflow.Counter;
 import org.lemurproject.galago.tupleflow.InputClass;
@@ -35,8 +35,8 @@ public class DocumentAggregator implements KeyValuePair.KeyOrder.ShreddedProcess
     Parameters corpusParams = parameters.getJSON();
     // create a writer;
     corpusParams.set("writerClass", getClass().getName());
-    corpusParams.set("readerClass", CorpusReader.class.getName());
-    corpusParams.set("mergerClass", CorpusMerger.class.getName());
+    corpusParams.set("readerClass", PseudoCorpusReader.class.getName());
+    corpusParams.set("mergerClass", PseudoCorpusMerger.class.getName());
     corpusParams.set("pseudo", true);
     writer = new DiskBTreeWriter(parameters);
     bufferedDocuments = new HashMap<String, PseudoDocument>();
