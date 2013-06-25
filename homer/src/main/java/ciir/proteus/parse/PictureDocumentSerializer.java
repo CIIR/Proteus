@@ -4,10 +4,8 @@ import java.io.IOException;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.types.KeyValuePair;
 import org.lemurproject.galago.tupleflow.InputClass;
-import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.OutputClass;
 import org.lemurproject.galago.tupleflow.StandardStep;
-import org.lemurproject.galago.tupleflow.TupleFlowParameters;
 import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.tupleflow.execution.Verified;
 
@@ -21,10 +19,7 @@ public class PictureDocumentSerializer extends StandardStep<Document, KeyValuePa
 
   @Override
   public void process(Document document) throws IOException {
-      String key = String.format("%s_%s",
-				 document.name,
-				 document.metadata.get("ordinal"));
-      processor.process(new KeyValuePair(Utility.fromString(key),
-					 Document.serialize(document)));
+    String key = String.format("%s_%s", document.name, document.metadata.get("ordinal"));
+    processor.process(new KeyValuePair(Utility.fromString(key), Document.serialize(document)));
   }
 }

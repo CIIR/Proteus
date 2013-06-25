@@ -29,15 +29,10 @@ public class DateTokenizer extends StandardStep<Document, WordDateCount> {
     try {
       int date = Integer.parseInt(document.name);
       for (String token : document.terms) {
-        processor.process(new WordDateCount(Utility.fromString(token),
-                date,
-                1));
+        processor.process(new WordDateCount(Utility.fromString(token), date, 1));
       }
     } catch (Exception e) {
-      System.err.printf("[SKIPPING] Unable to parse '%s' : %s\n",
-              document.name,
-              e.getMessage());
+      System.err.printf("[SKIPPING] Unable to parse '%s' : %s\n", document.name, e.getMessage());
     }
-
   }
 }
