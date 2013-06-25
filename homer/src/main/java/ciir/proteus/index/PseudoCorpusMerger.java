@@ -36,7 +36,7 @@ public class PseudoCorpusMerger extends GenericIndexMerger<Document> {
   @Override
   public void performValueMerge(byte[] key, List<KeyIteratorWrapper> keyIterators) throws IOException {
     assert (keyIterators.size() == 1) : "Found two identical keys when merging names. Documents can never be combined.";
-    PseudoCorpusReader.KeyIterator iter = (PseudoCorpusReader.KeyIterator) (keyIterators.get(0).iterator);
+    PseudoCorpusReader.KeyIterator iter = (PseudoCorpusReader.KeyIterator) (keyIterators.get(0).getIterator());
     PseudoDocument d = iter.getDocument(new PseudoDocumentComponents(true, true, true, true)) ;
     this.writer.process(d);
   }
