@@ -16,7 +16,7 @@ import org.lemurproject.galago.tupleflow.Parameters;
 //
 // Assumptions
 // - Names cannot be nested
-class MBTEIEntityParser extends MBTEIParserBase {
+public class MBTEIEntityParser extends MBTEIParserBase {
 
   public static final int WINDOW_SIZE = 30;
   Pattern pageBreakTag = Pattern.compile("pb");

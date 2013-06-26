@@ -10,7 +10,7 @@ import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.parse.Tag;
 
-class MBTEIPageEntityLinker extends MBTEIParserBase {
+public class MBTEIPageEntityLinker extends MBTEIParserBase {
 
   LinkedList<Document> entitiesInScope;
   Document bookLinks;

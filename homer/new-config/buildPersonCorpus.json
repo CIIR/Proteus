@@ -1,0 +1,14 @@
+{
+  "corpus":true,
+  "corpusPath" : "portland-3.5/people",
+  "galagoJobDir" : "job/entity-corpus",
+  "inputPath" : ["new-config/portland.list"],
+  "parser" : {
+    "externalParsers" : [
+      {
+        "filetype" : "mbtei",
+        "class" : "ciir.proteus.parse.MBTEIPersonParser"
+      }
+    ]
+  }
+}

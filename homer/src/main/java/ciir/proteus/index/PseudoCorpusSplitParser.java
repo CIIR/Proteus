@@ -10,7 +10,7 @@ import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
 /**
- * Reads Document data from an index file. Typically you'd use this parser by
+ * Reads PseudoDocument data from an pseudocorpus file. Typically you'd use this parser by
  * including UniversalParser in a TupleFlow Job.
  *
  * @author trevor, sjh
@@ -30,6 +30,7 @@ public class PseudoCorpusSplitParser extends DocumentStreamParser {
     super(split, p);
     reader = new PseudoCorpusReader(split.fileName);
     iterator = reader.getIterator();
+    System.out.println(split.startKey);
     iterator.skipToKey(split.startKey);
     this.split = split;
     extractionParameters = new PseudoDocumentComponents(false, true, false, true);    
@@ -37,11 +38,13 @@ public class PseudoCorpusSplitParser extends DocumentStreamParser {
 
   @Override
   public PseudoDocument nextDocument() throws IOException {
+    System.out.println("PseudoCorpusSplitParser::nextDocument()");
     if (reader != null && iterator.isDone()) {
       return null;
     }
 
     byte[] keyBytes = iterator.getKey();
+    System.out.println(iterator.getKeyString());
 
     // Don't go past the end of the split.
     if (split.endKey.length > 0 && Utility.compare(keyBytes, split.endKey) >= 0) {

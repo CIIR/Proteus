@@ -11,7 +11,7 @@
     Contains Tupleflow parsing and indexing code extensions for dealing
     with mbtei-format xml data.
   </description>
-  <repositories>
+  <!---<repositories>
     <repository>
       <id>CIIR</id>
       <url>http://scm-ciir.cs.umass.edu/maven</url>
@@ -20,7 +20,7 @@
         <updatePolicy>always</updatePolicy>
       </snapshots>
     </repository>
-  </repositories>
+  </repositories>-->
   <reporting>
     <plugins>
       <plugin>

@@ -1,0 +1,18 @@
+{
+  "corpus":true,
+  "indexPath" : "portland-3.5/books",
+  "galagoJobDir" : "job/books",
+  "inputPath" : ["new-config/portland.list"],
+  "tokenizer" : {
+    "fields" : [ "name", "title", "creator", "language", "subject", "date" ] , 
+		"formats" : { "date" : "date", "title" : "string" }
+  },
+  "parser" : {
+    "externalParsers" : [
+      {
+        "filetype" : "mbtei",
+        "class" : "ciir.proteus.parse.MBTEIBookParser"
+      }
+    ]
+  }
+}

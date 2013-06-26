@@ -388,12 +388,9 @@ import ProteusServlet._
       }
 
       val requestedTypes = if (multiParams("st").contains("all")) {
-	kReturnableTypes.map { rt : String => ProteusType.valueOf(rt).get }
+        kReturnableTypes.map { rt : String => ProteusType.valueOf(rt).get }
       } else {
-	multiParams("st") map {
-	  str =>
-	    ProteusType.valueOf(str).get
-	}
+        multiParams("st") map { str => ProteusType.valueOf(str).get }
       }
 
       var rgq : Option[String] = None

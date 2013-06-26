@@ -55,11 +55,11 @@ public class PseudoCorpusReader extends KeyValueReader {
   
   @Override
   public PseudoCorpusReader.KeyIterator getIterator() throws IOException {
-    return new PseudoCorpusReader.KeyIterator(reader);
+    return new PseudoCorpusReader.KeyIterator(reader, tokenizer);
   }
 
   public PseudoDocument getDocument(byte[] key, PseudoDocumentComponents p) throws IOException {
-    PseudoCorpusReader.KeyIterator i = new PseudoCorpusReader.KeyIterator(reader);
+    PseudoCorpusReader.KeyIterator i = new PseudoCorpusReader.KeyIterator(reader, tokenizer);
     if (i.findKey(key)) {
       return i.getDocument(p);
     } else {
@@ -69,13 +69,7 @@ public class PseudoCorpusReader extends KeyValueReader {
 
 
   public PseudoDocument getDocument(int key, PseudoDocumentComponents p) throws IOException {
-    PseudoCorpusReader.KeyIterator i = new PseudoCorpusReader.KeyIterator(reader);
-    byte[] k = Utility.fromInt(key);
-    if (i.findKey(k)) {
-      return i.getDocument(p);
-    } else {
-      return null;
-    }
+    return getDocument(Utility.fromInt(key), p);
   }
 
   @Override
@@ -88,7 +82,7 @@ public class PseudoCorpusReader extends KeyValueReader {
   @Override
   public BaseIterator getIterator(Node node) throws IOException {
     if (node.getOperator().equals("corpus")) {
-      return new PseudoCorpusReader.CorpusIterator(new PseudoCorpusReader.KeyIterator(reader));
+      return new PseudoCorpusReader.CorpusIterator(new PseudoCorpusReader.KeyIterator(reader, tokenizer));
     } else {
       throw new UnsupportedOperationException(
               "Index doesn't support operator: " + node.getOperator());
@@ -96,9 +90,11 @@ public class PseudoCorpusReader extends KeyValueReader {
   }
 
   public class KeyIterator extends KeyValueReader.KeyValueIterator {
+    private final TagTokenizer tokenizer;
 
-    public KeyIterator(BTreeReader reader) throws IOException {
+    public KeyIterator(BTreeReader reader, TagTokenizer myTokenizer) throws IOException {
       super(reader);
+      this.tokenizer = myTokenizer;
     }
 
     @Override
@@ -107,7 +103,11 @@ public class PseudoCorpusReader extends KeyValueReader {
     }
 
     public PseudoDocument getDocument(PseudoDocumentComponents p) throws IOException {
-      return PseudoDocument.deserialize(iterator.getValueBytes(), p);
+      PseudoDocument doc = PseudoDocument.deserialize(iterator.getValueBytes(), p);
+      if(p.tokenize) {
+        tokenizer.tokenize(doc);
+      }
+      return doc;
     }
 
     @Override

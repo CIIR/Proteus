@@ -40,7 +40,7 @@ import org.lemurproject.galago.tupleflow.Utility;
  *
  * @author irmarc
  */
-abstract class MBTEIParserBase extends DocumentStreamParser {
+public abstract class MBTEIParserBase extends DocumentStreamParser {
   // For XML stream processing
 
   protected StreamReaderDelegate reader;
@@ -54,7 +54,7 @@ abstract class MBTEIParserBase extends DocumentStreamParser {
   // Using these directly is either tedious or stupid to
   // do. Use the functions provided.
 
-  class Action {
+  public class Action {
 
     public Action(Pattern p, Method m) {
       labelRE = p;

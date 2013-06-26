@@ -139,9 +139,9 @@ public class PseudoDocument extends Document {
     pd.text = d.text;
     pd.terms = d.terms;
     pd.tags = d.tags;
-    int samplesSize = 0;
+    
     if (s.samples) {
-      samplesSize = dataIStream.readInt();
+      int samplesSize = dataIStream.readInt();
       System.err.printf("Size of sample data: %d\n", samplesSize);
       byte[] sampleData = new byte[samplesSize];
       dataIStream.readFully(sampleData);
