@@ -147,7 +147,6 @@ public class MBTEIEntityParser extends MBTEIParserBase {
       Context closingContext = openContexts.poll();
       parsedDocument = new Document();
       parsedDocument.name = closingContext.name;
-      parsedDocument.identifier = closingContext.name.hashCode();
       parsedDocument.metadata.put("title", closingContext.name);
       parsedDocument.metadata.put("src", getArchiveIdentifier());
       if (closingContext.externalLink != null) {
