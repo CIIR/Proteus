@@ -1,0 +1,15 @@
+{
+  "server":true,
+  "corpus":true,
+  "inputPath" : ["new-config/mbtei_portland.list"],
+  "indexPath" : "portland-3.5/misc",
+  "galagoJobDir" : "job/misc-corpus",
+  "parser" : {
+    "externalParsers" : [
+      {
+        "filetype" : "mbtei",
+        "class" : "ciir.proteus.parse.MBTEIMiscParser"
+      }
+    ]
+  }
+}

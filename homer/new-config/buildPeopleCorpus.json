@@ -1,9 +1,9 @@
 {
   "server":true,
   "corpus":true,
-  "inputPath" : ["new-config/portland.list"],
+  "inputPath" : ["new-config/mbtei_portland.list"],
   "indexPath" : "portland-3.5/people",
-  "galagoJobDir" : "job/entity-corpus",
+  "galagoJobDir" : "job/people-corpus",
   "parser" : {
     "externalParsers" : [
       {

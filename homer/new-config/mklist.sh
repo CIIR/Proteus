@@ -1,3 +1,4 @@
 #!/bin/sh
 
-find `pwd`/linked -name *mbtei* > portland.list
+find `pwd`/mbtei -name *.mbtei.gz > mbtei_portland.list
+find `pwd`/abbyy -name *.abbyy.gz > abbyy_portland.list
