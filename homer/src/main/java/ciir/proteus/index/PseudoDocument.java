@@ -9,6 +9,7 @@ import org.lemurproject.galago.tupleflow.Utility;
 import org.xerial.snappy.SnappyInputStream;
 import org.xerial.snappy.SnappyOutputStream;
 
+@Deprecated
 public class PseudoDocument extends Document {
 
   public class Sample implements Serializable {

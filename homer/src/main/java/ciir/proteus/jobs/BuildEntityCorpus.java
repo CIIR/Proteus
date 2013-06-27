@@ -1,6 +1,7 @@
  // BSD License (http://lemurproject.org/galago-license)
 package ciir.proteus.jobs;
 
+import ciir.proteus.index.DocumentToNamedKeyValue;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -35,7 +36,7 @@ public class BuildEntityCorpus extends AppFunction {
     stage.addOutput(outStream, new KeyValuePair.KeyOrder());
     stage.add(new InputStep(inStream));
     stage.add(BuildStageTemplates.getParserStep(p));
-    stage.add(new Step(DocumentToKeyValuePair.class, p));
+    stage.add(new Step(DocumentToNamedKeyValue.class, p));
     stage.add(Utility.getSorter(new KeyValuePair.KeyOrder()));
     stage.add(new OutputStep(outStream));
     return stage;

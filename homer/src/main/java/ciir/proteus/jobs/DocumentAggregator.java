@@ -12,7 +12,6 @@ import org.lemurproject.galago.tupleflow.InputClass;
 import org.lemurproject.galago.tupleflow.Linkage;
 import org.lemurproject.galago.tupleflow.NullProcessor;
 import org.lemurproject.galago.tupleflow.OutputClass;
-import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Processor;
 import org.lemurproject.galago.tupleflow.Source;
 import org.lemurproject.galago.tupleflow.Step;
@@ -26,15 +25,86 @@ import org.xerial.snappy.SnappyInputStream;
 @OutputClass(className = "org.lemurproject.galago.core.parse.Document")
 public class DocumentAggregator implements KeyValuePair.KeyOrder.ShreddedProcessor, Source<Document> {
   
-  public final class MergedDocument {
-    private long identifier;
+  final Counter docsIn;
+  long documentNumber = 0;
+  byte[] lastIdentifier = null;
+  DocBuilder currentDocument = null;
+  public Processor<Document> processor = new NullProcessor(Document.class);
+
+  public DocumentAggregator(TupleFlowParameters parameters) throws IOException, FileNotFoundException {
+    docsIn = parameters.getCounter("Documents in");
+  }
+
+  /**
+   * If this key is new and we have a key already, we need to write the previous document.
+   * @param key
+   * @throws IOException 
+   */
+  @Override
+  public void processKey(byte[] key) throws IOException {
+    if(key == null) { return; }
+    if (lastIdentifier != null && (Utility.compare(key, lastIdentifier) != 0)) {
+      write();
+    }
+    lastIdentifier = key;
+  }
+
+  @Override
+  public void processTuple(byte[] value) throws IOException {
+    ByteArrayInputStream stream = new ByteArrayInputStream(value);
+    Document document;
+    try {
+      ObjectInputStream input = new ObjectInputStream(new SnappyInputStream(stream));
+      document = (Document) input.readObject();
+      addToBuffer(document);
+      if (docsIn != null) {
+        docsIn.increment();
+      }
+    } catch (ClassNotFoundException cnfe) {
+      throw new RuntimeException(cnfe);
+    }
+  }
+
+  private void addToBuffer(Document d) {
+    if(currentDocument == null) {
+      currentDocument = new DocBuilder(d);
+    } else {
+      currentDocument.addSample(d);
+    }
+  }
+  
+  private void write() throws IOException {
+    if(currentDocument == null)
+      return;
+
+    // pull the current aggregate document
+    Document doc = currentDocument.result(documentNumber);
+    currentDocument = null;
+
+    // number this document with an increasing id
+    doc.identifier = documentNumber++;
+    processor.process(doc);
+  }
+
+  @Override
+  public void close() throws IOException {
+    write();
+    processor.close();
+  }
+  
+  @Override
+  public void setProcessor(Step processor) throws IncompatibleProcessorException {
+    Linkage.link(this, processor);
+  }
+  
+  
+  public final class DocBuilder {
     private Map<String,String> metadata;
     private StringBuilder sb;
     private int numSamples = 0;
     private String name;
 
-    private MergedDocument(Document d) {
-      identifier = -1;
+    private DocBuilder(Document d) {
       metadata = new HashMap<String,String>();
       sb = new StringBuilder();
       name = d.name;
@@ -77,7 +147,6 @@ public class DocumentAggregator implements KeyValuePair.KeyOrder.ShreddedProcess
       
       Document d = new Document();
       d.name = name;
-      d.identifier = id;
       d.text = sb.toString();
       d.metadata = metadata;
       
@@ -85,84 +154,5 @@ public class DocumentAggregator implements KeyValuePair.KeyOrder.ShreddedProcess
     }
  }
   
-  // this gets overriden with the correct thing in Linkage.link
-  public Processor<Document> processor = new NullProcessor(Document.class);
   
-  @Override
-  public void setProcessor(Step processor) throws IncompatibleProcessorException {
-    Linkage.link(this, processor);
-  }
-  
-  Counter docsIn, docsOut;
-  long documentNumber = 0;
-  byte[] lastIdentifier = null;
-  Map<String, MergedDocument> bufferedDocuments;
-
-  public DocumentAggregator(TupleFlowParameters parameters) throws IOException, FileNotFoundException {
-    docsIn = parameters.getCounter("Documents in");
-    docsOut = parameters.getCounter("Documents out");
-    bufferedDocuments = new HashMap<String, MergedDocument>();
-  }
-
-  /**
-   * If this key is new and we have a key already, we need to write the previous document.
-   * @param key
-   * @throws IOException 
-   */
-  @Override
-  public void processKey(byte[] key) throws IOException {
-    if(key == null) { return; }
-    if (lastIdentifier != null && (Utility.compare(key, lastIdentifier) != 0)) {
-      write();
-    }
-    lastIdentifier = key;
-  }
-
-  @Override
-  public void processTuple(byte[] value) throws IOException {
-    ByteArrayInputStream stream = new ByteArrayInputStream(value);
-    Document document;
-    try {
-      ObjectInputStream input = new ObjectInputStream(new SnappyInputStream(stream));
-      document = (Document) input.readObject();
-      addToBuffer(document);
-      if (docsIn != null) {
-        docsIn.increment();
-      }
-    } catch (ClassNotFoundException cnfe) {
-      throw new RuntimeException(cnfe);
-    }
-  }
-
-  private void addToBuffer(Document d) {
-    if (!bufferedDocuments.containsKey(d.name)) {
-      bufferedDocuments.put(d.name, new MergedDocument(d));
-    } else {
-      bufferedDocuments.get(d.name).addSample(d);
-    }
-  }
-  private Parameters emptyParameters = new Parameters();
-
-  private void write() throws IOException {
-    for (String nameKey : bufferedDocuments.keySet()) {
-      ByteArrayOutputStream array = new ByteArrayOutputStream();
-      
-      MergedDocument pd = bufferedDocuments.get(nameKey);
-      pd.identifier = documentNumber;
-      Document doc = pd.result(documentNumber);
-      processor.process(doc);
-      
-      documentNumber++;
-      if (docsOut != null) {
-        docsOut.increment();
-      }
-    }
-    bufferedDocuments.clear();
-  }
-
-  @Override
-  public void close() throws IOException {
-    write();
-    processor.close();
-  }
 }
