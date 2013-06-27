@@ -149,12 +149,12 @@ public class MBTEIEntityParser extends MBTEIParserBase {
       parsedDocument.name = closingContext.name;
       parsedDocument.identifier = closingContext.name.hashCode();
       parsedDocument.metadata.put("title", closingContext.name);
-      parsedDocument.metadata.put("sourceIdentifier", getArchiveIdentifier());
+      parsedDocument.metadata.put("src", getArchiveIdentifier());
       if (closingContext.externalLink != null) {
-        parsedDocument.metadata.put("externalLink", closingContext.externalLink);
+        parsedDocument.metadata.put("link", closingContext.externalLink);
       }
-      parsedDocument.metadata.put("startPage", Integer.toString(closingContext.startPage));
-      parsedDocument.metadata.put("startPos", Integer.toString(closingContext.startPos));
+      parsedDocument.metadata.put("page", Integer.toString(closingContext.startPage));
+      parsedDocument.metadata.put("pos", Integer.toString(closingContext.startPos));
       parsedDocument.terms = closingContext.tokens;
       pooler.transform(parsedDocument);
     } else {
@@ -162,6 +162,7 @@ public class MBTEIEntityParser extends MBTEIParserBase {
     }
   }
 
+  @Override
   public void cleanup() {
     if (openContexts.size() > 0) {
       // Restrict out any contexts that don't match.

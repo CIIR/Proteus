@@ -4,16 +4,6 @@
   "indexPath" : "portland-3.5/people",
   "galagoJobDir" : "job/person",
   "parser" : {
-    "externalParsers" : [
-      {
-      "filetype" : "pseudo-corpus",
-      "class" : "ciir.proteus.index.PseudoCorpusSplitParser"
-      }
-    ],
-    "filetype" : "pseudo-corpus",
-    "pseudo" : true,
-    "samples" : false
-  },
-  "tokenizer" : { "class" : "org.lemurproject.galago.core.parse.StringPoolTokenizer" },
-  "numberer" : {"class" : "org.lemurproject.galago.core.parse.IdentityTokenizer" }
+    "filetype" : "corpus"
+  }
 }

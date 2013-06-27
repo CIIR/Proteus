@@ -1,8 +1,9 @@
 {
+  "server":true,
   "corpus":true,
-  "corpusPath" : "portland-3.5/people",
-  "galagoJobDir" : "job/entity-corpus",
   "inputPath" : ["new-config/portland.list"],
+  "indexPath" : "portland-3.5/people",
+  "galagoJobDir" : "job/entity-corpus",
   "parser" : {
     "externalParsers" : [
       {

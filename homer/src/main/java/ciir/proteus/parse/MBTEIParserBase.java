@@ -438,7 +438,10 @@ public abstract class MBTEIParserBase extends DocumentStreamParser {
   public String getArchiveIdentifier() {
     File f = new File(split.fileName);
     String basename = f.getName();
-    String[] parts = basename.split("_");
+    if(!basename.endsWith(".mbtei.gz")) {
+      throw new RuntimeException("File extension was expected to be .mbtei.gz");
+    }
+    String[] parts = basename.split(".mbtei.gz");
     return parts[0];
   }
 }

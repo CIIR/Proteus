@@ -19,81 +19,80 @@ import org.lemurproject.galago.tupleflow.execution.OutputStep;
 import org.lemurproject.galago.tupleflow.execution.Stage;
 import org.lemurproject.galago.tupleflow.execution.Step;
 
-
 public class IndexLinker extends AppFunction {
 
-    public Stage getGenerateLinksStage(String stageName,
-				       String inStream,
-				       String outStream,
-				       Parameters parameters) {
-	Stage stage = new Stage(stageName);
+  public Stage getGenerateLinksStage(String stageName,
+          String inStream,
+          String outStream,
+          Parameters parameters) {
+    Stage stage = new Stage(stageName);
 
-	stage.addInput(inStream, new DocumentSplit.FileIdOrder());
-	stage.addOutput(outStream, new IndexLink.SrctypeTargettypeIdTargetidTargetposOrder());
+    stage.addInput(inStream, new DocumentSplit.FileIdOrder());
+    stage.addOutput(outStream, new IndexLink.SrctypeTargettypeIdTargetidTargetposOrder());
 
-	stage.add(new InputStep(inStream));
-	stage.add(BuildStageTemplates.getParserStep(parameters));
-	stage.add(new Step(IndexLinkGenerator.class));
-	stage.add(Utility.getSorter(new IndexLink.SrctypeTargettypeIdTargetidTargetposOrder()));
-	stage.add(new OutputStep(outStream));
-	return stage;
-    }
+    stage.add(new InputStep(inStream));
+    stage.add(BuildStageTemplates.getParserStep(parameters));
+    stage.add(new Step(IndexLinkGenerator.class));
+    stage.add(Utility.getSorter(new IndexLink.SrctypeTargettypeIdTargetidTargetposOrder()));
+    stage.add(new OutputStep(outStream));
+    return stage;
+  }
 
-    public Stage getWriteLinksStage(String stageName,
-				    String inStream,
-				    Parameters parameters) {
-	Stage stage = new Stage(stageName);
-	stage.addInput(inStream, new IndexLink.SrctypeTargettypeIdTargetidTargetposOrder());
+  public Stage getWriteLinksStage(String stageName,
+          String inStream,
+          Parameters parameters) {
+    Stage stage = new Stage(stageName);
+    stage.addInput(inStream, new IndexLink.SrctypeTargettypeIdTargetidTargetposOrder());
 
-	stage.add(new InputStep(inStream));
-	stage.add(new Step(IndexLinkWriter.class, parameters));
-	return stage;
-    }
+    stage.add(new InputStep(inStream));
+    stage.add(new Step(IndexLinkWriter.class, parameters));
+    return stage;
+  }
 
   public Job getLinkJob(Parameters jobParameters) throws Exception {
-      Job job = new Job();
+    Job job = new Job();
 
-      String linksPath = jobParameters.getString("linksPath");
-      File manifest = new File(linksPath, "buildManifest.json");
-      Utility.makeParentDirectories(manifest);
-      Utility.copyStringToFile(jobParameters.toPrettyString(), manifest);
+    String linksPath = jobParameters.getString("linksPath");
+    File manifest = new File(linksPath, "buildManifest.json");
+    Utility.makeParentDirectories(manifest);
+    Utility.copyStringToFile(jobParameters.toPrettyString(), manifest);
 
-      List<String> inputPaths = jobParameters.getAsList("inputPath");
-      Parameters splitParameters = jobParameters.get("parser", new Parameters()).clone();
-      job.add(BuildStageTemplates.getSplitStage(inputPaths,
-						DocumentSource.class,
-						new DocumentSplit.FileIdOrder(),
-						splitParameters));
-      job.add(getGenerateLinksStage("generateLinks",
-				    "splits",
-				    "links",
-				    jobParameters));
-      Parameters writeParameters = new Parameters();
-      writeParameters.set("filename", jobParameters.getString("linksPath"));
-      job.add(getWriteLinksStage("writeLinks", "links", writeParameters));
-      job.connect("inputSplit", "generateLinks", ConnectionAssignmentType.Each);
-      job.connect("generateLinks", "writeLinks", ConnectionAssignmentType.Combined);
-      return job;
+    List<String> inputPaths = jobParameters.getAsList("inputPath");
+    Parameters splitParameters = jobParameters.get("parser", new Parameters()).clone();
+    job.add(BuildStageTemplates.getSplitStage(inputPaths,
+            DocumentSource.class,
+            new DocumentSplit.FileIdOrder(),
+            splitParameters));
+    job.add(getGenerateLinksStage("generateLinks",
+            "splits",
+            "links",
+            jobParameters));
+    Parameters writeParameters = new Parameters();
+    writeParameters.set("filename", jobParameters.getString("linksPath"));
+    job.add(getWriteLinksStage("writeLinks", "links", writeParameters));
+    job.connect("inputSplit", "generateLinks", ConnectionAssignmentType.Each);
+    job.connect("generateLinks", "writeLinks", ConnectionAssignmentType.Combined);
+    return job;
   }
 
   @Override
   public void run(Parameters p, PrintStream output) throws Exception {
-      if (!p.isString("linksPath") && !p.isList("inputPath")) {
-	  output.println(getHelpString());
-	  return;
-      }
+    if (!p.isString("linksPath") && !p.isList("inputPath")) {
+      output.println(getHelpString());
+      return;
+    }
 
     Job job;
     IndexLinker linker = new IndexLinker();
     job = linker.getLinkJob(p);
 
     if (job != null) {
-	AppFunction.runTupleFlowJob(job, p, output);
+      AppFunction.runTupleFlowJob(job, p, output);
     }
   }
 
   public String getName() {
-      return "link-indexes";
+    return "link-indexes";
   }
 
   @Override
@@ -104,7 +103,7 @@ public class IndexLinker extends AppFunction {
             + "          specified as you like.  Galago can read html, xml, txt, \n"
             + "          arc (Heritrix), warc, trectext, trecweb and corpus files.\n"
             + "          Files may be gzip compressed (.gz|.bz).\n"
-	    + "<dir>:    The directory path for the produced links.\n\n"
+            + "<dir>:    The directory path for the produced links.\n\n"
             + AppFunction.getTupleFlowParameterString();
     //TODO: need to design parameters for field indexes + stemming for field indexes
   }
