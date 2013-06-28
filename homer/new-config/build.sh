@@ -3,8 +3,8 @@
 HOMER="java -cp target/homer-0.2.jar ciir.proteus.build.Main"
 
 # build books & pages - no deps on anything else
-#${HOMER} build new-config/buildBooks.json &
-#${HOMER} build new-config/buildPages.json &
+#${HOMER} build new-config/buildBooks.json
+${HOMER} build new-config/buildPages.json
 
 
 # build people/corpus
@@ -23,4 +23,4 @@ HOMER="java -cp target/homer-0.2.jar ciir.proteus.build.Main"
 #${HOMER} build new-config/buildMisc.json
 
 # build pictures
-${HOMER} build-pictures new-config/buildPictures.json
+#${HOMER} build-pictures new-config/buildPictures.json
