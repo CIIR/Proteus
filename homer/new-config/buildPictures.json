@@ -1,0 +1,16 @@
+{
+ "server":true,
+ "corpus":true,
+ "inputPath" : [ "new-config/abbyy_portland.list" ] , 
+ "picturesPath" : "portland-3.5/pictures",
+ "galagoJobDir" : "job/pictures",
+ "parser" : { 
+    "inputPolicy" : "warn",
+    "externalParsers" : [
+      {
+        "filetype" : "abbyy",
+        "class" : "ciir.proteus.parse.MBTEIPictureParser" 
+      }
+	  ]	
+	}
+}

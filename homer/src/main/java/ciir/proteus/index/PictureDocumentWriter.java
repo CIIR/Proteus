@@ -21,6 +21,7 @@ public class PictureDocumentWriter extends KeyValueWriter<KeyValuePair> {
     manifest.set("writerClass", this.getClass().getName());
   }
 
+  @Override
   public GenericElement prepare(KeyValuePair kvp) {
     return new GenericElement(kvp.key, kvp.value);
   }

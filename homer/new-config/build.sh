@@ -18,6 +18,9 @@ HOMER="java -cp target/homer-0.2.jar ciir.proteus.build.Main"
 #${HOMER} build new-config/buildLocations.json
 
 # build misc/corpus
-${HOMER} build-entity-corpus new-config/buildMiscCorpus.json
+#${HOMER} build-entity-corpus new-config/buildMiscCorpus.json
 # use misc/corpus to build the rest of the index
-${HOMER} build new-config/buildMisc.json
+#${HOMER} build new-config/buildMisc.json
+
+# build pictures
+${HOMER} build-pictures new-config/buildPictures.json

@@ -93,26 +93,27 @@ with TypedStore {
   def scorePictures(pageResults: List[SearchResult]) : List[SearchResult] = {
     pageResults.map {
       pageResult => {
-	val pid = pageResult.id.identifier
-	index.getEntry(pid) match {
-	  case None => List()
-	  case Some(pl: PictureList) => 
-	    pl.pictures.zipWithIndex.map {
-	      A => {
-		val (pic, index) = A
-		val id = "%s_%s" format (pid, index)
-		val thumbUrl = getThumbUrl(pid, pic)
-		val pictureUrl = getFullUrl(pid, pic)
-		SearchResult(id = AccessIdentifier(identifier = id,
-						   `type` = ProteusType.Picture,						   
-						   resourceId = siteId),
-			     score = 0,
-			     thumbUrl = thumbUrl,
-			     imgUrl = pictureUrl,
-			     externalUrl = getPageUrl(pid))
-	      }
-	    }
-	}	
+        val pid = pageResult.id.identifier
+        index.getEntry(pid) match {
+          case None => List()
+          case Some(pl: PictureList) => {
+            pl.pictures.zipWithIndex.map {
+              A => {
+                val (pic, index) = A
+                val id = "%s_%s" format (pid, index)
+                val thumbUrl = getThumbUrl(pid, pic)
+                val pictureUrl = getFullUrl(pid, pic)
+                SearchResult(id = AccessIdentifier(identifier = id,
+                           `type` = ProteusType.Picture,						   
+                           resourceId = siteId),
+                       score = 0,
+                       thumbUrl = thumbUrl,
+                       imgUrl = pictureUrl,
+                       externalUrl = getPageUrl(pid))
+              }
+            }
+          }
+        }	
       }
     }.flatten
   }
