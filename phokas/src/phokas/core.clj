@@ -757,11 +757,11 @@
           idir (.getParent ifile)
           bid (.getName (File. idir))
           mpath (jio/file idir (str bid "_meta.xml.bz2"))
-          raw-path (.getPath (jio/file idir (str bid "_rawtei.xml.gz")))
+          raw-path (.getPath (jio/file idir (str bid ".rawtei.gz")))
           [call opath]
           (cond
-           (re-find #"_rawtei.xml.gz$" ipath)
-           [nlp-annotate-file (.getPath (jio/file idir (str bid "_mbtei.xml.gz")))]
+           (re-find #".rawtei.gz$" ipath)
+           [nlp-annotate-file (.getPath (jio/file idir (str bid ".mbtei.gz")))]
            (re-find #"gut$" bid)
            [(partial raw-file gut-paras mpath) raw-path]
            (re-find #"_ocrml.xml$" ipath)
