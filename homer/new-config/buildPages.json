@@ -1,9 +1,9 @@
 {
   "server":true,
   "corpus":true,
-  "indexPath" : "portland-3.5/pages",
+  "indexPath" : "build/pages",
   "galagoJobDir" : "job/pages",
-  "inputPath" : ["new-config/mbtei_portland.list"],
+  "inputPath" : ["test.list.gz"],
   "tokenizer" : {
     "fields" : [ "name", "title", "creator", "language", "subject", "date" ] , 
 		"formats" : { "date" : "date", "title" : "string" }
