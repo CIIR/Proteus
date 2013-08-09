@@ -227,7 +227,7 @@
         encoding (if (re-find #"-8\." ipath) "ISO-8859-1" "UTF-8")
         file-read #(jio/reader (if (re-find #"\.bz2$" %) (bzreader %) %) :encoding encoding)]
     (with-open [in ^BufferedReader (file-read ipath)
-                out (-> opath jio/input-stream GZIPOutputStream.
+                out (-> opath jio/output-stream GZIPOutputStream.
                         (jio/writer :encoding "UTF-8"))]
       (.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TEI>\n")
       (.write out metadata)
@@ -237,34 +237,48 @@
       opath)))
 
 (defn convert-file
-  [fpath]
-  (let [ipath (s/trim fpath)
-        ifile (File. ipath)
+  [iname iprefix oprefix]
+  (let [ifile (File. iname)
         idir (.getParent ifile)
         bid (.getName (File. idir))
+        ;; All this stuff because of overprotective jio/file
+        ipath (str (if iprefix (jio/file iprefix iname) iname))
         mpath (jio/file idir (str bid "_meta.xml.bz2"))
-        raw-path (.getPath (jio/file idir (str bid ".rawtei.gz")))
-        [call opath]
+        opath (jio/file idir (str bid ".rawtei.gz"))
+        mpath (if iprefix (jio/file iprefix mpath) mpath)
+        opath (str (if oprefix (jio/file oprefix opath) opath))
+        call
         (cond
          (re-find #"gut$" bid)
-         [(partial raw-file gut-paras mpath) raw-path]
-         (re-find #"_ocrml.xml$" ipath)
-         [(partial raw-file ocrml-paras mpath) raw-path]
-         (re-find #"_djvu.xml.bz2" ipath)
-         [(partial raw-file dj-paras mpath) raw-path])]
+         (partial raw-file gut-paras mpath)
+         (re-find #"_ocrml.xml$" iname)
+         (partial raw-file ocrml-paras mpath)
+         (re-find #"_djvu.xml.bz2" iname)
+         (partial raw-file dj-paras mpath))]
     (try
+      (jio/make-parents opath)
       (call ipath opath)
       (catch Exception e
-        (println "# Error with " ifile ":" e)
+        (println "# Error with " ipath ":" e)
         (if opath
           (let [ofile (File. opath)]
             (if (and (.exists ofile) (.canWrite ofile))
-              (do (.delete opath)
+              (do (.delete ofile)
                   ""))))))))
 
 (defn -main
-  "I don't do a whole lot ... yet."
+  "Bridge to convert books to rawtei format."
   [& args]
   ;; work around dangerous default behaviour in Clojure
   (alter-var-root #'*read-eval* (constantly false))
-  (println "Hello, World!"))
+  (let [[options remaining banner]
+        (safe-cli args
+                  ["-i" "--input" "Input prefix" :default nil]
+                  ["-o" "--output" "Output prefix" :default nil]
+                  ["-h" "--help" "Show help" :default false :flag true])
+        fseq
+        (if (empty? remaining)
+          (-> System/in InputStreamReader. BufferedReader. line-seq)
+          (line-seq (first remaining)))]
+    (doseq [fpath fseq]
+      (convert-file (s/trim fpath) (:input options) (:output options)))))
