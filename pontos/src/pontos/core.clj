@@ -232,7 +232,7 @@
       (.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<TEI>\n")
       (.write out metadata)
       (.write out "<text>\n")
-      (doseq [para (para-seq in)] (.write out para))
+      (doseq [para (para-seq in)] (.write out (str para)))
       (.write out "\n</text></TEI>\n")
       opath)))
 
