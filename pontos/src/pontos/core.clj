@@ -238,7 +238,7 @@
 
 (defn convert-file
   [iname iprefix oprefix]
-  (let [ifile (File. iname)
+  (let [ifile (jio/file iname)
         idir (.getParent ifile)
         bid (.getName (File. idir))
         ;; All this stuff because of overprotective jio/file
@@ -279,6 +279,6 @@
         fseq
         (if (empty? remaining)
           (-> System/in InputStreamReader. BufferedReader. line-seq)
-          (line-seq (first remaining)))]
+          (line-seq (gzreader (first remaining))))]
     (doseq [fpath fseq]
       (convert-file (s/trim fpath) (:input options) (:output options)))))
