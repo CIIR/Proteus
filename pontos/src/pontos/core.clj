@@ -247,6 +247,7 @@
         opath (jio/file idir (str bid ".rawtei.gz"))
         mpath (if iprefix (jio/file iprefix mpath) mpath)
         opath (str (if oprefix (jio/file oprefix opath) opath))
+        ofile (File. opath)
         call
         (cond
          (re-find #"gut$" bid)
@@ -255,16 +256,15 @@
          (partial raw-file ocrml-paras mpath)
          (re-find #"_djvu.xml.bz2" iname)
          (partial raw-file dj-paras mpath))]
-    (try
-      (jio/make-parents opath)
-      (call ipath opath)
-      (catch Exception e
-        (println "# Error with " ipath ":" e)
-        (if opath
-          (let [ofile (File. opath)]
-            (if (and (.exists ofile) (.canWrite ofile))
-              (do (.delete ofile)
-                  ""))))))))
+    (when-not (.exists ofile)
+      (try
+        (jio/make-parents opath)
+        (call ipath opath)
+        (catch Exception e
+          (println "# Error with " ipath ":" e)
+          (if (and opath (.exists ofile) (.canWrite ofile))
+            (do (.delete ofile)
+                "")))))))
 
 (defn -main
   "Bridge to convert books to rawtei format."
