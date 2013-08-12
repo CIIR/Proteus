@@ -539,30 +539,28 @@
                (first top-lang)
                "unk")]
     (println "# sw-lang:" langs)
-    (if (and (not-empty *languages*) (not (*languages* lang)))
-      (do (println "# unprocessed language: " lang) "")
-      (with-bindings {#'*language* lang
-                      #'*annotators*
-                      {:tokenizer
-                       (edu.stanford.nlp.pipeline.PTBTokenizerAnnotator.
-                        false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")}
-                      #'*dict* (clojure.set/union
-                                *dict*
-                                (set (filter #(re-find #"^[A-Za-z]+$" %) (keys raw-counts))))}
-        (with-open [in ^BufferedReader (gzreader ipath)
-                    out (-> opath java.io.FileOutputStream. GZIPOutputStream.
-                            (jio/writer :encoding "UTF-8"))]
-          (let [event-seq (x/source-seq in)]
-            ;;(.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-            (.write out
-                    (->> event-seq
-                        (take-while #(not= (:name %) :text))
-                        x/event-tree x/emit-str
-                        (#(s/replace % #"</TEI>$" ""))))
-            (.write out (str "<text lang=\"" lang "\">\n"))
-            (doseq [para (tei-paras event-seq)] (.write out (tokenize-para (word-forms para))))
-            (.write out "\n</text></TEI>\n")
-            opath))))))  
+    (with-bindings {#'*language* lang
+                    #'*annotators*
+                    {:tokenizer
+                     (edu.stanford.nlp.pipeline.PTBTokenizerAnnotator.
+                      false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")}
+                    #'*dict* (clojure.set/union
+                              *dict*
+                              (set (filter #(re-find #"^[A-Za-z]+$" %) (keys raw-counts))))}
+      (with-open [in ^BufferedReader (gzreader ipath)
+                  out (-> opath java.io.FileOutputStream. GZIPOutputStream.
+                          (jio/writer :encoding "UTF-8"))]
+        (let [event-seq (x/source-seq in)]
+          ;;(.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+          (.write out
+                  (->> event-seq
+                       (take-while #(not= (:name %) :text))
+                       x/event-tree x/emit-str
+                       (#(s/replace % #"</TEI>$" ""))))
+          (.write out (str "<text lang=\"" lang "\">\n"))
+          (doseq [para (tei-paras event-seq)] (.write out (tokenize-para (word-forms para))))
+          (.write out "\n</text></TEI>\n")
+          opath)))))
 
 (defn convert-file
   [^String opath]
