@@ -5,11 +5,10 @@
 	    [clojure.java.io :as jio]
             [net.cgrand.enlive-html :as html]
 	    [clojure.data.zip :as zf]
-	    [clojure.zip :as zip])
-  (:use [clojure.tools.cli]
-	[clojure.data.xml :only (emit-element emit-str event event-tree source-seq parse-str)]
-	[clojure.data.zip.xml]
-        [ciir.utils])
+	    [clojure.zip :as zip]
+            [clojure.data.xml :as x]
+            [clojure.data.zip.xml :as zx]
+            [ciir.utils :refer :all])
   (:import (java.io File BufferedInputStream InputStreamReader
 		    BufferedReader PushbackReader)
 	   (java.util ArrayList Properties)
@@ -198,7 +197,7 @@
 
 (defn ner-sen
   [sen]
-  (let [words (xml-> sen :w (attr :form))
+  (let [words (zx/xml-> sen :w (zx/attr :form))
         spans (EmbedTagger/tagText (s/join " " words))]
     (map
      (fn [^TokenSpan span]
@@ -208,10 +207,10 @@
 (defn ner-para
   [para]
   (let [;; Wrap in dummy tags to allow stuff before or after main <p>.
-        tree (parse-str (str "<wrapper>" para "</wrapper>"))
+        tree (x/parse-str (str "<wrapper>" para "</wrapper>"))
         tags (-> tree
                  zip/xml-zip
-                 (xml-> :p :s)
+                 (zx/xml-> :p :s)
                  (#(map ner-sen %)))]
     (if (= tags '(()))
       para
@@ -236,15 +235,15 @@
   [para]
   (let [tags (->
 	      (str "<text>" para "</text>")
-	      parse-str
+	      x/parse-str
 	      zip/xml-zip
-	      (xml-> :p :s))]
+	      (zx/xml-> :p :s))]
     para))
 
 (defn dc-language
   [dc-string]
-  (let [mt (zip/xml-zip (parse-str dc-string))]
-    (xml1-> mt :language text)))
+  (let [mt (zip/xml-zip (x/parse-str dc-string))]
+    (zx/xml1-> mt :language zx/text)))
 
 (defn ^String local-language
   [otag]
@@ -366,7 +365,7 @@
 (defn tei-words
   [s]
   (->> s
-       source-seq
+       x/source-seq
        (drop-while #(not= (:name %) :text))
        (filter #(= (:type %) :characters))
        (map :str)
@@ -381,9 +380,9 @@
         #(and (= (:name %) :p)
               (= (:type %) :end-element)))
        (map
-        #(concat (vector (event :start-element :wrapper))
-                 % (vector (event :end-element :wrapper))))
-       (map #(-> % event-tree emit-str
+        #(concat (vector (x/event :start-element :wrapper))
+                 % (vector (x/event :end-element :wrapper))))
+       (map #(-> % x/event-tree x/emit-str
                  (s/replace #"^.*<wrapper>" "")
                  (s/replace #"</wrapper>$" "")
                  (s/replace #"</p>.*$" "")))))
@@ -500,7 +499,7 @@
 (defn nlp-annotate-file
   [ipath opath]
   (println opath)
-  (let [raw-counts (with-open [in ^BufferedReader (gzreader ipath)]
+   (let [raw-counts (with-open [in ^BufferedReader (gzreader ipath)]
                      (tei-words in))
         langs (sort-by second > (stopword-langid raw-counts))
         top-lang (first langs)
@@ -517,52 +516,85 @@
                                 (set (filter #(re-find #"^[A-Za-z]+$" %) (keys raw-counts))))}
         (with-open [in ^BufferedReader (gzreader ipath)
                     out (-> opath java.io.FileOutputStream. GZIPOutputStream. (jio/writer :encoding "UTF-8"))]
-          (let [event-seq (source-seq in)]
+          (let [event-seq (x/source-seq in)]
             ;;(.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
             (.write out
                     (->> event-seq
                         (take-while #(not= (:name %) :text))
-                        event-tree emit-str
+                        x/event-tree x/emit-str
                         (#(s/replace % #"</TEI>$" ""))))
             (.write out (str "<text lang=\"" lang "\">\n"))
             (doseq [para (tei-paras event-seq)] (.write out (annotate-para (word-forms para))))
             (.write out "\n</text></TEI>\n")
             opath))))))
 
-(defn convert-listed-files
-  [fname-seq]
-  (doseq [fpath fname-seq]
-    (let [ipath (s/trim fpath)
-          ifile (File. ipath)
-          idir (.getParent ifile)
-          bid (.getName (File. idir))
-          raw-path (.getPath (jio/file idir (str bid ".rawtei.gz")))
-          [call opath]
-          (cond
-           (re-find #".rawtei.gz$" ipath)
-           [nlp-annotate-file (.getPath (jio/file idir (str bid ".mbtei.gz")))]
-           )]
+(defn tokenize-file
+  [ipath opath]
+  (println opath)
+   (let [raw-counts (with-open [in ^BufferedReader (gzreader ipath)]
+                     (tei-words in))
+        langs (sort-by second > (stopword-langid raw-counts))
+        top-lang (first langs)
+        lang (if (> (second top-lang) 0.5)
+               (first top-lang)
+               "unk")]
+    (println "# sw-lang:" langs)
+    (if (and (not-empty *languages*) (not (*languages* lang)))
+      (do (println "# unprocessed language: " lang) "")
+      (with-bindings {#'*language* lang
+                      #'*annotators*
+                      {:tokenizer
+                       (edu.stanford.nlp.pipeline.PTBTokenizerAnnotator.
+                        false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")}
+                      #'*dict* (clojure.set/union
+                                *dict*
+                                (set (filter #(re-find #"^[A-Za-z]+$" %) (keys raw-counts))))}
+        (with-open [in ^BufferedReader (gzreader ipath)
+                    out (-> opath java.io.FileOutputStream. GZIPOutputStream.
+                            (jio/writer :encoding "UTF-8"))]
+          (let [event-seq (x/source-seq in)]
+            ;;(.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+            (.write out
+                    (->> event-seq
+                        (take-while #(not= (:name %) :text))
+                        x/event-tree x/emit-str
+                        (#(s/replace % #"</TEI>$" ""))))
+            (.write out (str "<text lang=\"" lang "\">\n"))
+            (doseq [para (tei-paras event-seq)] (.write out (tokenize-para (word-forms para))))
+            (.write out "\n</text></TEI>\n")
+            opath))))))  
+
+(defn convert-file
+  [^String opath]
+  (let [ofile (File. opath)
+        idir (.getParent ofile)
+        bid (.getName (File. idir))
+        raw-path (.getPath (jio/file idir (str bid ".rawtei.gz")))
+        [call ipath]
+        (cond
+         (re-find #".mbtei.gz$" opath)
+         [nlp-annotate-file (.getPath (jio/file idir (str bid ".toktei.gz")))]
+         (re-find #".toktei.gz$" opath)
+         [tokenize-file (.getPath (jio/file idir (str bid ".rawtei.gz")))]
+         )]
+    (when-not (.exists ofile)
       (try
         (call ipath opath)
         (catch Exception e
-          (println "# Error with " ifile ":" e)
-          (if opath
-            (let [ofile (File. opath)]
-              (if (and (.exists ofile) (.canWrite ofile))
-                (do (.delete opath)
-                    "")))))))))
+          (println "# Error with " ipath ":" e)
+          (if (and opath (.exists ofile) (.canWrite ofile))
+            (do (.delete opath)
+                "")))))))
 
 (defn -main [& args]
   "IA book converter"
   (let [[options remaining banner]
         (safe-cli args
-                  ["-c" "--clobber" "Clobber existing files" :default false :flag true]
                   ["-m" "--models" "Models for SamNER" :default "models"]
                   ["-h" "--help" "Show help" :default false :flag true])]
-    (binding [*clobber?* (:clobber options)
-              *ner-models* (or (:models options) *ner-models*)]
-      (if (empty? remaining)
-        (-> System/in InputStreamReader. BufferedReader. line-seq convert-listed-files)
-        (doseq [ff remaining]
-          (with-open [in (gzreader ff)]
-            (convert-listed-files (line-seq in))))))))
+    (binding [*ner-models* (or (:models options) *ner-models*)]
+      (doseq [fpath
+              (if (empty? remaining)
+                (-> System/in InputStreamReader. BufferedReader. line-seq)
+                (line-seq (gzreader (first remaining))))]
+        (convert-file (s/trim fpath))))))
