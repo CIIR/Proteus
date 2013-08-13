@@ -222,7 +222,6 @@
 
 (defn raw-file
   [para-seq ^String mpath ^String ipath ^String opath]
-  (println opath)
   (let [metadata (-> mpath bzreader slurp (s/replace #"^<\?xml [^>]+\?>\n*" "") dc-fix)
         encoding (if (re-find #"-8\." ipath) "ISO-8859-1" "UTF-8")
         file-read #(jio/reader (if (re-find #"\.bz2$" %) (bzreader %) %) :encoding encoding)]
@@ -256,15 +255,17 @@
          (partial raw-file ocrml-paras mpath)
          (re-find #"_djvu.xml.bz2" iname)
          (partial raw-file dj-paras mpath))]
-    (when-not (.exists ofile)
-      (try
-        (jio/make-parents opath)
-        (call ipath opath)
-        (catch Exception e
-          (println "# Error with " ipath ":" e)
-          (if (and opath (.exists ofile) (.canWrite ofile))
-            (do (.delete ofile)
-                "")))))))
+    (binding [*out* *err*]
+      (println opath)
+      (when-not (.exists ofile)
+        (try
+          (jio/make-parents opath)
+          (call ipath opath)
+          (catch Exception e
+            (println "# Error with " ipath ":" e)
+            (if (and opath (.exists ofile) (.canWrite ofile))
+              (do (.delete ofile)
+                  ""))))))))
 
 (defn -main
   "Bridge to convert books to rawtei format."

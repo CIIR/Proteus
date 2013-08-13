@@ -498,7 +498,6 @@
 
 (defn nlp-annotate-file
   [ipath opath]
-  (println opath)
    (let [raw-counts (with-open [in ^BufferedReader (gzreader ipath)]
                      (tei-words in))
         langs (sort-by second > (stopword-langid raw-counts))
@@ -530,8 +529,7 @@
 
 (defn tokenize-file
   [ipath opath]
-  (println opath)
-   (let [raw-counts (with-open [in ^BufferedReader (gzreader ipath)]
+  (let [raw-counts (with-open [in ^BufferedReader (gzreader ipath)]
                      (tei-words in))
         langs (sort-by second > (stopword-langid raw-counts))
         top-lang (first langs)
@@ -564,25 +562,27 @@
 
 (defn convert-file
   [^String opath]
-  (let [ofile (File. opath)
-        idir (.getParent ofile)
-        bid (.getName (File. idir))
-        raw-path (.getPath (jio/file idir (str bid ".rawtei.gz")))
-        [call ipath]
-        (cond
-         (re-find #".mbtei.gz$" opath)
-         [nlp-annotate-file (.getPath (jio/file idir (str bid ".toktei.gz")))]
-         (re-find #".toktei.gz$" opath)
-         [tokenize-file (.getPath (jio/file idir (str bid ".rawtei.gz")))]
-         )]
-    (when-not (.exists ofile)
-      (try
-        (call ipath opath)
-        (catch Exception e
-          (println "# Error with " ipath ":" e)
-          (if (and opath (.exists ofile) (.canWrite ofile))
-            (do (.delete opath)
-                "")))))))
+  (binding [*out* *err*]
+    (println opath)
+    (let [ofile (File. opath)
+          idir (.getParent ofile)
+          bid (.getName (File. idir))
+          raw-path (.getPath (jio/file idir (str bid ".rawtei.gz")))
+          [call ipath]
+          (cond
+           (re-find #".mbtei.gz$" opath)
+           [nlp-annotate-file (.getPath (jio/file idir (str bid ".toktei.gz")))]
+           (re-find #".toktei.gz$" opath)
+           [tokenize-file (.getPath (jio/file idir (str bid ".rawtei.gz")))]
+           )]
+      (when-not (.exists ofile)
+        (try
+          (call ipath opath)
+          (catch Exception e
+            (println "# Error with " ipath ":" e)
+            (if (and opath (.exists ofile) (.canWrite ofile))
+              (do (.delete opath)
+                  ""))))))))
 
 (defn -main [& args]
   "IA book converter"
