@@ -441,7 +441,6 @@ public abstract class MBTEIParserBase extends DocumentStreamParser {
     if(!basename.endsWith(".gz")) {
       throw new RuntimeException("File extension was expected to be .gz");
     }
-    String[] parts = basename.split("\\.");
-    return parts[0];
+    return basename.substring(0, basename.lastIndexOf('.', basename.length() - 4));
   }
 }
