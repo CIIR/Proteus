@@ -11,7 +11,7 @@
   "parser" : {
     "externalParsers" : [
       {
-        "filetype" : "toktei",
+        "filetype" : "mbtei",
         "class" : "ciir.proteus.parse.MBTEIPageParser"
       }
     ]
