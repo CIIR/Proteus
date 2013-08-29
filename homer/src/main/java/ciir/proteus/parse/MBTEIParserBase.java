@@ -347,6 +347,7 @@ public abstract class MBTEIParserBase extends DocumentStreamParser {
   Pattern textTag = Pattern.compile("text");
   Pattern teiTag = Pattern.compile("TEI", Pattern.CASE_INSENSITIVE);
   Pattern wordTag = Pattern.compile("w");
+  Pattern lbTag = Pattern.compile("lb");
   Pattern nameTag = Pattern.compile("name");
 
   // UTILITY FUNCTIONS
@@ -384,6 +385,19 @@ public abstract class MBTEIParserBase extends DocumentStreamParser {
     String scrubbed = scrub(formValue);
     if (scrubbed.length() > 0) {
       buffer.append(scrubbed).append(" ");
+      ++contentLength;
+    }
+  }
+
+  public void echoFormWithTag(int ignored) {
+    String formValue = reader.getAttributeValue(null, "form");
+    String scrubbed = scrub(formValue);
+    if (scrubbed.length() > 0) {
+      buffer.append("<w coords=\"").append(reader.getAttributeValue(null, "coords"));
+      buffer.append("\">");
+      buffer.append(scrubbed);
+      buffer.append("</w>");
+      buffer.append(" ");
       ++contentLength;
     }
   }
