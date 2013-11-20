@@ -1,4 +1,4 @@
-(ns phokas.core
+(ns ciir.phokas
   ^{:author "David Smith"}
   (:require [clojure.string :as s]
             [clojure.set]
