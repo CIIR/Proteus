@@ -9,5 +9,6 @@
                  [edu.stanford.nlp/stanford-corenlp "3.3.0"]
                  [edu.stanford.nlp/stanford-corenlp "3.3.0" :classifier "models"]
 		 [dparser "2011-01-18"]]
+  :plugins [[lein-bin "0.3.4"]]
   :aot :all
   :main ciir.phokas)
