@@ -9,4 +9,5 @@
                  [org.clojure/data.zip "0.1.1"]
 		 [ciir/utils "1.0.0-SNAPSHOT"]
                  ]
+  :plugins [[lein-bin "0.3.4"]]
   :main pontos.core)
