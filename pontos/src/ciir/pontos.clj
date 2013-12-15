@@ -1,4 +1,4 @@
-(ns pontos.core
+(ns ciir.pontos
   (:require [clojure.string :as s]
             [clojure.java.io :as jio]
             [clojure.data.xml :refer [source-seq]]
