@@ -10,6 +10,8 @@ repository by hand:
 
 http://books.cs.umass.edu/downloads/dparser-2011-01-18.jar
 
+We hope to automate this dependency soon.
+
 Then, to compile, run:
 
     $ lein bin
