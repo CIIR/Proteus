@@ -20,6 +20,7 @@ import ciir.proteus.parse.WordDateCountWriter;
 import org.lemurproject.galago.core.parse.DocumentSource;
 import org.lemurproject.galago.core.tools.AppFunction;
 import org.lemurproject.galago.core.tools.apps.BuildStageTemplates;
+import org.lemurproject.galago.tupleflow.FileUtility;
 
 public class BuildWordDateIndex extends AppFunction {
 
@@ -57,7 +58,7 @@ public class BuildWordDateIndex extends AppFunction {
 
     String wdPath = jobParameters.getString("indexPath");
     File manifest = new File(wdPath, "buildManifest.json");
-    Utility.makeParentDirectories(manifest);
+    FileUtility.makeParentDirectories(manifest);
     Utility.copyStringToFile(jobParameters.toPrettyString(), manifest);
 
     List<String> inputPaths = jobParameters.getAsList("inputPath");

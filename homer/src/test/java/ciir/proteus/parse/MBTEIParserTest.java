@@ -5,8 +5,15 @@ import java.util.ArrayList;
 import org.lemurproject.galago.core.types.DocumentSplit;
 import java.io.IOException;
 import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.parse.Tag;
+import org.lemurproject.galago.tupleflow.FileUtility;
 import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
@@ -15,14 +22,11 @@ import org.lemurproject.galago.tupleflow.Utility;
  *
  * @author irmarc
  */
-public class MBTEIParserTest extends TestCase {
+public class MBTEIParserTest {
 
-  public MBTEIParserTest(String testName) {
-    super(testName);
-  }
-
+  @Test
   public void testBookParseNothing() throws IOException {
-    File f = Utility.createTemporary();
+    File f = FileUtility.createTemporary();
     try {
       Utility.copyStringToFile("test book", f);
       DocumentSplit split = new DocumentSplit();
@@ -35,9 +39,10 @@ public class MBTEIParserTest extends TestCase {
       f.delete();
     }
   }
-
+  
+  @Test
   public void testPageParseNothing() throws IOException {
-    File f = Utility.createTemporary();
+    File f = FileUtility.createTemporary();
     try {
       Utility.copyStringToFile("test book", f);
       DocumentSplit split = new DocumentSplit();
@@ -50,11 +55,12 @@ public class MBTEIParserTest extends TestCase {
       f.delete();
     }
   }
-
+  
+  @Test
+  @Ignore
   public void testBookParse() throws IOException {
-    File f = Utility.createTemporary();
+    File f = FileUtility.createTemporary();
     try {
-      /*
       Utility.copyStringToFile(teiDocument, f);
       DocumentSplit split = new DocumentSplit();
       split.fileName = f.getAbsolutePath();
@@ -82,14 +88,14 @@ public class MBTEIParserTest extends TestCase {
       assertEquals("eng", document.metadata.get("language"));
       document = parser.nextDocument();
       assertNull(document);
-              */
     } finally {
       f.delete();
     }
   }
-
+  
+  @Test
   public void testIncompleteBookParse() throws IOException {
-    File f = Utility.createTemporary();
+    File f = FileUtility.createTemporary();
     try {
       Utility.copyStringToFile(badTEIDocument, f);
       DocumentSplit split = new DocumentSplit();
@@ -103,9 +109,10 @@ public class MBTEIParserTest extends TestCase {
 
     }
   }
-
+  
+  @Test
   public void testEntityParse() throws IOException {
-    File f = Utility.createTemporary();
+    File f = FileUtility.createTemporary();
     try {
       Utility.copyStringToFile(entityDocument, f);
       DocumentSplit split = new DocumentSplit();
@@ -124,57 +131,59 @@ public class MBTEIParserTest extends TestCase {
     }
   }
 
-   public void testPageParse() throws IOException {
-   File f = Utility.createTemporary();
-   try {
-     /*
-   Utility.copyStringToFile(teiDocument, f);
-   DocumentSplit split = new DocumentSplit();
-   split.fileName = f.getAbsolutePath();
-
-   MBTEIPageParser parser = new MBTEIPageParser(split, new Parameters());
-
-   Document document = parser.nextDocument();
-   String expected = "<TEI><metadata>"
-   + "<identifier>testDocument</identifier>"
-   + "<collection>galago</collection>"
-   + "<title>test1</title>"
-   + "<date>1916</date>"
-   + "<language>eng</language>"
-   + "</metadata>"
-   + "<text>The blue emerald</text></TEI>";
-   assertEquals("testdoc_2", document.name);
-   assertEquals(expected, document.text);
-
-   document = parser.nextDocument();
-   expected = "<TEI><metadata>"
-   + "<identifier>testDocument</identifier>"
-   + "<collection>galago</collection>"
-   + "<title>test1</title>"
-   + "<date>1916</date>"
-   + "<language>eng</language>"
-   + "</metadata>"
-   + "<text>, that ugly one</text></TEI>";
-   assertEquals("testdoc_3", document.name);
-   assertEquals(expected, document.text);
-   assertTrue(document.metadata.containsKey("title"));
-   assertEquals("test1", document.metadata.get("title"));
-   assertTrue(document.metadata.containsKey("date"));
-   assertEquals("1916", document.metadata.get("date"));
-   assertTrue(document.metadata.containsKey("language"));
-   assertEquals("eng", document.metadata.get("language"));
-   document = parser.nextDocument();
-   assertNull(document);
-             */
-   } finally {
-   f.delete();
-
-   }
-   }
-  public void testIncompletePageParse() throws IOException {
-    File f = Utility.createTemporary();
+  @Test
+  @Ignore
+  public void testPageParse() throws IOException {
+    File f = FileUtility.createTemporary();
     try {
-      /*
+      Utility.copyStringToFile(teiDocument, f);
+      DocumentSplit split = new DocumentSplit();
+      split.fileName = f.getAbsolutePath();
+
+      MBTEIPageParser parser = new MBTEIPageParser(split, new Parameters());
+
+      Document document = parser.nextDocument();
+      String expected = "<TEI><metadata>"
+              + "<identifier>testDocument</identifier>"
+              + "<collection>galago</collection>"
+              + "<title>test1</title>"
+              + "<date>1916</date>"
+              + "<language>eng</language>"
+              + "</metadata>"
+              + "<text>The blue emerald</text></TEI>";
+      assertEquals("testdoc_2", document.name);
+      assertEquals(expected, document.text);
+
+      document = parser.nextDocument();
+      expected = "<TEI><metadata>"
+              + "<identifier>testDocument</identifier>"
+              + "<collection>galago</collection>"
+              + "<title>test1</title>"
+              + "<date>1916</date>"
+              + "<language>eng</language>"
+              + "</metadata>"
+              + "<text>, that ugly one</text></TEI>";
+      assertEquals("testdoc_3", document.name);
+      assertEquals(expected, document.text);
+      assertTrue(document.metadata.containsKey("title"));
+      assertEquals("test1", document.metadata.get("title"));
+      assertTrue(document.metadata.containsKey("date"));
+      assertEquals("1916", document.metadata.get("date"));
+      assertTrue(document.metadata.containsKey("language"));
+      assertEquals("eng", document.metadata.get("language"));
+      document = parser.nextDocument();
+      assertNull(document);
+    } finally {
+      f.delete();
+
+    }
+  }
+  
+  @Test
+  @Ignore
+  public void testIncompletePageParse() throws IOException {
+    File f = FileUtility.createTemporary();
+    try {
       Utility.copyStringToFile(badTEIDocument, f);
       DocumentSplit split = new DocumentSplit();
       split.fileName = f.getAbsolutePath();
@@ -218,14 +227,15 @@ public class MBTEIParserTest extends TestCase {
       assertEquals("eng", document.metadata.get("language"));
       document = parser.nextDocument();
       assertNull(document);
-              */
     } finally {
       f.delete();
     }
   }
 
+  @Test
+  @Ignore
   public void testEntityLinking() throws IOException {
-    /*
+
     DocumentSplit split = new DocumentSplit();
     split.fileName = "testdoc";
     InputStream stream = new ByteArrayInputStream(entityDocument.getBytes());
@@ -276,13 +286,12 @@ public class MBTEIParserTest extends TestCase {
       assertEquals(d2.metadata.get("pos"),
               t2.attributes.get("pos"));
     }
-            */
   }
 
-  public static String teiDocument =
-          "<?xml version=\"1.0\" encoding=\"UTF-8\"?><TEI><metadata><identifier>testDocument</identifier><collection>galago</collection><title>test1</title><date>1916</date><language>eng</language></metadata><text lang=\"eng\"><pb n=\"1\" /><cb /><pb n=\"2\" /><w form=\"The\" deprel=\"ROOT\">The</w><w form=\"blue\">blue</w><w form=\"emerald\">emerald</w><pb n=\"3\"><w form=\",\">,</w><w form=\"that\" deprel=\"ROOT\">that</w><w form=\"ugly\">ugly</w><w form=\"one\">one</w></pb><pb n=\"4\"></pb></text></TEI>";
-  public static String entityDocument =
-          "<?xml version=\"1.0\" encoding=\"UTF-8\"?><TEI><metadata><identifier>testDocument</identifier><collection>galago</collection><title>test1</title><date>1916</date><language>eng</language></metadata><text lang=\"eng\"><pb n=\"1\" /><cb /><pb n=\"2\" /><w form=\"The\" deprel=\"ROOT\">The</w><name type=\"object\" name=\"blue emerald\"><w form=\"blue\">blue</w><w form=\"emerald\">emerald</w></name><pb n=\"3\"><w form=\",\">,</w><w form=\"that\" deprel=\"ROOT\">that</w><w form=\"ugly\">ugly</w><w form=\"one\">one</w></pb><pb n=\"4\"></pb></text></TEI>";
-  public static String badTEIDocument =
-          "<?xml version=\"1.0\" encoding=\"UTF-8\"?><TEI><metadata><identifier>testDocument</identifier><collection>galago</collection><title>test1</title><date>1916</date><language>eng</language></metadata><text lang=\"eng\"><pb n=\"1\" /><cb /><pb n=\"2\" /><w form=\"The\" deprel=\"ROOT\">The</w><w form=\"blue\">blue</w><w form=\"emerald\">emerald</w><pb n=\"3\"><w form=\",\">,</w><w form=\"that\" deprel=\"ROOT\">that</w><w form=\"ugly\">ugly</w><w form=\"one\">one</w></pb><pb n=\"4\"></pb><pb n=\"4\"><w coords=\"0234\" form=\"ha";
+  public static String teiDocument
+          = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><TEI><metadata><identifier>testDocument</identifier><collection>galago</collection><title>test1</title><date>1916</date><language>eng</language></metadata><text lang=\"eng\"><pb n=\"1\" /><cb /><pb n=\"2\" /><w form=\"The\" deprel=\"ROOT\">The</w><w form=\"blue\">blue</w><w form=\"emerald\">emerald</w><pb n=\"3\"><w form=\",\">,</w><w form=\"that\" deprel=\"ROOT\">that</w><w form=\"ugly\">ugly</w><w form=\"one\">one</w></pb><pb n=\"4\"></pb></text></TEI>";
+  public static String entityDocument
+          = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><TEI><metadata><identifier>testDocument</identifier><collection>galago</collection><title>test1</title><date>1916</date><language>eng</language></metadata><text lang=\"eng\"><pb n=\"1\" /><cb /><pb n=\"2\" /><w form=\"The\" deprel=\"ROOT\">The</w><name type=\"object\" name=\"blue emerald\"><w form=\"blue\">blue</w><w form=\"emerald\">emerald</w></name><pb n=\"3\"><w form=\",\">,</w><w form=\"that\" deprel=\"ROOT\">that</w><w form=\"ugly\">ugly</w><w form=\"one\">one</w></pb><pb n=\"4\"></pb></text></TEI>";
+  public static String badTEIDocument
+          = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><TEI><metadata><identifier>testDocument</identifier><collection>galago</collection><title>test1</title><date>1916</date><language>eng</language></metadata><text lang=\"eng\"><pb n=\"1\" /><cb /><pb n=\"2\" /><w form=\"The\" deprel=\"ROOT\">The</w><w form=\"blue\">blue</w><w form=\"emerald\">emerald</w><pb n=\"3\"><w form=\",\">,</w><w form=\"that\" deprel=\"ROOT\">that</w><w form=\"ugly\">ugly</w><w form=\"one\">one</w></pb><pb n=\"4\"></pb><pb n=\"4\"><w coords=\"0234\" form=\"ha";
 }

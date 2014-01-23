@@ -13,6 +13,7 @@ import org.lemurproject.galago.core.tools.AppFunction;
 import org.lemurproject.galago.core.tools.apps.BuildStageTemplates;
 import org.lemurproject.galago.core.types.DocumentSplit;
 import org.lemurproject.galago.core.types.KeyValuePair;
+import org.lemurproject.galago.tupleflow.FileUtility;
 import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.tupleflow.execution.ConnectionAssignmentType;
@@ -81,7 +82,7 @@ public class BuildPictureStore extends AppFunction {
 
     String picturesPath = jobParameters.getString("picturesPath");
     File manifest = new File(picturesPath, "buildManifest.json");
-    Utility.makeParentDirectories(manifest);
+    FileUtility.makeParentDirectories(manifest);
     Utility.copyStringToFile(jobParameters.toPrettyString(), manifest);
 
     List<String> inputPaths = jobParameters.getAsList("inputPath");
