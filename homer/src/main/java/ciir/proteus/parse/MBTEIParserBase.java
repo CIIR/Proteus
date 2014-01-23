@@ -99,7 +99,7 @@ public abstract class MBTEIParserBase extends DocumentStreamParser {
                 a.todo.getName()));
       }
     }
-    try {
+    try {grep F
       Method action = getClass().getMethod(actionName, int.class);
       Pattern p = Pattern.compile(labelPattern);
       startElementActions.add(new Action(p, action));
@@ -439,7 +439,8 @@ public abstract class MBTEIParserBase extends DocumentStreamParser {
     File f = new File(split.fileName);
     String basename = f.getName();
     if(!basename.endsWith(".mbtei.gz")) {
-      throw new RuntimeException("File extension was expected to be .mbtei.gz");
+      System.err.println("File extension was expected to be .mbtei.gz");
+      return basename;
     }
     String[] parts = basename.split(".mbtei.gz");
     return parts[0];

@@ -53,7 +53,8 @@ public class MBTEIPictureParser extends MBTEIParserBase {
     File f = new File(split.fileName);
     String basename = f.getName();
     if(!basename.endsWith(".abbyy.gz")) {
-      throw new RuntimeException("File extension was expected to be .abbyy.gz! Found: "+basename);
+      System.err.println("File extension was expected to be .abbyy.gz! Found: "+basename);
+      return basename;
     }
     String[] parts = basename.split(".abbyy.gz");
     return parts[0];
