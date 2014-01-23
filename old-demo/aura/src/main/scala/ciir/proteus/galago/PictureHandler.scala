@@ -5,7 +5,7 @@ import java.io.File
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 
-import ciir.proteus._
+import ciir.proteus.thrift._
 import com.twitter.util.Future
 import org.apache.thrift.protocol._
 import org.lemurproject.galago.tupleflow.Parameters;
@@ -82,37 +82,37 @@ with TypedStore {
     val height = coords.bottom - coords.top
     val width = coords.right - coords.left
     val Array(archiveId, pageNo) = pageId.split("_")
-    Some("http://www.archive.org/download/%s/page/n%s_h%d_w%d_x%d_y%d.jpg" format
-	 (archiveId, pageNo.toInt-1, height, width, coords.left, coords.top))
+    Some("http://www.archive.org/download/%s/page/n%s_h%d_w%d_x%d_y%d.jpg".format(archiveId, pageNo.toInt-1, height, width, coords.left, coords.top))
   }
   def getPageUrl(pageId: String) : Option[String] = {
     val Array(archiveId, pageNo) = pageId.split("_")
-    Some("http://www.archive.org/download/%s/page/n%s.jpg" format (archiveId, pageNo.toInt-1))
+    Some("http://www.archive.org/download/%s/page/n%s.jpg".format(archiveId, pageNo.toInt-1))
   }
 
   def scorePictures(pageResults: List[SearchResult]) : List[SearchResult] = {
     pageResults.map {
       pageResult => {
-	val pid = pageResult.id.identifier
-	index.getEntry(pid) match {
-	  case None => List()
-	  case Some(pl: PictureList) => 
-	    pl.pictures.zipWithIndex.map {
-	      A => {
-		val (pic, index) = A
-		val id = "%s_%s" format (pid, index)
-		val thumbUrl = getThumbUrl(pid, pic)
-		val pictureUrl = getFullUrl(pid, pic)
-		SearchResult(id = AccessIdentifier(identifier = id,
-						   `type` = ProteusType.Picture,						   
-						   resourceId = siteId),
-			     score = 0,
-			     thumbUrl = thumbUrl,
-			     imgUrl = pictureUrl,
-			     externalUrl = getPageUrl(pid))
-	      }
-	    }
-	}	
+        val pid = pageResult.id.identifier
+        index.getEntry(pid) match {
+          case None => List()
+          case Some(pl: PictureList) => {
+            pl.pictures.zipWithIndex.map {
+              A => {
+                val (pic, index) = A
+                val id = "%s_%s" format (pid, index)
+                val thumbUrl = getThumbUrl(pid, pic)
+                val pictureUrl = getFullUrl(pid, pic)
+                SearchResult(id = AccessIdentifier(identifier = id,
+                           `type` = ProteusType.Picture,						   
+                           resourceId = siteId),
+                       score = 0,
+                       thumbUrl = thumbUrl,
+                       imgUrl = pictureUrl,
+                       externalUrl = getPageUrl(pid))
+              }
+            }
+          }
+        }	
       }
     }.flatten
   }

@@ -13,7 +13,7 @@ import ciir.proteus.types.PictureOccurrence;
 
 @Verified
 @InputClass(className = "org.lemurproject.galago.core.parse.Document")
-@OutputClass(className = "org.lemurproject.galago.core.types.PictureOccurrence")
+@OutputClass(className = "ciir.proteus.types.PictureOccurrence")
 public class PictureOccurrenceGenerator
         extends StandardStep<Document, PictureOccurrence> {
 
@@ -23,6 +23,7 @@ public class PictureOccurrenceGenerator
     pictureCounter = parameters.getCounter("Pictures Generated");
   }
 
+  @Override
   public void process(Document document) throws IOException {
     PictureOccurrence po = new PictureOccurrence();
     po.id = Utility.fromString(document.name);

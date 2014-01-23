@@ -8,7 +8,7 @@ import scala.collection.mutable.HashMap
 import org.lemurproject.galago.tupleflow.Parameters
 import org.lemurproject.galago.tupleflow.Utility
 import org.lemurproject.galago.core.index.disk.DiskBTreeReader
-import ciir.proteus._
+import ciir.proteus.thrift._
 import com.twitter.finagle.builder._
 import com.twitter.finagle.thrift.ThriftServerFramedCodec
 import com.twitter.util.{Duration,Future}

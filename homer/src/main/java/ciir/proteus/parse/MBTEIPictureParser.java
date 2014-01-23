@@ -1,11 +1,12 @@
 package ciir.proteus.parse;
 
+import java.io.File;
 import java.util.regex.Pattern;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.types.DocumentSplit;
 import org.lemurproject.galago.tupleflow.Parameters;
 
-class MBTEIPictureParser extends MBTEIParserBase {
+public class MBTEIPictureParser extends MBTEIParserBase {
 
   Pattern blockTag = Pattern.compile("block");
   Pattern pageTag = Pattern.compile("page");
@@ -46,7 +47,19 @@ class MBTEIPictureParser extends MBTEIParserBase {
       ++index;
     }
   }
+  
+  @Override
+  public String getArchiveIdentifier() {
+    File f = new File(split.fileName);
+    String basename = f.getName();
+    if(!basename.endsWith(".abbyy.gz")) {
+      throw new RuntimeException("File extension was expected to be .abbyy.gz! Found: "+basename);
+    }
+    String[] parts = basename.split(".abbyy.gz");
+    return parts[0];
+  }
 
+  @Override
   public void cleanup() {
     // Nothing to do.
   }

@@ -1,0 +1,19 @@
+{
+  "server":true,
+  "corpus":true,
+  "indexPath" : "portland-3.5/pages",
+  "galagoJobDir" : "job/pages",
+  "inputPath" : ["new-config/mbtei_portland.list"],
+  "tokenizer" : {
+    "fields" : [ "name", "title", "creator", "language", "subject", "date" ] , 
+		"formats" : { "date" : "date", "title" : "string" }
+  },
+  "parser" : {
+    "externalParsers" : [
+      {
+        "filetype" : "mbtei",
+        "class" : "ciir.proteus.parse.MBTEIPageParser"
+      }
+    ]
+  }
+}

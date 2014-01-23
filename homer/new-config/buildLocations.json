@@ -1,0 +1,6 @@
+{
+  "corpus":false,
+  "inputPath" : "portland-3.5/locations/corpus",
+  "indexPath" : "portland-3.5/locations",
+  "galagoJobDir" : "job/locations",
+}

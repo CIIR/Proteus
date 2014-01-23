@@ -29,7 +29,7 @@ import org.lemurproject.galago.tupleflow.execution.Verification;
  *
  * @author irmarc
  */
-@InputClass(className = "org.lemurproject.galago.core.types.PictureOccurrence",
+@InputClass(className = "ciir.proteus.types.PictureOccurrence",
         order = {"+id", "+ordinal", "+top", "+left"})
 public class PictureStoreWriter implements Processor<PictureOccurrence> {
 
@@ -77,6 +77,7 @@ public class PictureStoreWriter implements Processor<PictureOccurrence> {
     currentPictures = new PictureList();
   }
 
+  @Override
   public void process(PictureOccurrence picture) throws IOException {
     byte[] key = picture.id;
     if (lastPrimaryKey == null
@@ -97,6 +98,7 @@ public class PictureStoreWriter implements Processor<PictureOccurrence> {
     }
   }
 
+  @Override
   public void close() throws IOException {
     if (writer != null) {
       emit();

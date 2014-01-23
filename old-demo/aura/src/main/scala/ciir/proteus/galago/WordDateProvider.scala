@@ -1,7 +1,7 @@
 package ciir.proteus.galago
 
 import java.io.File;
-import ciir.proteus._
+import ciir.proteus.thrift._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import org.lemurproject.galago.core.index.disk.DiskBTreeReader

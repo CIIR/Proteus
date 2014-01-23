@@ -19,16 +19,9 @@ class Scalatra extends LifeCycle {
      * IF YOU WANT TO MODIFY CONFIGURATION, DO IT HERE
      */
     import ProteusServlet._
-    val configuration =  System.getenv("org.scalatra.environment")
-    if (configuration == null || configuration.startsWith("dev")) {
-      // dev configuration
-      hosts = Site("ayr.cs.umass.edu", 8201) +: hosts
-      dbport = 27018
-    } else {
-      // prod configuration
-      hosts = Site("ayr.cs.umass.edu", 8200) +: hosts
-      dbport = 27017
-    }
+    // dev configuration
+    hosts = Site("localhost", 8201) +: hosts
+    dbport = 27018
 
     val servlet = new ProteusServlet
     context.mount(servlet, "/*")

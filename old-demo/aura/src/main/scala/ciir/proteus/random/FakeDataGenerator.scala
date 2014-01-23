@@ -1,6 +1,7 @@
 package ciir.proteus
 
 import com.twitter.util.Future
+import ciir.proteus.thrift._
 
 trait FakeDataGenerator {
   val chars =  ('a' to 'z')

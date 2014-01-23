@@ -4,7 +4,7 @@ import org.lemurproject.galago.core.parse.PseudoDocument
 import scala.collection.JavaConversions._
 import scala.io.Source._
 import java.net._
-import ciir.proteus.WikipediaEntity
+import ciir.proteus.thrift.WikipediaEntity
 import collection.mutable.ListBuffer
 
 object WikipediaEntityUtil {

@@ -4,7 +4,7 @@ import java.io.File
 import scala.collection.mutable.MapBuilder
 import scala.collection.immutable.HashMap
 import scala.collection.JavaConversions._
-import ciir.proteus._
+import ciir.proteus.thrift._
 import com.twitter.finagle.builder._
 import com.twitter.finagle.thrift.ThriftServerFramedCodec
 import com.twitter.util.{Duration,Future}

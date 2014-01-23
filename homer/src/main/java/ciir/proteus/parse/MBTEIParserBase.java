@@ -40,7 +40,7 @@ import org.lemurproject.galago.tupleflow.Utility;
  *
  * @author irmarc
  */
-abstract class MBTEIParserBase extends DocumentStreamParser {
+public abstract class MBTEIParserBase extends DocumentStreamParser {
   // For XML stream processing
 
   protected StreamReaderDelegate reader;
@@ -54,7 +54,7 @@ abstract class MBTEIParserBase extends DocumentStreamParser {
   // Using these directly is either tedious or stupid to
   // do. Use the functions provided.
 
-  class Action {
+  public class Action {
 
     public Action(Pattern p, Method m) {
       labelRE = p;
@@ -438,7 +438,10 @@ abstract class MBTEIParserBase extends DocumentStreamParser {
   public String getArchiveIdentifier() {
     File f = new File(split.fileName);
     String basename = f.getName();
-    String[] parts = basename.split("_");
+    if(!basename.endsWith(".mbtei.gz")) {
+      throw new RuntimeException("File extension was expected to be .mbtei.gz");
+    }
+    String[] parts = basename.split(".mbtei.gz");
     return parts[0];
   }
 }
