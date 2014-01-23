@@ -1,16 +1,17 @@
-Cronos - Code for temporal language modeling
-Pharos - Named entity recognition and linking
-Temporal - Some exploratory work on temporal data mining
-Phokas - Wrap book text in <strike>putrid sealskin</strike> TEI XML
+Project overview:
+===
+
 Morpheus - New front-end web service using the Scalatra lightweight router, and Scalate for templating.
 Aura - New proteus service using finagle/thrift
-Homer - Subproject built to contain all the indexing code necessary for Proteus. Uses Galago 3.5
+Chronos - Code for temporal language modeling
+Galago For Proteus - A roughly version 3.3 Galago with the components (now extracted to ../homer) mixed in.
 
 Morpheus and Aura:
 These two subprojects compose a single SBT subproject.  All dependencies and settings for each are
 contained in the root project directory, in ProteusBuild.scala (if you'd like to "t" search it).
 To compile the thrift code:
-from root directory enter sbt
+from root directory enter 
+$ sbt
 >> project aura
 >> scrooge-gen
 >> run <configuration file in json>
@@ -22,8 +23,8 @@ To start webapp:
 DEPENDENCIES
 ====
 - MongoDB (for persistence storage)
-- Thrift 0.8.0, Finagle (for RPCs)
-- Scala 2.9+
+- Thrift 0.9.0, Finagle (for RPCs)
+- Scala 2.9.2 (Updating to 2.10 is infeasible due to scala library collisions).
 
 GOTCHAS
 ====
@@ -35,8 +36,3 @@ GOTCHAS
   To configure what hosts/ports the ProteusServlet inside morpheus listens to, look
   at morpheus/src/main/scala/Scalatra.scala.
 
-NAMES TO USE
-====
-Pontus
-Triton
-Homer
