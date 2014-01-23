@@ -99,7 +99,7 @@ public abstract class MBTEIParserBase extends DocumentStreamParser {
                 a.todo.getName()));
       }
     }
-    try {grep F
+    try {
       Method action = getClass().getMethod(actionName, int.class);
       Pattern p = Pattern.compile(labelPattern);
       startElementActions.add(new Action(p, action));
