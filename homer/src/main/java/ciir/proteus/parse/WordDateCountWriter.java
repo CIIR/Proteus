@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import org.lemurproject.galago.core.index.disk.DiskBTreeWriter;
 import ciir.proteus.types.WordDateCount;
-import org.lemurproject.galago.core.index.CompressedRawByteBuffer;
+import org.lemurproject.galago.core.index.DiskSpillCompressedByteBuffer;
 import org.lemurproject.galago.core.index.IndexElement;
 import org.lemurproject.galago.tupleflow.InputClass;
 import org.lemurproject.galago.tupleflow.Parameters;
@@ -25,13 +25,13 @@ public class WordDateCountWriter implements WordDateCount.WordDateOrder.Shredded
   public class InvertedList implements IndexElement {
 
     byte[] key;
-    CompressedRawByteBuffer data;
+    DiskSpillCompressedByteBuffer data;
     int danglingCount;
     int entryCount;
 
     public InvertedList(byte[] key) {
       this.key = key;
-      data = new CompressedRawByteBuffer();
+      data = new DiskSpillCompressedByteBuffer();
       danglingCount = 0;
       entryCount = 0;
     }

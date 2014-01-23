@@ -11,7 +11,6 @@ import java.util.Map;
 import org.lemurproject.galago.core.index.BTreeReader;
 import org.lemurproject.galago.core.index.KeyToListIterator;
 import org.lemurproject.galago.core.index.KeyValueReader;
-import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.parse.TagTokenizer;
 import org.lemurproject.galago.core.retrieval.iterator.BaseIterator;
 import org.lemurproject.galago.core.retrieval.iterator.DataIterator;
@@ -164,11 +163,6 @@ public class PseudoCorpusReader extends KeyValueReader {
     @Override
     public boolean hasAllCandidates() {
       return true;
-    }
-
-    @Override
-    public String getKeyString() {
-      return "corpus";
     }
 
     @Override
