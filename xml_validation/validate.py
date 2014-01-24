@@ -7,17 +7,9 @@ path = sys.argv[1]
 dirs = os.listdir(path)
 
 for file in dirs:
-    output = open(file[0:len(file)-3],'w')
-    #command = "gunzip -c " + path + "/" + file
-    #print command
-    #call(["gunzip", "-c", path + "/" + file, ">", file[0:len(file)-3]])
-    call(['gunzip', '-c', path + '/' + file], stdout = output)
-    output.close()
-    Popen(['xmllint', '--noout', file[0:len(file)-3]], stdout=PIPE)
-    call(['rm', file[0:len(file)-3]])
-
-#gunzip
-#xmllint --noout
-#rm
-
-
+    print 'opening ' + file
+    gproc = Popen(['gunzip', '-c',path + '/' + file], stdout=PIPE)
+    gout = gproc.communicate()[0]
+    xproc = Popen(['xmllint', '--noout', '-'], stdin=PIPE, stdout=PIPE)
+    xout = xproc.communicate(input=gout)[0]
+    print xout
