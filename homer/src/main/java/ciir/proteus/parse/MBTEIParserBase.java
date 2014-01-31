@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.regex.Pattern;
@@ -41,6 +42,8 @@ import org.lemurproject.galago.tupleflow.Utility;
  * @author irmarc
  */
 public abstract class MBTEIParserBase extends DocumentStreamParser {
+    
+  protected HashMap<String, String> metadata;
   // For XML stream processing
 
   protected StreamReaderDelegate reader;
@@ -72,6 +75,16 @@ public abstract class MBTEIParserBase extends DocumentStreamParser {
   protected Document parsedDocument;
   protected StringBuilder buffer;
 
+  protected String getMetadataValue(String key){
+      
+      if (metadata == null)
+          return null;
+      
+      String value = metadata.get(key);
+      
+      return value;
+      
+  }
   public MBTEIParserBase(DocumentSplit split, Parameters p) {
     super(split, p); // DUMB call...
     try {
@@ -436,6 +449,15 @@ public abstract class MBTEIParserBase extends DocumentStreamParser {
   }
 
   public String getArchiveIdentifier() {
+    // MCZ see if we can get the internet archive ID from the metadata
+       
+    String archiveID = getMetadataValue("identifier");
+    
+     if (archiveID != null)
+        return archiveID;
+    
+    // if null - we'll try to figure it out from the file name.
+   
     File f = new File(split.fileName);
     String basename = f.getName();
     if(!basename.endsWith(".mbtei.gz")) {

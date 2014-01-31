@@ -26,7 +26,8 @@ public class MBTEIBookParser extends MBTEIParserBase {
 
   Pattern wantedMetadata = Pattern.compile(".+");
   String header;
-  HashMap<String, String> metadata;
+  // MCZ moving this to the ParserBase so we have access to it
+  // HashMap<String, String> metadata;
   String currentMetaTag = null;
   StringBuilder tagBuilder;
 
@@ -72,6 +73,14 @@ public class MBTEIBookParser extends MBTEIParserBase {
     addStartElementAction(nameTag, "transformNameTag");
     addEndElementAction(nameTag, "transformNameTag");
     addEndElementAction(textTag, "echo");
+    // MCZ 31-JAN-2014 - adding Internet Archive identifier
+    String archiveID = getArchiveIdentifier();
+    // Note we do NOT want the archive ID to be parsed, we've seen some
+    // that contain ":", ".", and lots of other characters that could be
+    // interpreted as "word breaks"
+    buffer.append("<archiveid tokenizetagcontent=\"false\">");
+    buffer.append(archiveID);
+    buffer.append("</archiveid>");   
     addEndElementAction(teiTag, "emitFinalDocument");
   }
   public String lastSeenNameTag = null;
@@ -120,6 +129,8 @@ public class MBTEIBookParser extends MBTEIParserBase {
   // This should only be called once but there isn't really a way
   // to handle that gracefully other than removing all the handlers.
   public void emitFinalDocument(int ignored) {
+   
+        
     if (contentLength > 0) {
       // Echo "</tei>" or whatever it is.
       echo(XMLStreamConstants.END_ELEMENT);

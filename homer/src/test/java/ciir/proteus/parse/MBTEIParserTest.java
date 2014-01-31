@@ -288,10 +288,81 @@ public class MBTEIParserTest {
     }
   }
 
+  @Test
+  public void testGetArchiveIdentifierIDExists() throws IOException {
+    // test getArchiveIdentifier where the "identifier" meta tag exists
+    File f = FileUtility.createTemporary();
+    try {
+      Utility.copyStringToFile(teiDocument, f);
+      DocumentSplit split = new DocumentSplit();
+      split.fileName = f.getAbsolutePath();
+
+      MBTEIBookParser parser = new MBTEIBookParser(split, new Parameters());
+
+      Document document = parser.nextDocument();
+
+      String expected = "<TEI><metadata>"
+              + "<identifier>testDocument</identifier>"
+             + "<language>eng</language>"
+              + "</metadata>"
+              + "<text>The blue emerald , that ugly one </text></TEI>";
+
+      
+         assertEquals("testDocument", parser.getArchiveIdentifier());
+    } finally {
+      f.delete();
+    }
+  }
+  
+  @Test
+  public void testGetArchiveIdentifierIDDoesNotExists() throws IOException {
+    // test getArchiveIdentifier where the "identifier" meta tag is missing
+    File f = FileUtility.createTemporary();
+    try {
+      Utility.copyStringToFile(teiDocumentNoMetaIdentifier, f);
+      DocumentSplit split = new DocumentSplit();
+      split.fileName = f.getAbsolutePath();
+
+      MBTEIBookParser parser = new MBTEIBookParser(split, new Parameters());
+
+      Document document = parser.nextDocument();
+      // since we don't have an identifier, it's going to try to get one from
+      // the file name.
+      assertEquals(f.getName(), parser.getArchiveIdentifier());
+   
+    } finally {
+      f.delete();
+    }
+  }
+  
+  
+  @Test
+  public void testGetArchiveIdentifierInPage() throws IOException {
+    // test getArchiveIdentifier where the "identifier" meta tag exists
+    File f = FileUtility.createTemporary();
+    try {
+      Utility.copyStringToFile(teiDocument, f);
+      DocumentSplit split = new DocumentSplit();
+      split.fileName = f.getAbsolutePath();
+
+      MBTEIBookParser parser = new MBTEIPageParser(split, new Parameters());
+
+      Document document = parser.nextDocument();
+ 
+      
+         assertEquals("testDocument", parser.getArchiveIdentifier());
+    } finally {
+      f.delete();
+    }
+  }
+  
   public static String teiDocument
           = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><TEI><metadata><identifier>testDocument</identifier><collection>galago</collection><title>test1</title><date>1916</date><language>eng</language></metadata><text lang=\"eng\"><pb n=\"1\" /><cb /><pb n=\"2\" /><w form=\"The\" deprel=\"ROOT\">The</w><w form=\"blue\">blue</w><w form=\"emerald\">emerald</w><pb n=\"3\"><w form=\",\">,</w><w form=\"that\" deprel=\"ROOT\">that</w><w form=\"ugly\">ugly</w><w form=\"one\">one</w></pb><pb n=\"4\"></pb></text></TEI>";
   public static String entityDocument
           = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><TEI><metadata><identifier>testDocument</identifier><collection>galago</collection><title>test1</title><date>1916</date><language>eng</language></metadata><text lang=\"eng\"><pb n=\"1\" /><cb /><pb n=\"2\" /><w form=\"The\" deprel=\"ROOT\">The</w><name type=\"object\" name=\"blue emerald\"><w form=\"blue\">blue</w><w form=\"emerald\">emerald</w></name><pb n=\"3\"><w form=\",\">,</w><w form=\"that\" deprel=\"ROOT\">that</w><w form=\"ugly\">ugly</w><w form=\"one\">one</w></pb><pb n=\"4\"></pb></text></TEI>";
   public static String badTEIDocument
           = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><TEI><metadata><identifier>testDocument</identifier><collection>galago</collection><title>test1</title><date>1916</date><language>eng</language></metadata><text lang=\"eng\"><pb n=\"1\" /><cb /><pb n=\"2\" /><w form=\"The\" deprel=\"ROOT\">The</w><w form=\"blue\">blue</w><w form=\"emerald\">emerald</w><pb n=\"3\"><w form=\",\">,</w><w form=\"that\" deprel=\"ROOT\">that</w><w form=\"ugly\">ugly</w><w form=\"one\">one</w></pb><pb n=\"4\"></pb><pb n=\"4\"><w coords=\"0234\" form=\"ha";
+   public static String teiDocumentNoMetaIdentifier
+          = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><TEI><metadata><collection>galago</collection><title>test1</title><date>1916</date><language>eng</language></metadata><text lang=\"eng\"><pb n=\"1\" /><cb /><pb n=\"2\" /><w form=\"The\" deprel=\"ROOT\">The</w><w form=\"blue\">blue</w><w form=\"emerald\">emerald</w><pb n=\"3\"><w form=\",\">,</w><w form=\"that\" deprel=\"ROOT\">that</w><w form=\"ugly\">ugly</w><w form=\"one\">one</w></pb><pb n=\"4\"></pb></text></TEI>";
+
 }

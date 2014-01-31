@@ -56,14 +56,23 @@ public class MBTEIPageParser extends MBTEIBookParser {
   // </text></TEI>
   public void emitSingleDocument(int ignored) {
     StringBuilder documentContent = new StringBuilder(header);
+    // MCZ 30-JAN-2014 - adding Internet Archive identifier
+    String archiveID = getArchiveIdentifier();
+    // Note we do NOT want the archive ID to be parsed, we've seen some
+    // that contain ":", ".", and lots of other characters that could be
+    // interpreted as "word breaks"
+    documentContent.append("<archiveid tokenizetagcontent=\"false\">");
+    documentContent.append(archiveID);
+    documentContent.append("</archiveid>");
     documentContent.append("<text>");
     documentContent.append(buffer.toString().trim());
     documentContent.append("</text>");
     String documentIdentifier = String.format("%s_%s",
-            getArchiveIdentifier(),
+            archiveID,
             pageNumber);
     parsedDocument = new Document(documentIdentifier,
             documentContent.toString());
+    // TODO : may not want to include metadata at the page level
     parsedDocument.metadata = metadata;
     contentLength = 0;
     pageNumber = reader.getAttributeValue(null, "n");
