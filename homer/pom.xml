@@ -8,8 +8,7 @@
   <name>homer</name>
   <url>http://github.com/CIIR/Proteus</url>
   <description>
-    Contains Tupleflow parsing and indexing code extensions for dealing
-    with mbtei-format xml data.
+    Contains parsing code extensions for dealing with mbtei-format xml data in Galago.
   </description>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,38 +26,13 @@
       <url>http://scm-ciir.cs.umass.edu:8080/nexus/content/repositories/snapshots</url>
     </repository>
   </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>edu.umass.ciir.releases</id>
-      <url>http://scm-ciir.cs.umass.edu:8080/nexus/content/repositories/releases</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>edu.umass.ciir.snapshots</id>
-      <url>http://scm-ciir.cs.umass.edu:8080/nexus/content/repositories/snapshots</url>
-    </pluginRepository>
-  </pluginRepositories>
   <dependencies>
-    <dependency>
-      <groupId>org.apache.thrift</groupId>
-      <artifactId>libthrift</artifactId>
-      <version>0.9.0</version>
-    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.10</version>
       <scope>test</scope>
       <type>jar</type>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.6.6</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.6.6</version>
     </dependency>
     <dependency>
       <groupId>org.lemurproject.galago</groupId>
@@ -105,20 +79,6 @@
           </execution>
         </executions>
       </plugin>    
-
-      <plugin>
-        <groupId>org.lemurproject.galago</groupId>
-        <artifactId>tupleflow-typebuilder</artifactId>
-        <version>${galagoVersion}</version>
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>typebuilder</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 </project>
