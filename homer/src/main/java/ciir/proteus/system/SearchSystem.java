@@ -14,17 +14,33 @@ import java.io.IOException;
 import java.util.*;
 
 public class SearchSystem {
-  private final Retrieval retrieval;
+  public final String defaultKind;
+  public final Map<String,Retrieval> kinds;
 
   public SearchSystem(Parameters argp) {
-    try {
-      this.retrieval = RetrievalFactory.instance(argp);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    this.defaultKind = argp.getString("defaultKind");
+
+    kinds = new HashMap<String,Retrieval>();
+    Parameters kindCfg = argp.getMap("kinds");
+    for(String kind : kindCfg.keySet()) {
+      try {
+        kinds.put(kind, RetrievalFactory.instance(kindCfg.getMap(kind)));
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 
-  public List<ScoredDocument> search(Node query, Parameters qp) {
+  public Retrieval getRetrieval(String kind) {
+    Retrieval r = kinds.get(kind);
+    if(r == null) {
+      throw new IllegalArgumentException("No retrieval for kind="+kind);
+    }
+    return r;
+  }
+
+  public List<ScoredDocument> search(String kind, Node query, Parameters qp) {
+    Retrieval retrieval = getRetrieval(kind);
     try {
       Node ready = retrieval.transformQuery(query, qp);
       return retrieval.executeQuery(ready, qp).scoredDocuments;
@@ -33,14 +49,14 @@ public class SearchSystem {
     }
   }
 
-  public List<ScoredDocument> search(String query, int requested) {
+  public List<ScoredDocument> search(String kind, String query, int requested) {
     Parameters qp = new Parameters();
     qp.set("requested", requested);
 
-    return search(StructuredQuery.parse(query), qp);
+    return search(kind, StructuredQuery.parse(query), qp);
   }
 
-  public Map<String, String> findPassages(String query, List<ScoredDocument> docs) {
+  public Map<String, String> findPassages(String kind, String query, List<ScoredDocument> docs) {
     ArrayList<String> names = new ArrayList<String>();
     for(ScoredDocument doc : docs) {
       names.add(doc.documentName);
@@ -54,12 +70,13 @@ public class SearchSystem {
     qp.set("passageSize", 200);
     qp.set("passageShift", 100);
 
-    List<ScoredDocument> passages = search(StructuredQuery.parse(query), qp);
+
+    List<ScoredDocument> passages = search(kind, StructuredQuery.parse(query), qp);
 
     // pull all documents into a map by name
     Map<String,Document> pulledDocuments = Collections.emptyMap();
     try {
-      pulledDocuments = retrieval.getDocuments(names, new Document.DocumentComponents(true, false, true));
+      pulledDocuments = getRetrieval(kind).getDocuments(names, new Document.DocumentComponents(true, false, true));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

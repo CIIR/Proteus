@@ -22,18 +22,19 @@ public class JSONSearch implements RequestHandler {
   @Override
   public Parameters handle(Parameters reqp) {
     String query = reqp.getAsString("q");
+    String kind = reqp.get("kind", system.defaultKind);
     int numResults = (int) reqp.get("n", 10);
     int skipResults = (int) reqp.get("skip", 0);
     boolean snippets = reqp.get("snippets", true);
 
-    List<ScoredDocument> docs = ListUtil.drop(system.search(query, numResults+skipResults), skipResults);
+    List<ScoredDocument> docs = ListUtil.drop(system.search(kind, query, numResults+skipResults), skipResults);
 
     Parameters response = new Parameters();
     ArrayList<Parameters> results = new ArrayList<Parameters>();
 
     Map<String,String> snippetText = Collections.emptyMap();
     if(snippets) {
-      snippetText = system.findPassages(query, docs);
+      snippetText = system.findPassages(kind, query, docs);
     }
 
     for(ScoredDocument sdoc : docs) {

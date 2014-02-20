@@ -1,5 +1,6 @@
 package ciir.proteus.server;
 
+import ciir.proteus.server.action.GetMetadata;
 import ciir.proteus.server.action.JSONSearch;
 import ciir.proteus.server.action.RequestHandler;
 import ciir.proteus.system.SearchSystem;
@@ -13,12 +14,15 @@ import java.io.PrintWriter;
 public class HTTPRouter {
   final SearchSystem system;
   private final JSONSearch jsonSearch;
+  private final GetMetadata metadata;
 
   public HTTPRouter(Parameters argp) {
     system = new SearchSystem(argp);
     jsonSearch = new JSONSearch(system, argp);
+    metadata = new GetMetadata(system, argp);
   }
 
+  // handle http requests
   public void handle(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     resp.addHeader("Access-Control-Allow-Origin", "*");
 
@@ -28,7 +32,9 @@ public class HTTPRouter {
 
     if(path.equals("/search/json") && (method.equals("GET") || method.equals("POST"))) {
       handleJSON(jsonSearch, reqp, resp);
-    } else if(path.equals("/debug")) {
+    } else if(path.equals("/metadata") && method.equals("GET")) {
+      handleJSON(metadata, reqp, resp);
+    } else {
       PrintWriter pw = resp.getWriter();
       pw.println("Method: " + method);
       pw.println("Path: "+path);
@@ -38,6 +44,7 @@ public class HTTPRouter {
     }
   }
 
+  // forward to JSON handler interface
   private void handleJSON(RequestHandler which, Parameters reqp, HttpServletResponse resp) throws IOException {
     Parameters response = which.handle(reqp);
 
