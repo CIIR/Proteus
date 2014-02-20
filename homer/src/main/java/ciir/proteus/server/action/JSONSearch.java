@@ -3,6 +3,8 @@ package ciir.proteus.server.action;
 import ciir.proteus.system.SearchSystem;
 import ciir.proteus.util.ListUtil;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
+import org.lemurproject.galago.core.retrieval.query.SimpleQuery;
+import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.tupleflow.Parameters;
 
 import java.util.ArrayList;
@@ -27,6 +29,10 @@ public class JSONSearch implements RequestHandler {
     int skipResults = (int) reqp.get("skip", 0);
     boolean snippets = reqp.get("snippets", true);
 
+    if(numResults > 1000) {
+      throw new IllegalArgumentException("Let's not put too many on a page...");
+    }
+
     List<ScoredDocument> docs = ListUtil.drop(system.search(kind, query, numResults+skipResults), skipResults);
 
     Parameters response = new Parameters();
@@ -48,9 +54,9 @@ public class JSONSearch implements RequestHandler {
       results.add(docp);
     }
 
-
-
+    response.set("request", reqp);
     response.set("results", results);
+    response.set("parsedQuery", StructuredQuery.parse(query).toString());
     return response;
   }
 
