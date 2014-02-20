@@ -55,7 +55,7 @@ public class HTTPMain extends AppFunction {
     });
     server.start();
 
-    out.println("Server started at:"+server.getURI());
+    out.println("Server started at:"+server.getConnectors()[0].getHost()+":"+server.getConnectors()[0].getPort());
 
     server.join();
     out.println("Server shutting down.");
