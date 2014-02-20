@@ -1,6 +1,0 @@
-{
-  "corpus":false,
-  "inputPath" : "portland-3.5/misc/corpus",
-  "indexPath" : "portland-3.5/misc",
-  "galagoJobDir" : "job/misc"
-}
