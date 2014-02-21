@@ -1,5 +1,6 @@
 package ciir.proteus.server;
 
+import java.io.File;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
@@ -15,6 +16,9 @@ import java.io.PrintStream;
 public class HTTPMain extends AppFunction {
   public static void main(String[] args) throws Exception {
     Parameters argp = Parameters.parseArgs(args);
+    if(new File("server.conf").exists()) {
+      argp.setBackoff(Parameters.parseFile("server.conf"));
+    }
     AppFunction self = new HTTPMain();
     self.run(argp, System.out);
   }
@@ -40,23 +44,25 @@ public class HTTPMain extends AppFunction {
   @Override
   public void run(Parameters argp, PrintStream out) throws Exception {
     final HTTPRouter router = new HTTPRouter(argp);
+    
+    int port = (short) argp.get("port", 8080);
 
-    Server server = new Server((short) argp.get("port", 8080));
+    Server server = new Server(port);
     server.setHandler(new AbstractHandler() {
       @Override
       public void handle(String s, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
         try {
           router.handle(httpServletRequest, httpServletResponse);
+          request.setHandled(true);
         } catch (Exception ex) {
           ex.printStackTrace();
           httpServletResponse.sendError(501, ex.getMessage());
         }
       }
     });
+    
     server.start();
-
-    out.println("Server started at:"+server.getConnectors()[0].getHost()+":"+server.getConnectors()[0].getPort());
-
+    out.println("Server started at: localhost:"+port);
     server.join();
     out.println("Server shutting down.");
   }

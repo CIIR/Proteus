@@ -25,6 +25,7 @@ public class HTTPRouter {
   // handle http requests
   public void handle(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     resp.addHeader("Access-Control-Allow-Origin", "*");
+    resp.addHeader("Content-Type", "application/json");
 
     String method = req.getMethod();
     String path = req.getPathInfo();
@@ -34,14 +35,17 @@ public class HTTPRouter {
       handleJSON(jsonSearch, reqp, resp);
     } else if(path.equals("/metadata") && method.equals("GET")) {
       handleJSON(metadata, reqp, resp);
-    } else {
-      PrintWriter pw = resp.getWriter();
-      pw.println("Method: " + method);
-      pw.println("Path: "+path);
-      pw.println(reqp);
-      pw.close();
-      resp.setStatus(HttpServletResponse.SC_OK);
     }
+    
+    Parameters debug = new Parameters();
+    debug.set("http-method", method);
+    debug.set("path", path);
+    debug.set("request", reqp);
+
+    PrintWriter pw = resp.getWriter();
+    pw.println(debug);
+    pw.close();
+    resp.setStatus(HttpServletResponse.SC_OK);
   }
 
   // forward to JSON handler interface
