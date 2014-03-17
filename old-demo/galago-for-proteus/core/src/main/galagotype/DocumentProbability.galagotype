@@ -1,8 +1,0 @@
-package org.lemurproject.galago.core.types;
-
-type DocumentProbability {
-    String document;
-    double probability;
-
-    order: +document;
-}

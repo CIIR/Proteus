@@ -1,7 +1,0 @@
-package org.lemurproject.galago.tupleflow.types;
-
-type TupleflowString {
-    String value;
-
-    order: +value;
-}

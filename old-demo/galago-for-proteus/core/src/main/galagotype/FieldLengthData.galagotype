@@ -1,9 +1,0 @@
-package org.lemurproject.galago.core.types;
-
-type FieldLengthData {
-    bytes field;
-    int document;
-    int length;
-    
-    order: +field +document;
-}

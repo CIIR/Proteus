@@ -1,7 +1,0 @@
-package org.lemurproject.galago.tupleflow.types;
-
-type TupleflowFloat {
-    float value;
-
-    order: +value;
-}

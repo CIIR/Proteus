@@ -1,7 +1,0 @@
-package org.lemurproject.galago.tupleflow.types;
-
-type SerializedParameters {
-    String parameters;
-
-    order: +parameters;
-}

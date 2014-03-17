@@ -1,8 +1,0 @@
-package org.lemurproject.galago.tupleflow.types;
-
-type XMLFragment {
-    String nodePath;
-    String innerText;
-    
-    order: +nodePath;
-}
