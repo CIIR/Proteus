@@ -1,9 +1,8 @@
 package ciir.proteus.server.action;
 
-import ciir.proteus.system.SearchSystem;
+import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.util.ListUtil;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
-import org.lemurproject.galago.core.retrieval.query.SimpleQuery;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.tupleflow.Parameters;
 
@@ -13,10 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 public class JSONSearch implements RequestHandler {
-  private final SearchSystem system;
+  private final ProteusSystem system;
   private final Parameters conf;
 
-  public JSONSearch(SearchSystem sys, Parameters conf) {
+  public JSONSearch(ProteusSystem sys, Parameters conf) {
     this.system = sys;
     this.conf = conf;
   }

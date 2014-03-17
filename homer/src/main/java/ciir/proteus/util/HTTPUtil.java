@@ -1,4 +1,4 @@
-package ciir.proteus.server;
+package ciir.proteus.util;
 
 import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.json.JSONUtil;

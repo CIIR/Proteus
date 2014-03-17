@@ -3,26 +3,29 @@ package ciir.proteus.server;
 import ciir.proteus.server.action.GetMetadata;
 import ciir.proteus.server.action.JSONSearch;
 import ciir.proteus.server.action.RequestHandler;
-import ciir.proteus.system.SearchSystem;
+import ciir.proteus.system.ProteusSystem;
+import ciir.proteus.util.HTTPUtil;
 import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.tupleflow.web.WebHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class HTTPRouter {
-  final SearchSystem system;
+public class HTTPRouter implements WebHandler {
+  final ProteusSystem system;
   private final JSONSearch jsonSearch;
   private final GetMetadata metadata;
 
   public HTTPRouter(Parameters argp) {
-    system = new SearchSystem(argp);
+    system = new ProteusSystem(argp);
     jsonSearch = new JSONSearch(system, argp);
     metadata = new GetMetadata(system, argp);
   }
 
   // handle http requests
+  @Override
   public void handle(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     resp.addHeader("Access-Control-Allow-Origin", "*");
     resp.addHeader("Content-Type", "application/json");

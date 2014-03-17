@@ -1,5 +1,7 @@
 package ciir.proteus.system;
 
+import ciir.proteus.users.UserDatabase;
+import ciir.proteus.users.impl.H2Database;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.Retrieval;
 import org.lemurproject.galago.core.retrieval.RetrievalFactory;
@@ -13,11 +15,12 @@ import org.lemurproject.galago.tupleflow.Parameters;
 import java.io.IOException;
 import java.util.*;
 
-public class SearchSystem {
+public class ProteusSystem {
   public final String defaultKind;
   public final Map<String,Retrieval> kinds;
+  public UserDatabase userdb;
 
-  public SearchSystem(Parameters argp) {
+  public ProteusSystem(Parameters argp) {
     this.defaultKind = argp.getString("defaultKind");
 
     kinds = new HashMap<String,Retrieval>();
@@ -27,6 +30,15 @@ public class SearchSystem {
         kinds.put(kind, RetrievalFactory.instance(kindCfg.getMap(kind)));
       } catch (Exception e) {
         throw new RuntimeException(e);
+      }
+    }
+
+    this.userdb = null;
+    if(argp.isMap("userdb")) {
+      Parameters dbp = argp.getMap("userdb");
+      String impl = dbp.get("impl", "H2Database");
+      if(impl.equals("H2Database")) {
+        userdb = new H2Database(dbp);
       }
     }
   }

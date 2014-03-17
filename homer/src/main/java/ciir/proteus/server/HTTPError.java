@@ -1,7 +1,7 @@
 package ciir.proteus.server;
 
 /**
- * Created by jfoley on 2/20/14.
+ * @author jfoley.
  */
 public class HTTPError extends Exception {
   public final int status;

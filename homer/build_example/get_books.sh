@@ -1,4 +1,4 @@
 #!/bin/bash
 
 mkdir -p books
-scp swarm:/work1/allan/jfoley/books/sample_books/*.mbtei.gz books
+scp swarm.cs.umass.edu:/work1/allan/jfoley/books/sample_books/*.mbtei.gz books
