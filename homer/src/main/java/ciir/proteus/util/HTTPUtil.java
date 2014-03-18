@@ -9,6 +9,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.tupleflow.json.JSONUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -106,12 +107,12 @@ public class HTTPUtil {
   }
 
   public static Response post(String url, String path, Parameters p) throws IOException {
-    log.info("GET url="+url+" path="+path+" p="+p);
+    log.info("POST url="+url+" path="+path+" p="+p);
     assert(path.startsWith("/"));
     CloseableHttpClient client = HttpClientBuilder.create().build();
 
     try {
-      HttpPost post = new HttpPost(url);
+      HttpPost post = new HttpPost(url+path);
       post.setEntity(new UrlEncodedFormEntity(fromParameters(p)));
       HttpResponse response = client.execute(post);
       return new Response(response);
@@ -140,10 +141,15 @@ public class HTTPUtil {
     public final String reason;
     public final String body;
 
-    Response(HttpResponse response) {
+    Response(HttpResponse response) throws IOException {
       this.status = response.getStatusLine().getStatusCode();
       this.reason = response.getStatusLine().getReasonPhrase();
-      this.body = response.getEntity().toString();
+      this.body = Utility.copyStreamToString(response.getEntity().getContent());
+    }
+
+    @Override
+    public String toString() {
+      return String.format("%d %s\n%s", status, reason, body);
     }
   }
 

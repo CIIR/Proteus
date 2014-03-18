@@ -17,8 +17,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class HTTPRouter implements WebHandler {
+  private static final Logger log = Logger.getLogger(HTTPRouter.class.getName());
   private final JSONHandler debug;
 
   private final JSONHandler search;
@@ -82,11 +85,11 @@ public class HTTPRouter implements WebHandler {
       resp.setStatus(200);
     } catch (HTTPError httpError) {
       // custom error type carries a HTTP status code
-      httpError.printStackTrace();
+      log.log(Level.INFO, "http-error", httpError);
       resp.sendError(httpError.status, httpError.getMessage());
     } catch (IllegalArgumentException argex) {
       // Parameters.get failed
-      argex.printStackTrace();
+      log.log(Level.INFO, "illegal argument received", argex);
       resp.sendError(HTTPError.BadRequest, argex.getMessage());
     }
 

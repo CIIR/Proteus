@@ -17,11 +17,14 @@ public class LoginUser extends DBAction {
     String user = reqp.getString("user");
 
     String token = userdb.login(user);
-
-    if(token == null) throw new HTTPError(HTTPError.BadRequest, "No such user!");
+    if(token == null) {
+      log.info("LoginUser FAIL user="+user);
+      throw new HTTPError(HTTPError.BadRequest, "No such user!");
+    }
 
     Parameters creds = new Parameters();
     creds.set("token", token);
+    log.info("LoginUser SUCCESS user="+user+" token="+token);
 
     return creds;
   }

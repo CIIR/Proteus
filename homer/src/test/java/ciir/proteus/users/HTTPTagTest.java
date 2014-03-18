@@ -1,5 +1,6 @@
 package ciir.proteus.users;
 
+import ciir.proteus.server.HTTPError;
 import ciir.proteus.server.HTTPRouter;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.util.HTTPUtil;
@@ -93,7 +94,11 @@ public class HTTPTagTest {
   }
 
   @Test
-  public void httpLogin() {
-
+  public void httpLogin() throws IOException {
+    Parameters p = new Parameters();
+    p.set("user", "fake-user");
+    HTTPUtil.Response resp = HTTPUtil.post(url, "/login", p);
+    assertEquals(HTTPError.BadRequest, resp.status);
+    assertEquals("No such user!", resp.reason);
   }
 }
