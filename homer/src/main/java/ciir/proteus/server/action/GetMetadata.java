@@ -10,7 +10,7 @@ import java.util.Map;
 public class GetMetadata implements JSONHandler {
   private final ProteusSystem system;
 
-  public GetMetadata(ProteusSystem system, Parameters argp) {
+  public GetMetadata(ProteusSystem system) {
     this.system = system;
   }
 

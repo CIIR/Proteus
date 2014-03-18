@@ -13,11 +13,9 @@ import java.util.Map;
 
 public class JSONSearch implements JSONHandler {
   private final ProteusSystem system;
-  private final Parameters conf;
 
-  public JSONSearch(ProteusSystem sys, Parameters conf) {
+  public JSONSearch(ProteusSystem sys) {
     this.system = sys;
-    this.conf = conf;
   }
 
   @Override

@@ -4,6 +4,9 @@ package ciir.proteus.server;
  * @author jfoley.
  */
 public class HTTPError extends Exception {
+  public static final int BadRequest = 400;
+  public static final int InternalError = 501;
+
   public final int status;
   private final String message;
 
@@ -13,8 +16,12 @@ public class HTTPError extends Exception {
   }
 
   public HTTPError(Exception exc) {
-    this.status = 501;
-    exc.printStackTrace();
+    this.status = InternalError;
     this.message = exc.getMessage();
+  }
+
+  @Override
+  public String getMessage() {
+    return message;
   }
 }
