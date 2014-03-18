@@ -7,7 +7,7 @@ import org.lemurproject.galago.tupleflow.Parameters;
 import java.io.IOException;
 import java.util.Map;
 
-public class GetMetadata implements RequestHandler {
+public class GetMetadata implements JSONHandler {
   private final ProteusSystem system;
 
   public GetMetadata(ProteusSystem system, Parameters argp) {
@@ -15,7 +15,7 @@ public class GetMetadata implements RequestHandler {
   }
 
   @Override
-  public Parameters handle(Parameters reqp) {
+  public Parameters handle(String method, String path, Parameters reqp) {
     String requestId = reqp.getString("id");
     String kind = reqp.get("kind", "books");
 

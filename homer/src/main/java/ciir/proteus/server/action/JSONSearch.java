@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class JSONSearch implements RequestHandler {
+public class JSONSearch implements JSONHandler {
   private final ProteusSystem system;
   private final Parameters conf;
 
@@ -21,7 +21,7 @@ public class JSONSearch implements RequestHandler {
   }
 
   @Override
-  public Parameters handle(Parameters reqp) {
+  public Parameters handle(String method, String path, Parameters reqp) {
     String query = reqp.getAsString("q");
     String kind = reqp.get("kind", system.defaultKind);
     int numResults = (int) reqp.get("n", 10);

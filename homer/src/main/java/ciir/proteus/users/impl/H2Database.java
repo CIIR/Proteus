@@ -34,10 +34,8 @@ public class H2Database implements UserDatabase {
       // open a connection
       conn = DriverManager.getConnection("jdbc:h2:" + path, dbuser, dbpass);
     } catch (ClassNotFoundException e) {
-      e.printStackTrace();
       throw new IllegalArgumentException(e);
     } catch (SQLException e) {
-      e.printStackTrace();
       throw new RuntimeException(e);
     }
   }
