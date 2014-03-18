@@ -14,6 +14,11 @@ public interface UserDatabase {
   public void initDB();
 
   /**
+   * shut down connection
+   */
+  public void close();
+
+  /**
    * Add a user to the database
    * @param username
    * @return
@@ -26,6 +31,11 @@ public interface UserDatabase {
    * @return a session token for that user
    */
   public String login(String username);
+
+  /**
+   * Logs out a user/session combo
+   */
+  public void logout(String username, String session);
 
   /**
    * Returns true if user has registered

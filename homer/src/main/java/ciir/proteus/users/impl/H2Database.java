@@ -57,6 +57,16 @@ public class H2Database implements UserDatabase {
   }
 
   @Override
+  public void close() {
+    try {
+      conn.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
   public boolean register(String username) {
     try {
       PreparedStatement stmt = conn.prepareStatement("insert into users (user) values (?)");
@@ -93,13 +103,31 @@ public class H2Database implements UserDatabase {
   }
 
   @Override
+  public void logout(String username, String token) {
+    if(!validSession(username, token))
+      return;
+
+    try {
+      PreparedStatement stmt = conn.prepareStatement("delete from sessions where user=? and session=?");
+      stmt.setString(1, username);
+      stmt.setString(2, token);
+
+      int numRows = stmt.executeUpdate();
+      assert(numRows == 1);
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
   public boolean validUser(String username) {
     if(username.length() > 64)
       return false;
 
     boolean found = false;
     try {
-      PreparedStatement stmt = conn.prepareStatement("count * from users where user=?");
+      PreparedStatement stmt = conn.prepareStatement("select count(*) from users where user=?");
       stmt.setString(1, username);
       ResultSet results = stmt.executeQuery();
 
