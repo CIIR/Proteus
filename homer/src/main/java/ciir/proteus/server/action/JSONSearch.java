@@ -1,9 +1,8 @@
 package ciir.proteus.server.action;
 
-import ciir.proteus.system.SearchSystem;
+import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.util.ListUtil;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
-import org.lemurproject.galago.core.retrieval.query.SimpleQuery;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.tupleflow.Parameters;
 
@@ -12,17 +11,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class JSONSearch implements RequestHandler {
-  private final SearchSystem system;
-  private final Parameters conf;
+public class JSONSearch implements JSONHandler {
+  private final ProteusSystem system;
 
-  public JSONSearch(SearchSystem sys, Parameters conf) {
+  public JSONSearch(ProteusSystem sys) {
     this.system = sys;
-    this.conf = conf;
   }
 
   @Override
-  public Parameters handle(Parameters reqp) {
+  public Parameters handle(String method, String path, Parameters reqp) {
     String query = reqp.getAsString("q");
     String kind = reqp.get("kind", system.defaultKind);
     int numResults = (int) reqp.get("n", 10);

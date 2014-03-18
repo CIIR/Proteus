@@ -1,8 +1,0 @@
-package org.lemurproject.galago.core.types;
-
-type PREntry {
-	long docNum;
-	double score;
-
-	order: +docNum;
-}

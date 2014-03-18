@@ -1,7 +1,0 @@
-package org.lemurproject.galago.tupleflow.types;
-
-type TupleflowLong {
-    long value;
-
-    order: +value;
-}

@@ -1,7 +1,0 @@
-package org.lemurproject.galago.tupleflow.types;
-
-type TupleflowDouble {
-    double value;
-
-    order: +value;
-}

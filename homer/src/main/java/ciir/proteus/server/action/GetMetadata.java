@@ -1,21 +1,21 @@
 package ciir.proteus.server.action;
 
-import ciir.proteus.system.SearchSystem;
+import ciir.proteus.system.ProteusSystem;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.tupleflow.Parameters;
 
 import java.io.IOException;
 import java.util.Map;
 
-public class GetMetadata implements RequestHandler {
-  private final SearchSystem system;
+public class GetMetadata implements JSONHandler {
+  private final ProteusSystem system;
 
-  public GetMetadata(SearchSystem system, Parameters argp) {
+  public GetMetadata(ProteusSystem system) {
     this.system = system;
   }
 
   @Override
-  public Parameters handle(Parameters reqp) {
+  public Parameters handle(String method, String path, Parameters reqp) {
     String requestId = reqp.getString("id");
     String kind = reqp.get("kind", "books");
 
