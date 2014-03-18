@@ -11,8 +11,7 @@ public class Users {
   public static final int SessionIdLength = generateSessionId().length();
 
   public static String generateSessionId() {
-    return Long.toHexString(random.nextLong()) +
-        Long.toHexString(random.nextLong());
+    return String.format("%016x%016x", random.nextLong(), random.nextLong());
   }
 
 }

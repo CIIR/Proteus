@@ -1,5 +1,7 @@
 package ciir.proteus.users;
 
+import ciir.proteus.users.error.DBError;
+import ciir.proteus.users.error.NoTuplesAffected;
 
 import java.util.List;
 
@@ -21,9 +23,8 @@ public interface UserDatabase {
   /**
    * Add a user to the database
    * @param username
-   * @return
    */
-  public boolean register(String username);
+  public void register(String username) throws NoTuplesAffected;
 
   /**
    * Logs in a
@@ -35,7 +36,7 @@ public interface UserDatabase {
   /**
    * Logs out a user/session combo
    */
-  public void logout(String username, String session);
+  public void logout(String username, String session) throws NoTuplesAffected;
 
   /**
    * Returns true if user has registered
@@ -51,7 +52,9 @@ public interface UserDatabase {
    */
   public boolean validSession(String user, String token);
 
-  public List<String> getTags(String user, String resource);
-  public boolean deleteTag(String user, String resource, String tag);
-  public boolean addTag(String user, String resource, String tag);
+  public void checkSession(String user, String token) throws DBError;
+
+  public List<String> getTags(String user, String token, String resource) throws DBError;
+  public void deleteTag(String user, String token, String resource, String tag) throws DBError;
+  public void addTag(String user, String token, String resource, String tag) throws DBError;
 }

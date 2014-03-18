@@ -30,7 +30,7 @@ public class ProteusSystem {
       try {
         kinds.put(kind, RetrievalFactory.instance(kindCfg.getMap(kind)));
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new IllegalArgumentException(e);
       }
     }
 
