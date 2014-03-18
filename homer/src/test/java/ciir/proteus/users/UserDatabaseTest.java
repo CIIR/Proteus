@@ -32,7 +32,7 @@ public class UserDatabaseTest {
     dbp.set("user", "junit");
     dbp.set("pass", "");
 
-    db = new H2Database(dbp);
+    db = UserDatabaseFactory.instance(dbp);
     db.initDB();
   }
 

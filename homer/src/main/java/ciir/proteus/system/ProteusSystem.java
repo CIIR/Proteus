@@ -1,6 +1,7 @@
 package ciir.proteus.system;
 
 import ciir.proteus.users.UserDatabase;
+import ciir.proteus.users.UserDatabaseFactory;
 import ciir.proteus.users.impl.H2Database;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.Retrieval;
@@ -33,14 +34,7 @@ public class ProteusSystem {
       }
     }
 
-    this.userdb = null;
-    if(argp.isMap("userdb")) {
-      Parameters dbp = argp.getMap("userdb");
-      String impl = dbp.get("impl", "H2Database");
-      if(impl.equals("H2Database")) {
-        userdb = new H2Database(dbp);
-      }
-    }
+    this.userdb = UserDatabaseFactory.instance(argp.getMap("userdb"));
   }
 
   public Retrieval getRetrieval(String kind) {
