@@ -1,5 +1,6 @@
-package ciir.proteus.server;
+package ciir.proteus.system;
 
+import ciir.proteus.server.HTTPRouter;
 import org.lemurproject.galago.core.tools.AppFunction;
 import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.web.WebServer;
@@ -7,19 +8,19 @@ import org.lemurproject.galago.tupleflow.web.WebServer;
 import java.io.File;
 import java.io.PrintStream;
 
-public class HTTPMain extends AppFunction {
+public class ProteusMain extends AppFunction {
   public static void main(String[] args) throws Exception {
     Parameters argp = Parameters.parseArgs(args);
     if(new File("server.conf").exists()) {
       argp.setBackoff(Parameters.parseFile("server.conf"));
     }
-    AppFunction self = new HTTPMain();
+    AppFunction self = new ProteusMain();
     self.run(argp, System.out);
   }
 
   @Override
   public String getName() {
-    return "homer-http";
+    return "proteus";
   }
 
   @Override
