@@ -42,7 +42,7 @@ public class HTTPUtil {
       } else {
         reqp.set(arg, new ArrayList());
         for(String val : values) {
-          reqp.getList(val).add(JSONUtil.parseString(val));
+          reqp.getList(arg).add(JSONUtil.parseString(val));
         }
       }
     }
@@ -127,7 +127,7 @@ public class HTTPUtil {
     CloseableHttpClient client = HttpClientBuilder.create().build();
 
     try {
-      String urlWithParams = encodeInURL(url, p);
+      String urlWithParams = encodeInURL(url+path, p);
       HttpGet get = new HttpGet(urlWithParams);
       HttpResponse response = client.execute(get);
       return new Response(response);

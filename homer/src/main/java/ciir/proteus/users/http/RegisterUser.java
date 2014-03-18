@@ -19,13 +19,14 @@ public class RegisterUser extends DBAction {
 
   @Override
   public Parameters handle(String method, String path, Parameters reqp) throws HTTPError {
-    String username = reqp.getString("username");
+    String username = reqp.getString("user");
     if(username.length() > Users.UserMaxLength) {
       throw new HTTPError(HTTPError.BadRequest, "User name too long.");
     }
 
     try {
       userdb.register(username);
+      log.info("RegisterUser user="+username);
     } catch (NoTuplesAffected ex) {
       throw new HTTPError(ex);
     }

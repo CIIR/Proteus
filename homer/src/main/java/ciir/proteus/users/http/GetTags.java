@@ -25,6 +25,8 @@ public class GetTags extends DBAction {
     String token = reqp.getString("token");
     List<String> resources = reqp.getAsList("resource");
 
+    log.info("GetTags user="+user+" token="+token+" resources="+resources);
+
     Parameters rtags = new Parameters();
     for(String resource : resources) {
       try {

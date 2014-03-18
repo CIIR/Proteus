@@ -15,6 +15,7 @@ import org.lemurproject.galago.tupleflow.web.WebServerException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
@@ -68,6 +69,7 @@ public class HTTPTagTest {
     assertNotEquals("", url);
   }
 
+  // sanity: does our GET work on normal urls?
   @Test
   public void httpGetTest() throws IOException {
     // list James Allan's publications to ensure that our get requests do actually work
@@ -78,6 +80,7 @@ public class HTTPTagTest {
     assertEquals("OK", response.reason);
   }
 
+  // sanity: does our POST work on normal urls?
   @Test
   public void httpPostTest() throws IOException {
     // search for 'allan' to ensure that our post requests do actually work
@@ -95,10 +98,51 @@ public class HTTPTagTest {
 
   @Test
   public void httpLogin() throws IOException {
-    Parameters p = new Parameters();
-    p.set("user", "fake-user");
-    HTTPUtil.Response resp = HTTPUtil.post(url, "/login", p);
-    assertEquals(HTTPError.BadRequest, resp.status);
-    assertEquals("No such user!", resp.reason);
+    Parameters requestJSON = null;
+    Parameters responseJSON = null;
+    HTTPUtil.Response response = null;
+
+    // expect a bad request with unregistered user
+    requestJSON = new Parameters();
+    requestJSON.set("user", "fake-user");
+    response = HTTPUtil.post(url, "/login", requestJSON);
+    assertEquals(HTTPError.BadRequest, response.status);
+    assertEquals("No such user!", response.reason);
+
+    // empty success response to register
+    requestJSON = new Parameters();
+    requestJSON.set("user", "register-me");
+    response = HTTPUtil.post(url, "/register", requestJSON);
+    assertEquals(200, response.status);
+    assertEquals("OK", response.reason);
+    responseJSON = Parameters.parseString(response.body);
+    assertEquals(0, responseJSON.size());
+
+    // token success response to login
+    requestJSON = new Parameters();
+    requestJSON.set("user", "register-me");
+    response = HTTPUtil.post(url, "/login", requestJSON);
+    assertEquals(200, response.status);
+    assertEquals("OK", response.reason);
+    responseJSON = Parameters.parseString(response.body);
+    assertTrue(responseJSON.isString("token"));
+    assertNotNull(responseJSON.getString("token"));
+
+    String token = responseJSON.getString("token");
+
+    // use token to list tags
+    requestJSON = new Parameters();
+    requestJSON.set("user", "register-me");
+    requestJSON.set("token", token);
+    requestJSON.set("resource", Arrays.asList("fake-resource0", "fake-resource1"));
+    response = HTTPUtil.get(url, "/tags", requestJSON);
+    System.out.println(response);
+    assertEquals(200, response.status);
+    assertEquals("OK", response.reason);
+    responseJSON = Parameters.parseString(response.body);
+    assertTrue(responseJSON.containsKey("fake-resource0"));
+    assertTrue(responseJSON.containsKey("fake-resource1"));
+    assertTrue(responseJSON.getList("fake-resource0").isEmpty());
+    assertTrue(responseJSON.getList("fake-resource1").isEmpty());
   }
 }
