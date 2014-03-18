@@ -7,6 +7,7 @@ import org.lemurproject.galago.tupleflow.web.WebServer;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.util.logging.Logger;
 
 public class ProteusMain extends AppFunction {
   public static void main(String[] args) throws Exception {
@@ -38,7 +39,8 @@ public class ProteusMain extends AppFunction {
 
   @Override
   public void run(Parameters argp, PrintStream out) throws Exception {
-    final HTTPRouter router = new HTTPRouter(argp);
+    final ProteusSystem proteus = new ProteusSystem(argp);
+    final HTTPRouter router = new HTTPRouter(proteus);
 
     WebServer server = WebServer.start(argp, router);
     out.println("Server started at: "+ server.getURL());

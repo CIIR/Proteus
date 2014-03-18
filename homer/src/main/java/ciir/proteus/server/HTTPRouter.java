@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class HTTPRouter implements WebHandler {
-  final ProteusSystem proteus;
   private final JSONHandler debug;
 
   private final JSONHandler search;
@@ -29,9 +28,7 @@ public class HTTPRouter implements WebHandler {
   private final JSONHandler logout;
   private final JSONHandler register;
 
-  public HTTPRouter(Parameters argp) {
-    proteus = new ProteusSystem(argp);
-
+  public HTTPRouter(ProteusSystem proteus) {
     debug = new DebugHandler();
 
     search = new JSONSearch(proteus);
@@ -76,9 +73,8 @@ public class HTTPRouter implements WebHandler {
     resp.addHeader("Access-Control-Allow-Origin", "*");
     resp.addHeader("Content-Type", "application/json");
 
-    Parameters response = null;
     try {
-      response = which.handle(method, path, reqp);
+      Parameters response = which.handle(method, path, reqp);
       PrintWriter pw = resp.getWriter();
       pw.write(response.toString());
       pw.flush();

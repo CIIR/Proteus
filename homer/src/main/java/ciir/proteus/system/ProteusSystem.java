@@ -18,7 +18,7 @@ import java.util.*;
 
 public class ProteusSystem {
   public final String defaultKind;
-  public final Map<String,Retrieval> kinds;
+  public Map<String,Retrieval> kinds;
   public UserDatabase userdb;
 
   public ProteusSystem(Parameters argp) {
@@ -104,5 +104,12 @@ public class ProteusSystem {
     }
 
     return results;
+  }
+
+  public void close() throws IOException {
+    for(Retrieval ret : kinds.values()) {
+      ret.close();
+    }
+    userdb.close();
   }
 }
