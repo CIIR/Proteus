@@ -54,6 +54,7 @@ var makeRequest = function(args) {
     .done(renderResults)
     .error(function(req, status, err) {
       showError("ERROR: "+status);
+      throw err;
     });
 
   return actualArgs;
