@@ -2,6 +2,7 @@ package ciir.proteus.system;
 
 import ciir.proteus.users.UserDatabase;
 import ciir.proteus.users.UserDatabaseFactory;
+import ciir.proteus.util.RetrievalUtil;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.Retrieval;
 import org.lemurproject.galago.core.retrieval.RetrievalFactory;
@@ -61,11 +62,8 @@ public class ProteusSystem {
     return search(kind, StructuredQuery.parse(query), qp);
   }
 
-  public Map<String, String> findPassages(String kind, String query, List<ScoredDocument> docs) {
-    ArrayList<String> names = new ArrayList<String>();
-    for(ScoredDocument doc : docs) {
-      names.add(doc.documentName);
-    }
+  public List<ScoredDocument> findPassages(String kind, String query, List<ScoredDocument> docs) {
+    List<String> names = RetrievalUtil.names(docs);
 
     // find max passage for each document
     Parameters qp = new Parameters();
@@ -76,10 +74,14 @@ public class ProteusSystem {
     qp.set("passageShift", 50);
 
 
-    List<ScoredDocument> passages = search(kind, StructuredQuery.parse(query), qp);
+    return search(kind, StructuredQuery.parse(query), qp);
+  }
+
+  public Map<String,String> passages(String kind, List<ScoredDocument> passages) {
+    List<String> names = RetrievalUtil.names(passages);
 
     // pull all documents into a map by name
-    Map<String,Document> pulledDocuments = Collections.emptyMap();
+    Map<String,Document> pulledDocuments;
     try {
       pulledDocuments = getRetrieval(kind).getDocuments(names, new Document.DocumentComponents(true, false, true));
     } catch (IOException e) {
@@ -118,5 +120,14 @@ public class ProteusSystem {
       ret.close();
     }
     userdb.close();
+  }
+
+  public Map<String, Document> getDocs(String kind, List<String> names, boolean metadata, boolean text) {
+    final boolean tokenize = true;
+    try {
+      return getRetrieval(kind).getDocuments(names, new Document.DocumentComponents(metadata, text, tokenize));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

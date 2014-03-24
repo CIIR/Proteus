@@ -5,48 +5,21 @@
 
 var server = "http://localhost:1234/";
 
-var clearDivs = function() {
-  $("#error").html('');
-  $("#parsedQuery").html('');
-  $("#request").html('');
-  $("#results").html('');
-};
-
-var showProgress = function(str) {
-  $("#progress").html(str);
-};
-
-var renderResults = function(data) {
-  showProgress("Ajax response received!");
-  var request = data.request;
-  $("#request").html(JSON.stringify(request));
-  $("#parsedQuery").html(data.parsedQuery);
-
-  console.log(data.queryTerms);
-
-  var resultsDiv = $("#results");
-  _(data.results).forEach(function (result) {
-    var snippet = "";
-    if(request.snippets) {
-      snippet = '<tr><td colspan="2">'+result.snippet+'</td></tr>';
-    }
-    resultsDiv.append('<div class="result">'+
-                      '<table>'+
-                      snippet+
-                      '<tr>'+
-                      '<td><b>'+result.name+'</b></td>'+
-                      '<td><i>'+result.score.toFixed(3)+'</i></td>'+
-                      '</tr>'+
-                      '</table>'+
-                      '</div>');
-  });
-};
+setReadyHandler(function() {
+  var params = getURLParams();
+  console.log(params);
+  if(!isBlank(params.q)) {
+    setQuery(params.q);
+    makeRequest(params);
+  }
+});
 
 var makeRequest = function(args) {
   var defaultArgs = {
     n: 10,
-    snippets: false,
-    kind: "books",
+    snippets: true,
+    metadata: true,
+    kind: "pages",
   };
   var actualArgs = _.merge(defaultArgs, args);
 
@@ -73,17 +46,14 @@ var makeRequest = function(args) {
   return actualArgs;
 };
 
-var formQuery = function() { return $("#ui-search").val(); };
-
 var goPages = function() {
-  makeRequest({kind:"pages", snippets:true, q:formQuery()});
+  makeRequest({kind:"pages", q:formQuery()});
 };
+setPageHandler(goPages);
 
 var goBooks = function() {
-  makeRequest({kind:"books", q:formQuery()});
+  makeRequest({kind:"books", snippets:false, q:formQuery()});
 };
-
-$("#ui-go-pages").click(goPages);
-$("#ui-go-books").click(goBooks);
+setBookHandler(goBooks);
 
 

@@ -3,10 +3,14 @@ package ciir.proteus.server.action;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.util.ListUtil;
 import ciir.proteus.util.QueryUtil;
+import ciir.proteus.util.RetrievalUtil;
+import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
+import org.lemurproject.galago.core.retrieval.ScoredPassage;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.tupleflow.Utility;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +30,6 @@ public class JSONSearch implements JSONHandler {
     String kind = reqp.get("kind", system.defaultKind);
     int numResults = (int) reqp.get("n", 10);
     int skipResults = (int) reqp.get("skip", 0);
-    boolean snippets = reqp.get("snippets", true);
 
     if(numResults > 1000) {
       throw new IllegalArgumentException("Let's not put too many on a page...");
@@ -35,28 +38,8 @@ public class JSONSearch implements JSONHandler {
     List<ScoredDocument> docs = ListUtil.drop(system.search(kind, query, numResults+skipResults), skipResults);
 
     Parameters response = new Parameters();
-    ArrayList<Parameters> results = new ArrayList<Parameters>();
 
-    Map<String,String> snippetText = Collections.emptyMap();
-    if(snippets) {
-      snippetText = system.findPassages(kind, query, docs);
-    }
-
-    for(ScoredDocument sdoc : docs) {
-      Parameters docp = new Parameters();
-      docp.set("name", sdoc.documentName);
-      docp.set("rank", sdoc.rank);
-      docp.set("score", sdoc.score);
-      if(snippets) {
-        //TODO: workaround for Galago's lack of JSON escaping!
-        String snippet = snippetText.get(sdoc.documentName)
-            .replace("\"", "")
-            .replace("'", "")
-            .replace("\\", "");
-        docp.set("snippet", snippet);
-      }
-      results.add(docp);
-    }
+    List<Parameters> results = annotate(kind, docs, query, reqp);
 
     Node pquery = StructuredQuery.parse(query);
 
@@ -67,5 +50,55 @@ public class JSONSearch implements JSONHandler {
     return response;
   }
 
+
+  public List<Parameters> annotate(String kind, List<ScoredDocument> results, String query, Parameters reqp) {
+    boolean snippets = reqp.get("snippets", true);
+    boolean metadata = reqp.get("metadata", true);
+
+    if(snippets) {
+      results = system.findPassages(kind, query, results);
+    }
+
+    // result data
+    ArrayList<Parameters> resultData = new ArrayList<Parameters>(results.size());
+
+    Map<String,Document> pulled = Collections.emptyMap();
+
+    // if we need to pull the documents:
+    if(snippets || metadata) {
+      pulled = system.getDocs(kind, RetrievalUtil.names(results), metadata, snippets);
+    }
+
+    for(ScoredDocument sdoc : results) {
+      Document doc = pulled.get(sdoc.documentName);
+      Parameters docp = new Parameters();
+
+      // default annotations
+      docp.set("name", sdoc.documentName);
+      docp.set("rank", sdoc.rank);
+      docp.set("score", sdoc.score);
+
+      // metadata annotation
+      if(doc != null && metadata) {
+        docp.set("meta", Parameters.parseMap(doc.metadata));
+      }
+      // snippet annotation
+      if(doc != null && snippets) {
+        ScoredPassage psg = (ScoredPassage) sdoc;
+        String snippet =
+            Utility.join(ListUtil.slice(doc.terms, psg.begin, psg.end), " ")
+                .replace("\"", "")
+                .replace("'", "")
+                .replace("\\", "");
+
+        docp.set("snippet", snippet);
+      }
+
+      resultData.add(docp);
+    }
+
+    // return annotated data:
+    return resultData;
+  }
 
 }
