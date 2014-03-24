@@ -31,23 +31,29 @@ var renderResults = function(data) {
 
   var resultsDiv = $("#results");
   _(data.results).forEach(function (result) {
-    var numCols = 2;
+    var page = (request.kind === 'pages');
+    var numCols = 3;
     var snippet = makeSnippet(data, result, numCols);
     var name = result.meta.title || result.name;
     var extURL = result.meta["identifier-access"];
+    var previewImage = '';
 
     if(extURL) {
       name = '<a href="'+extURL +'">[ext]</a> ' + name;
     }
-
-    if(request.kind == 'pages') {
+    if(page) {
+      var identifier = result.name.split('_')[0];
       var pageNum = result.name.split('_')[1];
       name += ' pp. '+pageNum;
+      previewImage = '<a href="'+pageImage(identifier, pageNum)+'">'+
+        '<img src="'+pageThumbnail(identifier, pageNum)+'" />' + 
+        '</a>';
     }
 
     resultsDiv.append('<div class="result">'+
                       '<table>'+
                       '<tr>'+
+                      '<td>'+previewImage+'</td>' +
                       '<td><b>'+name+'</b></td>'+
                       '<td><i>'+result.score.toFixed(3)+'</i></td>'+
                       '</tr>'+
