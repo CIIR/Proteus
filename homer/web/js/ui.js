@@ -5,15 +5,25 @@
  *
  */
 
-var clearDivs = function() {
+var clearUI = function() {
   $("#error").html('');
   $("#parsedQuery").html('');
   $("#request").html('');
   $("#results").html('');
+  clearError();
 };
 
 var showProgress = function(str) {
   $("#progress").html(str);
+};
+
+var showError = function(str) {
+  $("#error").html(str);
+  $("#error").show();
+};
+
+var clearError = function() {
+  $("#error").hide();
 };
 
 /**
@@ -22,11 +32,21 @@ var showProgress = function(str) {
  * TODO: highlight the query terms!
  */
 var makeSnippet = function(response, doc, numCols) {
-  var queryTerms = response.queryTerms;
-  if(response.request.snippets) {
-    return '<tr><td class="snippet" colspan="'+numCols+'">'+doc.snippet+'</td></tr>';
+  if(!response.request.snippets) {
+    return '<tr><td class="snippet" colspan="'+numCols+'"></td></tr>';
   }
-  return '';
+  var queryTerms = response.queryTerms;
+  var words = doc.snippet.split(/\s/);
+  var hiliSnippet = _(words).map(function(word) {
+    if(_.contains(queryTerms, word)) {
+      return '<span class="hili">'+word+'</span>';
+    }
+    return word;
+  }).reduce(function (lhs, rhs) {
+    return lhs + ' ' + rhs;
+  }, ' ');
+
+  return '<tr><td class="snippet" colspan="'+numCols+'">'+hiliSnippet+'</td></tr>';
 };
 
 /**
@@ -36,7 +56,7 @@ var makeSnippet = function(response, doc, numCols) {
  */
 var makeResult = function(data, result) {
   var page = (data.request.kind === 'pages');
-  var numCols = 3;
+  var numCols = 2;
   var snippet = makeSnippet(data, result, numCols);
   var name = result.meta.title || result.name;
   var extURL = result.meta["identifier-access"];
@@ -57,9 +77,9 @@ var makeResult = function(data, result) {
   return '<div class="result">'+
     '<table>'+
     '<tr>'+
-    '<td>'+previewImage+'</td>' +
-    '<td><b>'+name+'</b></td>'+
-    '<td><i>'+result.score.toFixed(3)+'</i></td>'+
+    '<td class="preview" rowspan="2">'+previewImage+'</td>' +
+    '<td class="name">'+name+'</td>'+
+    '<td class="score">'+result.score.toFixed(3)+'</td>'+
     '</tr>'+
     snippet+
     '</table>'+
