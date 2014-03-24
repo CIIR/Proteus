@@ -23,16 +23,18 @@ import java.util.logging.Logger;
 public class HTTPRouter implements WebHandler {
   private static final Logger log = Logger.getLogger(HTTPRouter.class.getName());
   private final JSONHandler debug;
-
   private final JSONHandler search;
   private final JSONHandler metadata;
   private final JSONHandler tags;
   private final JSONHandler login;
   private final JSONHandler logout;
   private final JSONHandler register;
+  private final StaticContentHandler staticContent;
 
   public HTTPRouter(ProteusSystem proteus) {
     debug = new DebugHandler();
+
+    staticContent = new StaticContentHandler(proteus.getConfig());
 
     search = new JSONSearch(proteus);
     metadata = new GetMetadata(proteus);
@@ -56,18 +58,23 @@ public class HTTPRouter implements WebHandler {
       final boolean DELETE = method.equals("DELETE");
 
       JSONHandler handler = debug;
-      if((GET || POST) && path.equals("/search")) {
+      if((GET || POST) && path.equals("/api/search")) {
         handler = search;
-      } else if(GET && path.equals("/metadata")) {
+      } else if(GET && path.equals("/api/metadata")) {
         handler = metadata;
-      } else if(GET && path.equals("/tags")) {
+      } else if(GET && path.equals("/api/tags")) {
         handler = tags;
-      } else if(POST && path.equals("/login")) {
+      } else if(POST && path.equals("/api/login")) {
         handler = login;
-      } else if(POST && path.equals("/logout")) {
+      } else if(POST && path.equals("/api/logout")) {
         handler = logout;
-      } else if(POST && path.equals("/register")) {
+      } else if(POST && path.equals("/api/register")) {
         handler = register;
+      } else if(path.equals("/api/debug")) {
+        handler = debug;
+      } else if(GET && !path.startsWith("/api")) {
+        staticContent.handle(path, reqp, resp);
+        return;
       }
       handleJSON(handler, method, path, reqp, resp);
     } catch (Throwable th) {

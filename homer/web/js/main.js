@@ -9,8 +9,6 @@
  * 
  */
 
-var server = "http://localhost:1234/";
-
 /**
  * document.ready handler onload
  *
@@ -45,7 +43,7 @@ var makeRequest = function(args) {
 
   var ajaxOpts = {
     type: "POST",
-    url: server+"search",
+    url: "/api/search",
     data: actualArgs,
     crossDomain: true
   };

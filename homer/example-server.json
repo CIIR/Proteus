@@ -5,6 +5,9 @@
     "books": {"index": "/path/to/books"},
     "pages": {"index": "/path/to/pages"},
   },
+  "content": {
+    "dir": "web"
+  },
   "userdb": {
     "impl": "H2Database",
     "path": "localdb/users",

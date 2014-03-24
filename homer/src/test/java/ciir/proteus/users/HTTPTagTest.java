@@ -1,19 +1,14 @@
 package ciir.proteus.users;
 
 import ciir.proteus.server.HTTPError;
-import ciir.proteus.server.HTTPRouter;
-import ciir.proteus.system.ProteusSystem;
+import ciir.proteus.server.TestEnvironment;
 import ciir.proteus.util.HTTPUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.lemurproject.galago.tupleflow.FileUtility;
 import org.lemurproject.galago.tupleflow.Parameters;
-import org.lemurproject.galago.tupleflow.Utility;
-import org.lemurproject.galago.tupleflow.web.WebServer;
 import org.lemurproject.galago.tupleflow.web.WebServerException;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -23,40 +18,16 @@ import static org.junit.Assert.*;
  * @author jfoley.
  */
 public class HTTPTagTest {
-  public static WebServer server;
-  public static File folder;
-  public static ProteusSystem proteus;
-  public static String url;
+  public static TestEnvironment env;
 
   @BeforeClass
   public static void setup() throws IOException, WebServerException {
-    folder =  FileUtility.createTemporaryDirectory();
-    String dbpath = folder.getPath()+"/users";
-    Parameters dbp = new Parameters();
-    dbp.set("path", dbpath);
-    dbp.set("user", "junit");
-    dbp.set("pass", "");
-
-    Parameters testSetup = new Parameters();
-    testSetup.set("defaultKind", "fake-kind");
-    testSetup.set("kinds", new Parameters());
-    testSetup.set("userdb", dbp);
-
-    proteus = new ProteusSystem(testSetup);
-    proteus.userdb.initDB();
-
-    final HTTPRouter router = new HTTPRouter(proteus);
-
-    int port = Utility.getFreePort();
-    server = WebServer.start(port, router);
-    url = server.getURL();
+    env = new TestEnvironment();
   }
 
   @AfterClass
-  public static void teardown() throws IOException, WebServerException {
-    server.stop();
-    proteus.close();
-    Utility.deleteDirectory(folder);
+  public static void tearDown() throws IOException, WebServerException {
+    env.close();
   }
 
   /**
@@ -64,9 +35,9 @@ public class HTTPTagTest {
    */
   @Test
   public void serverRunning() {
-    assertNotNull(server);
-    assertNotNull(url);
-    assertNotEquals("", url);
+    assertNotNull(env.server);
+    assertNotNull(env.url);
+    assertNotEquals("", env.url);
   }
 
   // sanity: does our GET work on normal urls?
@@ -98,21 +69,23 @@ public class HTTPTagTest {
 
   @Test
   public void httpLogin() throws IOException {
-    Parameters requestJSON = null;
-    Parameters responseJSON = null;
-    HTTPUtil.Response response = null;
+    String url = env.url;
+
+    Parameters requestJSON;
+    Parameters responseJSON;
+    HTTPUtil.Response response;
 
     // expect a bad request with unregistered user
     requestJSON = new Parameters();
     requestJSON.set("user", "fake-user");
-    response = HTTPUtil.post(url, "/login", requestJSON);
+    response = HTTPUtil.post(url, "/api/login", requestJSON);
     assertEquals(HTTPError.BadRequest, response.status);
     assertEquals("No such user!", response.reason);
 
     // empty success response to register
     requestJSON = new Parameters();
     requestJSON.set("user", "register-me");
-    response = HTTPUtil.post(url, "/register", requestJSON);
+    response = HTTPUtil.post(url, "/api/register", requestJSON);
     assertEquals(200, response.status);
     assertEquals("OK", response.reason);
     responseJSON = Parameters.parseString(response.body);
@@ -121,7 +94,7 @@ public class HTTPTagTest {
     // token success response to login
     requestJSON = new Parameters();
     requestJSON.set("user", "register-me");
-    response = HTTPUtil.post(url, "/login", requestJSON);
+    response = HTTPUtil.post(url, "/api/login", requestJSON);
     assertEquals(200, response.status);
     assertEquals("OK", response.reason);
     responseJSON = Parameters.parseString(response.body);
@@ -135,7 +108,7 @@ public class HTTPTagTest {
     requestJSON.set("user", "register-me");
     requestJSON.set("token", token);
     requestJSON.set("resource", Arrays.asList("fake-resource0", "fake-resource1"));
-    response = HTTPUtil.get(url, "/tags", requestJSON);
+    response = HTTPUtil.get(url, "/api/tags", requestJSON);
     System.out.println(response);
     assertEquals(200, response.status);
     assertEquals("OK", response.reason);
