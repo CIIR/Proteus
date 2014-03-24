@@ -47,12 +47,12 @@ var makeRequest = function(args) {
 };
 
 var goPages = function() {
-  makeRequest({kind:"pages", q:formQuery()});
+  makeRequest({kind:"pages", q:getQuery()});
 };
 setPageHandler(goPages);
 
 var goBooks = function() {
-  makeRequest({kind:"books", snippets:false, q:formQuery()});
+  makeRequest({kind:"books", snippets:false, q:getQuery()});
 };
 setBookHandler(goBooks);
 

@@ -34,7 +34,16 @@ var renderResults = function(data) {
     var numCols = 2;
     var snippet = makeSnippet(data, result, numCols);
     var name = result.meta.title || result.name;
-    var link = result.meta["identifier-access"];
+    var extURL = result.meta["identifier-access"];
+
+    if(extURL) {
+      name = '<a href="'+extURL +'">[ext]</a> ' + name;
+    }
+
+    if(request.kind == 'pages') {
+      var pageNum = result.name.split('_')[1];
+      name += ' pp. '+pageNum;
+    }
 
     resultsDiv.append('<div class="result">'+
                       '<table>'+
@@ -48,7 +57,7 @@ var renderResults = function(data) {
   });
 };
 
-var formQuery = function() { return $("#ui-search").val(); };
+var getQuery = function() { return $("#ui-search").val(); };
 var setQuery = function(q) { $("#ui-search").val(q); };
 
 var setReadyHandler = function(callback) {
