@@ -2,7 +2,9 @@ package ciir.proteus.server.action;
 
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.util.ListUtil;
+import ciir.proteus.util.QueryUtil;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
+import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.tupleflow.Parameters;
 
@@ -46,14 +48,22 @@ public class JSONSearch implements JSONHandler {
       docp.set("rank", sdoc.rank);
       docp.set("score", sdoc.score);
       if(snippets) {
-        docp.set("snippet", snippetText.get(sdoc.documentName));
+        //TODO: workaround for Galago's lack of JSON escaping!
+        String snippet = snippetText.get(sdoc.documentName)
+            .replace("\"", "")
+            .replace("'", "")
+            .replace("\\", "");
+        docp.set("snippet", snippet);
       }
       results.add(docp);
     }
 
+    Node pquery = StructuredQuery.parse(query);
+
     response.set("request", reqp);
     response.set("results", results);
-    response.set("parsedQuery", StructuredQuery.parse(query).toString());
+    response.set("parsedQuery", pquery.toString());
+    response.set("queryTerms", QueryUtil.queryTerms(pquery));
     return response;
   }
 

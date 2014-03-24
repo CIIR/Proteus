@@ -2,7 +2,6 @@ package ciir.proteus.system;
 
 import ciir.proteus.users.UserDatabase;
 import ciir.proteus.users.UserDatabaseFactory;
-import ciir.proteus.users.impl.H2Database;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.Retrieval;
 import org.lemurproject.galago.core.retrieval.RetrievalFactory;
@@ -73,8 +72,8 @@ public class ProteusSystem {
     qp.set("working", names);
     qp.set("processingModel", MaxPassageFinder.class.getCanonicalName());
     qp.set("passageQuery", true);
-    qp.set("passageSize", 200);
-    qp.set("passageShift", 100);
+    qp.set("passageSize", 100);
+    qp.set("passageShift", 50);
 
 
     List<ScoredDocument> passages = search(kind, StructuredQuery.parse(query), qp);
@@ -87,6 +86,10 @@ public class ProteusSystem {
       throw new RuntimeException(e);
     }
 
+    if(pulledDocuments.isEmpty()) {
+      return Collections.emptyMap();
+    }
+
     HashMap<String,String> results = new HashMap<String,String>();
 
     // collect terms from passage into results
@@ -94,7 +97,11 @@ public class ProteusSystem {
       ScoredPassage psg = (ScoredPassage) psgdoc;
       int start = psg.begin;
       int end = psg.end;
-      List<String> terms = pulledDocuments.get(psg.documentName).terms;
+      Document data = pulledDocuments.get(psg.documentName);
+      if(data == null) {
+        continue;
+      }
+      List<String> terms = data.terms;
 
       StringBuilder passageText = new StringBuilder();
       for(int i=start; i<end&&i<terms.size(); i++) {
