@@ -1,0 +1,15 @@
+{
+  "port":1234,
+  "defaultKind":"pages",
+  "kinds": {
+    "books": {"index": "/path/to/books"},
+    "pages": {"index": "/path/to/pages"},
+  },
+  "userdb": {
+    "impl": "H2Database",
+    "path": "localdb/users",
+    "user": "sa",
+    "pass": ""
+  }
+}
+
