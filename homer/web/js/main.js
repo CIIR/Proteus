@@ -1,10 +1,21 @@
 /**
  * main.js
  *
+ * Application-specific logic, contains the server URL.
+ *
+ * For now, includes talking to the proteus/homer server.
+ *
+ * TODO: use require.js and add a build system.
+ * 
  */
 
 var server = "http://localhost:1234/";
 
+/**
+ * document.ready handler onload
+ *
+ * reads the ?q=foo parameters and sends of a JSON API request
+ */
 setReadyHandler(function() {
   var params = getURLParams();
   console.log(params);
@@ -14,6 +25,9 @@ setReadyHandler(function() {
   }
 });
 
+/**
+ * Main async server communication call, only does /search for now
+ */
 var makeRequest = function(args) {
   var defaultArgs = {
     n: 10,
@@ -46,14 +60,8 @@ var makeRequest = function(args) {
   return actualArgs;
 };
 
-var goPages = function() {
-  makeRequest({kind:"pages", q:getQuery()});
-};
-setPageHandler(goPages);
-
-var goBooks = function() {
-  makeRequest({kind:"books", snippets:false, q:getQuery()});
-};
-setBookHandler(goBooks);
+/* handlers for search button types */
+setPageHandler(function() { makeRequest({kind:"pages", q:getQuery()}); });
+setBookHandler(function() { makeRequest({kind:"books", snippets:false, q:getQuery()}); });
 
 

@@ -1,6 +1,7 @@
 /**
  * util.js
  *
+ * For Javascript shims and other things that don't have a clear project-specific home.
  */
 
 if(!String.prototype.trim) {
