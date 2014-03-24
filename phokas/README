@@ -1,17 +1,4 @@
 # phokas
 
-FIXME: write description
+Use various tagging tools to create *.mbtei files from *.toktei files.
 
-## Usage
-
-FIXME: write
-
-## Installation
-
-FIXME: write
-
-## License
-
-Copyright (C) 2010 FIXME
-
-Distributed under the Eclipse Public License, the same as Clojure.
