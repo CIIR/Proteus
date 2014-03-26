@@ -9,8 +9,6 @@
  * 
  */
 
-var server = "http://localhost:1234/";
-
 /**
  * document.ready handler onload
  *
@@ -33,8 +31,9 @@ var makeRequest = function(args) {
     n: 10,
     snippets: true,
     metadata: true,
-    kind: "pages",
+    kind: "pages"
   };
+
   var actualArgs = _.merge(defaultArgs, args);
 
   if(!args.q || isBlank(args.q)) { 
@@ -44,17 +43,17 @@ var makeRequest = function(args) {
 
   var ajaxOpts = {
     type: "POST",
-    url: server+"search",
+    url: "/api/search",
     data: actualArgs,
-    crossDomain: true,
+    crossDomain: true
   };
   
-  clearDivs();
+  clearUI();
   showProgress("Search Request sent to server!");
   $.ajax(ajaxOpts)
     .done(renderResults)
     .error(function(req, status, err) {
-      $("#error").html("ERROR: "+status);
+      showError("ERROR: "+status);
     });
 
   return actualArgs;
@@ -62,6 +61,6 @@ var makeRequest = function(args) {
 
 /* handlers for search button types */
 setPageHandler(function() { makeRequest({kind:"pages", q:getQuery()}); });
-setBookHandler(function() { makeRequest({kind:"books", snippets:false, q:getQuery()}); });
+setBookHandler(function() { makeRequest({kind:"books", q:getQuery()}); });
 
 

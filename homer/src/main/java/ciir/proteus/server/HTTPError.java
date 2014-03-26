@@ -5,6 +5,7 @@ package ciir.proteus.server;
  */
 public class HTTPError extends Exception {
   public static final int BadRequest = 400;
+  public static final int NotFound = 404;
   public static final int InternalError = 501;
 
   public final int status;

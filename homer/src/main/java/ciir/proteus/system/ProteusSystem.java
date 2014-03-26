@@ -18,10 +18,12 @@ import java.util.*;
 
 public class ProteusSystem {
   public final String defaultKind;
+  private final Parameters config;
   public Map<String,Retrieval> kinds;
   public UserDatabase userdb;
 
   public ProteusSystem(Parameters argp) {
+    this.config = argp;
     this.defaultKind = argp.getString("defaultKind");
 
     kinds = new HashMap<String,Retrieval>();
@@ -130,4 +132,6 @@ public class ProteusSystem {
       throw new RuntimeException(e);
     }
   }
+
+  public Parameters getConfig() { return config; }
 }
