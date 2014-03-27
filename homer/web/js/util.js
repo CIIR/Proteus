@@ -9,7 +9,7 @@ if(!String.prototype.trim) {
 }
 
 var isBlank = function(str) {
-  return _.isEmpty(str.trim());
+  return _.isUndefined(str) || _.isEmpty(str.trim());
 };
 
 var getURLParams = function () {
