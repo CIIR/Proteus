@@ -7,11 +7,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.logging.Logger;
 
 /**
  * @author jfoley
  */
 public class StaticContentHandler {
+  private static final Logger log = Logger.getLogger(StaticContentHandler.class.getName());
   public final File baseDirectory;
   public final File defaultPath;
 
@@ -58,6 +60,22 @@ public class StaticContentHandler {
     }
   }
 
+  String determineContentType(String path) {
+    int extensionIndex = path.lastIndexOf('.');
+    String extension = path.substring(extensionIndex+1);
+
+    if(extension.equals("html")) {
+      return "text/html";
+    } else if(extension.equals("js")) {
+      return "application/javascript";
+    } else if(extension.equals("css")) {
+      return "text/css";
+    } else {
+      log.warning("Unhandled extension type: '"+extension+"' for file path: "+path);
+    }
+    return "text/plain"; // default
+  }
+
   /**
    * Send a file back to the client
    * @param fp java.io.File object representing the real resource
@@ -77,6 +95,7 @@ public class StaticContentHandler {
       out = resp.getOutputStream();
       Utility.copyFileToStream(fp, out);
       out.close();
+      resp.setContentType(determineContentType(fp.getPath()));
       resp.setStatus(200);
     } catch (IOException e) {
       throw new HTTPError(e);
