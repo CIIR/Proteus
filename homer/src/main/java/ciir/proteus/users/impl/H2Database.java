@@ -31,8 +31,12 @@ public class H2Database implements UserDatabase {
       String path = conf.getString("path");
       String dbuser = conf.getString("user");
       String dbpass = conf.get("pass", "");
+      // setting AUTO_SERVER to TRUE allows multiple processes to 
+      // connect to the DB - useful for debugging with a DB viewer
+      String autoServer = conf.get("auto_server", "FALSE");
       // open a connection
-      conn = DriverManager.getConnection("jdbc:h2:" + path, dbuser, dbpass);
+      conn = DriverManager.getConnection("jdbc:h2:" + path + ";AUTO_SERVER=" + autoServer, dbuser, dbpass);
+      
     } catch (ClassNotFoundException e) {
       throw new IllegalArgumentException(e);
     } catch (SQLException e) {
@@ -43,20 +47,23 @@ public class H2Database implements UserDatabase {
   @Override
   public void initDB() {
     try {
-      conn.prepareStatement("create table users (" +
+     
+      conn.prepareStatement("create table IF NOT EXISTS users (" +
           "user varchar("+ Users.UserMaxLength+")"+
-          ")").executeUpdate();
-      conn.prepareStatement("create table sessions (" +
+          ")").execute();
+      conn.prepareStatement("create table IF NOT EXISTS sessions (" +
           "user varchar("+Users.UserMaxLength+"), "+
           "session char("+Users.SessionIdLength+"), "+
           "foreign key (user) references users(user)"+
-          ")").executeUpdate();
-      conn.prepareStatement("create table tags (" +
+          ")").execute();
+      conn.prepareStatement("create table IF NOT EXISTS tags (" +
           "user varchar("+Users.UserMaxLength+"), " +
           "resource varchar(256), " +
           "tag varchar(256), " +
           "foreign key (user) references users(user)"+
-          ")").executeUpdate();
+          ")").execute();
+      
+   
     } catch (SQLException e) {
       e.printStackTrace();
       throw new RuntimeException(e);
