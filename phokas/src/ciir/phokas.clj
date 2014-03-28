@@ -1,4 +1,4 @@
-(ns phokas.core
+(ns ciir.phokas
   ^{:author "David Smith"}
   (:require [clojure.string :as s]
             [clojure.set]
@@ -10,16 +10,14 @@
             [clojure.data.zip.xml :as zx]
             [ciir.utils :refer :all])
   (:import (java.io File BufferedInputStream InputStreamReader
-		    BufferedReader PushbackReader)
+		    BufferedReader BufferedWriter PushbackReader)
 	   (java.util ArrayList Properties)
 	   (java.util.zip GZIPInputStream GZIPOutputStream)
 	   (edu.stanford.nlp.pipeline StanfordCoreNLP Annotation DefaultPaths)
 	   (edu.stanford.nlp.util ArrayCoreMap)
 	   (edu.stanford.nlp.ling CoreLabel
 				  CoreAnnotations$TokensAnnotation
-				  CoreAnnotations$SentencesAnnotation)
-           (cc.factorie.app.nlp Document TokenSpan Token Sentence)
-           (SamNER NER EmbedTagger))
+				  CoreAnnotations$SentencesAnnotation))
   (:gen-class))
 
 (set! *warn-on-reflection* true)
@@ -31,8 +29,6 @@
       BufferedInputStream. GZIPInputStream. InputStreamReader. BufferedReader.))
 
 (def ^:dynamic *clobber?* true)
-
-(def ^:dynamic *ner-models* "models")
 
 (def ^:dynamic *language* "eng")
 
@@ -134,9 +130,9 @@
 ;; e.g., . . . -> ...
 ;; This is tolerable at present since all the tokens we want show up
 ;; in form attributes.
-(defn tokenize-para
+(defn ^String tokenize-para
   [^String para]
-  (let [[pref ptag body] (partition-str para #"<p(?: [^>]*)?>")]
+  (let [[pref ptag body] (-> para (s/replace #"</p>.*$" "") (partition-str #"<p(?: [^>]*)?>"))]
     (if (empty? body) (str para (when (re-find #"<p(?: [^>]*)?>$" para) "</p>\n"))
 	(let [wsegs (s/split body #"</w>")
 	      wspans (map #(re-find #"^((?:.|\n)*)<w form=\"([^\"]+)\" coords=\"([^\"]+)\"((?:.|\n)+)$" %)
@@ -154,9 +150,9 @@
 				      ;; Account for untokenizable characters (other than space)
 				      (count (s/trim (.before (nth % 1))))))))
 	   (map (fn [x] (map #(.word (nth % 0)) x)))
-	   (map (fn [o n] (apply str (nth o 1) "<w form=\"" (first n) "\""
+	   (map (fn [o n] (apply str (nth o 1) "<w form=\"" (s/escape (first n) escapes) "\""
 				 " coords=\"" (nth o 3) "\"" (nth o 4) "</w>"
-				 (map-indexed #(str "<w form=\"" %2 "\""
+				 (map-indexed #(str "<w form=\"" (s/escape %2 escapes) "\""
 						    " coords=\"" (nth o 3) "+" (inc %1) "\"></w>")
 					      (rest n))))
 		wspans)
@@ -197,12 +193,13 @@
 
 (defn ner-sen
   [sen]
-  (let [words (zx/xml-> sen :w (zx/attr :form))
-        spans (EmbedTagger/tagText (s/join " " words))]
-    (map
-     (fn [^TokenSpan span]
-       [(.. span head position) (.. span last position) (.. span head nerLabel shortCategoryValue) (.string span)])
-     spans)))
+  '(()))
+;;   (let [words (zx/xml-> sen :w (zx/attr :form))
+;;         spans (EmbedTagger/tagText (s/join " " words))]
+;;     (map
+;;      (fn [^TokenSpan span]
+;;        [(.. span head position) (.. span last position) (.. span head nerLabel shortCategoryValue) (.string span)])
+;;      spans)))
 
 (defn ner-para
   [para]
@@ -228,8 +225,6 @@
          s/join
          (s/replace #"^<wrapper>" "")
          (s/replace #"</wrapper>$" ""))))))
-
-;;      (s/join "</s>" (map str (s/split para #"</s>") (concat tags [""]))))))
 
 (defn xmlck-para
   [para]
@@ -384,11 +379,8 @@
                  % (vector (x/event :end-element :wrapper))))
        (map #(-> % x/event-tree x/emit-str
                  (s/replace #"^.*<wrapper>" "")
-                 (s/replace #"</wrapper>$" "")
-                 (s/replace #"</p>.*$" "")))))
+                 (s/replace #"</wrapper>$" "")))))
   
-  ;;(map word-forms (lazy-seq (s/split s #"</p>\n"))))
-
 (defn ^String annotate-para
   "Perform linguistic annotation on a paragraph."
   [para]
@@ -412,64 +404,47 @@
   [lang]
   (condp = lang
       "eng" {:annotate
-	     #(-> % tokenize-para tag-para parse-para ner-para)
-	     :tokenizer
-	     (edu.stanford.nlp.pipeline.PTBTokenizerAnnotator.
-	      false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")
+	     #(-> % tag-para parse-para)
 	     :tagger
 	     (edu.stanford.nlp.pipeline.POSTaggerAnnotator.
-              "edu/stanford/nlp/models/pos-tagger/wsj-left3words/wsj-0-18-left3words-distsim.tagger"
-	      false 500)
-             :ner
-             (EmbedTagger/prepModels *ner-models*)
+              "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger"
+	      false 500 1)
 	     :parser
 	     (parser.Parser/pretrained)}
       "fre" {:annotate
 	     #(-> % tokenize-para
 		  (s/replace #"-LRB-" "(")
 		  (s/replace #"-RRB-" ")")
-		  tag-para parse-para ner-para)
-	     :tokenizer
-	     (edu.stanford.nlp.pipeline.PTBTokenizerAnnotator.
-	      false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")
+		  tag-para parse-para)
 	     :tagger
 	     (edu.stanford.nlp.pipeline.POSTaggerAnnotator.
 	      "ciir/models/fre.pos" false 500)
 	     :parser
 	     (parser.Parser/read "/home2/dasmith/src/iabooks/fre.dep")}
       "ger" {:annotate
-	     #(-> % tokenize-para
-		  (s/replace #"-([LR])RB-" "*$1RB*")
-		  tag-para parse-para ner-para)
-	     :tokenizer
-	     (edu.stanford.nlp.pipeline.PTBTokenizerAnnotator.
-	      false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")
+	     #(-> %
+                  (s/replace #"-([LR])RB-" "*$1RB*")
+		  tag-para parse-para)
 	     :tagger
 	     (edu.stanford.nlp.pipeline.POSTaggerAnnotator.
 	      "ciir/models/ger.pos" false 500)
 	     :parser
 	     (parser.Parser/read "/home2/dasmith/src/iabooks/ger.dep")}
       "ita" {:annotate
-	     #(-> % tokenize-para
-		  (s/replace #"-LRB-" "(")
+	     #(-> %
+                  (s/replace #"-LRB-" "(")
 		  (s/replace #"-RRB-" ")")
-		  tag-para parse-para ner-para)
-	     :tokenizer
-	     (edu.stanford.nlp.pipeline.PTBTokenizerAnnotator.
-	      false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")
+		  tag-para parse-para)
 	     :tagger
 	     (edu.stanford.nlp.pipeline.POSTaggerAnnotator.
 	      "ciir/models/ita.pos" false 500)
 	     :parser
 	     (parser.Parser/read "/home2/dasmith/src/iabooks/ita.dep")}
       "lat" {:annotate
-	     #(-> % tokenize-para
+	     #(-> %
 		  (s/replace #"-LRB-" "(")
 		  (s/replace #"-RRB-" ")")
 		  lemmatize-para)
-	     :tokenizer
-	     (edu.stanford.nlp.pipeline.PTBTokenizerAnnotator.
-	      false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")
 	     ;; :tagger
 	     ;; (edu.stanford.nlp.pipeline.POSTaggerAnnotator.
 	     ;;  "ciir/models/lat.pos" false 500)
@@ -478,10 +453,7 @@
 		   (->> "dict/lat-lems.clj.gz" gzresource PushbackReader. read
 			(map top-lemma)))}
       {:annotate
-       #(tokenize-para %)
-       :tokenizer
-       (edu.stanford.nlp.pipeline.PTBTokenizerAnnotator.
-	false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")}))
+       #(identity %)}))
 
 (defn stopword-langid
   [counts]
@@ -497,41 +469,31 @@
     (assoc props "unk" (- 1 (reduce + (vals props))))))
 
 (defn nlp-annotate-file
-  [ipath opath]
-  (println opath)
-   (let [raw-counts (with-open [in ^BufferedReader (gzreader ipath)]
-                     (tei-words in))
-        langs (sort-by second > (stopword-langid raw-counts))
-        top-lang (first langs)
-        lang (if (> (second top-lang) 0.5)
-               (first top-lang)
-               "unk")]
-    (println "# sw-lang:" langs)
-    (if (and (not-empty *languages*) (not (*languages* lang)))
-      (do (println "# unprocessed language: " lang) "")
-      (with-bindings {#'*language* lang
-                      #'*lang-annotators* {lang (init-annotators lang)}
-                      #'*dict* (clojure.set/union
-                                *dict*
-                                (set (filter #(re-find #"^[A-Za-z]+$" %) (keys raw-counts))))}
-        (with-open [in ^BufferedReader (gzreader ipath)
-                    out (-> opath java.io.FileOutputStream. GZIPOutputStream. (jio/writer :encoding "UTF-8"))]
-          (let [event-seq (x/source-seq in)]
-            ;;(.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-            (.write out
-                    (->> event-seq
-                        (take-while #(not= (:name %) :text))
-                        x/event-tree x/emit-str
-                        (#(s/replace % #"</TEI>$" ""))))
-            (.write out (str "<text lang=\"" lang "\">\n"))
-            (doseq [para (tei-paras event-seq)] (.write out (annotate-para (word-forms para))))
+  [^String ipath ^String opath]
+  (with-open [in ^BufferedReader (gzreader ipath)]
+    (let [event-seq (x/source-seq in)
+          [header lang]
+          (let [front
+                (->> event-seq
+                     (take-to-first #(= (:name %) :text)))]
+            [(-> front x/event-tree x/emit-str
+                 (s/replace #"</text></TEI>$" ""))
+             (-> front last :attrs :lang)])]
+      (if (and (not-empty *languages*) (not (*languages* lang)))
+        (do (println "# unprocessed language: " lang) "")
+        (with-bindings {#'*language* lang
+                        #'*lang-annotators* {lang (init-annotators lang)}}
+          (with-open
+              [out (-> opath java.io.FileOutputStream. GZIPOutputStream.
+                       (jio/writer :encoding "UTF-8"))]
+            (.write out header)
+            (doseq [para (tei-paras event-seq)] (.write out (annotate-para para)))
             (.write out "\n</text></TEI>\n")
             opath))))))
 
 (defn tokenize-file
-  [ipath opath]
-  (println opath)
-   (let [raw-counts (with-open [in ^BufferedReader (gzreader ipath)]
+  [^String ipath ^String opath]
+  (let [raw-counts (with-open [in ^BufferedReader (gzreader ipath)]
                      (tei-words in))
         langs (sort-by second > (stopword-langid raw-counts))
         top-lang (first langs)
@@ -539,62 +501,59 @@
                (first top-lang)
                "unk")]
     (println "# sw-lang:" langs)
-    (if (and (not-empty *languages*) (not (*languages* lang)))
-      (do (println "# unprocessed language: " lang) "")
-      (with-bindings {#'*language* lang
-                      #'*annotators*
-                      {:tokenizer
-                       (edu.stanford.nlp.pipeline.PTBTokenizerAnnotator.
-                        false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")}
-                      #'*dict* (clojure.set/union
-                                *dict*
-                                (set (filter #(re-find #"^[A-Za-z]+$" %) (keys raw-counts))))}
-        (with-open [in ^BufferedReader (gzreader ipath)
-                    out (-> opath java.io.FileOutputStream. GZIPOutputStream.
-                            (jio/writer :encoding "UTF-8"))]
-          (let [event-seq (x/source-seq in)]
-            ;;(.write out "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-            (.write out
-                    (->> event-seq
-                        (take-while #(not= (:name %) :text))
-                        x/event-tree x/emit-str
-                        (#(s/replace % #"</TEI>$" ""))))
-            (.write out (str "<text lang=\"" lang "\">\n"))
-            (doseq [para (tei-paras event-seq)] (.write out (tokenize-para (word-forms para))))
-            (.write out "\n</text></TEI>\n")
-            opath))))))  
+    (with-bindings {#'*language* lang
+                    #'*annotators*
+                    {:tokenizer
+                     (edu.stanford.nlp.pipeline.PTBTokenizerAnnotator.
+                      false "invertible,americanize=false,normalizeAmpersandEntity=false,ptb3Escaping=true,untokenizable=noneDelete")}
+                    #'*dict* (clojure.set/union
+                              *dict*
+                              (set (filter #(re-find #"^[A-Za-z]+$" %) (keys raw-counts))))}
+      (with-open [in ^BufferedReader (gzreader ipath)
+                  out (-> opath java.io.FileOutputStream. GZIPOutputStream.
+                          (jio/writer :encoding "UTF-8"))]
+        (let [event-seq (x/source-seq in)]
+          (.write out
+                  (->> event-seq
+                       (take-while #(not= (:name %) :text))
+                       x/event-tree x/emit-str
+                       (#(s/replace % #"</TEI>$" ""))))
+          (.write out (str "<text lang=\"" lang "\">\n"))
+          (doseq [para (tei-paras event-seq)] (.write out (tokenize-para (word-forms para))))
+          (.write out "\n</text></TEI>\n")
+          opath)))))
 
 (defn convert-file
   [^String opath]
-  (let [ofile (File. opath)
-        idir (.getParent ofile)
-        bid (.getName (File. idir))
-        raw-path (.getPath (jio/file idir (str bid ".rawtei.gz")))
-        [call ipath]
-        (cond
-         (re-find #".mbtei.gz$" opath)
-         [nlp-annotate-file (.getPath (jio/file idir (str bid ".toktei.gz")))]
-         (re-find #".toktei.gz$" opath)
-         [tokenize-file (.getPath (jio/file idir (str bid ".rawtei.gz")))]
-         )]
-    (when-not (.exists ofile)
-      (try
-        (call ipath opath)
-        (catch Exception e
-          (println "# Error with " ipath ":" e)
-          (if (and opath (.exists ofile) (.canWrite ofile))
-            (do (.delete opath)
-                "")))))))
+  (binding [*out* *err*]
+    (println opath)
+    (let [ofile (File. opath)
+          idir (.getParent ofile)
+          bid (.getName (File. idir))
+          raw-path (.getPath (jio/file idir (str bid ".rawtei.gz")))
+          [call ipath]
+          (cond
+           (re-find #".mbtei.gz$" opath)
+           [nlp-annotate-file (.getPath (jio/file idir (str bid ".toktei.gz")))]
+           (re-find #".toktei.gz$" opath)
+           [tokenize-file (.getPath (jio/file idir (str bid ".rawtei.gz")))]
+           )]
+      (when-not (.exists ofile)
+        (try
+          (call ipath opath)
+          (catch Exception e
+            (println "# Error with " ipath ":" e)
+            (if (and opath (.exists ofile) (.canWrite ofile))
+              (do (.delete ofile)
+                  ""))))))))
 
 (defn -main [& args]
   "IA book converter"
   (let [[options remaining banner]
         (safe-cli args
-                  ["-m" "--models" "Models for SamNER" :default "models"]
                   ["-h" "--help" "Show help" :default false :flag true])]
-    (binding [*ner-models* (or (:models options) *ner-models*)]
-      (doseq [fpath
-              (if (empty? remaining)
-                (-> System/in InputStreamReader. BufferedReader. line-seq)
-                (line-seq (gzreader (first remaining))))]
-        (convert-file (s/trim fpath))))))
+    (doseq [fpath
+            (if (empty? remaining)
+              (-> System/in InputStreamReader. BufferedReader. line-seq)
+              (line-seq (gzreader (first remaining))))]
+      (convert-file (s/trim fpath)))))

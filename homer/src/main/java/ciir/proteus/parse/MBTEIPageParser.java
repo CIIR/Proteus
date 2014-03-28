@@ -41,7 +41,8 @@ public class MBTEIPageParser extends MBTEIBookParser {
     unsetCharactersAction();
 
     // Now set up our normal processing matchers
-    addStartElementAction(wordTag, "echoFormAttribute");
+    addStartElementAction(lbTag, "echoWithAttributes");
+    addStartElementAction(wordTag, "echoFormWithTag");
     addStartElementAction(nameTag, "transformNameTag");
     addEndElementAction(nameTag, "transformNameTag");
     addEndElementAction(textTag, "echo");
