@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @author jfoley.
  */
-public class TestBuildIndex {
+public class BuildIndexTest {
 
   public static Parameters makeExternalParsersConfig(String parserClass) {
     Parameters tokteiParser = new Parameters();

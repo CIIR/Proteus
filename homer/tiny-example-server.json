@@ -2,8 +2,8 @@
   "port":1234,
   "defaultKind":"pages",
   "kinds": {
-    "books": {"index": "/path/to/books"},
-    "pages": {"index": "/path/to/pages"},
+    "books": {"index": "examples/tiny.books"},
+    "pages": {"index": "examples/tiny.pages"}
   },
   "content": {
     "dir": "web"
