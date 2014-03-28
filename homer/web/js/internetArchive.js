@@ -4,7 +4,7 @@
  * No other code should construct URLs or know about the internet archive in general, 
  * so that we can generalize to the academic paper domain.
  *
- * URL format information for the Archive is at htjjtps://openlibrary.org/dev/docs/bookurls (as of March 2014)
+ * URL format information for the Archive is at https://openlibrary.org/dev/docs/bookurls (as of March 2014)
  *
  */
 
