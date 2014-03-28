@@ -12,7 +12,8 @@
     "impl": "H2Database",
     "path": "localdb/users",
     "user": "sa",
-    "pass": ""
+    "pass": "",
+    "auto_server": "TRUE"
   }
 }
 
