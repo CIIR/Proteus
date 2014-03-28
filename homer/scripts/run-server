@@ -1,6 +1,0 @@
-#!/bin/bash
-
-set -e -u
-
-java -cp target/homer-0.4-SNAPSHOT.jar ciir.proteus.system.ProteusMain server.conf "$@"
-

@@ -40,33 +40,6 @@ public class HTTPTagTest {
     assertNotEquals("", env.url);
   }
 
-  // sanity: does our GET work on normal urls?
-  @Test
-  public void httpGetTest() throws IOException {
-    // list James Allan's publications to ensure that our get requests do actually work
-    Parameters getp = new Parameters();
-    getp.set("id", 1918);
-    HTTPUtil.Response response = HTTPUtil.get("http://ciir-publications.cs.umass.edu", "/pub/web/browse_authors.php", getp);
-    assertEquals(200, response.status);
-    assertEquals("OK", response.reason);
-  }
-
-  // sanity: does our POST work on normal urls?
-  @Test
-  public void httpPostTest() throws IOException {
-    // search for 'allan' to ensure that our post requests do actually work
-    Parameters form = new Parameters();
-    form.set("years", "");
-    form.set("authors", "allan");
-    form.set("query", "");
-    form.set("pubtype", "IR");
-
-    HTTPUtil.Response response = HTTPUtil.post("http://ciir-publications.cs.umass.edu", "/pub/web/search.php", form);
-
-    assertEquals(200, response.status);
-    assertEquals("OK", response.reason);
-  }
-
   @Test
   public void httpLogin() throws IOException {
     String url = env.url;
