@@ -11,7 +11,9 @@ public class UserDatabaseFactory {
     String impl = dbp.get("impl", "H2Database");
 
     if("H2Database".equals(impl)) {
-      return new H2Database(dbp);
+      UserDatabase newDB = new H2Database(dbp);
+      newDB.initDB();
+      return newDB;
     }
 
     throw new IllegalArgumentException("Unknown impl="+impl);
