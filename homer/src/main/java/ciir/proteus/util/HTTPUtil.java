@@ -3,9 +3,7 @@ package ciir.proteus.util;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -144,16 +142,16 @@ public class HTTPUtil {
     }
   }
 
-  public static Response putJSON(String url, String path, Parameters body) throws IOException {
-    log.info("PUT url="+url+" path="+path+" body="+body);
+  public static Response postJSON(String url, String path, Parameters body) throws IOException {
+    log.info("DELETE url="+url+" path="+path+" body="+body);
     assert(path.startsWith("/"));
     CloseableHttpClient client = HttpClientBuilder.create().build();
 
     try {
-      HttpPut put = new HttpPut(url+path);
-      put.setHeader("Content-Type", "application/json");
-      put.setEntity(new StringEntity(body.toString()));
-      return new Response(client.execute(put));
+      HttpPost post = new HttpPost(url+path);
+      post.setHeader("Content-Type", "application/json");
+      post.setEntity(new StringEntity(body.toString()));
+      return new Response(client.execute(post));
     } finally {
       client.close();
     }

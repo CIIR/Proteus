@@ -103,17 +103,19 @@ public class HTTPTagTest {
   }
 
   @Test
-  public void putTags() throws IOException {
+  public void putDeleteTags() throws IOException {
     Parameters creds = env.creds.toJSON();
 
+    // put
     Parameters put = new Parameters();
     put.copyFrom(creds);
     put.set("tags", Parameters.parseArray(
         "funny", Arrays.asList("res1", "res2", "res12", "res22"),
         "romeo", Arrays.asList("res2", "res17")));
 
-    assertOK(HTTPUtil.putJSON(env.url, "/api/tags", put));
+    assertOK(HTTPUtil.postJSON(env.url, "/api/tags/create", put));
 
+    // get
     Parameters getp = new Parameters();
     getp.copyFrom(creds);
     getp.set("resource", Arrays.asList("res1", "res12", "res22", "res2", "res17"));
@@ -121,6 +123,7 @@ public class HTTPTagTest {
     assertOK(resp);
     Parameters json = Parameters.parseString(resp.body);
 
+    // validate
     assertEquals("funny", json.getAsList("res1", String.class).get(0));
     assertEquals(1, json.getAsList("res1", String.class).size());
 
@@ -134,5 +137,25 @@ public class HTTPTagTest {
     assertEquals(1, json.getAsList("res22", String.class).size());
     assertEquals("romeo", json.getAsList("res17", String.class).get(0));
     assertEquals(1, json.getAsList("res17", String.class).size());
+
+    // delete
+    Parameters del = new Parameters();
+    del.copyFrom(creds);
+    del.set("tags", Parameters.parseArray(
+        "funny", Arrays.asList("res1", "res2", "res12", "res22"),
+        "romeo", Arrays.asList("res2", "res17")));
+
+    assertOK(HTTPUtil.postJSON(env.url, "/api/tags/delete", del));
+
+    resp = get("/api/tags", getp);
+    assertOK(resp);
+    json = Parameters.parseString(resp.body);
+
+    // validate
+    assertEquals(0, json.getAsList("res1", String.class).size());
+    assertEquals(0, json.getAsList("res2", String.class).size());
+    assertEquals(0, json.getAsList("res12", String.class).size());
+    assertEquals(0, json.getAsList("res22", String.class).size());
+    assertEquals(0, json.getAsList("res17", String.class).size());
   }
 }

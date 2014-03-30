@@ -25,6 +25,7 @@ public class HTTPRouter implements WebHandler {
   private final JSONHandler metadata;
   private final JSONHandler tags;
   private final JSONHandler putTags;
+  private final JSONHandler deleteTags;
   private final JSONHandler login;
   private final JSONHandler logout;
   private final JSONHandler register;
@@ -39,6 +40,7 @@ public class HTTPRouter implements WebHandler {
     metadata = new GetMetadata(proteus);
     tags = new GetTags(proteus);
     putTags = new PutTags(proteus);
+    deleteTags = new DeleteTags(proteus);
     login = new LoginUser(proteus);
     logout = new LogoutUser(proteus);
     register = new RegisterUser(proteus);
@@ -54,18 +56,18 @@ public class HTTPRouter implements WebHandler {
 
       final boolean GET = method.equals("GET");
       final boolean POST = method.equals("POST");
-      final boolean PUT = method.equals("PUT");
-      final boolean DELETE = method.equals("DELETE");
 
-      JSONHandler handler = debug;
+      JSONHandler handler;
       if((GET || POST) && path.equals("/api/search")) {
         handler = search;
       } else if(GET && path.equals("/api/metadata")) {
         handler = metadata;
       } else if(GET && path.equals("/api/tags")) {
         handler = tags;
-      } else if(PUT && path.equals("/api/tags")) {
+      } else if(POST && path.equals("/api/tags/create")) {
         handler = putTags;
+      } else if(POST && path.equals("/api/tags/delete")) {
+        handler = deleteTags;
       } else if(POST && path.equals("/api/login")) {
         handler = login;
       } else if(POST && path.equals("/api/logout")) {
