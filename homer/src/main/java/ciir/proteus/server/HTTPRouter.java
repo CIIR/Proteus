@@ -6,10 +6,7 @@ import ciir.proteus.server.action.JSONHandler;
 import ciir.proteus.server.action.JSONSearch;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
-import ciir.proteus.users.http.GetTags;
-import ciir.proteus.users.http.LoginUser;
-import ciir.proteus.users.http.LogoutUser;
-import ciir.proteus.users.http.RegisterUser;
+import ciir.proteus.users.http.*;
 import ciir.proteus.util.HTTPUtil;
 import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.web.WebHandler;
@@ -27,6 +24,7 @@ public class HTTPRouter implements WebHandler {
   private final JSONHandler search;
   private final JSONHandler metadata;
   private final JSONHandler tags;
+  private final JSONHandler putTags;
   private final JSONHandler login;
   private final JSONHandler logout;
   private final JSONHandler register;
@@ -40,6 +38,7 @@ public class HTTPRouter implements WebHandler {
     search = new JSONSearch(proteus);
     metadata = new GetMetadata(proteus);
     tags = new GetTags(proteus);
+    putTags = new PutTags(proteus);
     login = new LoginUser(proteus);
     logout = new LogoutUser(proteus);
     register = new RegisterUser(proteus);
@@ -65,6 +64,8 @@ public class HTTPRouter implements WebHandler {
         handler = metadata;
       } else if(GET && path.equals("/api/tags")) {
         handler = tags;
+      } else if(PUT && path.equals("/api/tags")) {
+        handler = putTags;
       } else if(POST && path.equals("/api/login")) {
         handler = login;
       } else if(POST && path.equals("/api/logout")) {

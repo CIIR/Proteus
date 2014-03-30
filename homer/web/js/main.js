@@ -44,8 +44,10 @@ var makeRequest = function(args) {
   var ajaxOpts = {
     type: "POST",
     url: "/api/search",
-    data: actualArgs,
-    crossDomain: true
+    data: JSON.stringify(actualArgs),
+    dataType: "json",
+    contentType: "application/json",
+    processData: false
   };
 
   clearUI();

@@ -1,6 +1,7 @@
 package ciir.proteus.server;
 
 import ciir.proteus.system.ProteusSystem;
+import ciir.proteus.users.error.NoTuplesAffected;
 import org.lemurproject.galago.tupleflow.FileUtility;
 import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
@@ -9,6 +10,8 @@ import org.lemurproject.galago.tupleflow.web.WebServerException;
 
 import java.io.File;
 import java.io.IOException;
+
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author jfoley
@@ -20,7 +23,10 @@ public class TestEnvironment {
   public ProteusSystem proteus;
   public String url;
 
-  public TestEnvironment() throws IOException, WebServerException {
+  public String user = "proteusTestUser";
+  public String token;
+
+  public TestEnvironment() throws IOException, WebServerException, NoTuplesAffected {
     folder =  FileUtility.createTemporaryDirectory();
     proteus = new ProteusSystem(testParams(folder));
 
@@ -29,6 +35,14 @@ public class TestEnvironment {
     int port = Utility.getFreePort();
     server = WebServer.start(port, router);
     url = server.getURL();
+
+    createUser();
+  }
+
+  private void createUser() throws NoTuplesAffected {
+    proteus.userdb.register(user);
+    token = proteus.userdb.login(user);
+    assertNotNull(token);
   }
 
   public static Parameters testParams(File tmpDir) {

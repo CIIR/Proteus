@@ -1,15 +1,11 @@
 package ciir.proteus.users.http;
 
 import ciir.proteus.server.HTTPError;
-import ciir.proteus.server.action.JSONHandler;
 import ciir.proteus.system.ProteusSystem;
-import ciir.proteus.users.UserDatabase;
 import ciir.proteus.users.error.DBError;
 import org.lemurproject.galago.tupleflow.Parameters;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author jfoley.
@@ -22,8 +18,8 @@ public class GetTags extends DBAction {
   @Override
   public Parameters handle(String method, String path, Parameters reqp) throws HTTPError {
     String user = reqp.getString("user");
-    String token = reqp.getString("token");
-    List<String> resources = reqp.getAsList("resource");
+    String token = reqp.getAsString("token");
+    List<String> resources = reqp.getAsList("resource", String.class);
 
     log.info("GetTags user="+user+" token="+token+" resources="+resources);
 
