@@ -53,8 +53,7 @@ var makeRequest = function(args) {
   $.ajax(ajaxOpts)
     .done(renderResults)
     .error(function(req, status, err) {
-      showError("ERROR: "+status);
-      console.log(err);
+      showError("ERROR: ``"+err+"``");
       throw err;
     });
 
