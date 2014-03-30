@@ -1,6 +1,7 @@
 package ciir.proteus.server.action;
 
 import ciir.proteus.system.ProteusSystem;
+import ciir.proteus.users.error.DBError;
 import ciir.proteus.util.ListUtil;
 import ciir.proteus.util.QueryUtil;
 import ciir.proteus.util.RetrievalUtil;
@@ -25,7 +26,7 @@ public class JSONSearch implements JSONHandler {
   }
 
   @Override
-  public Parameters handle(String method, String path, Parameters reqp) {
+  public Parameters handle(String method, String path, Parameters reqp) throws DBError {
     String query = reqp.getAsString("q");
     String kind = reqp.get("kind", system.defaultKind);
     int numResults = (int) reqp.get("n", 10);
@@ -51,9 +52,10 @@ public class JSONSearch implements JSONHandler {
   }
 
 
-  public List<Parameters> annotate(String kind, List<ScoredDocument> results, String query, Parameters reqp) {
+  public List<Parameters> annotate(String kind, List<ScoredDocument> results, String query, Parameters reqp) throws DBError {
     boolean snippets = reqp.get("snippets", true);
     boolean metadata = reqp.get("metadata", true);
+    boolean tags = reqp.get("tags", reqp.isString("user"));
 
     if(snippets) {
       results = system.findPassages(kind, query, results);
@@ -62,11 +64,19 @@ public class JSONSearch implements JSONHandler {
     // result data
     ArrayList<Parameters> resultData = new ArrayList<Parameters>(results.size());
 
-    Map<String,Document> pulled = Collections.emptyMap();
 
     // if we need to pull the documents:
+    Map<String,Document> pulled = Collections.emptyMap();
     if(snippets || metadata) {
       pulled = system.getDocs(kind, RetrievalUtil.names(results), metadata, snippets);
+    }
+
+    // if we need to get tags for these documents:
+    Map<String,List<String>> docTags = null;
+    if(tags) {
+      String user = reqp.getString("user");
+      String token = reqp.getAsString("token");
+      docTags = system.userdb.getTags(user, token, RetrievalUtil.names(results));
     }
 
     for(ScoredDocument sdoc : results) {
@@ -89,6 +99,11 @@ public class JSONSearch implements JSONHandler {
             workaround(Utility.join(ListUtil.slice(doc.terms, psg.begin, psg.end), " "));
 
         docp.set("snippet", snippet);
+      }
+
+      // tags annotation
+      if(tags && docTags != null) {
+        docp.set("tags", docTags.get(sdoc.documentName));
       }
 
       resultData.add(docp);

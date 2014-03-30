@@ -5,6 +5,7 @@ import ciir.proteus.server.action.GetMetadata;
 import ciir.proteus.server.action.JSONHandler;
 import ciir.proteus.server.action.JSONSearch;
 import ciir.proteus.system.ProteusSystem;
+import ciir.proteus.users.error.DBError;
 import ciir.proteus.users.http.GetTags;
 import ciir.proteus.users.http.LoginUser;
 import ciir.proteus.users.http.LogoutUser;
@@ -102,6 +103,9 @@ public class HTTPRouter implements WebHandler {
       // Parameters.get failed
       log.log(Level.INFO, "illegal argument received", argex);
       resp.sendError(HTTPError.BadRequest, argex.getMessage());
+    } catch (DBError dbError) {
+      log.log(Level.WARNING, "database-error", dbError);
+      resp.sendError(HTTPError.InternalError, dbError.getMessage());
     }
 
   }
