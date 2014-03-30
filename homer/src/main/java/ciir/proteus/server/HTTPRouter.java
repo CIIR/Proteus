@@ -76,10 +76,14 @@ public class HTTPRouter implements WebHandler {
       } else if(GET && !path.startsWith("/api")) {
         staticContent.handle(path, reqp, resp);
         return;
+      } else {
+        resp.sendError(404, "Not found");
+        return;
       }
       handleJSON(handler, method, path, reqp, resp);
     } catch (Throwable th) {
       th.printStackTrace();
+      resp.sendError(501, th.getMessage());
     }
   }
 
