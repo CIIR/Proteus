@@ -23,7 +23,6 @@ public class TestEnvironment {
   public TestEnvironment() throws IOException, WebServerException {
     folder =  FileUtility.createTemporaryDirectory();
     proteus = new ProteusSystem(testParams(folder));
-    proteus.userdb.initDB();
 
     router = new HTTPRouter(proteus);
 

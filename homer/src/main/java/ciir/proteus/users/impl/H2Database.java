@@ -8,14 +8,8 @@ import ciir.proteus.users.error.DBError;
 import ciir.proteus.users.error.NoTuplesAffected;
 import org.lemurproject.galago.tupleflow.Parameters;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.math.BigDecimal;
-import java.net.URL;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author jfoley.
@@ -36,6 +30,9 @@ public class H2Database implements UserDatabase {
       String autoServer = conf.get("auto_server", "FALSE");
       // open a connection
       conn = DriverManager.getConnection("jdbc:h2:" + path + ";AUTO_SERVER=" + autoServer, dbuser, dbpass);
+
+      // create tables if needed
+      initDB();
       
     } catch (ClassNotFoundException e) {
       throw new IllegalArgumentException(e);
@@ -44,8 +41,7 @@ public class H2Database implements UserDatabase {
     }
   }
 
-  @Override
-  public void initDB() {
+  private void initDB() {
     try {
      
       conn.prepareStatement("create table IF NOT EXISTS users (" +
@@ -195,23 +191,37 @@ public class H2Database implements UserDatabase {
 
   @Override
   public List<String> getTags(String user, String token, String resource) throws DBError {
+    Map<String, List<String>> results = getTags(user, token, Arrays.asList(resource));
+    return results.get(resource);
+  }
+
+  @Override
+  public Map<String, List<String>> getTags(String user, String token, List<String> resources) throws DBError {
     checkSession(user, token);
-    ArrayList<String> tags = new ArrayList<String>();
+
+    Map<String,List<String>> results = new HashMap<String,List<String>>();
+
     try {
       PreparedStatement stmt = conn.prepareStatement("select tag from tags where user=? and resource=?");
       stmt.setString(1, user);
-      stmt.setString(2, resource);
 
-      ResultSet results = stmt.executeQuery();
-      while(results.next()) {
-        String tag = results.getString(1);
-        tags.add(tag);
+      for(String resource : resources) {
+        List<String> tags = new ArrayList<String>();
+        stmt.setString(2, resource);
+
+        ResultSet tuples = stmt.executeQuery();
+        while(tuples.next()) {
+          String tag = tuples.getString(1);
+          tags.add(tag);
+        }
+        tuples.close();
+        results.put(resource, tags);
       }
-      results.close();
     } catch (SQLException e) {
       e.printStackTrace();
     }
-    return tags;
+
+    return results;
   }
 
   @Override

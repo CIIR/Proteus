@@ -6,7 +6,7 @@
  * For now, includes talking to the proteus/homer server.
  *
  * TODO: use require.js and add a build system.
- * 
+ *
  */
 
 /**
@@ -36,7 +36,7 @@ var makeRequest = function(args) {
 
   var actualArgs = _.merge(defaultArgs, args);
 
-  if(!args.q || isBlank(args.q)) { 
+  if(!args.q || isBlank(args.q)) {
     showProgress("Query is blank!");
     return;
   }
@@ -47,13 +47,14 @@ var makeRequest = function(args) {
     data: actualArgs,
     crossDomain: true
   };
-  
+
   clearUI();
   showProgress("Search Request sent to server!");
   $.ajax(ajaxOpts)
     .done(renderResults)
     .error(function(req, status, err) {
       showError("ERROR: "+status);
+      console.log(err);
       throw err;
     });
 

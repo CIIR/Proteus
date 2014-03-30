@@ -4,17 +4,12 @@ import ciir.proteus.users.error.DBError;
 import ciir.proteus.users.error.NoTuplesAffected;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author jfoley.
  */
 public interface UserDatabase {
-
-  /**
-   * generate tables, call this once; because "if not exists" is annoyingly non-standard
-   */
-  public void initDB();
-
   /**
    * shut down connection
    */
@@ -55,6 +50,7 @@ public interface UserDatabase {
   public void checkSession(String user, String token) throws DBError;
 
   public List<String> getTags(String user, String token, String resource) throws DBError;
+  public Map<String, List<String>> getTags(String user, String token, List<String> resources) throws DBError;
   public void deleteTag(String user, String token, String resource, String tag) throws DBError;
   public void addTag(String user, String token, String resource, String tag) throws DBError;
 }

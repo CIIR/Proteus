@@ -11,8 +11,10 @@ import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
@@ -39,7 +41,6 @@ public class UserDatabaseTest {
     dbp.set("pass", "");
 
     db = UserDatabaseFactory.instance(dbp);
-    db.initDB();
   }
 
   @AfterClass
@@ -141,6 +142,17 @@ public class UserDatabaseTest {
     res2tags = db.getTags(user, token, "res2");
     Collections.sort(res2tags); // don't depend on db order
     assertArrayEquals(new String[]{"tag1", "tag3"}, res2tags.toArray());
+
+    // test get multiple
+    Map<String,List<String>> getres = db.getTags(user, token, Arrays.asList("res1", "res2", "res3"));
+    assertNotNull(getres);
+    assertNotNull(getres.get("res1"));
+    assertNotNull(getres.get("res2"));
+    assertNotNull(getres.get("res3"));
+
+    assertArrayEquals(new String[]{"tag1"}, getres.get("res1").toArray());
+    assertArrayEquals(new String[]{"tag1", "tag3"}, getres.get("res2").toArray());
+    assertTrue(getres.get("res3").isEmpty());
 
   }
 }
