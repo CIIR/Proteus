@@ -1,6 +1,7 @@
 package ciir.proteus.server;
 
 import ciir.proteus.system.ProteusSystem;
+import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.NoTuplesAffected;
 import org.lemurproject.galago.tupleflow.FileUtility;
 import org.lemurproject.galago.tupleflow.Parameters;
@@ -23,8 +24,7 @@ public class TestEnvironment {
   public ProteusSystem proteus;
   public String url;
 
-  public String user = "proteusTestUser";
-  public String token;
+  public Credentials creds;
 
   public TestEnvironment() throws IOException, WebServerException, NoTuplesAffected {
     folder =  FileUtility.createTemporaryDirectory();
@@ -40,9 +40,12 @@ public class TestEnvironment {
   }
 
   private void createUser() throws NoTuplesAffected {
+    String user = "proteusTestUser";
     proteus.userdb.register(user);
-    token = proteus.userdb.login(user);
+    String token = proteus.userdb.login(user);
     assertNotNull(token);
+
+    creds = new Credentials(user, token);
   }
 
   public static Parameters testParams(File tmpDir) {

@@ -55,19 +55,21 @@ public class UserDatabaseTest {
     db.register("user1");
 
     assertTrue(db.validUser("user1"));
-    assertFalse(db.validSession("user1", "bogus-token"));
+    assertFalse(db.validSession(new Credentials("user1", "bogus-token")));
 
     for(int i=0; i<NumIterations; i++) {
       String session = db.login("user1");
       assertNotNull(session);
 
-      assertTrue(db.validSession("user1", session));
+      Credentials user1 = new Credentials("user1", session);
+
+      assertTrue(db.validSession(user1));
 
       // try our getTags sql
-      assertEquals(0, db.getTags("user1", session, "fake-resource").size());
+      assertEquals(0, db.getTags(user1, "fake-resource").size());
 
-      db.logout("user1", session);
-      assertFalse(db.validSession("user1", session));
+      db.logout(user1);
+      assertFalse(db.validSession(user1));
     }
   }
 
@@ -81,7 +83,7 @@ public class UserDatabaseTest {
 
     for(String user : users) {
       try {
-        db.getTags(user, "no-such-session", "fake-resource");
+        db.getTags(new Credentials(user, "no-such-session"), "fake-resource");
         fail("Expected exception user="+user);
       } catch (BadSessionException e) {
         assertEquals(user, "real-user");
@@ -90,7 +92,7 @@ public class UserDatabaseTest {
       }
 
       try {
-        db.addTag(user, "no-such-session", "fake-resource", "is-fake");
+        db.addTag(new Credentials(user, "no-such-session"), "fake-resource", "is-fake");
         fail("Expected exception user="+user);
       } catch (BadSessionException e) {
         assertEquals(user, "real-user");
@@ -99,7 +101,7 @@ public class UserDatabaseTest {
       }
 
       try {
-        db.deleteTag(user, "no-such-session", "fake-resource", "is-fake");
+        db.deleteTag(new Credentials(user, "no-such-session"), "fake-resource", "is-fake");
         fail("Expected exception user="+user);
       } catch (BadSessionException e) {
         assertEquals(user, "real-user");
@@ -108,7 +110,7 @@ public class UserDatabaseTest {
       }
 
       // ignore logout to invalid users/sessions; for now
-      db.logout(user, "no-such-session");
+      db.logout(new Credentials(user, "no-such-session"));
     }
 
   }
@@ -120,31 +122,33 @@ public class UserDatabaseTest {
     String token = db.login(user);
     assertNotNull(token);
 
-    // test single tag
-    db.addTag(user, token, "res1", "tag1");
+    Credentials cred = new Credentials(user, token);
 
-    List<String> res1tags = db.getTags(user, token, "res1");
+    // test single tag
+    db.addTag(cred, "res1", "tag1");
+
+    List<String> res1tags = db.getTags(cred, "res1");
     Collections.sort(res1tags); // don't depend on db order
     assertArrayEquals(new String[]{"tag1"}, res1tags.toArray());
 
     // test multiple tags for the same thing
-    db.addTag(user, token, "res2", "tag1");
-    db.addTag(user, token, "res2", "tag2");
-    db.addTag(user, token, "res2", "tag3");
+    db.addTag(cred, "res2", "tag1");
+    db.addTag(cred, "res2", "tag2");
+    db.addTag(cred, "res2", "tag3");
 
-    List<String> res2tags = db.getTags(user, token, "res2");
+    List<String> res2tags = db.getTags(cred, "res2");
     Collections.sort(res2tags); // don't depend on db order
     assertArrayEquals(new String[]{"tag1", "tag2", "tag3"}, res2tags.toArray());
 
     // test delete!
-    db.deleteTag(user, token, "res2", "tag2");
+    db.deleteTag(cred, "res2", "tag2");
 
-    res2tags = db.getTags(user, token, "res2");
+    res2tags = db.getTags(cred, "res2");
     Collections.sort(res2tags); // don't depend on db order
     assertArrayEquals(new String[]{"tag1", "tag3"}, res2tags.toArray());
 
     // test get multiple
-    Map<String,List<String>> getres = db.getTags(user, token, Arrays.asList("res1", "res2", "res3"));
+    Map<String,List<String>> getres = db.getTags(cred, Arrays.asList("res1", "res2", "res3"));
     assertNotNull(getres);
     assertNotNull(getres.get("res1"));
     assertNotNull(getres.get("res2"));

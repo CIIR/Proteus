@@ -7,14 +7,15 @@ import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.Retrieval;
 import org.lemurproject.galago.core.retrieval.RetrievalFactory;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
-import org.lemurproject.galago.core.retrieval.ScoredPassage;
 import org.lemurproject.galago.core.retrieval.processing.MaxPassageFinder;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.tupleflow.Parameters;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ProteusSystem {
   public final String defaultKind;
@@ -77,44 +78,6 @@ public class ProteusSystem {
 
 
     return search(kind, StructuredQuery.parse(query), qp);
-  }
-
-  public Map<String,String> passages(String kind, List<ScoredDocument> passages) {
-    List<String> names = RetrievalUtil.names(passages);
-
-    // pull all documents into a map by name
-    Map<String,Document> pulledDocuments;
-    try {
-      pulledDocuments = getRetrieval(kind).getDocuments(names, new Document.DocumentComponents(true, false, true));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    if(pulledDocuments.isEmpty()) {
-      return Collections.emptyMap();
-    }
-
-    HashMap<String,String> results = new HashMap<String,String>();
-
-    // collect terms from passage into results
-    for(ScoredDocument psgdoc : passages) {
-      ScoredPassage psg = (ScoredPassage) psgdoc;
-      int start = psg.begin;
-      int end = psg.end;
-      Document data = pulledDocuments.get(psg.documentName);
-      if(data == null) {
-        continue;
-      }
-      List<String> terms = data.terms;
-
-      StringBuilder passageText = new StringBuilder();
-      for(int i=start; i<end&&i<terms.size(); i++) {
-        passageText.append(terms.get(i)).append(' ');
-      }
-      results.put(psg.documentName, passageText.toString());
-    }
-
-    return results;
   }
 
   public void close() throws IOException {

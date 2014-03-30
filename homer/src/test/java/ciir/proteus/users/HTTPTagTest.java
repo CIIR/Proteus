@@ -41,7 +41,7 @@ public class HTTPTagTest {
     return HTTPUtil.get(env.url, path, req);
   }
 
-  public static final void assertOK(HTTPUtil.Response resp) {
+  public static void assertOK(HTTPUtil.Response resp) {
     assertEquals(200, resp.status);
     assertEquals("OK", resp.reason);
   }
@@ -104,10 +104,7 @@ public class HTTPTagTest {
 
   @Test
   public void putTags() throws IOException {
-    Parameters creds = Parameters.parseArray(
-        "user", env.user,
-        "token", env.token
-    );
+    Parameters creds = env.creds.toJSON();
 
     Parameters put = new Parameters();
     put.copyFrom(creds);

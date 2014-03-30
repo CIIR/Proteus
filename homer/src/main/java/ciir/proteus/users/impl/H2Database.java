@@ -1,5 +1,6 @@
 package ciir.proteus.users.impl;
 
+import ciir.proteus.users.Credentials;
 import ciir.proteus.users.UserDatabase;
 import ciir.proteus.users.Users;
 import ciir.proteus.users.error.BadSessionException;
@@ -114,14 +115,14 @@ public class H2Database implements UserDatabase {
   }
 
   @Override
-  public void logout(String username, String token) throws NoTuplesAffected {
-    if(!validSession(username, token))
+  public void logout(Credentials creds) throws NoTuplesAffected {
+    if(!validSession(creds))
       return;
 
     try {
       PreparedStatement stmt = conn.prepareStatement("delete from sessions where user=? and session=?");
-      stmt.setString(1, username);
-      stmt.setString(2, token);
+      stmt.setString(1, creds.user);
+      stmt.setString(2, creds.token);
 
       int numRows = stmt.executeUpdate();
       if(numRows == 0) {
@@ -159,13 +160,13 @@ public class H2Database implements UserDatabase {
   }
 
   @Override
-  public boolean validSession(String user, String token) {
+  public boolean validSession(Credentials creds) {
     boolean found = false;
 
     try {
       PreparedStatement stmt = conn.prepareStatement("select (user,session) from sessions where user=? and session=?");
-      stmt.setString(1, user);
-      stmt.setString(2, token);
+      stmt.setString(1, creds.user);
+      stmt.setString(2, creds.token);
 
       ResultSet results = stmt.executeQuery();
       if(results.next()) {
@@ -180,30 +181,30 @@ public class H2Database implements UserDatabase {
   }
 
   @Override
-  public void checkSession(String user, String token) throws DBError {
-    if(!validUser(user)) {
-      throw new BadUserException(user);
+  public void checkSession(Credentials creds) throws DBError {
+    if(!validUser(creds.user)) {
+      throw new BadUserException(creds.user);
     }
-    if(!validSession(user, token)) {
-      throw new BadSessionException(user, token);
+    if(!validSession(creds)) {
+      throw new BadSessionException(creds.user, creds.token);
     }
   }
 
   @Override
-  public List<String> getTags(String user, String token, String resource) throws DBError {
-    Map<String, List<String>> results = getTags(user, token, Arrays.asList(resource));
+  public List<String> getTags(Credentials creds, String resource) throws DBError {
+    Map<String, List<String>> results = getTags(creds, Arrays.asList(resource));
     return results.get(resource);
   }
 
   @Override
-  public Map<String, List<String>> getTags(String user, String token, List<String> resources) throws DBError {
-    checkSession(user, token);
+  public Map<String, List<String>> getTags(Credentials creds, List<String> resources) throws DBError {
+    checkSession(creds);
 
     Map<String,List<String>> results = new HashMap<String,List<String>>();
 
     try {
       PreparedStatement stmt = conn.prepareStatement("select tag from tags where user=? and resource=?");
-      stmt.setString(1, user);
+      stmt.setString(1, creds.user);
 
       for(String resource : resources) {
         List<String> tags = new ArrayList<String>();
@@ -225,12 +226,12 @@ public class H2Database implements UserDatabase {
   }
 
   @Override
-  public void deleteTag(String user, String token, String resource, String tag) throws DBError {
-    checkSession(user, token);
+  public void deleteTag(Credentials creds, String resource, String tag) throws DBError {
+    checkSession(creds);
 
     try {
       PreparedStatement stmt = conn.prepareStatement("delete from tags where user=? and resource=? and tag=?");
-      stmt.setString(1, user);
+      stmt.setString(1, creds.user);
       stmt.setString(2, resource);
       stmt.setString(3, tag);
       int numRows = stmt.executeUpdate();
@@ -244,12 +245,12 @@ public class H2Database implements UserDatabase {
   }
 
   @Override
-  public void addTag(String user, String token, String resource, String tag) throws DBError {
-    checkSession(user, token);
+  public void addTag(Credentials creds, String resource, String tag) throws DBError {
+    checkSession(creds);
 
     try {
       PreparedStatement stmt = conn.prepareStatement("insert into tags (user,resource,tag) values (?,?,?)");
-      stmt.setString(1, user);
+      stmt.setString(1, creds.user);
       stmt.setString(2, resource);
       stmt.setString(3, tag);
       int numRows = stmt.executeUpdate();

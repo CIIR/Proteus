@@ -1,6 +1,7 @@
 package ciir.proteus.server.action;
 
 import ciir.proteus.system.ProteusSystem;
+import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.util.ListUtil;
 import ciir.proteus.util.QueryUtil;
@@ -74,9 +75,7 @@ public class JSONSearch implements JSONHandler {
     // if we need to get tags for these documents:
     Map<String,List<String>> docTags = null;
     if(tags) {
-      String user = reqp.getString("user");
-      String token = reqp.getAsString("token");
-      docTags = system.userdb.getTags(user, token, RetrievalUtil.names(results));
+      docTags = system.userdb.getTags(Credentials.fromJSON(reqp), RetrievalUtil.names(results));
     }
 
     for(ScoredDocument sdoc : results) {

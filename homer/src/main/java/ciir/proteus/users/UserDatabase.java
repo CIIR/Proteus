@@ -31,7 +31,7 @@ public interface UserDatabase {
   /**
    * Logs out a user/session combo
    */
-  public void logout(String username, String session) throws NoTuplesAffected;
+  public void logout(Credentials creds) throws NoTuplesAffected;
 
   /**
    * Returns true if user has registered
@@ -42,15 +42,14 @@ public interface UserDatabase {
 
   /**
    * Returns a user record for a given session
-   * @param token a token given as part of a request
    * @return user object for the logged in user or null
    */
-  public boolean validSession(String user, String token);
+  public boolean validSession(Credentials creds);
 
-  public void checkSession(String user, String token) throws DBError;
+  public void checkSession(Credentials creds) throws DBError;
 
-  public List<String> getTags(String user, String token, String resource) throws DBError;
-  public Map<String, List<String>> getTags(String user, String token, List<String> resources) throws DBError;
-  public void deleteTag(String user, String token, String resource, String tag) throws DBError;
-  public void addTag(String user, String token, String resource, String tag) throws DBError;
+  public List<String> getTags(Credentials creds, String resource) throws DBError;
+  public Map<String, List<String>> getTags(Credentials creds, List<String> resources) throws DBError;
+  public void deleteTag(Credentials creds, String resource, String tag) throws DBError;
+  public void addTag(Credentials creds, String resource, String tag) throws DBError;
 }
