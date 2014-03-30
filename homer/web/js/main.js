@@ -19,14 +19,11 @@ setReadyHandler(function() {
   console.log(params);
   if(!isBlank(params.q)) {
     setQuery(params.q);
-    makeRequest(params);
+    search(params);
   }
 });
 
-/**
- * Main async server communication call, only does /search for now
- */
-var makeRequest = function(args) {
+var search = function(args) {
   var defaultArgs = {
     n: 10,
     snippets: true,
@@ -41,29 +38,18 @@ var makeRequest = function(args) {
     return;
   }
 
-  var ajaxOpts = {
-    type: "POST",
-    url: "/api/search",
-    data: JSON.stringify(actualArgs),
-    dataType: "json",
-    contentType: "application/json",
-    processData: false
-  };
-
   clearUI();
   showProgress("Search Request sent to server!");
-  $.ajax(ajaxOpts)
-    .done(renderResults)
-    .error(function(req, status, err) {
-      showError("ERROR: ``"+err+"``");
-      throw err;
-    });
+  API.search(actualArgs, renderResults, function(req, status, err) {
+    showError("ERROR: ``"+err+"``");
+    throw err;
+  });
 
   return actualArgs;
 };
 
 /* handlers for search button types */
-setPageHandler(function() { makeRequest({kind:"pages", q:getQuery()}); });
-setBookHandler(function() { makeRequest({kind:"books", q:getQuery()}); });
+setPageHandler(function() { search({kind:"pages", q:getQuery()}); });
+setBookHandler(function() { search({kind:"books", q:getQuery()}); });
 
 

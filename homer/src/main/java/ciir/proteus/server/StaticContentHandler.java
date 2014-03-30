@@ -92,11 +92,11 @@ public class StaticContentHandler {
 
     OutputStream out = null;
     try {
+      resp.setContentType(determineContentType(fp.getPath()));
+      resp.setStatus(200);
       out = resp.getOutputStream();
       Utility.copyFileToStream(fp, out);
       out.close();
-      resp.setContentType(determineContentType(fp.getPath()));
-      resp.setStatus(200);
     } catch (IOException e) {
       throw new HTTPError(e);
     } finally {

@@ -76,7 +76,7 @@ public class HTTPRouter implements WebHandler {
         handler = register;
       } else if(path.equals("/api/debug")) {
         handler = debug;
-      } else if(GET && !path.startsWith("/api")) {
+      } else if(GET && !path.startsWith("/api/")) {
         staticContent.handle(path, reqp, resp);
         return;
       } else {
