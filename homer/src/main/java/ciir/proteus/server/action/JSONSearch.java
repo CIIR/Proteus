@@ -95,7 +95,7 @@ public class JSONSearch implements JSONHandler {
       if(doc != null && snippets) {
         ScoredPassage psg = (ScoredPassage) sdoc;
         String snippet =
-            workaround(Utility.join(ListUtil.slice(doc.terms, psg.begin, psg.end), " "));
+            (Utility.join(ListUtil.slice(doc.terms, psg.begin, psg.end), " "));
 
         docp.set("snippet", snippet);
       }
@@ -110,28 +110,5 @@ public class JSONSearch implements JSONHandler {
 
     // return annotated data:
     return resultData;
-  }
-
-  /**
-   * Workaround for escaping issues in galago.core
-   * @param input noisy string from Galago's corpus
-   * @return valid JSON string at all costs
-   */
-  private String workaround(String input) {
-    StringBuilder justSafeChars = new StringBuilder();
-    for(int i=0; i<input.length(); i++) {
-      int x = input.codePointAt(i);
-      // restrict to ascii
-      if(x > 127)
-        continue;
-
-      // drop escapable
-      char ch = (char) x;
-      if(ch == '"' || ch == '\'' || ch == '\\')
-        continue;
-
-      justSafeChars.append(ch);
-    }
-    return justSafeChars.toString();
   }
 }

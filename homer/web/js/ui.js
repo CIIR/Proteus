@@ -70,7 +70,7 @@ var makeResult = function(data, result) {
     var pageNum = result.name.split('_')[1];
     name += ' pp. '+pageNum;
     previewImage = '<a href="'+pageImage(identifier, pageNum)+'">'+
-      '<img src="'+pageThumbnail(identifier, pageNum)+'" />' + 
+      '<img class="thumbnail" src="'+pageThumbnail(identifier, pageNum)+'" />' + 
       '</a>';
   }
 
