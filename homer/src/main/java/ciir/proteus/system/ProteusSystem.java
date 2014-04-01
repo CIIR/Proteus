@@ -88,9 +88,12 @@ public class ProteusSystem {
   }
 
   public Map<String, Document> getDocs(String kind, List<String> names, boolean metadata, boolean text) {
-    final boolean tokenize = true;
     try {
-      return getRetrieval(kind).getDocuments(names, new Document.DocumentComponents(metadata, text, tokenize));
+      Document.DocumentComponents docOpts = new Document.DocumentComponents();
+      docOpts.text = text;
+      docOpts.tokenize = text;
+      docOpts.metadata = metadata;
+      return getRetrieval(kind).getDocuments(names, docOpts);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
