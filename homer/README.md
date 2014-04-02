@@ -20,3 +20,8 @@ To run the Proteus demonstration server (in its current state) on these books, r
 
     ./scripts/tiny-corpus/run.sh
 
+## FAQ
+
+### Why do I get some sort of URLException while trying to set up the database?
+
+There appears to be some issues with hostname resolution with JDK7 on a Mac. Adding a workaround to your ``/etc/hosts`` seems to be the [solution](https://groups.google.com/forum/#!topic/h2-database/DuIlTLN5KOo). TL;DR - you need to explain to your computer that your hostname is the same as 127.0.0.1.
