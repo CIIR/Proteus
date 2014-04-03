@@ -3,7 +3,8 @@
   "defaultKind":"pages",
   "kinds": {
     "books": {"index": "examples/tiny.books"},
-    "pages": {"index": "examples/tiny.pages"}
+    "pages": {"index": "examples/tiny.pages"},
+    "metadata": {"index": "examples/tiny.metadata"}
   },
   "content": {
     "dir": "web"
