@@ -19,5 +19,5 @@ To generate date and author entries from raw_date and raw_creator
 To index the metadata entries
 1. Run python db_to_xml.py <database-name> <output-file>
 Note: make sure that the output file is in a directory called "xml"
-2. Run java -jar ../homer/target/homer-0.3.jar build xml.conf
+2. Run java -jar ../homer/target/homer-0.3.jar build metadata.conf
 
