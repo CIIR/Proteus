@@ -115,4 +115,8 @@ var setPageHandler = function(callback) {
 var setBookHandler = function(callback) {
   $("#ui-go-books").click(callback);
 };
+var setMetadataHandler = function(callback) {
+  $("#ui-go-metadata").click(callback);
+};
+
 

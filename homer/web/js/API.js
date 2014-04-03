@@ -27,6 +27,7 @@ var method = function(method, url) {
 };
 
 API.search = method("POST", "/api/search");
+API.advanced = method("POST", "/api/advanced");
 API.metadata = method("GET", "/api/metadata");
 API.getTags = method("GET", "/api/tags");
 API.createTags = method("POST", "/api/tags/create");

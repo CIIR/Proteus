@@ -48,8 +48,34 @@ var search = function(args) {
   return actualArgs;
 };
 
+var advanced = function(args) {
+  var defaultArgs = {
+    n: 10,
+    snippets: true,
+    metadata: true,
+    kind: "pages"
+  };
+
+  var actualArgs = _.merge(defaultArgs, args);
+
+  if(!args.q || isBlank(args.q)) {
+    showProgress("Query is blank!");
+    return;
+  }
+
+  clearUI();
+  showProgress("Search Request sent to server!");
+  API.advanced(actualArgs, renderResults, function(req, status, err) {
+    showError("ERROR: ``"+err+"``");
+    throw err;
+  });
+
+  return actualArgs;
+};
+
 /* handlers for search button types */
 setPageHandler(function() { search({kind:"pages", q:getQuery()}); });
 setBookHandler(function() { search({kind:"books", q:getQuery()}); });
+setMetadataHandler(function() { advanced({kind:"metadata", q:getQuery()}); });
 
 

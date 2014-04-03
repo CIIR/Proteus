@@ -4,6 +4,7 @@ import ciir.proteus.server.action.DebugHandler;
 import ciir.proteus.server.action.GetMetadata;
 import ciir.proteus.server.action.JSONHandler;
 import ciir.proteus.server.action.JSONSearch;
+import ciir.proteus.server.action.JSONAdvSearch;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.users.http.*;
@@ -22,6 +23,7 @@ public class HTTPRouter implements WebHandler {
   private static final Logger log = Logger.getLogger(HTTPRouter.class.getName());
   private final JSONHandler debug;
   private final JSONHandler search;
+  private final JSONHandler advancedSearch;
   private final JSONHandler metadata;
   private final JSONHandler tags;
   private final JSONHandler putTags;
@@ -37,6 +39,7 @@ public class HTTPRouter implements WebHandler {
     staticContent = new StaticContentHandler(proteus.getConfig());
 
     search = new JSONSearch(proteus);
+    advancedSearch = new JSONAdvSearch(proteus);
     metadata = new GetMetadata(proteus);
     tags = new GetTags(proteus);
     putTags = new PutTags(proteus);
@@ -60,6 +63,8 @@ public class HTTPRouter implements WebHandler {
       JSONHandler handler;
       if((GET || POST) && path.equals("/api/search")) {
         handler = search;
+      } else if((GET || POST) && path.equals("/api/advanced")) {
+        handler = advancedSearch;
       } else if(GET && path.equals("/api/metadata")) {
         handler = metadata;
       } else if(GET && path.equals("/api/tags")) {
