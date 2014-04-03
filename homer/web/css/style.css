@@ -66,6 +66,17 @@ body {
   float:right;
   height: 20pt;
   vertical-align: middle;
+} 
+#login-form {
+  color: #fff;
+  text-align: right;
+  float:bottom;
+  height: 20pt;
+  vertical-align: middle;
+}
+
+#login-form a:hover, a:visited {
+	color: #fff;
 }
 
 #ui {
