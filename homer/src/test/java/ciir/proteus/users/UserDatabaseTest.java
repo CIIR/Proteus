@@ -151,17 +151,12 @@ public class UserDatabaseTest {
     Collections.sort(res2tags); // don't depend on db order
     assertArrayEquals(new String[]{"tag1", "tag2", "tag3"}, res2tags.toArray());
 
-    // test that we can get tags regardless of case of resource
-    List<String> res2tagsUpper = db.getTags(cred, "RES2");
-    Collections.sort(res2tagsUpper); // don't depend on db order
-    assertArrayEquals(new String[]{"tag1", "tag2", "tag3"}, res2tagsUpper.toArray());
-
     // test delete!
     db.deleteTag(cred, "res2", "tag2");
 
-    // re-add, then delete testing case insensitivity
+    // re-add, then delete testing tag case insensitivity
     db.addTag(cred, "res2", "tag2");
-    db.deleteTag(cred, "rES2", "tAG2");
+    db.deleteTag(cred, "res2", "tAG2");
 
     res2tags = db.getTags(cred, "res2");
     Collections.sort(res2tags); // don't depend on db order

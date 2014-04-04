@@ -16,6 +16,7 @@ import java.util.*;
  * @author jfoley.
  */
 public class H2Database implements UserDatabase {
+
   private Connection conn;
 
   public H2Database(Parameters conf) {
@@ -34,7 +35,7 @@ public class H2Database implements UserDatabase {
 
       // create tables if needed
       initDB();
-      
+
     } catch (ClassNotFoundException e) {
       throw new IllegalArgumentException(e);
     } catch (SQLException e) {
@@ -44,23 +45,23 @@ public class H2Database implements UserDatabase {
 
   private void initDB() {
     try {
-     
-      conn.prepareStatement("create table IF NOT EXISTS users (" +
-          "user varchar("+ Users.UserMaxLength+")"+
-          ")").execute();
-      conn.prepareStatement("create table IF NOT EXISTS sessions (" +
-          "user varchar("+Users.UserMaxLength+"), "+
-          "session char("+Users.SessionIdLength+"), "+
-          "foreign key (user) references users(user)"+
-          ")").execute();
-      conn.prepareStatement("create table IF NOT EXISTS tags (" +
-          "user varchar("+Users.UserMaxLength+"), " +
-          "resource varchar(256), " +
-          "tag varchar(256), " +
-          "foreign key (user) references users(user)"+
-          ")").execute();
-      
-   
+
+      conn.prepareStatement("create table IF NOT EXISTS users ("
+              + "user varchar(" + Users.UserMaxLength + ")"
+              + ")").execute();
+      conn.prepareStatement("create table IF NOT EXISTS sessions ("
+              + "user varchar(" + Users.UserMaxLength + "), "
+              + "session char(" + Users.SessionIdLength + "), "
+              + "foreign key (user) references users(user)"
+              + ")").execute();
+      conn.prepareStatement("create table IF NOT EXISTS tags ("
+              + "user varchar(" + Users.UserMaxLength + "), "
+              + "resource varchar(256), "
+              + "tag varchar(256), "
+              + "foreign key (user) references users(user)"
+              + ")").execute();
+
+
     } catch (SQLException e) {
       e.printStackTrace();
       throw new RuntimeException(e);
@@ -86,7 +87,9 @@ public class H2Database implements UserDatabase {
       PreparedStatement stmt = conn.prepareStatement("insert into users (user) values (LOWER(?))");
       stmt.setString(1, username);
       int numRows = stmt.executeUpdate();
-      if(numRows == 0) throw new NoTuplesAffected();
+      if (numRows == 0) {
+        throw new NoTuplesAffected();
+      }
     } catch (SQLException e) {
       e.printStackTrace();
       throw new RuntimeException(e);
@@ -95,7 +98,7 @@ public class H2Database implements UserDatabase {
 
   @Override
   public String login(String username) {
-    if(!validUser(username)) {
+    if (!validUser(username)) {
       return null;
     }
     String session = Users.generateSessionId();
@@ -107,7 +110,7 @@ public class H2Database implements UserDatabase {
       stmt.setString(2, session);
 
       // should create 1 row
-      if(1 == stmt.executeUpdate()) {
+      if (1 == stmt.executeUpdate()) {
         return session;
       }
     } catch (SQLException e) {
@@ -119,8 +122,9 @@ public class H2Database implements UserDatabase {
 
   @Override
   public void logout(Credentials creds) throws NoTuplesAffected {
-    if(!validSession(creds))
+    if (!validSession(creds)) {
       return;
+    }
 
     try {
       PreparedStatement stmt = conn.prepareStatement("delete from sessions where user=LOWER(?) and session=?");
@@ -128,7 +132,7 @@ public class H2Database implements UserDatabase {
       stmt.setString(2, creds.token);
 
       int numRows = stmt.executeUpdate();
-      if(numRows == 0) {
+      if (numRows == 0) {
         // since validSession was true,
         // this probably should have worked, barring race conditions
         throw new NoTuplesAffected();
@@ -141,17 +145,18 @@ public class H2Database implements UserDatabase {
 
   @Override
   public boolean validUser(String username) {
-    if(username.length() > 64)
+    if (username.length() > 64) {
       return false;
+    }
 
     boolean found = false;
     try {
- 
+
       PreparedStatement stmt = conn.prepareStatement("select count(*) from users where user=LOWER(?)");
       stmt.setString(1, username);
       ResultSet results = stmt.executeQuery();
 
-      if(results.next()) {
+      if (results.next()) {
         int numUsers = results.getInt(1);
         found = (numUsers == 1);
       }
@@ -173,7 +178,7 @@ public class H2Database implements UserDatabase {
       stmt.setString(2, creds.token);
 
       ResultSet results = stmt.executeQuery();
-      if(results.next()) {
+      if (results.next()) {
         found = true;
       }
       results.close();
@@ -186,10 +191,10 @@ public class H2Database implements UserDatabase {
 
   @Override
   public void checkSession(Credentials creds) throws DBError {
-    if(!validUser(creds.user)) {
+    if (!validUser(creds.user)) {
       throw new BadUserException(creds.user);
     }
-    if(!validSession(creds)) {
+    if (!validSession(creds)) {
       throw new BadSessionException(creds.user, creds.token);
     }
   }
@@ -204,18 +209,18 @@ public class H2Database implements UserDatabase {
   public Map<String, List<String>> getTags(Credentials creds, List<String> resources) throws DBError {
     checkSession(creds);
 
-    Map<String,List<String>> results = new HashMap<String,List<String>>();
+    Map<String, List<String>> results = new HashMap<String, List<String>>();
 
     try {
-      PreparedStatement stmt = conn.prepareStatement("select tag from tags where user=LOWER(?) and resource=LOWER(?)");
+      PreparedStatement stmt = conn.prepareStatement("select tag from tags where user=LOWER(?) and resource=?");
       stmt.setString(1, creds.user);
 
-      for(String resource : resources) {
+      for (String resource : resources) {
         List<String> tags = new ArrayList<String>();
         stmt.setString(2, resource);
 
         ResultSet tuples = stmt.executeQuery();
-        while(tuples.next()) {
+        while (tuples.next()) {
           String tag = tuples.getString(1);
           tags.add(tag);
         }
@@ -234,13 +239,13 @@ public class H2Database implements UserDatabase {
     checkSession(creds);
 
     try {
-      PreparedStatement stmt = conn.prepareStatement("delete from tags where user=LOWER(?) and resource=LOWER(?) and tag=LOWER(?)");
+      PreparedStatement stmt = conn.prepareStatement("delete from tags where user=LOWER(?) and resource=? and tag=LOWER(?)");
       stmt.setString(1, creds.user);
       stmt.setString(2, resource);
       stmt.setString(3, tag);
       int numRows = stmt.executeUpdate();
 
-      if(numRows == 0) {
+      if (numRows == 0) {
         throw new NoTuplesAffected();
       }
     } catch (SQLException e) {
@@ -253,15 +258,14 @@ public class H2Database implements UserDatabase {
     checkSession(creds);
 
     try {
-      PreparedStatement stmt = conn.prepareStatement("insert into tags (user,resource,tag) values (LOWER(?),LOWER(?),LOWER(?))");
+      PreparedStatement stmt = conn.prepareStatement("insert into tags (user,resource,tag) values (LOWER(?),?,LOWER(?))");
       stmt.setString(1, creds.user);
       stmt.setString(2, resource);
       stmt.setString(3, tag);
       int numRows = stmt.executeUpdate();
-      assert(numRows == 1);
+      assert (numRows == 1);
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
   }
-
 }
