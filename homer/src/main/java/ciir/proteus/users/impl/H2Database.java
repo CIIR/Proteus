@@ -80,7 +80,10 @@ public class H2Database implements UserDatabase {
   @Override
   public void register(String username) throws NoTuplesAffected {
     try {
-      PreparedStatement stmt = conn.prepareStatement("insert into users (user) values (?)");
+      // MCZ: note that we lower case the user PK. This means we need to always LOWER() the
+      // value we're usin to search that key. We'll display (on the web front end) whatever
+      // they type in, but "MichaelZ", "michaelz", etc are all equivalent. 
+      PreparedStatement stmt = conn.prepareStatement("insert into users (user) values (LOWER(?))");
       stmt.setString(1, username);
       int numRows = stmt.executeUpdate();
       if(numRows == 0) throw new NoTuplesAffected();
@@ -98,7 +101,7 @@ public class H2Database implements UserDatabase {
     String session = Users.generateSessionId();
 
     try {
-      PreparedStatement stmt = conn.prepareStatement("insert into sessions (user,session) values (?, ?)");
+      PreparedStatement stmt = conn.prepareStatement("insert into sessions (user,session) values (LOWER(?), ?)");
 
       stmt.setString(1, username);
       stmt.setString(2, session);
@@ -120,7 +123,7 @@ public class H2Database implements UserDatabase {
       return;
 
     try {
-      PreparedStatement stmt = conn.prepareStatement("delete from sessions where user=? and session=?");
+      PreparedStatement stmt = conn.prepareStatement("delete from sessions where user=LOWER(?) and session=?");
       stmt.setString(1, creds.user);
       stmt.setString(2, creds.token);
 
@@ -143,7 +146,8 @@ public class H2Database implements UserDatabase {
 
     boolean found = false;
     try {
-      PreparedStatement stmt = conn.prepareStatement("select count(*) from users where user=?");
+ 
+      PreparedStatement stmt = conn.prepareStatement("select count(*) from users where user=LOWER(?)");
       stmt.setString(1, username);
       ResultSet results = stmt.executeQuery();
 
@@ -164,7 +168,7 @@ public class H2Database implements UserDatabase {
     boolean found = false;
 
     try {
-      PreparedStatement stmt = conn.prepareStatement("select (user,session) from sessions where user=? and session=?");
+      PreparedStatement stmt = conn.prepareStatement("select (user,session) from sessions where user=LOWER(?) and session=?");
       stmt.setString(1, creds.user);
       stmt.setString(2, creds.token);
 
@@ -203,7 +207,7 @@ public class H2Database implements UserDatabase {
     Map<String,List<String>> results = new HashMap<String,List<String>>();
 
     try {
-      PreparedStatement stmt = conn.prepareStatement("select tag from tags where user=? and resource=?");
+      PreparedStatement stmt = conn.prepareStatement("select tag from tags where user=LOWER(?) and resource=LOWER(?)");
       stmt.setString(1, creds.user);
 
       for(String resource : resources) {
@@ -230,7 +234,7 @@ public class H2Database implements UserDatabase {
     checkSession(creds);
 
     try {
-      PreparedStatement stmt = conn.prepareStatement("delete from tags where user=? and resource=? and tag=?");
+      PreparedStatement stmt = conn.prepareStatement("delete from tags where user=LOWER(?) and resource=LOWER(?) and tag=LOWER(?)");
       stmt.setString(1, creds.user);
       stmt.setString(2, resource);
       stmt.setString(3, tag);
@@ -249,7 +253,7 @@ public class H2Database implements UserDatabase {
     checkSession(creds);
 
     try {
-      PreparedStatement stmt = conn.prepareStatement("insert into tags (user,resource,tag) values (?,?,?)");
+      PreparedStatement stmt = conn.prepareStatement("insert into tags (user,resource,tag) values (LOWER(?),LOWER(?),LOWER(?))");
       stmt.setString(1, creds.user);
       stmt.setString(2, resource);
       stmt.setString(3, tag);

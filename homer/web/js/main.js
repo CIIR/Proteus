@@ -59,11 +59,46 @@ setBookHandler(function() {
   search({kind: "books", q: getQuery()});
 });
 
-function logIn()
+function logIn(userName)
 {
-  document.cookie = "username=" + $("#ui-username").val() + ";";
+
+  if (!userName)
+    return;
+
+  var args = {user: userName};
+
+  // MZ: first we'll try to register them then log them in. It's OK if they're
+  // already registered. Eventually we'll want this to be a 2 step process
+  // but for now we just want something running. FOR NOW, we'll assume an error
+  // means they're already registred (duplicate key error).
+  var loginFunc = function() {
+    API.login(args, function(data) {
+      document.cookie = "username=" + userName + ";";
+      document.cookie = "token=" + data.token + ";";
+    }, function(req, status, err) {
+      showError("ERROR: ``" + err + "``");
+      throw err;
+    })
+  };
+
+  API.register(args, loginFunc, loginFunc);
+
 }
+
 function logOut()
 {
-  document.cookie = "username=;";
+  var userName = getCookie("username");
+  var userToken = getCookie("token");
+
+  var args = {user: userName, token: userToken};
+  API.logout(args, function() {
+    document.cookie = "username=;";
+    document.cookie = "token=;";
+  }, function(req, status, err) {
+    showError("ERROR: ``" + err + "``");
+    throw err;
+  });
+
+  setUserName("");
+
 }

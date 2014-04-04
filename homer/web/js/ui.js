@@ -125,7 +125,10 @@ function setUserName(user) {
   if (!user) {
     clearUserName();
   } else {
-    $("#ui-login-info").html("Welcome back " + user + " <a href='' onclick='logOut();'>(logout)</a>");
+    $("#ui-login-info").html("Welcome " + user + " <input id='ui-go-logout' type='button' value='LogOut' />");
+    $("#ui-go-logout").click(function() {
+      logOut();
+    });
   }
 }
 
@@ -134,7 +137,7 @@ function clearUserName() {
           "<input id='ui-go-login' type='button' value='Login' />");
   // have to bind click event here because that ID doesn't exist until we do this.
   $("#ui-go-login").click(function() {
-    logIn();
+    logIn($("#ui-username").val());
     setUserName($("#ui-username").val());
   });
 }
