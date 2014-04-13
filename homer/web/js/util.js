@@ -14,6 +14,14 @@ var isBlank = function(str) {
   return _.isUndefined(str) || _.isEmpty(str.trim());
 };
 
+var pushURLParams = function(params) {
+  var urlParams = "?"+_.pairs(params).map(function(kv) {
+    return _(kv).map(encodeURIComponent).join('=');
+  }).join('&');
+
+  History.pushState(null, null, urlParams);
+};
+
 var getURLParams = function() {
   var match,
           pl = /\+/g, // Regex for replacing addition symbol with a space
@@ -38,7 +46,7 @@ function getCookie(cname)
   for (var i = 0; i < ca.length; i++)
   {
     var c = ca[i].trim();
-    if (c.indexOf(name) == 0)
+    if (c.indexOf(name) === 0)
       return c.substring(name.length, c.length);
   }
   return "";

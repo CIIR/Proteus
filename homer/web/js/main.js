@@ -43,6 +43,7 @@ var search = function(args) {
 
   clearUI();
   showProgress("Search Request sent to server!");
+  pushURLParams(args); // modify URL if possible
   API.search(actualArgs, renderResults, function(req, status, err) {
     showError("ERROR: ``" + err + "``");
     throw err;
