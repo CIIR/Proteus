@@ -68,6 +68,9 @@ public class BuildIndexTest {
 
     Assert.assertFalse(results.isEmpty());
 
+    List<ScoredDocument> emptyResults = runQuery(ret, "thisisaridiculoustermthatwillnotbefound");
+    Assert.assertTrue(emptyResults.isEmpty());
+
 
     Utility.deleteDirectory(tmpIndex);
   }

@@ -33,15 +33,18 @@ public class JSONSearch implements JSONHandler {
     int numResults = (int) reqp.get("n", 10);
     int skipResults = (int) reqp.get("skip", 0);
 
-    if(numResults > 1000) {
+    if (numResults > 1000) {
       throw new IllegalArgumentException("Let's not put too many on a page...");
     }
 
-    List<ScoredDocument> docs = ListUtil.drop(system.search(kind, query, numResults+skipResults), skipResults);
+    List<ScoredDocument> docs = ListUtil.drop(system.search(kind, query, numResults + skipResults), skipResults);
 
     Parameters response = new Parameters();
 
-    List<Parameters> results = annotate(kind, docs, query, reqp);
+    List<Parameters> results = Collections.emptyList();
+    if(!docs.isEmpty()) {
+      results = annotate(kind, docs, query, reqp);
+    }
 
     Node pquery = StructuredQuery.parse(query);
 
