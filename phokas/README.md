@@ -1,7 +1,9 @@
 # phokas
 
 Tokenize and do basic NLP annotations on books in the `.rawtei.gz`
-format.
+format. 
+
+Use various tagging tools to create \*.mbtei files from \*.toktei files.
 
 ## Installation
 
@@ -10,7 +12,7 @@ repository by hand:
 
 http://books.cs.umass.edu/downloads/dparser-2011-01-18.jar
 
-We hope to automate this dependency soon.
+This is somewhat automated by the ``./deps.sh`` script.
 
 Then, to compile, run:
 
