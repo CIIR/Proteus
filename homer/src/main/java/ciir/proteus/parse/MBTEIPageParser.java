@@ -124,6 +124,7 @@ public class MBTEIPageParser extends DocumentStreamParser {
             // echo a document when we find the <pb /> tag
             String pageNumber = xml.getAttributeValue(null, "n");
             pages.add(new Page(pageNumber, buffer.toString()));
+            documentEmpty = true;
             buffer = new StringBuilder();
           }
         }
@@ -132,8 +133,7 @@ public class MBTEIPageParser extends DocumentStreamParser {
 
     // echo a document when we find the end of the stream
     if(!documentEmpty) {
-      // TODO: turn this back on after it's not going to fire for every book...
-      //log.warning("Missing final <pb /> tag for book: "+MBTEI.getArchiveIdentifier(split, metadata));
+      log.warning("Missing final <pb /> tag for book: "+MBTEI.getArchiveIdentifier(split, metadata));
       pages.add(new Page("last", buffer.toString()));
     }
   }
