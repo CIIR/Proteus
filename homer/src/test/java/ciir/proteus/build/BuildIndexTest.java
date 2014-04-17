@@ -4,6 +4,7 @@ import ciir.proteus.parse.MBTEIBookParser;
 import ciir.proteus.parse.MBTEIPageParser;
 import org.junit.Assert;
 import org.junit.Test;
+import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.Retrieval;
 import org.lemurproject.galago.core.retrieval.RetrievalFactory;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
@@ -67,6 +68,13 @@ public class BuildIndexTest {
     List<ScoredDocument> results = runQuery(ret, "romeo");
 
     Assert.assertFalse(results.isEmpty());
+
+    Document doc = ret.getDocument(results.get(0).documentName, new Document.DocumentComponents(true, true, true));
+    Assert.assertNotNull(doc);
+    Assert.assertNotNull(doc.text);
+    Assert.assertNotNull(doc.metadata);
+    Assert.assertNotNull(doc.terms);
+
 
     List<ScoredDocument> emptyResults = runQuery(ret, "thisisaridiculoustermthatwillnotbefound");
     Assert.assertTrue(emptyResults.isEmpty());
