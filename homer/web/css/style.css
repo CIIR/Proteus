@@ -75,7 +75,7 @@ body {
   vertical-align: middle;
 }
 
-#login-form a:hover, a:visited {
+#login-form a:hover, #login-form  a:visited {
   color: #fff;
 }
 
