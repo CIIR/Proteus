@@ -11,6 +11,7 @@ import org.lemurproject.galago.tupleflow.web.WebServerException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -56,7 +57,7 @@ public class TestEnvironment {
     dbp.set("pass", "");
 
     Parameters content = new Parameters();
-    content.set("dir", "web");
+    content.set("dir", Arrays.asList("web", "src/test/resources"));
 
     Parameters testSetup = new Parameters();
     testSetup.set("defaultKind", "fake-kind");

@@ -42,5 +42,9 @@ public class StaticContentHandlerTest {
 
     response = HTTPUtil.get(url, "/../evil/path.html", new Parameters());
     assertEquals(HTTPError.BadRequest, response.status);
+
+    response = HTTPUtil.get(url, "/metadata/metadata.trectext", new Parameters());
+    assertEquals(200, response.status);
+    assertEquals(Utility.readFileToString(new File("src/test/resources/metadata/metadata.trectext")), response.body);
   }
 }

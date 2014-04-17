@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -14,26 +16,35 @@ import java.util.logging.Logger;
  */
 public class StaticContentHandler {
   private static final Logger log = Logger.getLogger(StaticContentHandler.class.getName());
-  public final File baseDirectory;
+  public final List<File> baseDirs;
   public final File defaultPath;
 
   public StaticContentHandler(Parameters argp) {
     Parameters p = argp.getMap("content");
 
-    // assert that we have a content directory that seems to exist
-    this.baseDirectory = new File(p.getString("dir"));
-    if(!baseDirectory.exists())
-      throw new IllegalArgumentException("content.dir: "+baseDirectory.getAbsolutePath()+" does not exist!");
-    if(!baseDirectory.isDirectory())
-      throw new IllegalArgumentException("content.dir: "+baseDirectory.getAbsolutePath()+" is not a directory!");
+    // collect list of content directories
+    baseDirs = new ArrayList<File>();
+    for(String dir : p.getAsList("dir", String.class)) {
+      // assert that we have a content directory that seems to exist
+      File baseDirectory = new File(dir);
+      if(!baseDirectory.exists())
+        throw new IllegalArgumentException("content.dir: "+baseDirectory.getAbsolutePath()+" does not exist!");
+      if(!baseDirectory.isDirectory())
+        throw new IllegalArgumentException("content.dir: "+baseDirectory.getAbsolutePath()+" is not a directory!");
+
+      baseDirs.add(baseDirectory);
+    }
 
     // assert that this seems like the right directory
-    this.defaultPath = new File(baseDirectory, p.get("default", "index.html"));
-    if(!defaultPath.exists()) {
-      throw new IllegalArgumentException("Default content file: "+defaultPath.getAbsolutePath()+" is not found!");
+    this.defaultPath = resolvePath(p.get("default", "index.html"));
+    if(defaultPath == null) {
+      throw new IllegalArgumentException("Default content file: "+p.get("default", "index.html")+" is not found!");
     }
   }
 
+  /**
+   * Make sure we don't leak files that aren't children of a base directory.
+   */
   public boolean isDescendentOf(File target, File dir) {
     // return true if target is in some subfolder of dir
     File bottom = new File("/");
@@ -47,15 +58,28 @@ public class StaticContentHandler {
     }
   }
 
+  /**
+   * Resolve a path by searching in the list of directories, in order.
+   */
+  public File resolvePath(String path) {
+    for(File base : baseDirs) {
+      File possible = new File(base, path);
+      if(possible.exists()) {
+        assert(isDescendentOf(possible, base));
+        return possible;
+      }
+    }
+    return null;
+  }
+
   public void handle(String path, Parameters reqp, HttpServletResponse resp) throws HTTPError, IOException {
     if(path.contains("..")) {
       throw new HTTPError(HTTPError.BadRequest, "Malformed GET path.");
     }
-    if(path.equals("/") || path.equals("index.html")) {
+    if(path.equals("/")) {
       sendFile(defaultPath, path, resp);
     } else {
-      File target = new File(baseDirectory, path);
-      assert(isDescendentOf(target, baseDirectory));
+      File target = resolvePath(path);
       sendFile(target, path, resp);
     }
   }
@@ -85,11 +109,10 @@ public class StaticContentHandler {
    * @throws IOException socket screwups
    */
   private void sendFile(File fp, String path, HttpServletResponse resp) throws HTTPError, IOException {
-    if(!fp.exists()) {
+    if(fp == null || !fp.exists()) {
       sendError(resp, HTTPError.NotFound, path+" not found");
       return;
     }
-
     OutputStream out = null;
     try {
       resp.setContentType(determineContentType(fp.getPath()));
