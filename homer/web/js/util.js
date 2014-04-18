@@ -51,3 +51,13 @@ function getCookie(cname)
   }
   return "";
 }
+
+var highlightText = function(queryTerms, text, beforeTag, afterTag) {
+  var words = text.split(/\s/);
+  return _(words).map(function (word) {
+    if (_.contains(queryTerms, word)) {
+      return beforeTag + word + afterTag;
+    }
+    return word;
+  }).join(' ');
+};
