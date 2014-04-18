@@ -16,28 +16,12 @@ import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author jfoley.
  */
 public class BuildIndexTest {
-
-  public static Parameters makeExternalParsersConfig(String parserClass) {
-    Parameters tokteiParser = new Parameters();
-    tokteiParser.set("filetype", "toktei");
-    tokteiParser.set("class", parserClass);
-
-    Parameters mbteiParser = new Parameters();
-    mbteiParser.set("filetype", "mbtei");
-    mbteiParser.set("class", parserClass);
-
-    Parameters extP = new Parameters();
-    extP.set("externalParsers", Arrays.asList(tokteiParser, mbteiParser));
-
-    return extP;
-  }
 
   public static List<ScoredDocument> runQuery(Retrieval r, String input) throws Exception {
     Parameters qp = new Parameters();
@@ -55,7 +39,7 @@ public class BuildIndexTest {
     buildP.set("corpus", true);
     buildP.set("indexPath", tmpIndex.getAbsolutePath());
     buildP.set("inputPath", "src/test/resources/toktei/");
-    buildP.set("parser", makeExternalParsersConfig(MBTEIPageParser.class.getCanonicalName()));
+    buildP.set("filetype", MBTEIPageParser.class.getCanonicalName());
 
     BuildIndex buildFn = new BuildIndex();
     buildFn.run(buildP, System.out);
@@ -75,7 +59,6 @@ public class BuildIndexTest {
     Assert.assertNotNull(doc.metadata);
     Assert.assertNotNull(doc.terms);
 
-
     List<ScoredDocument> emptyResults = runQuery(ret, "thisisaridiculoustermthatwillnotbefound");
     Assert.assertTrue(emptyResults.isEmpty());
 
@@ -92,7 +75,7 @@ public class BuildIndexTest {
     buildP.set("corpus", true);
     buildP.set("indexPath", tmpIndex.getAbsolutePath());
     buildP.set("inputPath", "src/test/resources/toktei/");
-    buildP.set("parser", makeExternalParsersConfig(MBTEIBookParser.class.getCanonicalName()));
+    buildP.set("filetype", MBTEIBookParser.class.getCanonicalName());
 
     BuildIndex buildFn = new BuildIndex();
     buildFn.run(buildP, System.out);
