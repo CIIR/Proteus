@@ -84,12 +84,12 @@ body {
 }
 
 .result {
-  border-bottom: 1px solid grey;
+  /*border-bottom: 1px solid grey;*/
   padding-left: 20pt;
   padding-right: 20pt;
 }
 
-.preview {
+.result .preview {
   padding: 10pt;
 }
 
@@ -98,8 +98,13 @@ img.thumbnail {
   height: 120px;
 }
 
-.name { }
-.score {
+.result .rank {
+  color: grey;
+  padding-right:10pt;
+}
+
+.result .name { }
+.result .score {
   color: grey;
   text-align: right;
 }

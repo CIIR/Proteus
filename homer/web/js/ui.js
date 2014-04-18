@@ -5,139 +5,107 @@
  *
  */
 
-var clearUI = function() {
-  $("#error").html('');
-  $("#parsedQuery").html('');
-  $("#request").html('');
-  $("#results").html('');
+var errorDiv = $("#error");
+var resultsDiv = $("#results");
+var progressDiv = $("#progress");
+var queryBox = $("#ui-search");
+var loginInfo = $("#ui-login-info");
+var moreButton = $("#ui-go-more");
+
+// UI object/namespace
+var UI = {};
+
+UI.clear = function() {
+  UI.clearResults();
   clearError();
 };
 
-var showProgress = function(str) {
-  $("#progress").html(str);
+UI.clearResults = function() {
+  resultsDiv.html('');
+  moreButton.hide();
 };
 
-var showError = function(str) {
-  $("#error").html(str);
-  $("#error").show();
+UI.showProgress = function(str) {
+  progressDiv.html(str);
 };
 
-var clearError = function() {
-  $("#error").hide();
+UI.showError = function(str) {
+  errorDiv.html(str);
+  errorDiv.show();
 };
 
-/**
- * Render a snippet.
- *
- * TODO: highlight the query terms!
- */
-var makeSnippet = function(response, doc, numCols) {
-  if (!response.request.snippets) {
-    return '<tr><td class="snippet" colspan="' + numCols + '"></td></tr>';
-  }
-  var queryTerms = response.queryTerms;
-  var words = doc.snippet.split(/\s/);
-  var hiliSnippet = _(words).map(function(word) {
-    if (_.contains(queryTerms, word)) {
-      return '<span class="hili">' + word + '</span>';
-    }
-    return word;
-  }).reduce(function(lhs, rhs) {
-    return lhs + ' ' + rhs;
-  }, ' ');
+UI.clearError = function() {
+  errorDiv.html('');
+  errorDiv.hide();
+};
 
-  return '<tr><td class="snippet" colspan="' + numCols + '">' + hiliSnippet + '</td></tr>';
+UI.getQuery = function() {
+  return queryBox.val();
+};
+
+UI.setQuery = function(q) {
+  queryBox.val(q);
 };
 
 /**
  * Render a single search result.
- *
- * TODO: move this to mustache.js or another templating engine.
+ * @see render.js
  */
-var makeResult = function(data, result) {
-  var page = (data.request.kind === 'pages');
-  var numCols = 2;
-  var snippet = makeSnippet(data, result, numCols);
-  var name = result.meta.title || result.name;
-  var extURL = result.meta["identifier-access"];
-  var previewImage = '';
-
-  if (extURL) {
-    name = '<a href="' + extURL + '">' + name + '</a>';
-  }
-  if (page) {
-    var identifier = result.name.split('_')[0];
-    var pageNum = result.name.split('_')[1];
-    name += ' pp. ' + pageNum;
-    previewImage = '<a href="' + pageImage(identifier, pageNum) + '">' +
-            '<img class="thumbnail" src="' + pageThumbnail(identifier, pageNum) + '" />' +
-            '</a>';
-  }
-
-  return '<div class="result">' +
-          '<table>' +
-          '<tr>' +
-          '<td class="preview" rowspan="2">' + previewImage + '</td>' +
-          '<td class="name">' + name + '</td>' +
-          '<td class="score">' + result.score.toFixed(3) + '</td>' +
-          '</tr>' +
-          snippet +
-          '</table>' +
-          '</div>';
+UI.makeResult = function(queryTerms, result) {
+  var renderer = getResultRenderer(result.kind);
+  return '<div class="result">'+renderer(queryTerms, result)+'</div>';
 };
 
 /**
- * Async callback that receives /search JSON data and renders it.
+ * Renders search results into UI after current results
  */
-var renderResults = function(data) {
-  showProgress("Ajax response received!");
-  $("#request").html(JSON.stringify(data.request));
-  $("#parsedQuery").html(data.parsedQuery);
+UI.appendResults = function(queryTerms, results) {
+  UI.showProgress("Ajax response received!");
 
-  var resultsDiv = $("#results");
-  _(data.results).forEach(function(result) {
-    resultsDiv.append(makeResult(data, result));
+  _(results).forEach(function(result) {
+    resultsDiv.append(UI.makeResult(queryTerms, result));
   });
-};
-
-var getQuery = function() {
-  return $("#ui-search").val();
-};
-var setQuery = function(q) {
-  $("#ui-search").val(q);
+  moreButton.show();
 };
 
 /**
  * A set of functions for reacting to events in other, more general code.
  */
-var setReadyHandler = function(callback) {
+UI.setReadyHandler = function(callback) {
   $(document).ready(callback);
 };
-var setPageHandler = function(callback) {
+UI.setMoreHandler = function(callback) {
+  moreButton.click(callback);
+};
+/**
+ * Kind-specific buttons, this is not a general solution
+ */
+UI.setPageHandler = function(callback) {
   $("#ui-go-pages").click(callback);
 };
-var setBookHandler = function(callback) {
+UI.setBookHandler = function(callback) {
   $("#ui-go-books").click(callback);
 };
 
-
-function setUserName(user) {
+UI.setUserName = function(user) {
   if (!user) {
-    clearUserName();
+    UI.clearUserName();
   } else {
-    $("#ui-login-info").html("Welcome " + user + " <input id='ui-go-logout' type='button' value='LogOut' />");
+    loginInfo.html("Welcome " + user + " <input id='ui-go-logout' type='button' value='LogOut' />");
     $("#ui-go-logout").click(function() {
       logOut();
     });
   }
-}
+};
 
-function clearUserName() {
-  $("#ui-login-info").html(" <input id='ui-username' type='text' /> " +
+UI.clearUserName = function() {
+  loginInfo.html(" <input id='ui-username' type='text' /> " +
           "<input id='ui-go-login' type='button' value='Login' />");
   // have to bind click event here because that ID doesn't exist until we do this.
   $("#ui-go-login").click(function() {
-    logIn($("#ui-username").val());
-    setUserName($("#ui-username").val());
+    var username = $("#ui-username").val();
+    logIn(username);
+    UI.setUserName(username);
   });
-}
+};
+

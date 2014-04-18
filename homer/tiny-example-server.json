@@ -1,10 +1,10 @@
 {
   "port":1234,
-  "defaultKind":"pages",
+  "defaultKind":"ia-pages",
   "kinds": {
-    "books": {"index": "examples/tiny.books"},
-    "pages": {"index": "examples/tiny.pages"},
-    "metadata": {"index": "examples/tiny.metadata"}
+    "ia-books": {"index": "examples/tiny.books"},
+    "ia-pages": {"index": "examples/tiny.pages"},
+    "ia-metadata": {"index": "examples/tiny.metadata"}
   },
   "content": {
     "dir": "web"
