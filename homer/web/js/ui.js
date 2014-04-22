@@ -11,9 +11,25 @@ var progressDiv = $("#progress");
 var queryBox = $("#ui-search");
 var loginInfo = $("#ui-login-info");
 var moreButton = $("#ui-go-more");
+var searchButtons = $("#search-buttons");
 
 // UI object/namespace
 var UI = {};
+
+// a list of defined buttons
+UI.buttons = [
+  {display: "Pages", kind: "ia-pages" },
+  {display: "Books", kind: "ia-books" },
+  {display: "Metadata", kind: "ia-meta" }
+];
+
+UI.generateButtons = function() {
+  _(UI.buttons).forEach(function(buttonDesc) {
+    var button = $('<input type="button" value="'+buttonDesc.display+'" />');
+    button.click(function() { UI.onClickSearchButton(buttonDesc); });
+    searchButtons.append(button)
+  });
+};
 
 UI.clear = function() {
   UI.clearResults();
@@ -72,19 +88,13 @@ UI.appendResults = function(queryTerms, results) {
  * A set of functions for reacting to events in other, more general code.
  */
 UI.setReadyHandler = function(callback) {
-  $(document).ready(callback);
+  $(document).ready(function() {
+    UI.generateButtons();
+    callback();
+  });
 };
 UI.setMoreHandler = function(callback) {
   moreButton.click(callback);
-};
-/**
- * Kind-specific buttons, this is not a general solution
- */
-UI.setPageHandler = function(callback) {
-  $("#ui-go-pages").click(callback);
-};
-UI.setBookHandler = function(callback) {
-  $("#ui-go-books").click(callback);
 };
 
 UI.setUserName = function(user) {

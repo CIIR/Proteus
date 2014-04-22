@@ -15,7 +15,6 @@ var getResultRenderer = function(kind) {
   return resultRenderers["default"];
 };
 
-
 /** This is the default, plain result renderer */
 resultRenderers["default"] = function(queryTerms, result) {
   var html = '<table><tr>';

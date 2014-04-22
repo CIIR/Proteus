@@ -39,8 +39,7 @@ var getURLParams = function() {
 };
 
 // from: http://www.w3schools.com/js/js_cookies.asp
-function getCookie(cname)
-{
+var getCookie = function(cname) {
   var name = cname + "=";
   var ca = document.cookie.split(';');
   for (var i = 0; i < ca.length; i++)
@@ -50,7 +49,7 @@ function getCookie(cname)
       return c.substring(name.length, c.length);
   }
   return "";
-}
+};
 
 var highlightText = function(queryTerms, text, beforeTag, afterTag) {
   var words = text.split(/\s/);

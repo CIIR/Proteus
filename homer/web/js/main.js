@@ -94,12 +94,10 @@ var search = function(args) {
 };
 
 /* handlers for search button types */
-UI.setPageHandler(function() {
-  search({kind: "ia-pages", q: UI.getQuery()});
-});
-UI.setBookHandler(function() {
-  search({kind: "ia-books", q: UI.getQuery()});
-});
+UI.onClickSearchButton = function(buttonDesc) {
+  var kind = buttonDesc.kind;
+  search({kind: kind, q: UI.getQuery()});
+};
 
 /* pull the previous request out of the "Model" and send it to the server, but request the next 10 */
 UI.setMoreHandler(function() {

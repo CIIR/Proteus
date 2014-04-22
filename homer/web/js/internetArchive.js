@@ -1,7 +1,5 @@
 /**
- * This file should hopefully encapsulate the different data source backends.
- *
- * No other code should construct URLs or know about the internet archive in general, 
+ * No other code should construct URLs or know about the internet archive in general,
  * so that we can generalize to the academic paper domain.
  *
  * URL format information for the Archive is at https://openlibrary.org/dev/docs/bookurls (as of March 2014)
