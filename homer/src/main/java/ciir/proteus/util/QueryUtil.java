@@ -1,6 +1,7 @@
 package ciir.proteus.util;
 
 import org.lemurproject.galago.core.retrieval.query.Node;
+import org.lemurproject.galago.core.retrieval.traversal.SetFieldTraversal;
 import org.lemurproject.galago.core.retrieval.traversal.Traversal;
 import org.lemurproject.galago.tupleflow.Parameters;
 
@@ -30,6 +31,15 @@ public class QueryUtil {
     });
 
     return new ArrayList<String>(terms);
+  }
+
+  /**
+   * Walk over a query and set the preferred field accordingly.
+   * @param inputQuery a pre-transformed query
+   * @param targetField the name of the field to send the query against
+   */
+  public static void setField(Node inputQuery, final String targetField) {
+    walk(inputQuery, Parameters.parseArray("field", targetField), new SetFieldTraversal());
   }
 
   /**
