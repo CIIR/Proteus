@@ -33,7 +33,7 @@ UI.generateButtons = function() {
 
 UI.clear = function() {
   UI.clearResults();
-  clearError();
+  UI.clearError();
 };
 
 UI.clearResults = function() {
