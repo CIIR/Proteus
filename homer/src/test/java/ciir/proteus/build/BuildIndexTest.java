@@ -51,9 +51,11 @@ public class BuildIndexTest {
     Retrieval ret = RetrievalFactory.instance(runP);
     List<ScoredDocument> results = runQuery(ret, "romeo");
 
+    String aDocumentName = results.get(0).documentName;
+
     Assert.assertFalse(results.isEmpty());
 
-    Document doc = ret.getDocument(results.get(0).documentName, new Document.DocumentComponents(true, true, true));
+    Document doc = ret.getDocument(aDocumentName, new Document.DocumentComponents(true, true, true));
     Assert.assertNotNull(doc);
     Assert.assertNotNull(doc.text);
     Assert.assertNotNull(doc.metadata);
@@ -61,6 +63,14 @@ public class BuildIndexTest {
 
     List<ScoredDocument> emptyResults = runQuery(ret, "thisisaridiculoustermthatwillnotbefound");
     Assert.assertTrue(emptyResults.isEmpty());
+
+    // assert that our identifier hack is still working
+    Assert.assertTrue(aDocumentName.contains("_"));
+    String[] parts = aDocumentName.split("_");
+    Assert.assertEquals(2, parts.length);
+    String bookName = parts[0];
+    Assert.assertNotNull(Integer.parseInt(parts[1]));
+    Assert.assertEquals(bookName, doc.metadata.get("identifier"));
 
 
     Utility.deleteDirectory(tmpIndex);
