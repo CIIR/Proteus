@@ -28,7 +28,6 @@ public class MBTEIPageParser extends DocumentStreamParser {
   private final BufferedInputStream is;
   private final XMLStreamReader xml;
   private final DocumentSplit split;
-  private LinkedList<Page> pages;
   private Map<String,String> metadata;
 
   public MBTEIPageParser(DocumentSplit split, Parameters p) throws IOException, XMLStreamException {
@@ -38,7 +37,6 @@ public class MBTEIPageParser extends DocumentStreamParser {
     this.split = split;
     this.is = getBufferedInputStream(split);
     this.xml = xmlFactory.createXMLStreamReader(is);
-    pages = null;
     metadata = null;
   }
 
@@ -54,97 +52,51 @@ public class MBTEIPageParser extends DocumentStreamParser {
 
   @Override
   public Document nextDocument() throws IOException {
-    if(pages == null) {
-      try {
-        readPages();
-      } catch (XMLStreamException e) {
-        throw new IOException(e);
+    Document doc = null;
+    try {
+      if(metadata == null) {
+        metadata = MBTEI.parseMetadata(xml);
       }
+      return nextPage();
+    } catch (XMLStreamException e) {
+      throw new IOException(e);
     }
-
-    if(pages == null || pages.isEmpty())
-      return null;
-
-    Page page = pages.pop();
-    Document doc = new Document();
-    doc.metadata = metadata;
-    doc.text = page.text;
-    doc.name = String.format("%s_%s", MBTEI.getArchiveIdentifier(split, metadata), page.number);
-    return doc;
   }
 
-  private void readPages() throws XMLStreamException {
-    pages = new LinkedList<Page>();
-    metadata = new HashMap<String,String>();
-
+  private Document nextPage() throws XMLStreamException {
     if(!xml.hasNext())
-      return;
+      return null;
 
     // local parser state
     StringBuilder buffer = new StringBuilder();
-    boolean beforeOrDuringMetadata = true;
-    String currentMetaTag = null;
-    StringBuilder tagBuilder = null;
-    boolean documentEmpty = true;
+    String pageNumber = null;
+    boolean empty = true;
 
     while(xml.hasNext()) {
       int event = xml.next();
 
-      if(beforeOrDuringMetadata) {
-        if (event == XMLStreamConstants.START_ELEMENT) {
-          String tag = xml.getLocalName();
-          if("text".equals(tag)) {
-            beforeOrDuringMetadata = false;
-          } else {
-            currentMetaTag = tag;
-            tagBuilder = new StringBuilder();
+      // copy the "form" attribute out of word tags
+      if(event == XMLStreamConstants.START_ELEMENT) {
+        String tag = xml.getLocalName();
+        if("w".equals(tag)) {
+          String formValue = MBTEI.scrub(xml.getAttributeValue(null, "form"));
+          if (!formValue.isEmpty()) {
+            buffer.append(formValue).append(' ');
+            empty = false;
           }
-        } else if(event == XMLStreamConstants.END_ELEMENT) {
-          if (currentMetaTag != null) {
-            metadata.put(currentMetaTag, tagBuilder.toString().trim());
-            currentMetaTag = null;
-            tagBuilder = null;
-          }
-        } else if(event == XMLStreamConstants.CHARACTERS || event == XMLStreamConstants.CDATA) {
-          if(currentMetaTag != null) {
-            tagBuilder.append(xml.getText()).append(' ');
-          }
-        }
-      } else {
-        // copy the "form" attribute out of word tags
-        if(event == XMLStreamConstants.START_ELEMENT) {
-          String tag = xml.getLocalName();
-          if("w".equals(tag)) {
-            String formValue = MBTEI.scrub(xml.getAttributeValue(null, "form"));
-            if (!formValue.isEmpty()) {
-              buffer.append(formValue).append(' ');
-              documentEmpty = false;
-            }
-          } else if("pb".equals(tag) && !documentEmpty) {
-            // echo a document when we find the <pb /> tag
-            String pageNumber = xml.getAttributeValue(null, "n");
-            pages.add(new Page(pageNumber, buffer.toString()));
-            documentEmpty = true;
-            buffer = new StringBuilder();
-          }
+        } else if("pb".equals(tag)) {
+          // echo a document when we find the <pb /> tag
+          pageNumber = xml.getAttributeValue(null, "n");
+          if(!empty) break;
         }
       }
     }
 
-    // echo a document when we find the end of the stream
-    if(!documentEmpty) {
-      log.warning("Missing final <pb /> tag for book: "+MBTEI.getArchiveIdentifier(split, metadata));
-      pages.add(new Page("last", buffer.toString()));
-    }
-  }
-
-  private static final class Page {
-    public final String number;
-    public final String text;
-
-    public Page(String number, String text) {
-      this.number = number;
-      this.text = text;
-    }
+    Document page = new Document();
+    page.text = buffer.toString();
+    page.name = MBTEI.getArchiveIdentifier(split, metadata)+"_"+pageNumber;
+    page.metadata = metadata;
+    page.metadata.put("pageNumber", pageNumber);
+    return page;
   }
 }
