@@ -1,0 +1,110 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.snippet {
+  padding-left: 20pt;
+  color: #666;
+}
+
+.hili {
+  color: black;
+  font-weight: bold;
+}
+
+#parsedQuery {
+  font-family: monospace;
+  display: none;
+}
+#request {
+  display: none;
+}
+
+#progress {
+  color: white;
+  text-align: right;
+  vertical-align: middle;
+  font-family: monospace;
+  display:inline;
+}
+
+#error {
+  color: white;
+  background-color: #a00;
+  font-weight: bold;
+  text-align: center;
+  display:none;
+  padding:10pt;
+  margin:0;
+}
+
+#footer {
+  margin: 0;
+  margin-top: 40pt;
+  padding: 10pt;
+  background-color: #009;
+}
+
+#ui {
+  margin: 0;
+  padding: 10pt;
+  background-color: #009;
+}
+
+#title {
+  margin: 0;
+  vertical-align: middle;
+  padding-right: 20pt;
+  font-size: 20pt;
+  font-weight: bold;
+  height: 20pt;
+  color: #fff;
+}
+#search-buttons {
+  text-align: right;
+  float:right;
+  height: 20pt;
+  vertical-align: middle;
+} 
+#login-form {
+  color: #fff;
+  text-align: right;
+  float:none;
+  height: 20pt;
+  vertical-align: middle;
+}
+
+#login-form a:hover, #login-form  a:visited {
+  color: #fff;
+}
+
+#ui {
+  vertical-align: middle;
+}
+
+.result {
+  /*border-bottom: 1px solid grey;*/
+  padding-left: 20pt;
+  padding-right: 20pt;
+}
+
+.result .preview {
+  padding: 10pt;
+}
+
+img.thumbnail {
+  width: 100px;
+  height: 120px;
+}
+
+.result .rank {
+  color: grey;
+  padding-right:10pt;
+}
+
+.result .name { }
+.result .score {
+  color: grey;
+  text-align: right;
+}
