@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <title>Proteus: Search</title>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/history.js/1.8/native.history.min.js
+"></script>
+    <!-- scripts included here evaluate before the page loads -->
+    <script src="js/API.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/render.js"></script>
+    <script src="js/internetArchive.js"></script>
+    <link rel="stylesheet" href="css/style.css" type="text/css" />
+
+  </head>
+  <body>
+    <div id="ui">
+      <span id="title">Proteus</span>
+      <span id="search-buttons">
+        <input id="ui-search" placeholder="Search..." type="search" />
+      </span>
+      <div id="login-form">
+        <span id="ui-login-info"></span>
+      </div>
+    </div>
+    <div id="error"></div>
+    <div id="parsedQuery"></div>
+    <div id="request"></div>
+    <div id="results"></div>
+
+    <div id="more"><input id="ui-go-more" type="button" value="More" /></div>
+    <div id="footer">
+      <div id="progress"></div>
+    </div>
+  </body>
+  <!-- scripts included here evaluate after the page loads -->
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</html>
