@@ -13,7 +13,6 @@ var Model = {
   request: {},
   query: "",
   results: [],
-
   // user login data
   user: null,
   token: null
@@ -63,7 +62,7 @@ var search = function(args) {
   }
 
   // if we didn't ask for more
-  if(actualArgs.skip === 0) {
+  if (actualArgs.skip === 0) {
     Model.clearResults();
     UI.clearResults();
     pushURLParams(args); // modify URL if possible
@@ -72,8 +71,9 @@ var search = function(args) {
   Model.request = actualArgs;
 
   var onSuccess = function(data) {
+    UI.clearError();
     Model.query = data.request.q;
-    var rank = Model.results.length+1;
+    var rank = Model.results.length + 1;
     var newResults = _(data.results).map(function(result) {
       result.kind = data.request.kind;
       result.rank = rank++;
