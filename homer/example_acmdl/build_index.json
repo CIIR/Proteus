@@ -2,12 +2,12 @@
   "filetype" : "trectext",
   "corpus": true,
   "tokenizer" : {
-    "fields" : [ "artid", "procid", "proc", "pubyear", "title", "author", "institution", "address", "email_notk", "keyword" ]
+    "fields" : [ "artid", "procid", "proc", "pubyear", "title", "author", "institution", "address", "email", "email_notk", "abstract", "keyword", "text", "reference" ]
   },
   "parser" : {
     "externalParsers" : [
       {
-  		"filetype" : "trectext",
+        "filetype" : "trectext",
         "class" : "ciir.proteus.parse.ACMArticleParser"
       }
     ]
