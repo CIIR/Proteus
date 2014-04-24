@@ -18,15 +18,18 @@ var UI = {};
 
 // a list of defined buttons
 UI.buttons = [
-  {display: "Pages", kind: "ia-pages" },
-  {display: "Books", kind: "ia-books" },
-  {display: "Metadata", kind: "ia-meta" }
+  {display: "Pages", kind: "ia-pages"},
+  {display: "Articles", kind: "article"},
+  {display: "Books", kind: "ia-books"},
+  {display: "Metadata", kind: "ia-meta"}
 ];
 
 UI.generateButtons = function() {
   _(UI.buttons).forEach(function(buttonDesc) {
-    var button = $('<input type="button" value="'+buttonDesc.display+'" />');
-    button.click(function() { UI.onClickSearchButton(buttonDesc); });
+    var button = $('<input type="button" value="' + buttonDesc.display + '" />');
+    button.click(function() {
+      UI.onClickSearchButton(buttonDesc);
+    });
     searchButtons.append(button)
   });
 };
@@ -69,7 +72,7 @@ UI.setQuery = function(q) {
  */
 UI.makeResult = function(queryTerms, result) {
   var renderer = getResultRenderer(result.kind);
-  return '<div class="result">'+renderer(queryTerms, result)+'</div>';
+  return '<div class="result">' + renderer(queryTerms, result) + '</div>';
 };
 
 /**

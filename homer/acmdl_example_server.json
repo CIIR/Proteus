@@ -1,11 +1,11 @@
 {
-  "port":1234,
-  "defaultKind":"article",
+  "port": 1234,
+  "defaultKind": "article",
   "kinds": {
     "article": {"index": "example_acmdl/index_acmdl"},
   },
   "content": {
-    "dir": "web_acmdl"
+    "dir": "web"
   },
   "userdb": {
     "impl": "H2Database",
