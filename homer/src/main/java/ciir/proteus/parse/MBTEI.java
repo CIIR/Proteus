@@ -26,14 +26,18 @@ public class MBTEI {
     File f = new File(split.fileName);
     String basename = f.getName();
 
+    String archiveId;
     if(basename.endsWith(".mbtei.gz"))
-      return basename.split(".mbtei.gz")[0];
+      archiveId = basename.split(".mbtei.gz")[0];
     else if(basename.endsWith(".toktei.gz"))
-      return basename.split(".toktei.gz")[0];
+      archiveId = basename.split(".toktei.gz")[0];
     else {
       System.err.println("File extension was expected to be .mbtei.gz or .toktei.gz");
-      return basename;
+      archiveId = basename;
     }
+    // put it in the metadata if we had to guess it.
+    metadata.put("identifier", archiveId);
+    return archiveId;
   }
 
   public static Document makeDocument(DocumentSplit split, Map<String, String> metadata, String text) {
