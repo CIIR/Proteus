@@ -63,53 +63,27 @@ public class MBTEIBookParser extends DocumentStreamParser {
 
       // local parser state
       StringBuilder buffer = new StringBuilder();
-      boolean beforeOrDuringMetadata = true;
-      String currentMetaTag = null;
-      StringBuilder tagBuilder = null;
-      Map<String,String> metadata = new HashMap<String,String>();
+      Map<String,String> metadata = MBTEI.parseMetadata(xml);
       boolean documentEmpty = true;
 
       while(xml.hasNext()) {
         int event = xml.next();
 
-        if(beforeOrDuringMetadata) {
-          if (event == XMLStreamConstants.START_ELEMENT) {
-            String tag = xml.getLocalName();
-            if("text".equals(tag)) {
-              finishMetadata(buffer, metadata);
-              beforeOrDuringMetadata = false;
-            } else {
-              currentMetaTag = tag;
-              tagBuilder = new StringBuilder();
-            }
-          } else if(event == XMLStreamConstants.END_ELEMENT) {
-            if (currentMetaTag != null) {
-              metadata.put(currentMetaTag, tagBuilder.toString().trim());
-              currentMetaTag = null;
-              tagBuilder = null;
-            }
-          } else if(event == XMLStreamConstants.CHARACTERS || event == XMLStreamConstants.CDATA) {
-            if(currentMetaTag != null) {
-              tagBuilder.append(xml.getText()).append(' ');
+        // copy the "form" attribute out of word tags
+        if(event == XMLStreamConstants.START_ELEMENT) {
+          String tag = xml.getLocalName();
+          if("w".equals(tag)) {
+            String formValue = MBTEI.scrub(xml.getAttributeValue(null, "form"));
+            if (!formValue.isEmpty()) {
+              buffer.append(formValue).append(' ');
+              documentEmpty = false;
             }
           }
-        } else {
-          // copy the "form" attribute out of word tags
-          if(event == XMLStreamConstants.START_ELEMENT) {
-            String tag = xml.getLocalName();
-            if("w".equals(tag)) {
-              String formValue = MBTEI.scrub(xml.getAttributeValue(null, "form"));
-              if (!formValue.isEmpty()) {
-                buffer.append(formValue).append(' ');
-                documentEmpty = false;
-              }
-            }
           // echo a document when we find the </tei> tag
-          } else if(event == XMLStreamConstants.END_ELEMENT) {
-            String tag = xml.getLocalName();
-            if("tei".equalsIgnoreCase(tag) && !documentEmpty) {
-              return MBTEI.makeDocument(split, metadata, buffer.toString());
-            }
+        } else if(event == XMLStreamConstants.END_ELEMENT) {
+          String tag = xml.getLocalName();
+          if("tei".equalsIgnoreCase(tag) && !documentEmpty) {
+            return MBTEI.makeDocument(split, metadata, buffer.toString());
           }
         }
       }
