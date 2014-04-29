@@ -13,11 +13,13 @@ var loginInfo = $("#ui-login-info");
 var moreButton = $("#ui-go-more");
 var searchButtons = $("#search-buttons");
 
+
 // UI object/namespace
 var UI = {};
 
 // a list of defined buttons
 UI.buttons = [
+  {display: "Default", kind: "default"},
   {display: "Pages", kind: "ia-pages"},
   {display: "Articles", kind: "article"},
   {display: "Books", kind: "ia-books"},
@@ -83,9 +85,27 @@ UI.appendResults = function(queryTerms, results) {
 
   _(results).forEach(function(result) {
     resultsDiv.append(UI.makeResult(queryTerms, result));
+    var tagName = ".tags_" + result.name;
+
+    $(tagName).tagit({
+      afterTagAdded: function(event, ui) {
+        if (!ui.duringInitialization) {
+          // only add new tags
+          addTag(ui.tagLabel, result.name);
+        }
+        return true;
+      },
+      afterTagRemoved: function(event, ui) {
+
+        deleteTag(ui.tagLabel, result.name);
+        return true;
+
+      }
+    });
+    moreButton.show();
+
   });
-  moreButton.show();
-};
+}
 
 /**
  * A set of functions for reacting to events in other, more general code.

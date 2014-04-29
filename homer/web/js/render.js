@@ -19,21 +19,34 @@ var getResultRenderer = function(kind) {
 resultRenderers["default"] = function(queryTerms, result) {
   var html = '<table><tr>';
 
-  html += '<td class="rank">'+result.rank+'</td>';
-  html += '<td class="name">'+result.name+'</td>';
-  html += '<td class="score">'+result.score+'</td>';
-  if(result.snippet) {
+  html += '<td class="rank">' + result.rank + '</td>';
+  html += '<td class="name">' + result.name + '</td>';
+  html += '<td class="score">' + result.score + '</td>';
+
+
+  if (result.snippet) {
     html += '</tr><tr>';
     html += '<td>&nbsp;</td>';
     html += '<td class="snippet" colspan=2> ...' +
-      highlightText(queryTerms, result.snippet, '<span class="hili">', '</span>') +
-      '... </td>';
+            highlightText(queryTerms, result.snippet, '<span class="hili">', '</span>') +
+            '... </td>';
   }
-  if(result.meta) {
+
+  if (result.meta) {
     //html += '</tr><tr>'; // open new row
     //html += '<td class="meta" colspan="2">TODO: default meta</td>'; // single column
   }
-  html+='</tr></table>';
+  html += '</tr></table><div>';
+  if (result.tags) {
+    html += '<ul class="tags_' + result.name + '">  ';
+    tags = result.tags.toString().split(',');
+    for (tag in tags) {
+      html += '  <li> ' + tags[tag] + ' </li> ';
+    }
+    html += '</ul>'
+  }
+
+  html += '</div>';
 
   return html;
 };

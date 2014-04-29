@@ -54,6 +54,26 @@ var search = function(args) {
     metadata: true
   };
 
+  // we inherit args from the URL - which could contain
+  // the user name, so we want to strip out any data we're
+  // filling in here.
+  delete args.tags;
+  delete args.user;
+  delete args.token;
+
+  var userName = getCookie("username");
+
+  if (userName != "") {
+
+    var userToken = getCookie("token");
+    var tagArgs = {
+      tags: true,
+      user: userName,
+      token: userToken
+    }
+    args = _.merge(args, tagArgs);
+  }
+
   var actualArgs = _.merge(defaultArgs, args);
 
   if (!actualArgs.q || isBlank(actualArgs.q)) {
@@ -77,6 +97,7 @@ var search = function(args) {
     var newResults = _(data.results).map(function(result) {
       result.kind = data.request.kind;
       result.rank = rank++;
+
       return result;
     }).value();
 
@@ -148,6 +169,33 @@ var logOut = function() {
   });
 
   UI.setUserName("");
+
+};
+
+var addTag = function(tagText, resourceID) {
+  var userName = getCookie("username");
+  var userToken = getCookie("token");
+
+  var tmp = '{ "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + tagText + '": ["' + resourceID + '"]}}';
+  var args = JSON.parse(tmp);
+  API.createTags(args, null, function(req, status, err) {
+    UI.showError("ERROR: ``" + err + "``");
+    throw err;
+  });
+
+};
+
+
+var deleteTag = function(tagText, resourceID) {
+  var userName = getCookie("username");
+  var userToken = getCookie("token");
+
+  var tmp = '{ "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + tagText + '": ["' + resourceID + '"]}}';
+  var args = JSON.parse(tmp);
+  API.deleteTags(args, null, function(req, status, err) {
+    UI.showError("ERROR: ``" + err + "``");
+    throw err;
+  });
 
 };
 
