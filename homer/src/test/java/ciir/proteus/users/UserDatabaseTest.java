@@ -173,5 +173,49 @@ public class UserDatabaseTest {
     assertArrayEquals(new String[]{"tag1", "tag3"}, getres.get("res2").toArray());
     assertTrue(getres.get("res3").isEmpty());
 
+    // testing getAllTags
+
+    // insert a new user
+    user = "user2";
+    db.register(user);
+    token = db.login(user);
+    assertNotNull(token);
+    cred = new Credentials(user, token);
+
+    // test single tag
+    db.addTag(cred, "res1", "user2_res1_tag1");
+    db.addTag(cred, "res1", "user2_res1_tag2");
+    db.addTag(cred, "res2", "user2_res2_tag1");
+
+    Map<String, Map<String, List<String>>> getAllTagsResult;
+
+    getAllTagsResult = db.getAllTags(Arrays.asList("res1", "res2", "res3"));
+
+    assertNotNull(getAllTagsResult);
+    assertNotNull(getAllTagsResult.get("res1"));
+    assertNotNull(getAllTagsResult.get("res2"));
+    assertNotNull(getAllTagsResult.get("res3"));
+    assertTrue(getAllTagsResult.get("res3").isEmpty());
+
+    assertNotNull(getAllTagsResult.get("res1").get("tag-user"));
+    assertNotNull(getAllTagsResult.get("res1").get("user2"));
+    assertNotNull(getAllTagsResult.get("res2").get("tag-user"));
+    assertNotNull(getAllTagsResult.get("res2").get("user2"));
+
+
+    assertArrayEquals(new String[]{"tag1"}, getAllTagsResult.get("res1").get("tag-user").toArray());
+    assertArrayEquals(new String[]{"tag1", "tag3"}, getAllTagsResult.get("res2").get("tag-user").toArray());
+
+    assertArrayEquals(new String[]{"user2_res1_tag1", "user2_res1_tag2"}, getAllTagsResult.get("res1").get("user2").toArray());
+    assertArrayEquals(new String[]{"user2_res2_tag1"}, getAllTagsResult.get("res2").get("user2").toArray());
+
+    Map<String, List<String>> singleResourceResult = db.getAllTags("res1");
+
+    assertNotNull(singleResourceResult.get("tag-user"));
+    assertNotNull(singleResourceResult.get("user2"));
+
+    assertArrayEquals(new String[]{"tag1"}, singleResourceResult.get("tag-user").toArray());
+    assertArrayEquals(new String[]{"user2_res1_tag1", "user2_res1_tag2"}, singleResourceResult.get("user2").toArray());
+
   }
 }

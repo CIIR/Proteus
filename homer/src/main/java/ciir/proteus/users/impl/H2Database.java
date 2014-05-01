@@ -18,6 +18,7 @@ import java.util.*;
 public class H2Database implements UserDatabase {
 
   private Connection conn;
+  private PreparedStatement getAllTagsSQL = null;
 
   public H2Database(Parameters conf) {
     try {
@@ -35,6 +36,9 @@ public class H2Database implements UserDatabase {
 
       // create tables if needed
       initDB();
+
+      // prepare the SQL just once
+      getAllTagsSQL = conn.prepareStatement("SELECT user, tag FROM tags WHERE resource=? GROUP BY user, tag ORDER BY user, tag");
 
     } catch (ClassNotFoundException e) {
       throw new IllegalArgumentException(e);
@@ -205,7 +209,6 @@ public class H2Database implements UserDatabase {
     return results.get(resource);
   }
 
-  @Override
   public Map<String, List<String>> getTags(Credentials creds, List<String> resources) throws DBError {
     checkSession(creds);
 
@@ -226,6 +229,67 @@ public class H2Database implements UserDatabase {
         }
         tuples.close();
         results.put(resource, tags);
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+
+    return results;
+  }
+
+  // returns resources and a list of users and their tags.
+  @Override
+  public Map<String, List<String>> getAllTags(String resource) throws DBError {
+    Map<String, Map<String, List<String>>> results = getAllTags(Arrays.asList(resource));
+    return results.get(resource);
+  }
+
+  public Map<String, Map<String, List<String>>> getAllTags(List<String> resources) throws DBError {
+
+    Map<String, Map<String, List<String>>> results = new HashMap<String, Map<String, List<String>>>();
+
+    try {
+
+      for (String resource : resources) {
+        Map<String, List<String>> userTags = new HashMap<String, List<String>>();
+        getAllTagsSQL.setString(1, resource);
+
+        ResultSet tuples = getAllTagsSQL.executeQuery();
+
+        String currentUser = new String();
+        List<String> tags = new ArrayList<String>();
+
+        while (tuples.next()) {
+
+          String user = tuples.getString(1);
+
+          if (currentUser.isEmpty()) {   // first time through
+            currentUser = user;
+          }
+
+          String tag = tuples.getString(2);
+
+          if (!currentUser.equals(user)) {
+            userTags.put(currentUser, tags);
+            results.put(resource, userTags); // put user/tags in results for the resource
+
+            currentUser = user;
+            tags = new ArrayList<String>();
+          }
+
+          tags.add(tag);
+
+        } // end while we have rows
+
+        // put in the last user - if there is one
+        if (!currentUser.isEmpty()) {
+          userTags.put(currentUser, tags);
+        }
+        results.put(resource, userTags);
+
+
+        tuples.close();
+
       }
     } catch (SQLException e) {
       e.printStackTrace();

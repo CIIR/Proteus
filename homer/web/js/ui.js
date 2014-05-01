@@ -102,6 +102,11 @@ UI.appendResults = function(queryTerms, results) {
 
       }
     });
+
+    $(".read-only-tags").tagit({
+      readOnly: true
+    });
+
     moreButton.show();
 
   });

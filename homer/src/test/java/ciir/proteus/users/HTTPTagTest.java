@@ -13,6 +13,8 @@ import org.lemurproject.galago.tupleflow.web.WebServerException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -21,6 +23,7 @@ import static org.junit.Assert.*;
  * @author jfoley.
  */
 public class HTTPTagTest {
+
   public static TestEnvironment env;
 
   @BeforeClass
@@ -98,8 +101,10 @@ public class HTTPTagTest {
     responseJSON = Parameters.parseString(response.body);
     assertTrue(responseJSON.containsKey("fake-resource0"));
     assertTrue(responseJSON.containsKey("fake-resource1"));
+
     assertTrue(responseJSON.getList("fake-resource0").isEmpty());
     assertTrue(responseJSON.getList("fake-resource1").isEmpty());
+
   }
 
   @Test
@@ -110,8 +115,8 @@ public class HTTPTagTest {
     Parameters put = new Parameters();
     put.copyFrom(creds);
     put.set("tags", Parameters.parseArray(
-        "funny", Arrays.asList("res1", "res2", "res12", "res22"),
-        "romeo", Arrays.asList("res2", "res17")));
+            "funny", Arrays.asList("res1", "res2", "res12", "res22"),
+            "romeo", Arrays.asList("res2", "res17")));
 
     assertOK(HTTPUtil.postJSON(env.url, "/api/tags/create", put));
 
@@ -124,26 +129,38 @@ public class HTTPTagTest {
     Parameters json = Parameters.parseString(resp.body);
 
     // validate
-    assertEquals("funny", json.getAsList("res1", String.class).get(0));
-    assertEquals(1, json.getAsList("res1", String.class).size());
 
-    Set<String> res2tags = new HashSet<String>(json.getAsList("res2", String.class));
+    Parameters dummy = new Parameters();
+    dummy.set("wrongKey", "wrongValue");
+    Parameters tmp = new Parameters();
+
+    tmp = json.get("res1", dummy);
+    assertEquals("funny", tmp.getAsList("proteustestuser", String.class).get(0));
+    assertEquals(1, tmp.getAsList("proteustestuser", String.class).size());
+
+    tmp = json.get("res2", dummy);
+    Set<String> res2tags = new HashSet<String>(tmp.getAsList("proteustestuser", String.class));
     assertTrue(res2tags.contains("romeo"));
     assertTrue(res2tags.contains("funny"));
 
-    assertEquals("funny", json.getAsList("res12", String.class).get(0));
-    assertEquals(1, json.getAsList("res12", String.class).size());
-    assertEquals("funny", json.getAsList("res22", String.class).get(0));
-    assertEquals(1, json.getAsList("res22", String.class).size());
-    assertEquals("romeo", json.getAsList("res17", String.class).get(0));
-    assertEquals(1, json.getAsList("res17", String.class).size());
+    tmp = json.get("res12", dummy);
+    assertEquals("funny", tmp.getAsList("proteustestuser", String.class).get(0));
+    assertEquals(1, tmp.getAsList("proteustestuser", String.class).size());
+
+    tmp = json.get("res22", dummy);
+    assertEquals("funny", tmp.getAsList("proteustestuser", String.class).get(0));
+    assertEquals(1, tmp.getAsList("proteustestuser", String.class).size());
+
+    tmp = json.get("res17", dummy);
+    assertEquals("romeo", tmp.getAsList("proteustestuser", String.class).get(0));
+    assertEquals(1, tmp.getAsList("proteustestuser", String.class).size());
 
     // delete
     Parameters del = new Parameters();
     del.copyFrom(creds);
     del.set("tags", Parameters.parseArray(
-        "funny", Arrays.asList("res1", "res2", "res12", "res22"),
-        "romeo", Arrays.asList("res2", "res17")));
+            "funny", Arrays.asList("res1", "res2", "res12", "res22"),
+            "romeo", Arrays.asList("res2", "res17")));
 
     assertOK(HTTPUtil.postJSON(env.url, "/api/tags/delete", del));
 
@@ -157,5 +174,6 @@ public class HTTPTagTest {
     assertEquals(0, json.getAsList("res12", String.class).size());
     assertEquals(0, json.getAsList("res22", String.class).size());
     assertEquals(0, json.getAsList("res17", String.class).size());
+
   }
 }

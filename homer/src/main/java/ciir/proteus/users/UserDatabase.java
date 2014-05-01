@@ -10,6 +10,7 @@ import java.util.Map;
  * @author jfoley.
  */
 public interface UserDatabase {
+
   /**
    * shut down connection
    */
@@ -17,12 +18,14 @@ public interface UserDatabase {
 
   /**
    * Add a user to the database
+   *
    * @param username
    */
   public void register(String username) throws NoTuplesAffected;
 
   /**
    * Logs in a
+   *
    * @param username the user to login
    * @return a session token for that user
    */
@@ -35,6 +38,7 @@ public interface UserDatabase {
 
   /**
    * Returns true if user has registered
+   *
    * @param user a username
    * @return registered?
    */
@@ -42,6 +46,7 @@ public interface UserDatabase {
 
   /**
    * Returns a user record for a given session
+   *
    * @return user object for the logged in user or null
    */
   public boolean validSession(Credentials creds);
@@ -49,7 +54,14 @@ public interface UserDatabase {
   public void checkSession(Credentials creds) throws DBError;
 
   public List<String> getTags(Credentials creds, String resource) throws DBError;
+
   public Map<String, List<String>> getTags(Credentials creds, List<String> resources) throws DBError;
+
+  public Map<String, List<String>> getAllTags(String res1) throws DBError;
+
+  public Map<String, Map<String, List<String>>> getAllTags(List<String> resources) throws DBError;
+
   public void deleteTag(Credentials creds, String resource, String tag) throws DBError;
+
   public void addTag(Credentials creds, String resource, String tag) throws DBError;
 }

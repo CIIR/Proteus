@@ -7,23 +7,18 @@
  * See, for example, resultRenderers["ia-pages"] in internetArchive.js
  */
 var resultRenderers = {};
-
 var getResultRenderer = function(kind) {
   if (resultRenderers[kind]) {
     return resultRenderers[kind];
   }
   return resultRenderers["default"];
 };
-
 /** This is the default, plain result renderer */
 resultRenderers["default"] = function(queryTerms, result) {
   var html = '<table><tr>';
-
   html += '<td class="rank">' + result.rank + '</td>';
   html += '<td class="name">' + result.name + '</td>';
   html += '<td class="score">' + result.score + '</td>';
-
-
   if (result.snippet) {
     html += '</tr><tr>';
     html += '<td>&nbsp;</td>';
@@ -33,21 +28,35 @@ resultRenderers["default"] = function(queryTerms, result) {
   }
 
   if (result.meta) {
-    //html += '</tr><tr>'; // open new row
-    //html += '<td class="meta" colspan="2">TODO: default meta</td>'; // single column
+//html += '</tr><tr>'; // open new row
+//html += '<td class="meta" colspan="2">TODO: default meta</td>'; // single column
   }
   html += '</tr></table><div>';
   if (result.tags) {
-    html += '<ul class="tags_' + result.name + '">  ';
-    tags = result.tags.toString().split(',');
-    for (tag in tags) {
-      html += '  <li> ' + tags[tag] + ' </li> ';
+    for (user in result.tags) {
+      tags = result.tags[user].toString().split(',');
+      // if these are OUR tags, we can edit
+      if (getCookie("username") == user) {
+        html += '<ul class="tags_' + result.name + '">  ';
+        for (tag in tags) {
+          html += '  <li> ' + tags[tag] + ' </li> ';
+        }
+        html += '</ul>'
+      } else {
+        // read-only tags
+        html += '<ul class="read-only-tags">';
+        for (tag in tags) {
+          html += '  <li> ' + tags[tag] + ' </li> ';
+        }
+        html += '</ul>';
+      }
+
+
     }
-    html += '</ul>'
+
   }
 
   html += '</div>';
-
   return html;
 };
 

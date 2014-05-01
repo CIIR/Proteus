@@ -19,16 +19,16 @@ import static org.junit.Assert.assertNotNull;
  * @author jfoley
  */
 public class TestEnvironment {
+
   public HTTPRouter router;
   public WebServer server;
   public File folder;
   public ProteusSystem proteus;
   public String url;
-
   public Credentials creds;
 
   public TestEnvironment() throws IOException, WebServerException, NoTuplesAffected {
-    folder =  FileUtility.createTemporaryDirectory();
+    folder = FileUtility.createTemporaryDirectory();
     proteus = new ProteusSystem(testParams(folder));
 
     router = new HTTPRouter(proteus);
@@ -50,11 +50,12 @@ public class TestEnvironment {
   }
 
   public static Parameters testParams(File tmpDir) {
-    String dbpath = tmpDir.getPath()+"/users";
+    String dbpath = tmpDir.getPath() + "/users";
     Parameters dbp = new Parameters();
     dbp.set("path", dbpath);
     dbp.set("user", "junit");
     dbp.set("pass", "");
+    dbp.set("auto_server", "TRUE"); // allows us to query the DB outside this process
 
     Parameters content = new Parameters();
     content.set("dir", Arrays.asList("web", "src/test/resources"));

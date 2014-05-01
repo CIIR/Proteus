@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 public class JSONSearch implements JSONHandler {
+
   private final ProteusSystem system;
 
   public JSONSearch(ProteusSystem sys) {
@@ -42,7 +43,7 @@ public class JSONSearch implements JSONHandler {
     Parameters response = new Parameters();
 
     List<Parameters> results = Collections.emptyList();
-    if(!docs.isEmpty()) {
+    if (!docs.isEmpty()) {
       results = annotate(kind, docs, query, reqp);
     }
 
@@ -55,13 +56,12 @@ public class JSONSearch implements JSONHandler {
     return response;
   }
 
-
   public List<Parameters> annotate(String kind, List<ScoredDocument> results, String query, Parameters reqp) throws DBError {
     boolean snippets = reqp.get("snippets", true);
     boolean metadata = reqp.get("metadata", true);
     boolean tags = reqp.get("tags", reqp.isString("user"));
 
-    if(snippets) {
+    if (snippets) {
       results = system.findPassages(kind, query, results);
     }
 
@@ -70,18 +70,20 @@ public class JSONSearch implements JSONHandler {
 
 
     // if we need to pull the documents:
-    Map<String,Document> pulled = Collections.emptyMap();
-    if(snippets || metadata) {
+    Map<String, Document> pulled = Collections.emptyMap();
+    if (snippets || metadata) {
       pulled = system.getDocs(kind, RetrievalUtil.names(results), metadata, snippets);
     }
 
     // if we need to get tags for these documents:
-    Map<String,List<String>> docTags = null;
-    if(tags) {
-      docTags = system.userdb.getTags(Credentials.fromJSON(reqp), RetrievalUtil.names(results));
+    //Map<String,List<String>> docTags = null;
+    Map<String, Map<String, List<String>>> docTags = null;
+
+    if (tags) {
+      docTags = system.userdb.getAllTags(RetrievalUtil.names(results));
     }
 
-    for(ScoredDocument sdoc : results) {
+    for (ScoredDocument sdoc : results) {
       Document doc = pulled.get(sdoc.documentName);
       Parameters docp = new Parameters();
 
@@ -91,22 +93,37 @@ public class JSONSearch implements JSONHandler {
       docp.set("score", sdoc.score);
 
       // metadata annotation
-      if(doc != null && metadata) {
+      if (doc != null && metadata) {
         docp.set("meta", Parameters.parseMap(doc.metadata));
       }
       // snippet annotation
-      if(doc != null && snippets) {
+      if (doc != null && snippets) {
         ScoredPassage psg = (ScoredPassage) sdoc;
         String snippet =
-            (Utility.join(ListUtil.slice(doc.terms, psg.begin, psg.end), " "));
+                (Utility.join(ListUtil.slice(doc.terms, psg.begin, psg.end), " "));
 
         docp.set("snippet", snippet);
       }
 
       // tags annotation
-      if(tags && docTags != null) {
-        docp.set("tags", docTags.get(sdoc.documentName));
-      }
+      if (tags && docTags != null) {
+
+        // get the tags for this resource
+        if (docTags.containsKey(sdoc.documentName)) {
+          Parameters tmp = new Parameters();
+          for (Map.Entry<String, List<String>> entry : docTags.get(sdoc.documentName).entrySet()) {
+            tmp.put(entry.getKey(), entry.getValue());
+          }
+          if (tmp.size() == 0) {
+            docp.set("tags", new ArrayList<String>()); // empty list of tags
+          } else {
+            docp.set("tags", tmp);
+          }
+        } else {
+          docp.set("tags", new ArrayList<String>()); // empty list of tags
+        }
+      } // end if we want tags
+
 
       resultData.add(docp);
     }
