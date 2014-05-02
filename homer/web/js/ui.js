@@ -147,3 +147,39 @@ UI.clearUserName = function() {
   });
 };
 
+UI.renderTags = function(result) {
+  var html = '<div>';
+  // we ALWAYS want a div if you're logged in so you can add tags
+  var username = getCookie("username");
+  if (username !== "") {
+
+    html += '<ul class="tags_' + result.name + '">  ';
+    if (typeof result.tags[username] !== 'undefined') {
+      tags = result.tags[username].toString().split(',');
+      for (tag in tags) {
+        html += '  <li> ' + tags[tag] + ' </li> ';
+      }
+    }
+    html += '</ul>'
+  } // end if someone is logged in
+
+  var tmp_html = "";
+  var read_only_tags = false;
+  for (user in result.tags) {
+
+    tags = result.tags[user].toString().split(',');
+    // skip current user
+    if (user !== username) {
+      for (tag in tags) {
+        read_only_tags = true;
+        tmp_html += '  <li> ' + tags[tag] + ' </li> ';
+      }
+    }
+  }
+  // only show the tag box if there is something to show
+  if (read_only_tags === true) {
+    html += '<ul class="read-only-tags">' + tmp_html + '</ul>'
+  }
+  html += '</div>';
+  return html;
+}
