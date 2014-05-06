@@ -80,26 +80,33 @@ UI.makeResult = function(queryTerms, result) {
 /**
  * Renders search results into UI after current results
  */
+
+
 UI.appendResults = function(queryTerms, results) {
   UI.showProgress("Ajax response received!");
 
   _(results).forEach(function(result) {
     resultsDiv.append(UI.makeResult(queryTerms, result));
-    var tagName = ".tags_" + result.name;
+    var tagName = "#tags_" + result.name;
 
     $(tagName).tagit({
-      afterTagAdded: function(event, ui) {
-        if (!ui.duringInitialization) {
-          // only add new tags
-          addTag(ui.tagLabel, result.name);
-        }
-        return true;
-      },
       afterTagRemoved: function(event, ui) {
 
         deleteTag(ui.tagLabel, result.name);
         return true;
 
+      },
+      beforeTagAdded: function(event, ui) {
+        if (!ui.duringInitialization) {
+          var res = confirm("Are you sure you want to add the tag " + ui.tagLabel + "?");
+          if (res == true) {
+            addTag(ui.tagLabel, result.name);
+          }
+          return res;
+
+        } else {
+          return true;
+        }
       }
     });
 
@@ -153,7 +160,7 @@ UI.renderTags = function(result) {
   var username = getCookie("username");
   if (username !== "") {
 
-    html += '<ul class="tags_' + result.name + '">  ';
+    html += '<ul id="tags_' + result.name + '">  ';
     if (typeof result.tags[username] !== 'undefined') {
       tags = result.tags[username].toString().split(',');
       for (tag in tags) {
