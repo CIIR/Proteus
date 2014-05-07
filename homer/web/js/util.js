@@ -15,7 +15,11 @@ var isBlank = function(str) {
 };
 
 var pushURLParams = function(params) {
-  var urlParams = "?"+_.pairs(params).map(function(kv) {
+  var urlParams = "?"+_.pairs(params)
+  .filter(function(kv) {
+    var key = kv[0];
+    return !(key == "user" || key == "token");
+  }).map(function(kv) {
     return _(kv).map(encodeURIComponent).join('=');
   }).join('&');
 
@@ -33,7 +37,9 @@ var getURLParams = function() {
 
   var urlParams = {};
   while ((match = search.exec(query))) {
-    urlParams[decode(match[1])] = decode(match[2]);
+    var key = decode(match[1]);
+    var value = decode(match[2]);
+    urlParams[key] = value;
   }
   return urlParams;
 };

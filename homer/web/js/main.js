@@ -34,9 +34,11 @@ UI.setReadyHandler(function() {
 
   UI.setUserName(getCookie("username"));
 
-  if (!isBlank(params.q)) {
+  if (params.action=="search" && !isBlank(params.q)) {
     UI.setQuery(params.q);
-    search(params);
+    doActionRequest(params);
+  } else if(params.action == "view") {
+    doActionRequest(params);
   }
 });
 
@@ -46,7 +48,12 @@ UI.setReadyHandler(function() {
  * @param args
  * @returns {Object|*}
  */
-var search = function(args) {
+var doActionRequest = function(args) {
+  var action = args.action;
+  if(!action) {
+    UI.showError("action not defined when calling doActionRequest in JS");
+    return;
+  }
   var defaultArgs = {
     n: 10,
     skip: 0,
@@ -64,7 +71,6 @@ var search = function(args) {
   var userName = getCookie("username");
 
   if (userName != "") {
-
     var userToken = getCookie("token");
     var tagArgs = {
       tags: true,
@@ -76,9 +82,11 @@ var search = function(args) {
 
   var actualArgs = _.merge(defaultArgs, args);
 
-  if (!actualArgs.q || isBlank(actualArgs.q)) {
-    UI.showProgress("Query is blank!");
-    return;
+  if(action == "search") {
+    if (!actualArgs.q || isBlank(actualArgs.q)) {
+      UI.showProgress("Query is blank!");
+      return;
+    }
   }
 
   // if we didn't ask for more
@@ -89,24 +97,36 @@ var search = function(args) {
   }
 
   Model.request = actualArgs;
+  console.log(request);
 
   var onSuccess = function(data) {
     UI.clearError();
-    Model.query = data.request.q;
-    var rank = Model.results.length + 1;
-    var newResults = _(data.results).map(function(result) {
-      result.kind = data.request.kind;
-      result.rank = rank++;
+    var action = data.request.action;
+    console.log(data);
 
-      return result;
-    }).value();
+    if(action === "search") {
+      Model.query = data.request.q;
+      var rank = Model.results.length + 1;
+      var newResults = _(data.results).map(function(result) {
+        result.kind = data.request.kind;
+        result.rank = rank++;
 
-    Model.results = _(Model.results).concat(data.results).value();
-    UI.appendResults(data.queryTerms, newResults);
+        return result;
+      }).value();
+
+      Model.results = _(Model.results).concat(data.results).value();
+      UI.appendResults(data.queryTerms, newResults);
+    } else if(action === "view") {
+      console.log(data);
+      UI.showError("TODO: handle 'view' action.")
+    } else {
+      console.log(data);
+      UI.showError("Error: UI doesn't know how to handle '"+action+"' action.")
+    }
   };
 
   UI.showProgress("Search Request sent to server!");
-  API.search(actualArgs, onSuccess, function(req, status, err) {
+  API.action(actualArgs, onSuccess, function(req, status, err) {
     UI.showError("ERROR: ``" + err + "``");
     throw err;
   });
@@ -117,7 +137,7 @@ var search = function(args) {
 /* handlers for search button types */
 UI.onClickSearchButton = function(buttonDesc) {
   var kind = buttonDesc.kind;
-  search({kind: kind, q: UI.getQuery()});
+  doActionRequest({kind: kind, q: UI.getQuery(), action:"search"});
 };
 
 /* pull the previous request out of the "Model" and send it to the server, but request the next 10 */
@@ -125,7 +145,7 @@ UI.setMoreHandler(function() {
   var prev = Model.request;
   prev.skip = Model.results.length;
   prev.n = 10;
-  search(prev);
+  doActionRequest(prev);
 });
 
 var logIn = function(userName) {

@@ -22,11 +22,15 @@ var method = function(method, url) {
   // -- this is the real signature of the API calls
   return function(options, doneCallback, errorCallback) {
     ajaxOpts.data = dataFn(options);
-    $.ajax(ajaxOpts).done(doneCallback).error(errorCallback);
+    $.ajax(ajaxOpts).done(function(data) {
+      data.request = options;
+      console.log(data);
+      doneCallback(data);
+    }).error(errorCallback);
   };
 };
 
-API.search = method("POST", "/api/search");
+API.action = method("POST", "/api/action");
 API.metadata = method("GET", "/api/metadata");
 API.getTags = method("GET", "/api/tags");
 API.createTags = method("POST", "/api/tags/create");

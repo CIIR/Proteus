@@ -1,7 +1,6 @@
 package ciir.proteus.server.action;
 
 import ciir.proteus.system.ProteusSystem;
-import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.util.ListUtil;
 import ciir.proteus.util.QueryUtil;
@@ -49,7 +48,6 @@ public class JSONSearch implements JSONHandler {
 
     Node pquery = StructuredQuery.parse(query);
 
-    response.set("request", reqp);
     response.set("results", results);
     response.set("parsedQuery", pquery.toString());
     response.set("queryTerms", QueryUtil.queryTerms(pquery));

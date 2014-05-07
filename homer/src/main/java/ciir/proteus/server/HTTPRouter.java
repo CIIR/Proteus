@@ -1,9 +1,6 @@
 package ciir.proteus.server;
 
-import ciir.proteus.server.action.DebugHandler;
-import ciir.proteus.server.action.GetMetadata;
-import ciir.proteus.server.action.JSONHandler;
-import ciir.proteus.server.action.JSONSearch;
+import ciir.proteus.server.action.*;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.users.http.*;
@@ -23,6 +20,7 @@ public class HTTPRouter implements WebHandler {
   private final JSONHandler debug;
   private final JSONHandler search;
   private final JSONHandler metadata;
+  private final JSONHandler viewResource;
   private final JSONHandler tags;
   private final JSONHandler putTags;
   private final JSONHandler deleteTags;
@@ -38,6 +36,7 @@ public class HTTPRouter implements WebHandler {
 
     search = new JSONSearch(proteus);
     metadata = new GetMetadata(proteus);
+    viewResource = new ViewResource(proteus);
     tags = new GetTags(proteus);
     putTags = new PutTags(proteus);
     deleteTags = new DeleteTags(proteus);
@@ -58,35 +57,48 @@ public class HTTPRouter implements WebHandler {
       final boolean POST = method.equals("POST");
 
       JSONHandler handler;
-      if((GET || POST) && path.equals("/api/search")) {
-        handler = search;
-      } else if(GET && path.equals("/api/metadata")) {
+      if ((GET || POST) && path.equals("/api/action")) {
+        if (!reqp.isString("action"))
+          throw new IllegalArgumentException("/api/action demands String key 'action'");
+
+        String action = reqp.getString("action");
+        if (action.equals("search")) {
+          handler = search;
+        } else if (action.equals("view")) {
+          handler = viewResource;
+        } else {
+          throw new IllegalArgumentException("/api/action doesn't know how to handle action="+action);
+        }
+      } else if (GET && path.equals("/api/metadata")) {
         handler = metadata;
-      } else if(GET && path.equals("/api/tags")) {
+      } else if (GET && path.equals("/api/tags")) {
         handler = tags;
-      } else if(POST && path.equals("/api/tags/create")) {
+      } else if (POST && path.equals("/api/tags/create")) {
         handler = putTags;
-      } else if(POST && path.equals("/api/tags/delete")) {
+      } else if (POST && path.equals("/api/tags/delete")) {
         handler = deleteTags;
-      } else if(POST && path.equals("/api/login")) {
+      } else if (POST && path.equals("/api/login")) {
         handler = login;
-      } else if(POST && path.equals("/api/logout")) {
+      } else if (POST && path.equals("/api/logout")) {
         handler = logout;
-      } else if(POST && path.equals("/api/register")) {
+      } else if (POST && path.equals("/api/register")) {
         handler = register;
-      } else if(path.equals("/api/debug")) {
+      } else if (path.equals("/api/debug")) {
         handler = debug;
-      } else if(GET && !path.startsWith("/api/")) {
+      } else if (GET && !path.startsWith("/api/")) {
         staticContent.handle(path, reqp, resp);
         return;
       } else {
-        resp.sendError(404, "Not found");
+        resp.sendError(HTTPError.NotFound, "Not found");
         return;
       }
       handleJSON(handler, method, path, reqp, resp);
+    } catch (IllegalArgumentException iae) {
+      log.log(Level.INFO, "illegal argument received", iae);
+      resp.sendError(HTTPError.BadRequest, iae.getMessage());
     } catch (Throwable th) {
       th.printStackTrace();
-      resp.sendError(501, th.getMessage());
+      resp.sendError(HTTPError.InternalError, th.getMessage());
     }
   }
 
