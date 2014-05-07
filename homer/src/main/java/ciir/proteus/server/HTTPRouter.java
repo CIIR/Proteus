@@ -19,7 +19,6 @@ public class HTTPRouter implements WebHandler {
   private static final Logger log = Logger.getLogger(HTTPRouter.class.getName());
   private final JSONHandler debug;
   private final JSONHandler search;
-  private final JSONHandler metadata;
   private final JSONHandler viewResource;
   private final JSONHandler tags;
   private final JSONHandler putTags;
@@ -35,7 +34,6 @@ public class HTTPRouter implements WebHandler {
     staticContent = new StaticContentHandler(proteus.getConfig());
 
     search = new JSONSearch(proteus);
-    metadata = new GetMetadata(proteus);
     viewResource = new ViewResource(proteus);
     tags = new GetTags(proteus);
     putTags = new PutTags(proteus);
@@ -69,8 +67,6 @@ public class HTTPRouter implements WebHandler {
         } else {
           throw new IllegalArgumentException("/api/action doesn't know how to handle action="+action);
         }
-      } else if (GET && path.equals("/api/metadata")) {
-        handler = metadata;
       } else if (GET && path.equals("/api/tags")) {
         handler = tags;
       } else if (POST && path.equals("/api/tags/create")) {

@@ -31,7 +31,6 @@ var method = function(method, url) {
 };
 
 API.action = method("POST", "/api/action");
-API.metadata = method("GET", "/api/metadata");
 API.getTags = method("GET", "/api/tags");
 API.createTags = method("POST", "/api/tags/create");
 API.deleteTags = method("POST", "/api/tags/delete");
