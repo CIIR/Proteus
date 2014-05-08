@@ -2,9 +2,9 @@
   "port":1234,
   "defaultKind":"ia-pages",
   "kinds": {
-    "ia-books": {"index": "examples/tiny.books"},
-    "ia-pages": {"index": "examples/tiny.pages"},
-    "ia-metadata": {"index": "examples/tiny.metadata"}
+    "ia-books": {"index": "examples/tiny.books", "button": "Books"},
+    "ia-pages": {"index": "examples/tiny.pages", "button": "Pages"},
+    "ia-metadata": {"index": "examples/tiny.metadata", "button": "Metadata"}
   },
   "content": {
     "dir": "web"

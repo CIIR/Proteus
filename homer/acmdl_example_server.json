@@ -2,7 +2,7 @@
   "port": 1234,
   "defaultKind": "article",
   "kinds": {
-    "article": {"index": "example_acmdl/index_acmdl"},
+    "article": {"index": "example_acmdl/index_acmdl", "button": "Papers"},
   },
   "content": {
     "dir": "web"

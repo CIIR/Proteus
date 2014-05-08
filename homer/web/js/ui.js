@@ -18,23 +18,19 @@ var searchButtons = $("#search-buttons");
 // UI object/namespace
 var UI = {};
 
-// a list of defined buttons
-UI.buttons = [
-  {display: "Default", kind: "default"},
-  {display: "Pages", kind: "ia-pages"},
-  {display: "Articles", kind: "article"},
-  {display: "Books", kind: "ia-books"},
-  {display: "Metadata", kind: "ia-metadata"}
-];
-
 UI.generateButtons = function() {
   API.getKinds({}, function(data) {
     var availableKinds = _(data.kinds);
-    _(UI.buttons).forEach(function(buttonDesc) {
-      if(!availableKinds.contains(buttonDesc.kind)) return;
-      var button = $('<input type="button" value="' + buttonDesc.display + '" />');
+    var buttonDescriptions = _(UI.buttons);
+
+    _.forIn(data.kinds, function(spec, kind) {
+      spec.kind = kind; // so the onClick knows what kind it was
+      if(!spec.button) {
+        UI.showError("You need to specify a \"button\" display attribute for kind \""+kind+"\"");
+      }
+      var button = $('<input type="button" value="' + spec.button + '" />');
       button.click(function() {
-        UI.onClickSearchButton(buttonDesc);
+        UI.onClickSearchButton(spec);
       });
       searchButtons.append(button)
     });
