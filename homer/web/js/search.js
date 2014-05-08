@@ -25,7 +25,7 @@ var doSearchRequest = function(args) {
       tags: true,
       user: userName,
       token: userToken
-    }
+    };
     args = _.merge(args, tagArgs);
   }
 
@@ -48,8 +48,6 @@ var doSearchRequest = function(args) {
 
   var onSuccess = function(data) {
     UI.clearError();
-    var action = data.request.action;
-    console.log(data);
 
     Model.query = data.request.q;
     var rank = Model.results.length + 1;
@@ -71,5 +69,5 @@ var doSearchRequest = function(args) {
   });
 
   return actualArgs;
-}
+};
 

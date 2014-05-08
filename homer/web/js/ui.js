@@ -117,7 +117,8 @@ UI.appendResults = function(queryTerms, results) {
     moreButton.show();
 
   });
-}
+};
+
 
 /**
  * A set of functions for reacting to events in other, more general code.
@@ -163,7 +164,7 @@ UI.renderTags = function(result) {
     html += '<ul id="tags_' + result.name + '">  ';
     if (typeof result.tags[username] !== 'undefined') {
       tags = result.tags[username].toString().split(',');
-      for (tag in tags) {
+      for (var tag in tags) {
         html += '  <li> ' + tags[tag] + ' </li> ';
       }
     }
@@ -172,7 +173,7 @@ UI.renderTags = function(result) {
 
   var tmp_html = "";
   var read_only_tags = false;
-  for (user in result.tags) {
+  for (var user in result.tags) {
 
     tags = result.tags[user].toString().split(',');
     // skip current user
@@ -189,4 +190,4 @@ UI.renderTags = function(result) {
   }
   html += '</div>';
   return html;
-}
+};

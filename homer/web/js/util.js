@@ -15,8 +15,7 @@ var isBlank = function(str) {
 };
 
 var pushURLParams = function(params) {
-  var urlParams = "?"+_.pairs(params)
-  .filter(function(kv) {
+  var urlParams = "?"+_.pairs(params).filter(function(kv) {
     var key = kv[0];
     return !(key == "user" || key == "token");
   }).map(function(kv) {

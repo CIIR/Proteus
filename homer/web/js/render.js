@@ -43,4 +43,4 @@ resultRenderers["default"] = function(queryTerms, result) {
 
 Render.makeViewLink = function(id, kind, label) {
   return '<a href="/?action=view&id='+id+'&kind='+kind+'">'+label+'</a>';
-}
+};
