@@ -43,7 +43,7 @@ UI.setReadyHandler(function() {
 });
 
 /**
- * This main "action-request" delegates to other things. Notice how search requests disappear into search.js early.
+ * This main "action-request" delegates to other things. Notice how search requests disappear into actions.js early.
  */
 var doActionRequest = function(args) {
   var action = args.action;
@@ -51,12 +51,15 @@ var doActionRequest = function(args) {
     doSearchRequest(args);
     return;
   }
+  if(action == "view") {
+    doViewRequest(args);
+    return;
+  }
   if(!action) {
     UI.showError("action not defined when calling doActionRequest in JS");
     return;
   }
 
-  console.log(request);
   var onSuccess = function(data) {
     UI.clearError();
     var action = data.request.action;

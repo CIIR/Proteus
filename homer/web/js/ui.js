@@ -7,6 +7,7 @@
 
 var errorDiv = $("#error");
 var resultsDiv = $("#results");
+var viewResourceDiv = $("#view-resource");
 var progressDiv = $("#progress");
 var queryBox = $("#ui-search");
 var loginInfo = $("#ui-login-info");
@@ -39,6 +40,7 @@ UI.generateButtons = function() {
 UI.clear = function() {
   UI.clearResults();
   UI.clearError();
+  viewResourceDiv.html('');
 };
 
 UI.clearResults = function() {

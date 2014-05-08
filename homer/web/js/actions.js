@@ -46,22 +46,6 @@ var doSearchRequest = function(args) {
   Model.request = actualArgs;
   console.log(request);
 
-  var onSuccess = function(data) {
-    UI.clearError();
-
-    Model.query = data.request.q;
-    var rank = Model.results.length + 1;
-    var newResults = _(data.results).map(function(result) {
-      result.kind = data.request.kind;
-      result.rank = rank++;
-
-      return result;
-    }).value();
-
-    Model.results = _(Model.results).concat(data.results).value();
-    UI.appendResults(data.queryTerms, newResults);
-  };
-
   UI.showProgress("Search Request sent to server!");
   API.action(actualArgs, onSuccess, function(req, status, err) {
     UI.showError("ERROR: ``" + err + "``");
@@ -69,5 +53,41 @@ var doSearchRequest = function(args) {
   });
 
   return actualArgs;
+};
+
+/**
+ * This gets called with the response from JSONSearch
+ */
+var onSearchSuccess = function(data) {
+  UI.clearError();
+
+  Model.query = data.request.q;
+  var rank = Model.results.length + 1;
+  var newResults = _(data.results).map(function(result) {
+    result.kind = data.request.kind;
+    result.rank = rank++;
+
+    return result;
+  }).value();
+
+  Model.results = _(Model.results).concat(data.results).value();
+  UI.appendResults(data.queryTerms, newResults);
+};
+
+var doViewRequest = function(args) {
+  UI.showProgress("View request sent to server!");
+  API.action(args, onViewSuccess, function(req, status, err) {
+    UI.showError("ERROR: ``" + err + "``");
+    throw err;
+  });
+};
+
+/** this gets called with the response from ViewResource */
+var onViewSuccess = function(args) {
+  UI.clearError();
+  resultsDiv.hide();
+  var html = '<div>' + args.text + '</div>';
+  viewResourceDiv.html(html);
+  viewResourceDiv.show();
 };
 

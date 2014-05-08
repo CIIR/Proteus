@@ -2,6 +2,7 @@
   "port":1234,
   "defaultKind":"ia-pages",
   "kinds": {
+    "default": {"index": "examples/tiny.pages"},
     "ia-books": {"index": "examples/tiny.books"},
     "ia-pages": {"index": "examples/tiny.pages"},
     "ia-metadata": {"index": "examples/tiny.metadata"}
