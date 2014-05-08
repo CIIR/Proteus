@@ -31,6 +31,7 @@ var method = function(method, url) {
 };
 
 API.action = method("POST", "/api/action");
+API.getKinds = method("GET", "/api/kinds");
 API.getTags = method("GET", "/api/tags");
 API.createTags = method("POST", "/api/tags/create");
 API.deleteTags = method("POST", "/api/tags/delete");

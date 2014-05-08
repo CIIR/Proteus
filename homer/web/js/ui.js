@@ -24,16 +24,20 @@ UI.buttons = [
   {display: "Pages", kind: "ia-pages"},
   {display: "Articles", kind: "article"},
   {display: "Books", kind: "ia-books"},
-  {display: "Metadata", kind: "ia-meta"}
+  {display: "Metadata", kind: "ia-metadata"}
 ];
 
 UI.generateButtons = function() {
-  _(UI.buttons).forEach(function(buttonDesc) {
-    var button = $('<input type="button" value="' + buttonDesc.display + '" />');
-    button.click(function() {
-      UI.onClickSearchButton(buttonDesc);
+  API.getKinds({}, function(data) {
+    var availableKinds = _(data.kinds);
+    _(UI.buttons).forEach(function(buttonDesc) {
+      if(!availableKinds.contains(buttonDesc.kind)) return;
+      var button = $('<input type="button" value="' + buttonDesc.display + '" />');
+      button.click(function() {
+        UI.onClickSearchButton(buttonDesc);
+      });
+      searchButtons.append(button)
     });
-    searchButtons.append(button)
   });
 };
 
