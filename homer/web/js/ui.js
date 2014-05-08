@@ -44,7 +44,9 @@ UI.clear = function() {
 };
 
 UI.clearResults = function() {
+  viewResourceDiv.hide();
   resultsDiv.html('');
+  resultsDiv.show();
   moreButton.hide();
 };
 

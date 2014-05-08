@@ -10,12 +10,12 @@ var doSearchRequest = function(args) {
     metadata: true
   };
 
-  // we inherit args from the URL - which could contain
-  // the user name, so we want to strip out any data we're
-  // filling in here.
-  delete args.tags;
-  delete args.user;
-  delete args.token;
+  // if we didn't ask for more
+  if (!args.skip || args.skip === 0) {
+    Model.clearResults();
+    UI.clearResults();
+    updateURL(args); // modify URL if possible
+  }
 
   var userName = getCookie("username");
 
@@ -36,18 +36,11 @@ var doSearchRequest = function(args) {
     return;
   }
 
-  // if we didn't ask for more
-  if (actualArgs.skip === 0) {
-    Model.clearResults();
-    UI.clearResults();
-    pushURLParams(args); // modify URL if possible
-  }
-
   Model.request = actualArgs;
   console.log(request);
 
   UI.showProgress("Search Request sent to server!");
-  API.action(actualArgs, onSuccess, function(req, status, err) {
+  API.action(actualArgs, onSearchSuccess, function(req, status, err) {
     UI.showError("ERROR: ``" + err + "``");
     throw err;
   });
@@ -85,8 +78,9 @@ var doViewRequest = function(args) {
 /** this gets called with the response from ViewResource */
 var onViewSuccess = function(args) {
   UI.clearError();
+  moreButton.hide();
   resultsDiv.hide();
-  var html = '<div>' + args.text + '</div>';
+  var html = '<div>' + _.escape(args.text) + '</div>';
   viewResourceDiv.html(html);
   viewResourceDiv.show();
 };

@@ -23,13 +23,19 @@ Model.clearResults = function() {
   Model.query = "";
 };
 
+var privateURLParams = _(["user", "token"]);
+
+var updateURL = function(request) {
+  pushURLParams(_.omit(request, privateURLParams));
+};
+
 /**
  * document.ready handler onload
  *
  * reads the ?q=foo parameters and sends of a JSON API request
  */
 UI.setReadyHandler(function() {
-  var params = getURLParams();
+  var params = _.omit(getURLParams(), privateURLParams);
   console.log(params);
 
   UI.setUserName(getCookie("username"));
@@ -48,39 +54,16 @@ UI.setReadyHandler(function() {
 var doActionRequest = function(args) {
   var action = args.action;
   if(action == "search") {
-    doSearchRequest(args);
-    return;
+    return doSearchRequest(args);
   }
   if(action == "view") {
-    doViewRequest(args);
-    return;
+    return doViewRequest(args);
   }
   if(!action) {
     UI.showError("action not defined when calling doActionRequest in JS");
     return;
   }
-
-  var onSuccess = function(data) {
-    UI.clearError();
-    var action = data.request.action;
-    console.log(data);
-
-    if(action === "view") {
-      console.log(data);
-      UI.showError("TODO: handle 'view' action.")
-    } else {
-      console.log(data);
-      UI.showError("Error: UI doesn't know how to handle '"+action+"' action.")
-    }
-  };
-
-  UI.showProgress("Request sent to server!");
-  API.action(args, onSuccess, function(req, status, err) {
-    UI.showError("ERROR: ``" + err + "``");
-    throw err;
-  });
-
-  return args;
+  UI.showError("Unknown action `"+action+"'");
 };
 
 /* handlers for search button types */
