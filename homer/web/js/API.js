@@ -23,8 +23,10 @@ var method = function(method, url) {
   return function(options, doneCallback, errorCallback) {
     ajaxOpts.data = dataFn(options);
     $.ajax(ajaxOpts).done(function(data) {
+      if(!doneCallback) {
+        return;
+      }
       data.request = options;
-      console.log(data);
       doneCallback(data);
     }).error(errorCallback);
   };
