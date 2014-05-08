@@ -43,80 +43,26 @@ UI.setReadyHandler(function() {
 });
 
 /**
- * This search functions to get initial and more results from the server through the API.search call. It hands the results it receives on success to UI.appendResults
- * @see UI.appendResults
- * @param args
- * @returns {Object|*}
+ * This main "action-request" delegates to other things. Notice how search requests disappear into search.js early.
  */
 var doActionRequest = function(args) {
   var action = args.action;
+  if(action == "search") {
+    doSearchRequest(args);
+    return;
+  }
   if(!action) {
     UI.showError("action not defined when calling doActionRequest in JS");
     return;
   }
-  var defaultArgs = {
-    n: 10,
-    skip: 0,
-    snippets: true,
-    metadata: true
-  };
 
-  // we inherit args from the URL - which could contain
-  // the user name, so we want to strip out any data we're
-  // filling in here.
-  delete args.tags;
-  delete args.user;
-  delete args.token;
-
-  var userName = getCookie("username");
-
-  if (userName != "") {
-    var userToken = getCookie("token");
-    var tagArgs = {
-      tags: true,
-      user: userName,
-      token: userToken
-    }
-    args = _.merge(args, tagArgs);
-  }
-
-  var actualArgs = _.merge(defaultArgs, args);
-
-  if(action == "search") {
-    if (!actualArgs.q || isBlank(actualArgs.q)) {
-      UI.showProgress("Query is blank!");
-      return;
-    }
-  }
-
-  // if we didn't ask for more
-  if (actualArgs.skip === 0) {
-    Model.clearResults();
-    UI.clearResults();
-    pushURLParams(args); // modify URL if possible
-  }
-
-  Model.request = actualArgs;
   console.log(request);
-
   var onSuccess = function(data) {
     UI.clearError();
     var action = data.request.action;
     console.log(data);
 
-    if(action === "search") {
-      Model.query = data.request.q;
-      var rank = Model.results.length + 1;
-      var newResults = _(data.results).map(function(result) {
-        result.kind = data.request.kind;
-        result.rank = rank++;
-
-        return result;
-      }).value();
-
-      Model.results = _(Model.results).concat(data.results).value();
-      UI.appendResults(data.queryTerms, newResults);
-    } else if(action === "view") {
+    if(action === "view") {
       console.log(data);
       UI.showError("TODO: handle 'view' action.")
     } else {
@@ -125,13 +71,13 @@ var doActionRequest = function(args) {
     }
   };
 
-  UI.showProgress("Search Request sent to server!");
-  API.action(actualArgs, onSuccess, function(req, status, err) {
+  UI.showProgress("Request sent to server!");
+  API.action(args, onSuccess, function(req, status, err) {
     UI.showError("ERROR: ``" + err + "``");
     throw err;
   });
 
-  return actualArgs;
+  return args;
 };
 
 /* handlers for search button types */
