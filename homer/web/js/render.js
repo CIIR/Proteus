@@ -20,19 +20,25 @@ resultRenderers["default"] = function(queryTerms, result) {
   html += '<td class="rank">' + result.rank + '</td>';
   html += '<td class="name">' + Render.makeViewLink(result.name, result.kind, result.name) + '</a></td>';
   html += '<td class="score">' + result.score + '</td>';
+  html += '</tr>';
   if (result.snippet) {
-    html += '</tr><tr>';
+    html += '<tr>';
     html += '<td>&nbsp;</td>';
     html += '<td class="snippet" colspan=2> ...' +
             highlightText(queryTerms, result.snippet, '<span class="hili">', '</span>') +
             '... </td>';
+    html += '</tr>';
   }
 
   if (result.meta) {
-//html += '</tr><tr>'; // open new row
-//html += '<td class="meta" colspan="2">TODO: default meta</td>'; // single column
+    _.forIn(result.meta, function(value, key) {
+      html += '<tr>';
+      html += '<td class="metakey">'+key+'</td>';
+      html += '<td class="metavalue">'+value+'</td>';
+      html += '</tr>';
+    });
   }
-  html += '</tr></table>';
+  html += '</table>';
 
   if (result.tags) {
     html += UI.renderTags(result);

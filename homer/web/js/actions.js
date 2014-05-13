@@ -80,7 +80,17 @@ var onViewSuccess = function(args) {
   UI.clearError();
   moreButton.hide();
   resultsDiv.hide();
-  var html = '<div>' + _.escape(args.text) + '</div>';
+  var html = '';
+  html += '<table>'
+  _(args.metadata).forIn(function(val, key) {
+    html += '<tr>';
+    html += '<td>'+key+'</td>';
+    html += '<td>'+val+'</td>'
+    html += '</tr>';
+  })
+  html += '</table>'
+  console.log(args.metadata);
+  html += '<div>' + _.escape(args.text) + '</div>';
   viewResourceDiv.html(html);
   viewResourceDiv.show();
 };
