@@ -89,6 +89,8 @@ public class MBTEIPageParser extends DocumentStreamParser {
       }
     }
 
+    if(empty) return null;
+
     Document page = new Document();
     String archiveId = MBTEI.getArchiveIdentifier(split, metadata);
     page.text = buffer.toString();
