@@ -37,7 +37,7 @@ var doSearchRequest = function(args) {
   }
 
   Model.request = actualArgs;
-  console.log(request);
+  console.log(Model.request);
 
   UI.showProgress("Search Request sent to server!");
   API.action(actualArgs, onSearchSuccess, function(req, status, err) {

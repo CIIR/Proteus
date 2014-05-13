@@ -15,8 +15,7 @@ var isBlank = function(str) {
 };
 
 var pushURLParams = function(params) {
-  var urlParams = "?"+_.pairs(params).filter(function(kv) {
-  }).map(function(kv) {
+  var urlParams = "?"+_.pairs(params).map(function(kv) {
     return _(kv).map(encodeURIComponent).join('=');
   }).join('&');
 
