@@ -77,7 +77,7 @@ UI.setQuery = function(q) {
  * @see render.js
  */
 UI.makeResult = function(queryTerms, result) {
-  var renderer = getResultRenderer(result.kind);
+  var renderer = getResultRenderer(result.viewKind);
   return '<div class="result">' + renderer(queryTerms, result) + '</div>';
 };
 

@@ -54,16 +54,27 @@ var doSearchRequest = function(args) {
 var onSearchSuccess = function(data) {
   UI.clearError();
 
+  console.log(data);
+
+  // mark up results with rank and kind
   Model.query = data.request.q;
   var rank = Model.results.length + 1;
   var newResults = _(data.results).map(function(result) {
+    result.viewKind = data.request.viewKind || data.request.kind;
     result.kind = data.request.kind;
     result.rank = rank++;
 
     return result;
   }).value();
 
+  // update the model
   Model.results = _(Model.results).concat(data.results).value();
+
+  // don't show results if empty
+  if(_.isEmpty(data.results)) {
+    UI.showProgress("No results found for '"+data.request.q+"'");
+    return;
+  }
   UI.appendResults(data.queryTerms, newResults);
 };
 
