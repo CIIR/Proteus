@@ -27,9 +27,9 @@ public class MBTEIPageParserTest {
       "<identifier>foo</identifier>"+
       "<text>"+
       "<w form=\"first\">firstWord</w>"+
-      "<pb n=\"1\" />"+
+      "<pb n=\"0\" />"+
       "<w form=\"second\">huh</w>"+
-      "<pb n=\"2\" />"+
+      "<pb n=\"1\" />"+
       "</text>"+
       "</TEI>";
 
@@ -43,12 +43,12 @@ public class MBTEIPageParserTest {
 
     Document page1 = parser.nextDocument();
     assertNotNull(page1);
-    assertEquals("1", page1.metadata.get("pageNumber"));
+    assertEquals("0", page1.metadata.get("pageNumber"));
     assertEquals("first", page1.text.trim());
 
     Document page2 = parser.nextDocument();
     assertNotNull(page2);
-    assertEquals("2", page2.metadata.get("pageNumber"));
+    assertEquals("1", page2.metadata.get("pageNumber"));
     assertEquals("second", page2.text.trim());
 
     assertNull(parser.nextDocument());
