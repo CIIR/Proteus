@@ -27,6 +27,7 @@ public class MBTEIPageParser extends DocumentStreamParser {
   private final XMLStreamReader xml;
   private final DocumentSplit split;
   private Map<String,String> metadata;
+  public int pageIndex = 0;
 
   public MBTEIPageParser(DocumentSplit split, Parameters p) throws IOException, XMLStreamException {
     super(split, p);
@@ -66,7 +67,6 @@ public class MBTEIPageParser extends DocumentStreamParser {
 
     // local parser state
     StringBuilder buffer = new StringBuilder();
-    String pageNumber = null;
     boolean empty = true;
 
     while(xml.hasNext()) {
@@ -83,7 +83,6 @@ public class MBTEIPageParser extends DocumentStreamParser {
           }
         } else if("pb".equals(tag)) {
           // echo a document when we find the <pb /> tag
-          pageNumber = xml.getAttributeValue(null, "n");
           if(!empty) break;
         }
       }
@@ -91,6 +90,7 @@ public class MBTEIPageParser extends DocumentStreamParser {
 
     if(empty) return null;
 
+    final String pageNumber = Integer.toString(pageIndex++);
     Document page = new Document();
     String archiveId = MBTEI.getArchiveIdentifier(split, metadata);
     page.text = buffer.toString();
