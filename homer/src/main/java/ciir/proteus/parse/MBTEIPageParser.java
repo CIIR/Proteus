@@ -12,6 +12,7 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -50,14 +51,15 @@ public class MBTEIPageParser extends DocumentStreamParser {
   }
 
   @Override
-  public Document nextDocument() throws IOException {
+  public Document nextDocument() {
     try {
       if(metadata == null) {
         metadata = MBTEI.parseMetadata(xml);
       }
       return nextPage();
     } catch (XMLStreamException e) {
-      throw new IOException(e);
+      log.log(Level.WARNING, "XML Exception", e);
+      return null;
     }
   }
 
