@@ -9,7 +9,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
@@ -24,20 +23,24 @@ public class MBTEIPageParser extends DocumentStreamParser {
   static {
     xmlFactory.setProperty(XMLInputFactory.IS_COALESCING, true);
   }
-  private final BufferedInputStream is;
-  private final XMLStreamReader xml;
+  private XMLStreamReader xml;
   private final DocumentSplit split;
   private Map<String,String> metadata;
   public int pageIndex = 0;
 
-  public MBTEIPageParser(DocumentSplit split, Parameters p) throws IOException, XMLStreamException {
+  public MBTEIPageParser(DocumentSplit split, Parameters p) throws IOException {
     super(split, p);
 
-
     this.split = split;
-    this.is = getBufferedInputStream(split);
-    this.xml = xmlFactory.createXMLStreamReader(is);
     metadata = null;
+    this.xml = null;
+    try {
+      this.xml = xmlFactory.createXMLStreamReader(getBufferedInputStream(split));
+    } catch (XMLStreamException e) {
+      log.log(Level.WARNING, "Failed to create page parser for split="+split.fileName+" ",e);
+    } catch (IOException e) {
+      log.log(Level.WARNING, "Failed to create page parser for split="+split.fileName+" ",e);
+    }
   }
 
   @Override
@@ -47,11 +50,11 @@ public class MBTEIPageParser extends DocumentStreamParser {
     } catch (XMLStreamException xml) {
       throw new IOException(xml);
     }
-    is.close();
   }
 
   @Override
   public Document nextDocument() {
+    if(xml == null) return null;
     try {
       if(metadata == null) {
         metadata = MBTEI.parseMetadata(xml);
