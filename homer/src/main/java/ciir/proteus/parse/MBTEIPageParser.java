@@ -45,6 +45,7 @@ public class MBTEIPageParser extends DocumentStreamParser {
 
   @Override
   public void close() throws IOException {
+    if(xml == null) return;
     try {
       xml.close();
     } catch (XMLStreamException xml) {

@@ -15,11 +15,19 @@ public class MBTEIPageParserTest {
     MBTEIPageParser pages = new MBTEIPageParser(input, new Parameters());
     Assert.assertNotNull(pages);
     Assert.assertNull(pages.nextDocument());
+    pages.close();
 
     input.fileName = ".gitignore";
     pages = new MBTEIPageParser(input, new Parameters());
     Assert.assertNotNull(pages);
     Assert.assertNull(pages.nextDocument());
+    pages.close();
+
+    input.fileName = "src/test/resources/nearly-empty.mbtei.gz";
+    pages = new MBTEIPageParser(input, new Parameters());
+    Assert.assertNotNull(pages);
+    Assert.assertNull(pages.nextDocument());
+    pages.close();
   }
 
 }
