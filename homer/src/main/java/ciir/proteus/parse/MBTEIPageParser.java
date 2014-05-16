@@ -18,8 +18,10 @@ import java.util.logging.Logger;
  * @author jfoley.
  */
 public class MBTEIPageParser extends DocumentStreamParser {
+
   public static final Logger log = Logger.getLogger(MBTEIPageParser.class.getName());
   public static final XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
+
   static {
     xmlFactory.setProperty(XMLInputFactory.IS_COALESCING, true);
   }
@@ -57,7 +59,7 @@ public class MBTEIPageParser extends DocumentStreamParser {
   public Document nextDocument() {
     if(xml == null) return null;
     try {
-      if(metadata == null) {
+      if (metadata == null) {
         metadata = MBTEI.parseMetadata(xml);
       }
       return nextPage();
@@ -68,26 +70,27 @@ public class MBTEIPageParser extends DocumentStreamParser {
   }
 
   private Document nextPage() throws XMLStreamException {
-    if(!xml.hasNext())
+    if (!xml.hasNext()) {
       return null;
+    }
 
     // local parser state
     StringBuilder buffer = new StringBuilder();
     boolean empty = true;
 
-    while(xml.hasNext()) {
+    while (xml.hasNext()) {
       int event = xml.next();
 
       // copy the "form" attribute out of word tags
-      if(event == XMLStreamConstants.START_ELEMENT) {
+      if (event == XMLStreamConstants.START_ELEMENT) {
         String tag = xml.getLocalName();
-        if("w".equals(tag)) {
+        if ("w".equals(tag)) {
           String formValue = MBTEI.scrub(xml.getAttributeValue(null, "form"));
           if (!formValue.isEmpty()) {
             buffer.append(formValue).append(' ');
             empty = false;
           }
-        } else if("pb".equals(tag)) {
+        } else if ("pb".equals(tag)) {
           // echo a document when we find the <pb /> tag
           if(!empty) break;
         }
@@ -100,7 +103,7 @@ public class MBTEIPageParser extends DocumentStreamParser {
     Document page = new Document();
     String archiveId = MBTEI.getArchiveIdentifier(split, metadata);
     page.text = buffer.toString();
-    page.name = archiveId+"_"+pageNumber;
+    page.name = archiveId + "_" + pageNumber;
     page.metadata = metadata;
     page.metadata.put("pageNumber", pageNumber);
     return page;

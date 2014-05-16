@@ -11,7 +11,7 @@ var method = function(method, url) {
     processData: false
   };
   var dataFn = JSON.stringify;
-  if(method == "GET") {
+  if (method == "GET") {
     dataFn = _.identity;
     ajaxOpts = {
       type: method,
@@ -21,6 +21,7 @@ var method = function(method, url) {
 
   // -- this is the real signature of the API calls
   return function(options, doneCallback, errorCallback) {
+
     ajaxOpts.data = dataFn(options);
     $.ajax(ajaxOpts).done(function(data) {
       if(!doneCallback) {
@@ -40,4 +41,4 @@ API.deleteTags = method("POST", "/api/tags/delete");
 API.login = method("POST", "/api/login");
 API.logout = method("POST", "/api/logout");
 API.register = method("POST", "/api/register");
-
+API.getAllTagsByUser = method("POST", "/api/alltags");

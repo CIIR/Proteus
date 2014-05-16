@@ -94,6 +94,8 @@ UI.appendResults = function(queryTerms, results) {
     var tagName = "#tags_" + result.name;
 
     $(tagName).tagit({
+      uniqueID: result.name,
+      allowSpaces: true,
       afterTagRemoved: function(event, ui) {
 
         deleteTag(ui.tagLabel, result.name);
@@ -102,7 +104,7 @@ UI.appendResults = function(queryTerms, results) {
       },
       beforeTagAdded: function(event, ui) {
         if (!ui.duringInitialization) {
-          var res = confirm("Are you sure you want to add the tag " + ui.tagLabel + "?");
+          var res = confirm("Are you sure you want to add the tag \"" + ui.tagLabel + "\"?");
           if (res == true) {
             addTag(ui.tagLabel, result.name);
           }
@@ -172,7 +174,19 @@ UI.renderTags = function(result) {
         html += '  <li> ' + tags[tag] + ' </li> ';
       }
     }
-    html += '</ul>'
+
+    html += '</ul>';
+    html += ' <div id="dialog-form-' + result.name + '" class="create-label-form" >  ' +
+            '    <label for="type">Type:</label> ' +
+            '    <input type="text" name="type" id="type" class="text ui-widget-content ui-corner-all" value="free-form">' +
+            '    <label for="value">Value:</label> ' +
+            '    <input type="text" name="value" id="value" value="" class="text ui-widget-content ui-corner-all"> ' +
+            '    <input type="radio" name="scope" value="private">Private&nbsp; ' +
+            '    <input type="radio" name="scope" value="public" checked="checked" >Public&nbsp; ' +
+            '    <button id="create-tag" type="create-tag" value="create-tag">Create Tag</button> ' +
+            '    <button id="cancel-tag" type="cancel" value="cancel">Cancel</button> ' +
+            '   </div>';
+
   } // end if someone is logged in
 
   var tmp_html = "";

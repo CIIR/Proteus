@@ -38,7 +38,7 @@ public class H2Database implements UserDatabase {
       initDB();
 
       // prepare the SQL just once
-      getAllTagsSQL = conn.prepareStatement("SELECT user, tag FROM tags WHERE resource=? GROUP BY user, tag ORDER BY user, tag");
+      getAllTagsSQL = conn.prepareStatement("SELECT user, tag FROM tags WHERE resource LIKE ? GROUP BY user, tag ORDER BY user, tag");
 
     } catch (ClassNotFoundException e) {
       throw new IllegalArgumentException(e);
@@ -303,7 +303,7 @@ public class H2Database implements UserDatabase {
     checkSession(creds);
 
     try {
-      PreparedStatement stmt = conn.prepareStatement("delete from tags where user=LOWER(?) and resource=? and tag=LOWER(?)");
+      PreparedStatement stmt = conn.prepareStatement("delete from tags where user=LOWER(?) and resource=? and tag=(?)");
       stmt.setString(1, creds.user);
       stmt.setString(2, resource);
       stmt.setString(3, tag);
@@ -322,7 +322,7 @@ public class H2Database implements UserDatabase {
     checkSession(creds);
 
     try {
-      PreparedStatement stmt = conn.prepareStatement("insert into tags (user,resource,tag) values (LOWER(?),?,LOWER(?))");
+      PreparedStatement stmt = conn.prepareStatement("insert into tags (user,resource,tag) values (LOWER(?),?, (?))");
       stmt.setString(1, creds.user);
       stmt.setString(2, resource);
       stmt.setString(3, tag);
