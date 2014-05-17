@@ -135,7 +135,7 @@
   (let [[pref ptag body] (-> para (s/replace #"</p>.*$" "") (partition-str #"<p(?: [^>]*)?>"))]
     (if (empty? body) (str para (when (re-find #"<p(?: [^>]*)?>$" para) "</p>\n"))
 	(let [wsegs (s/split body #"</w>")
-	      wspans (map #(re-find #"^((?:.|\n)*)<w form=\"([^\"]+)\" coords=\"([^\"]+)\"((?:.|\n)+)$" %)
+              wspans (map #(re-find #"^((?:.|\n)*)<w form=\"([^\"]+)\" coords=\"([^\"]+)\"([^>]*)>((?:.|\n)*)$" %)
 			  wsegs)
 	      words (map #(nth % 2) wspans)
 	      ann (Annotation. (s/join " " words))]
@@ -150,9 +150,9 @@
 				      ;; Account for untokenizable characters (other than space)
 				      (count (s/trim (.before (nth % 1))))))))
 	   (map (fn [x] (map #(.word (nth % 0)) x)))
-	   (map (fn [o n] (apply str (nth o 1) "<w form=\"" (s/escape (first n) escapes) "\""
-				 " coords=\"" (nth o 3) "\"" (nth o 4) "</w>"
-				 (map-indexed #(str "<w form=\"" (s/escape %2 escapes) "\""
+           (map (fn [o n] (apply str (nth o 1) "<w form=\"" (s/escape (first n) escapes) "\""
+                                 " coords=\"" (nth o 3) "\"" (nth o 4) ">" (nth o 5) "</w>"
+                                 (map-indexed #(str "<w form=\"" (s/escape %2 escapes) "\""
 						    " coords=\"" (nth o 3) "+" (inc %1) "\"></w>")
 					      (rest n))))
 		wspans)
