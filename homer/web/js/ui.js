@@ -25,8 +25,8 @@ UI.generateButtons = function() {
 
     _.forIn(data.kinds, function(spec, kind) {
       spec.kind = kind; // so the onClick knows what kind it was
-      if(!spec.button) {
-        UI.showError("You need to specify a \"button\" display attribute for kind \""+kind+"\"");
+      if (!spec.button) {
+        UI.showError("You need to specify a \"button\" display attribute for kind \"" + kind + "\"");
       }
       var button = $('<input type="button" value="' + spec.button + '" />');
       button.click(function() {
@@ -89,33 +89,48 @@ UI.makeResult = function(queryTerms, result) {
 UI.appendResults = function(queryTerms, results) {
   UI.showProgress("Ajax response received!");
 
+  console.debug("i'm debugging!!!");
   _(results).forEach(function(result) {
+    console.debug("result name: " + result.name);
     resultsDiv.append(UI.makeResult(queryTerms, result));
+
+
     var tagName = "#tags_" + result.name;
-
+    console.debug("Tag name: " + tagName);
     $(tagName).tagit({
-      uniqueID: result.name,
+      availableTags: ["aaaa", "abbbb", "abc", "xyz", "ruby", "python", "c"],
+      autocomplete: {delay: 0, minLength: 1},
       allowSpaces: true,
-      afterTagRemoved: function(event, ui) {
+      placeholderText: "Add a Label"
 
-        deleteTag(ui.tagLabel, result.name);
-        return true;
+              // uniqueID: result.name
+    }
+    );
+    console.debug("after ");
+//            {
+//      uniqueID: result.name,
+//      allowSpaces: true,
+//      afterTagRemoved: function(event, ui) {
+//
+//        deleteTag(ui.tagLabel, result.name);
+//        return true;
+//
+//      },
+//      beforeTagAdded: function(event, ui) {
+//        if (!ui.duringInitialization) {
+//          var res = confirm("Are you sure you want to add the tag \"" + ui.tagLabel + "\"?");
+//          if (res == true) {
+//            addTag(ui.tagLabel, result.name);
+//          }
+//          return res;
+//
+//        } else {
+//          return true;
+//        }
+//      }
+//    }
 
-      },
-      beforeTagAdded: function(event, ui) {
-        if (!ui.duringInitialization) {
-          var res = confirm("Are you sure you want to add the tag \"" + ui.tagLabel + "\"?");
-          if (res == true) {
-            addTag(ui.tagLabel, result.name);
-          }
-          return res;
-
-        } else {
-          return true;
-        }
-      }
-    });
-
+    console.debug("asdfasdfsadfsadfsadfsad ");
     $(".read-only-tags").tagit({
       readOnly: true
     });
@@ -162,6 +177,7 @@ UI.clearUserName = function() {
 };
 
 UI.renderTags = function(result) {
+  getAllTagsByUser();
   var html = '<div>';
   // we ALWAYS want a div if you're logged in so you can add tags
   var username = getCookie("username");
@@ -169,23 +185,25 @@ UI.renderTags = function(result) {
 
     html += '<ul id="tags_' + result.name + '">  ';
     if (typeof result.tags[username] !== 'undefined') {
+      //console.log(result.tags[username].toString());
       tags = result.tags[username].toString().split(',');
+      //console.log(tags);
       for (var tag in tags) {
         html += '  <li> ' + tags[tag] + ' </li> ';
       }
     }
 
     html += '</ul>';
-    html += ' <div id="dialog-form-' + result.name + '" class="create-label-form" >  ' +
-            '    <label for="type">Type:</label> ' +
-            '    <input type="text" name="type" id="type" class="text ui-widget-content ui-corner-all" value="free-form">' +
+    html += '  <div id="dialog-form-' + result.name + '" class="create-label-form" >  ' +
+            '  <label for="type-combobox">Type: </label>   ' +
+            '    <span><input id="type-combobox" name="dept" value="aa">   </span>' +
             '    <label for="value">Value:</label> ' +
-            '    <input type="text" name="value" id="value" value="" class="text ui-widget-content ui-corner-all"> ' +
+            '    <span> <input type="text" name="value" id="value" value="" class="text  ui-widget-content ui-corner-all"></span> ' +
             '    <input type="radio" name="scope" value="private">Private&nbsp; ' +
             '    <input type="radio" name="scope" value="public" checked="checked" >Public&nbsp; ' +
             '    <button id="create-tag" type="create-tag" value="create-tag">Create Tag</button> ' +
             '    <button id="cancel-tag" type="cancel" value="cancel">Cancel</button> ' +
-            '   </div>';
+            '  </div> ';
 
   } // end if someone is logged in
 

@@ -24,7 +24,7 @@ var method = function(method, url) {
 
     ajaxOpts.data = dataFn(options);
     $.ajax(ajaxOpts).done(function(data) {
-      if(!doneCallback) {
+      if (!doneCallback) {
         return;
       }
       data.request = options;
@@ -42,3 +42,4 @@ API.login = method("POST", "/api/login");
 API.logout = method("POST", "/api/logout");
 API.register = method("POST", "/api/register");
 API.getAllTagsByUser = method("POST", "/api/alltags");
+API.getUniqTagTypes = method("POST", "/api/uniqtagtypes");

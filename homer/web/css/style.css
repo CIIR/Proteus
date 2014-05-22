@@ -116,3 +116,8 @@ img.thumbnail {
   border:2px solid gray;
   margin:0px; 
 }
+
+
+.read-only-li{
+  background-color: red;
+}

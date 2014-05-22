@@ -6,7 +6,7 @@
  * For now, includes talking to the proteus/homer server.
  *
  */
-
+var gUniqType = [];
 // the JSON of the application state
 var Model = {
   // search result data
@@ -40,10 +40,10 @@ UI.setReadyHandler(function() {
 
   UI.setUserName(getCookie("username"));
 
-  if (params.action=="search" && !isBlank(params.q)) {
+  if (params.action == "search" && !isBlank(params.q)) {
     UI.setQuery(params.q);
     doActionRequest(params);
-  } else if(params.action == "view") {
+  } else if (params.action == "view") {
     doActionRequest(params);
   }
 });
@@ -53,23 +53,23 @@ UI.setReadyHandler(function() {
  */
 var doActionRequest = function(args) {
   var action = args.action;
-  if(action == "search") {
+  if (action == "search") {
     return doSearchRequest(args);
   }
-  if(action == "view") {
+  if (action == "view") {
     return doViewRequest(args);
   }
-  if(!action) {
+  if (!action) {
     UI.showError("action not defined when calling doActionRequest in JS");
     return;
   }
-  UI.showError("Unknown action `"+action+"'");
+  UI.showError("Unknown action `" + action + "'");
 };
 
 /* handlers for search button types */
 UI.onClickSearchButton = function(buttonDesc) {
   var kind = buttonDesc.kind;
-  doActionRequest({kind: kind, q: UI.getQuery(), action:"search"});
+  doActionRequest({kind: kind, q: UI.getQuery(), action: "search"});
 };
 
 /* pull the previous request out of the "Model" and send it to the server, but request the next 10 */
@@ -94,7 +94,7 @@ var logIn = function(userName) {
     API.login(args, function(data) {
       document.cookie = "username=" + userName + ";";
       document.cookie = "token=" + data.token + ";";
-      getAllTagsByUser();
+      //  getAllTagsByUser();
       Model.user = userName;
       Model.token = data.token;
     }, function(req, status, err) {
@@ -160,7 +160,7 @@ var deleteTag = function(tagText, resourceID) {
 var getAllTagsByUser = function() {
   var userName = getCookie("username");
   var userToken = getCookie("token");
-
+  var uniqType = [];
 // really want tags per user by resource OR "project"
   var args = {resource: ["%"], user: userName, token: userToken};
   API.getAllTagsByUser(args, function(origresult) {
@@ -190,11 +190,22 @@ var getAllTagsByUser = function() {
     } // end if someone is logged in
     html = "";
     for (user in result) {
+      //??? not the most effiecent code in the world
+      tags = result[user].toString().split(',');
+      for (tag in tags) {
+        //alert(tag);
+        uniqType.push(tags[tag].split(":")[0]);
+      }
 
-      html += "<b>" + user + ":</b>&nbsp;" + result[user].toString() + "&nbsp;";
+      if (user != userName)
+        html += "<b>" + user + ":</b>&nbsp;" + result[user].toString() + "&nbsp;";
 
     }
     $("#other-tags").html(html);
+
+    gUniqType = _.uniq(uniqType);
+    // alert(newUniqType.toString());
+
 
   }, function(req, status, err) {
     UI.showError("ERROR: ``" + err + "``");
