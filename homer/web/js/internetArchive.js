@@ -6,6 +6,14 @@
  *
  */
 
+var bookImage = function(archiveId){
+return "http://www.archive.org/download/" + archiveId + "/page/n0.jpg";
+}
+
+var bookThumbnail = function(archiveId){
+return "http://www.archive.org/download/" +archiveId + "/page/n0.jpg";
+}
+
 var pageImage = function(archiveId, pageNum) {
   return "http://www.archive.org/download/" + archiveId + "/page/n" + pageNum + ".jpg";
 };
@@ -14,22 +22,44 @@ var pageThumbnail = function(archiveId, pageNum) {
   return "http://www.archive.org/download/" + archiveId + "/page/n" + pageNum + "_thumb.jpg";
 };
 
-resultRenderers["ia-pages"] = function(queryTerms, result) {
+ 
+
+console.log("Defining table, renderResult="+renderResult);
+var renderResult = function(queryTerms, result) {
+
   var name = result.meta.title || result.name;
   var identifier = result.name.split('_')[0];
   var snippet = result.snippet;
-  var pageNum = result.name.split('_')[1];
+  var pageNum= result.name.split('_')[1];
   var iaURL = result.meta["identifier-access"];
 
+
+console.log(result);
+
   if (iaURL) {
-    name = '<a href="' + iaURL + '">' + name + '</a>';
+	
+
+    name = '<a href="'+iaURL+'">' + name + '</a>';
   }
   name += ' pp. ' + pageNum;
 
-  var previewImage = '<a href="' + pageImage(identifier, pageNum) + '">' +
+  var previewImage = imgPreviewGenerator;
+
+var imgPreviewGenerator = function( identifier, pageNum)
+{ 
+
+if(result.kind ==="ia-books"){
+
+return '<a href="'+ bookImage(identifier)+'">' +
+ '<img class="thumbnail" src"'+ bookThumbnail(identifier) +'"/>'+ '</a>';
+}
+else {
+
+return '<a href="' + pageImage(identifier, pageNum) + '">' +
     '<img class="thumbnail" src="' + pageThumbnail(identifier, pageNum) + '" />' +
     '</a>';
-
+}
+}
   var html =
         '<div class="result">' +
         '<table>' +
@@ -46,6 +76,9 @@ resultRenderers["ia-pages"] = function(queryTerms, result) {
   html += '</table>';
 
   return html;
+
+resultRenderers["ia-books"] = renderResult;
+resultRenderers["ia-pages"] = renderResult;
 };
 
 
