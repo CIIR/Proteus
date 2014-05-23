@@ -201,7 +201,7 @@ var getAllTagsByUser = function() {
       var type;
       var myUniq = _.uniq(myTypes);
       for (type in myUniq) {
-        UI.appendMyTag(GLOBAL.uniqTypes[type]);
+        UI.appendMyTag(myUniq[type]);
       }
     }
 

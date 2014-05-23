@@ -96,7 +96,6 @@
     _create: function() {
       // for handling static scoping inside callbacks
       var that = this;
-      console.log("ro tag");
       // There are 2 kinds of DOM nodes this widget can be instantiated on:
       //     1. UL, OL, or some element containing either of these.
       //     2. INPUT, in which case 'singleField' is overridden to true,
@@ -274,7 +273,7 @@
       if (this.options.availableTags || this.options.tagSource || this.options.autocomplete.source) {
         var autocompleteOptions = {
           select: function(event, ui) {
-          
+
             // MZ: don't create tag when they select something from auto complete
             //that.createTag(ui.item.value);
             ui.item.value = ui.item.value + ":";
