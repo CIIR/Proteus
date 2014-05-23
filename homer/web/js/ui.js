@@ -119,6 +119,8 @@ UI.appendResults = function(queryTerms, results) {
             res = confirm("Are you sure you want to create the label type \"" + tmp[0] + "\"?");
             // add the new type to our list
             GLOBAL.uniqTypes.push(tmp[0]);
+            UI.appendMyTag(tmp[0]);
+
           }
           if (res == true) {
             addTag(ui.tagLabel, result.name);
@@ -215,4 +217,42 @@ UI.renderTags = function(result) {
   }
   html += '</div>';
   return html;
+};
+
+UI.appendMyTag = function(name) {
+
+  $("#my-tags").append('<button class="ui-widget-content ui-state-default type-button">' + name + '</button>');
+
+  if ($("#toggle-my-tags-img").is(":visible") === false) {
+    $("#toggle-my-tags-img").attr("src", "/images/up_arrows.png");
+    $("#toggle-my-tags-img").show();
+    $("#my-tags").show();
+
+  }
+};
+UI.clearAllMyTags = function( ) {
+
+
+  $("#my-tags").html("");
+
+};
+
+// used when we don't want to dispaly any of the "my tags" features
+UI.hideMyTagsFunctionality = function() {
+  UI.clearAllMyTags();
+  $("#toggle-my-tags-img").hide();
+  $("#my-tags").hide();
+
+};
+
+UI.toggleMyTags = function() {
+  var ele = $("#my-tags");
+  if (ele.is(":visible")) {
+    $("#toggle-my-tags-img").attr("src", "/images/down_arrows.png");
+    ele.hide();
+  }
+  else {
+    $("#toggle-my-tags-img").attr("src", "/images/up_arrows.png");
+    ele.show();
+  }
 };

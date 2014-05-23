@@ -99,6 +99,8 @@ var logIn = function(userName) {
     API.login(args, function(data) {
       document.cookie = "username=" + userName + ";";
       document.cookie = "token=" + data.token + ";";
+      // update the type tags
+      getAllTagsByUser();
       Model.user = userName;
       Model.token = data.token;
     }, function(req, status, err) {
@@ -120,6 +122,8 @@ var logOut = function() {
   API.logout(args, function() {
     document.cookie = "username=;";
     document.cookie = "token=;";
+    // update the type tags
+    getAllTagsByUser();
     Model.user = null;
     Model.token = null;
   }, function(req, status, err) {
@@ -128,6 +132,7 @@ var logOut = function() {
   });
 
   UI.setUserName("");
+  UI.hideMyTagsFunctionality();
 
 };
 
@@ -166,13 +171,14 @@ var getAllTagsByUser = function() {
   var userToken = getCookie("token");
   var uniqType = [];
 
+  UI.clearAllMyTags();
+
   var args = {resource: ["%"], user: userName, token: userToken};
   API.getAllTagsByUser(args, function(origresult) {
 
     var keys = Object.keys(origresult);
 
     GLOBAL.allTags = origresult[keys[0]];
-
     for (user in GLOBAL.allTags) {
       // not the most effiecent code in the world
       tags = GLOBAL.allTags[user].toString().split(',');
@@ -182,6 +188,22 @@ var getAllTagsByUser = function() {
     }
 
     GLOBAL.uniqTypes = _.uniq(uniqType);
+    var typeHTML = "";
+
+    if (typeof GLOBAL.allTags[userName] !== 'undefined') {
+      // get just our types
+      var myTypes = [];
+      tags = GLOBAL.allTags[userName].toString().split(',');
+      for (tag in tags) {
+        myTypes.push(tags[tag].split(":")[0]);
+      }
+
+      var type;
+      var myUniq = _.uniq(myTypes);
+      for (type in myUniq) {
+        UI.appendMyTag(GLOBAL.uniqTypes[type]);
+      }
+    }
 
   }, function(req, status, err) {
     UI.showError("ERROR: ``" + err + "``");
