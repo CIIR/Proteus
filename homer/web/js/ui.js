@@ -89,48 +89,47 @@ UI.makeResult = function(queryTerms, result) {
 UI.appendResults = function(queryTerms, results) {
   UI.showProgress("Ajax response received!");
 
-  console.debug("i'm debugging!!!");
   _(results).forEach(function(result) {
     console.debug("result name: " + result.name);
     resultsDiv.append(UI.makeResult(queryTerms, result));
 
 
     var tagName = "#tags_" + result.name;
-    console.debug("Tag name: " + tagName);
+
     $(tagName).tagit({
-      availableTags: ["aaaa", "abbbb", "abc", "xyz", "ruby", "python", "c"],
-      autocomplete: {delay: 0, minLength: 1},
+      availableTags: GLOBAL.uniqTypes,
+      autocomplete: {delay: 0, minLength: 0},
       allowSpaces: true,
-      placeholderText: "Add a Label"
+      placeholderText: "Add a Label",
+      // uniqueID: result.name
 
-              // uniqueID: result.name
-    }
-    );
-    console.debug("after ");
-//            {
-//      uniqueID: result.name,
-//      allowSpaces: true,
-//      afterTagRemoved: function(event, ui) {
-//
-//        deleteTag(ui.tagLabel, result.name);
-//        return true;
-//
-//      },
-//      beforeTagAdded: function(event, ui) {
-//        if (!ui.duringInitialization) {
-//          var res = confirm("Are you sure you want to add the tag \"" + ui.tagLabel + "\"?");
-//          if (res == true) {
-//            addTag(ui.tagLabel, result.name);
-//          }
-//          return res;
-//
-//        } else {
-//          return true;
-//        }
-//      }
-//    }
+      afterTagRemoved: function(event, ui) {
 
-    console.debug("asdfasdfsadfsadfsadfsad ");
+        deleteTag(ui.tagLabel, result.name);
+        return true;
+
+      },
+      beforeTagAdded: function(event, ui) {
+        if (!ui.duringInitialization) {
+          // only ask "are you sure" if this is a NEW tag TYPE
+          tmp = ui.tagLabel.split(":");
+
+          var res = true;
+          if (tmp.length === 2 && $.inArray(tmp[0], GLOBAL.uniqTypes) === -1) {
+            res = confirm("Are you sure you want to create the label type \"" + tmp[0] + "\"?");
+            // add the new type to our list
+            GLOBAL.uniqTypes.push(tmp[0]);
+          }
+          if (res == true) {
+            addTag(ui.tagLabel, result.name);
+          }
+          return res;
+
+        } else {
+          return true;
+        }
+      }
+    });
     $(".read-only-tags").tagit({
       readOnly: true
     });
@@ -177,7 +176,7 @@ UI.clearUserName = function() {
 };
 
 UI.renderTags = function(result) {
-  getAllTagsByUser();
+
   var html = '<div>';
   // we ALWAYS want a div if you're logged in so you can add tags
   var username = getCookie("username");
@@ -194,16 +193,6 @@ UI.renderTags = function(result) {
     }
 
     html += '</ul>';
-    html += '  <div id="dialog-form-' + result.name + '" class="create-label-form" >  ' +
-            '  <label for="type-combobox">Type: </label>   ' +
-            '    <span><input id="type-combobox" name="dept" value="aa">   </span>' +
-            '    <label for="value">Value:</label> ' +
-            '    <span> <input type="text" name="value" id="value" value="" class="text  ui-widget-content ui-corner-all"></span> ' +
-            '    <input type="radio" name="scope" value="private">Private&nbsp; ' +
-            '    <input type="radio" name="scope" value="public" checked="checked" >Public&nbsp; ' +
-            '    <button id="create-tag" type="create-tag" value="create-tag">Create Tag</button> ' +
-            '    <button id="cancel-tag" type="cancel" value="cancel">Cancel</button> ' +
-            '  </div> ';
 
   } // end if someone is logged in
 

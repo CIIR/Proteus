@@ -26,7 +26,7 @@
  */
 (function($) {
 
-  $.widget('ui.rotagit', {
+  $.widget('ui.tagit', {
     options: {
       allowDuplicates: false,
       caseSensitive: true,
@@ -261,18 +261,28 @@
       }).blur(function(e) {
         // Create a tag when the element loses focus.
         // If autocomplete is enabled and suggestion was clicked, don't add it.
-        if (!that.tagInput.data('autocomplete-open')) {
-          that.createTag(that._cleanedInput());
-        }
+        // MCZ - removing - this is showing duplicate tags on the page
+        // when things like "confirm" are asked.
+        /*
+         if (!that.tagInput.data('autocomplete-open')) {
+         that.createTag(that._cleanedInput());
+         }
+         */
       });
 
       // Autocomplete.
       if (this.options.availableTags || this.options.tagSource || this.options.autocomplete.source) {
         var autocompleteOptions = {
           select: function(event, ui) {
-            that.createTag(ui.item.value);
+          
+            // MZ: don't create tag when they select something from auto complete
+            //that.createTag(ui.item.value);
+            ui.item.value = ui.item.value + ":";
+            that.tagInput.value = ui.item.value;
+            that.tagInput.text(that.tagInput.value);
             // Preventing the tag input to be updated with the chosen value.
-            return false;
+            return true; // MZ  - show what we selected in the input field
+            //return false;
           }
         };
         $.extend(autocompleteOptions, this.options.autocomplete);
@@ -476,6 +486,8 @@
         tagLabel: this.tagLabel(tag),
         duringInitialization: duringInitialization
       }) === false) {
+        // MCZ - remove what they were typing. Otherwise it just sits there
+        this.tagInput.val('');
         return;
       }
 

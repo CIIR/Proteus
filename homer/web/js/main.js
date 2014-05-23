@@ -6,7 +6,12 @@
  * For now, includes talking to the proteus/homer server.
  *
  */
-var gUniqType = [];
+
+var GLOBAL = {
+  uniqTypes: [],
+  allTags: []
+};
+
 // the JSON of the application state
 var Model = {
   // search result data
@@ -94,7 +99,6 @@ var logIn = function(userName) {
     API.login(args, function(data) {
       document.cookie = "username=" + userName + ";";
       document.cookie = "token=" + data.token + ";";
-      //  getAllTagsByUser();
       Model.user = userName;
       Model.token = data.token;
     }, function(req, status, err) {
@@ -161,51 +165,23 @@ var getAllTagsByUser = function() {
   var userName = getCookie("username");
   var userToken = getCookie("token");
   var uniqType = [];
-// really want tags per user by resource OR "project"
+
   var args = {resource: ["%"], user: userName, token: userToken};
   API.getAllTagsByUser(args, function(origresult) {
-    // $("#my-tags").html("poop");
-    //  DUPLIATE CODES
+
     var keys = Object.keys(origresult);
-// UGLY - assuming only one resuorce
-    // for (var key in result) {
-    //alert(JSON.stringify(result[keys[0]]));
-    result = origresult[keys[0]]
-    // }
-    // alert(JSON.stringify(result ));
-    html = "";
-    if (userName !== "") {
 
-      html += '<span><b>My Tags:</b>&nbsp;';
+    GLOBAL.allTags = origresult[keys[0]];
 
-      if (typeof result[userName] !== 'undefined') {
-//        tags = result[userName].toString().split(',');
-//        for (tag in tags) {
-//          html += tags[tag] + ', ';
-//        }
-        html += result[userName].toString();
-      }
-      html += '</span>'
-      $("#my-tags").html(html);
-    } // end if someone is logged in
-    html = "";
-    for (user in result) {
-      //??? not the most effiecent code in the world
-      tags = result[user].toString().split(',');
+    for (user in GLOBAL.allTags) {
+      // not the most effiecent code in the world
+      tags = GLOBAL.allTags[user].toString().split(',');
       for (tag in tags) {
-        //alert(tag);
         uniqType.push(tags[tag].split(":")[0]);
       }
-
-      if (user != userName)
-        html += "<b>" + user + ":</b>&nbsp;" + result[user].toString() + "&nbsp;";
-
     }
-    $("#other-tags").html(html);
 
-    gUniqType = _.uniq(uniqType);
-    // alert(newUniqType.toString());
-
+    GLOBAL.uniqTypes = _.uniq(uniqType);
 
   }, function(req, status, err) {
     UI.showError("ERROR: ``" + err + "``");
@@ -214,37 +190,6 @@ var getAllTagsByUser = function() {
 };
 
 
-var userTagsJSON = "";
 
-var setAllTagsByUser = function(setGlobalFunc) {
-  var userName = getCookie("username");
-  var userToken = getCookie("token");
-
-// really want tags per user by resource OR "project"
-  var args = {resource: ["%"], user: userName, token: userToken};
-
-  API.getAllTagsByUser(args, function(origresult) {
-
-    // there is only one key cuz we only passed in one resource
-    var keys = Object.keys(origresult);
-    setGlobalFunc(origresult[keys[0]]);
-
-  }, function(req, status, err) {
-    UI.showError("ERROR: ``" + err + "``");
-    throw err;
-  });
-
-};
-
-
-// ???? tmp global list of all users/tags
-
-
-
-setAllTagsByUser(function(result) {
-  userTagsJSON = result;
-  $("#tmp-tags").html(JSON.stringify(userTagsJSON));
-
-});
-
-
+// get all tags grouped by user on start up
+getAllTagsByUser();
