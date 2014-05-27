@@ -48,7 +48,7 @@ body {
 
 #ui {
   margin: 0;
-  padding-bottom: 20pt;
+  padding-bottom: 10pt;
   padding-top: 10pt;
   background-color: #009;
 }
@@ -68,9 +68,13 @@ body {
   height: 20pt;
   vertical-align: middle;
 } 
+#login-form-text{
+     color: #fff;
+      text-align: right;
+}
 #login-form {
-  color: #fff;
-  text-align: right;
+ 
+ 
   float:right;
   height: 20pt;
   vertical-align: middle;
@@ -148,3 +152,4 @@ img.thumbnail {
   margin: 2px 5px 2px 0;
 
 }
+ 
