@@ -48,7 +48,8 @@ body {
 
 #ui {
   margin: 0;
-  padding: 10pt;
+  padding-bottom: 20pt;
+  padding-top: 10pt;
   background-color: #009;
 }
 
@@ -70,9 +71,19 @@ body {
 #login-form {
   color: #fff;
   text-align: right;
-  float:none;
+  float:right;
   height: 20pt;
   vertical-align: middle;
+
+}
+
+#toggle-my-tags{
+  color: #fff;
+  text-align: right;
+  float:left;
+  height: 20pt;
+  vertical-align: middle;
+
 }
 
 #login-form a:hover, #login-form  a:visited {
@@ -118,5 +129,27 @@ img.thumbnail {
 }
 
 
+<<<<<<< HEAD
 
 
+=======
+.read-only-li{
+  background-color: red;
+}
+
+#all-tags {
+  float: right;
+  width: 25%;
+
+}
+#my-tags {
+  background-color: lightblue;
+  padding: 5px;
+
+}
+
+.type-button{
+  margin: 2px 5px 2px 0;
+
+}
+>>>>>>> upstream/master

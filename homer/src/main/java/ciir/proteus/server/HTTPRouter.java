@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HTTPRouter implements WebHandler {
+
   private static final Logger log = Logger.getLogger(HTTPRouter.class.getName());
   private final JSONHandler debug;
   private final JSONHandler search;
@@ -58,8 +59,9 @@ public class HTTPRouter implements WebHandler {
 
       JSONHandler handler;
       if ((GET || POST) && path.equals("/api/action")) {
-        if (!reqp.isString("action"))
+        if (!reqp.isString("action")) {
           throw new IllegalArgumentException("/api/action demands String key 'action'");
+        }
 
         String action = reqp.getString("action");
         if (action.equals("search")) {
@@ -67,11 +69,13 @@ public class HTTPRouter implements WebHandler {
         } else if (action.equals("view")) {
           handler = viewResource;
         } else {
-          throw new IllegalArgumentException("/api/action doesn't know how to handle action="+action);
+          throw new IllegalArgumentException("/api/action doesn't know how to handle action=" + action);
         }
       } else if (GET && path.equals("/api/kinds")) {
         handler = getKinds;
       } else if (GET && path.equals("/api/tags")) {
+        handler = tags;
+      } else if (POST && path.equals("/api/alltags")) {
         handler = tags;
       } else if (POST && path.equals("/api/tags/create")) {
         handler = putTags;

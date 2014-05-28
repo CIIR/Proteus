@@ -1,0 +1,49 @@
+{
+  "corpus" : true,
+  "corpusParameters" :   {
+    "blockSize" : 512,
+    "filename" : "/home/ubuntu/src/Proteus/homer/pages-index/corpus",
+    "mergerClass" : "org.lemurproject.galago.core.index.merge.CorpusMerger",
+    "readerClass" : "org.lemurproject.galago.core.index.corpus.CorpusReader",
+    "tokenizer" :     {
+      "fields" : [ "archiveid" , "name" , "title" , "creator" , "language" , "subject" , "date"],
+      "formats" :       {
+
+      }
+    },
+    "writerClass" : "org.lemurproject.galago.core.index.corpus.CorpusFolderWriter"
+  },
+  "fieldIndex" : true,
+  "fieldIndexParameters" :   {
+    "nonStemmedPostings" : true,
+    "stemmedPostings" : true,
+    "stemmer" : [ "krovetz"]
+  },
+  "galagoJobDir" : "pages-job",
+  "indexPath" : "/home/ubuntu/src/Proteus/homer/pages-index",
+  "inputPath" : [ "/home/ubuntu/src/Proteus/homer/books"],
+  "nonStemmedPostings" : true,
+  "parser" :   {
+    "externalParsers" : [       {
+        "class" : "ciir.proteus.parse.MBTEIPageParser",
+        "filetype" : "mbtei"
+      } ,       {
+        "class" : "ciir.proteus.parse.MBTEIPageParser",
+        "filetype" : "toktei"
+      }]
+  },
+  "server" : true,
+  "skipDistance" : 500,
+  "skipping" : true,
+  "stemmedPostings" : true,
+  "stemmer" : [ "krovetz"],
+  "stemmerClass" :   {
+    "krovetz" : "org.lemurproject.galago.core.parse.stem.KrovetzStemmer"
+  },
+  "tokenizer" :   {
+    "fields" : [ "archiveid" , "name" , "title" , "creator" , "language" , "subject" , "date"],
+    "formats" :     {
+
+    }
+  }
+}

@@ -7,6 +7,11 @@
  *
  */
 
+var GLOBAL = {
+  uniqTypes: [],
+  allTags: []
+};
+
 // the JSON of the application state
 var Model = {
   // search result data
@@ -40,10 +45,10 @@ UI.setReadyHandler(function() {
 
   UI.setUserName(getCookie("username"));
 
-  if (params.action=="search" && !isBlank(params.q)) {
+  if (params.action == "search" && !isBlank(params.q)) {
     UI.setQuery(params.q);
     doActionRequest(params);
-  } else if(params.action == "view") {
+  } else if (params.action == "view") {
     doActionRequest(params);
   }
 });
@@ -53,23 +58,23 @@ UI.setReadyHandler(function() {
  */
 var doActionRequest = function(args) {
   var action = args.action;
-  if(action == "search") {
+  if (action == "search") {
     return doSearchRequest(args);
   }
-  if(action == "view") {
+  if (action == "view") {
     return doViewRequest(args);
   }
-  if(!action) {
+  if (!action) {
     UI.showError("action not defined when calling doActionRequest in JS");
     return;
   }
-  UI.showError("Unknown action `"+action+"'");
+  UI.showError("Unknown action `" + action + "'");
 };
 
 /* handlers for search button types */
 UI.onClickSearchButton = function(buttonDesc) {
   var kind = buttonDesc.kind;
-  doActionRequest({kind: kind, q: UI.getQuery(), action:"search"});
+  doActionRequest({kind: kind, q: UI.getQuery(), action: "search"});
 };
 
 /* pull the previous request out of the "Model" and send it to the server, but request the next 10 */
@@ -94,6 +99,7 @@ var logIn = function(userName) {
     API.login(args, function(data) {
       document.cookie = "username=" + userName + ";";
       document.cookie = "token=" + data.token + ";";
+      // update the type tags
       getAllTagsByUser();
       Model.user = userName;
       Model.token = data.token;
@@ -116,6 +122,8 @@ var logOut = function() {
   API.logout(args, function() {
     document.cookie = "username=;";
     document.cookie = "token=;";
+    // update the type tags
+    getAllTagsByUser();
     Model.user = null;
     Model.token = null;
   }, function(req, status, err) {
@@ -124,6 +132,7 @@ var logOut = function() {
   });
 
   UI.setUserName("");
+  UI.hideMyTagsFunctionality();
 
 };
 
@@ -160,41 +169,41 @@ var deleteTag = function(tagText, resourceID) {
 var getAllTagsByUser = function() {
   var userName = getCookie("username");
   var userToken = getCookie("token");
+  var uniqType = [];
 
-// really want tags per user by resource OR "project"
+  UI.clearAllMyTags();
+
   var args = {resource: ["%"], user: userName, token: userToken};
   API.getAllTagsByUser(args, function(origresult) {
-    // $("#my-tags").html("poop");
-    //  DUPLIATE CODES
+
     var keys = Object.keys(origresult);
-// UGLY - assuming only one resuorce
-    // for (var key in result) {
-    //alert(JSON.stringify(result[keys[0]]));
-    result = origresult[keys[0]]
-    // }
-    // alert(JSON.stringify(result ));
-    html = "";
-    if (userName !== "") {
 
-      html += '<span><b>My Tags:</b>&nbsp;';
-
-      if (typeof result[userName] !== 'undefined') {
-//        tags = result[userName].toString().split(',');
-//        for (tag in tags) {
-//          html += tags[tag] + ', ';
-//        }
-        html += result[userName].toString();
+    GLOBAL.allTags = origresult[keys[0]];
+    for (user in GLOBAL.allTags) {
+      // not the most effiecent code in the world
+      tags = GLOBAL.allTags[user].toString().split(',');
+      for (tag in tags) {
+        uniqType.push(tags[tag].split(":")[0]);
       }
-      html += '</span>'
-      $("#my-tags").html(html);
-    } // end if someone is logged in
-    html = "";
-    for (user in result) {
-
-      html += "<b>" + user + ":</b>&nbsp;" + result[user].toString() + "&nbsp;";
-
     }
-    $("#other-tags").html(html);
+
+    GLOBAL.uniqTypes = _.uniq(uniqType);
+    var typeHTML = "";
+
+    if (typeof GLOBAL.allTags[userName] !== 'undefined') {
+      // get just our types
+      var myTypes = [];
+      tags = GLOBAL.allTags[userName].toString().split(',');
+      for (tag in tags) {
+        myTypes.push(tags[tag].split(":")[0]);
+      }
+
+      var type;
+      var myUniq = _.uniq(myTypes);
+      for (type in myUniq) {
+        UI.appendMyTag(myUniq[type]);
+      }
+    }
 
   }, function(req, status, err) {
     UI.showError("ERROR: ``" + err + "``");
@@ -203,37 +212,6 @@ var getAllTagsByUser = function() {
 };
 
 
-var userTagsJSON = "";
 
-var setAllTagsByUser = function(setGlobalFunc) {
-  var userName = getCookie("username");
-  var userToken = getCookie("token");
-
-// really want tags per user by resource OR "project"
-  var args = {resource: ["%"], user: userName, token: userToken};
-
-  API.getAllTagsByUser(args, function(origresult) {
-
-    // there is only one key cuz we only passed in one resource
-    var keys = Object.keys(origresult);
-    setGlobalFunc(origresult[keys[0]]);
-
-  }, function(req, status, err) {
-    UI.showError("ERROR: ``" + err + "``");
-    throw err;
-  });
-
-};
-
-
-// ???? tmp global list of all users/tags
-
-
-
-setAllTagsByUser(function(result) {
-  userTagsJSON = result;
-  $("#tmp-tags").html(JSON.stringify(userTagsJSON));
-
-});
-
-
+// get all tags grouped by user on start up
+getAllTagsByUser();

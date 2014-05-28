@@ -12,6 +12,7 @@ var getResultRenderer = function(kind) {
   if (resultRenderers[kind]) {
     return resultRenderers[kind];
   }
+  console.log("Falling back to default for "+kind);
   return resultRenderers["default"];
 };
 /** This is the default, plain result renderer */

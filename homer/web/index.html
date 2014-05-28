@@ -1,12 +1,16 @@
 <html>
   <head>
     <title>Proteus: Search</title>
+    <link href="css/easyui.css" rel="stylesheet" type="text/css">
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/history.js/1.8/native.history.min.js"></script>
+
+
+
     <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-    <script src="js/tag-it.js" type="text/javascript" charset="utf-8"></script>
+
     <!-- scripts included here evaluate before the page loads -->
     <script src="js/API.js"></script>
     <script src="js/util.js"></script>
@@ -15,25 +19,37 @@
     <script src="js/acmdl.js"></script>
     <script src="js/capent.js"></script>
     <link rel="stylesheet" href="css/style.css" type="text/css" />
-
+    <script src="js/tag-it.js" type="text/javascript" charset="utf-8"></script>
     <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/flick/jquery-ui.css">
     <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
 
+    <script>
+      $(document).ready(function() {
+        UI.hideMyTagsFunctionality();
+      });
+
+    </script>
   </head>
   <body>
+
     <div id="ui">
       <span id="title">Proteus</span>
       <span id="search-buttons">
         <input id="ui-search" placeholder="Search..." type="search" />
       </span>
-      <div id="login-form">
-        <span id="ui-login-info"></span>
+      <div id="user-info">
+        <span id="toggle-my-tags"><img id="toggle-my-tags-img" src="/images/up_arrows.png" onclick="UI.toggleMyTags()"></span>
+        <span id="login-form">
+          <span id="ui-login-info"></span>
+        </span>
       </div>
     </div>
     <div id="error"></div>
     <div id="parsedQuery"></div>
     <div id="request"></div>
     <div id="view-resource"></div>
+    <div id="all-tags"></div>
+    <div id="my-tags"></div>
     <div id="results"></div>
 
     <div id="more"><input id="ui-go-more" type="button" value="More" /></div>
@@ -45,4 +61,5 @@
   <script src="js/ui.js"></script>
   <script src="js/actions.js"></script>
   <script src="js/main.js"></script>
+
 </html>

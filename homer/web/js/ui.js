@@ -31,8 +31,8 @@ UI.generateButtons = function() {
 
     _.forIn(data.kinds, function(spec, kind) {
       spec.kind = kind; // so the onClick knows what kind it was
-      if(!spec.button) {
-        UI.showError("You need to specify a \"button\" display attribute for kind \""+kind+"\"");
+      if (!spec.button) {
+        UI.showError("You need to specify a \"button\" display attribute for kind \"" + kind + "\"");
       }
       var button = $('<input type="button" value="' + spec.button + '" />');
       button.click(function() {
@@ -96,12 +96,19 @@ UI.appendResults = function(queryTerms, results) {
   UI.showProgress("Ajax response received!");
 
   _(results).forEach(function(result) {
+    console.debug("result name: " + result.name);
     resultsDiv.append(UI.makeResult(queryTerms, result));
+
+
     var tagName = "#tags_" + result.name;
 
     $(tagName).tagit({
-      uniqueID: result.name,
+      availableTags: GLOBAL.uniqTypes,
+      autocomplete: {delay: 0, minLength: 0},
       allowSpaces: true,
+      placeholderText: "Add a Label",
+      // uniqueID: result.name
+
       afterTagRemoved: function(event, ui) {
 
         deleteTag(ui.tagLabel, result.name);
@@ -110,7 +117,17 @@ UI.appendResults = function(queryTerms, results) {
       },
       beforeTagAdded: function(event, ui) {
         if (!ui.duringInitialization) {
-          var res = confirm("Are you sure you want to add the tag \"" + ui.tagLabel + "\"?");
+          // only ask "are you sure" if this is a NEW tag TYPE
+          tmp = ui.tagLabel.split(":");
+
+          var res = true;
+          if (tmp.length === 2 && $.inArray(tmp[0], GLOBAL.uniqTypes) === -1) {
+            res = confirm("Are you sure you want to create the label type \"" + tmp[0] + "\"?");
+            // add the new type to our list
+            GLOBAL.uniqTypes.push(tmp[0]);
+            UI.appendMyTag(tmp[0]);
+
+          }
           if (res == true) {
             addTag(ui.tagLabel, result.name);
           }
@@ -121,7 +138,6 @@ UI.appendResults = function(queryTerms, results) {
         }
       }
     });
-
     $(".read-only-tags").tagit({
       readOnly: true
     });
@@ -168,6 +184,7 @@ UI.clearUserName = function() {
 };
 
 UI.renderTags = function(result) {
+
   var html = '<div>';
   // we ALWAYS want a div if you're logged in so you can add tags
   var username = getCookie("username");
@@ -175,23 +192,15 @@ UI.renderTags = function(result) {
 
     html += '<ul id="tags_' + result.name + '">  ';
     if (typeof result.tags[username] !== 'undefined') {
+      //console.log(result.tags[username].toString());
       tags = result.tags[username].toString().split(',');
+      //console.log(tags);
       for (var tag in tags) {
         html += '  <li> ' + tags[tag] + ' </li> ';
       }
     }
 
     html += '</ul>';
-    html += ' <div id="dialog-form-' + result.name + '" class="create-label-form" >  ' +
-            '    <label for="type">Type:</label> ' +
-            '    <input type="text" name="type" id="type" class="text ui-widget-content ui-corner-all" value="free-form">' +
-            '    <label for="value">Value:</label> ' +
-            '    <input type="text" name="value" id="value" value="" class="text ui-widget-content ui-corner-all"> ' +
-            '    <input type="radio" name="scope" value="private">Private&nbsp; ' +
-            '    <input type="radio" name="scope" value="public" checked="checked" >Public&nbsp; ' +
-            '    <button id="create-tag" type="create-tag" value="create-tag">Create Tag</button> ' +
-            '    <button id="cancel-tag" type="cancel" value="cancel">Cancel</button> ' +
-            '   </div>';
 
   } // end if someone is logged in
 
@@ -214,4 +223,42 @@ UI.renderTags = function(result) {
   }
   html += '</div>';
   return html;
+};
+
+UI.appendMyTag = function(name) {
+
+  $("#my-tags").append('<button class="ui-widget-content ui-state-default type-button">' + name + '</button>');
+
+  if ($("#toggle-my-tags-img").is(":visible") === false) {
+    $("#toggle-my-tags-img").attr("src", "/images/up_arrows.png");
+    $("#toggle-my-tags-img").show();
+    $("#my-tags").show();
+
+  }
+};
+UI.clearAllMyTags = function( ) {
+
+
+  $("#my-tags").html("");
+
+};
+
+// used when we don't want to dispaly any of the "my tags" features
+UI.hideMyTagsFunctionality = function() {
+  UI.clearAllMyTags();
+  $("#toggle-my-tags-img").hide();
+  $("#my-tags").hide();
+
+};
+
+UI.toggleMyTags = function() {
+  var ele = $("#my-tags");
+  if (ele.is(":visible")) {
+    $("#toggle-my-tags-img").attr("src", "/images/down_arrows.png");
+    ele.hide();
+  }
+  else {
+    $("#toggle-my-tags-img").attr("src", "/images/up_arrows.png");
+    ele.show();
+  }
 };
