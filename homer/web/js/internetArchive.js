@@ -44,23 +44,28 @@ var renderResult = function(queryTerms, result) {
 	name += ' pp. ' + pageNum;
 
 	var previewImage = '<a href="'+ pageImage(identifier, pageNum) +'">' +
-	    '<img class="thumbnail" src="' + pageThumbnail(identifier, pageNum) + '"/>' +
-	     '</a>';
+		'<img class="thumbnail" src="' + pageThumbnail(identifier, pageNum) + '"/>' +
+		'</a>';
 	var html =
 		'<div class="result">' +
-		'<table>' +
-		'<tr>' +
-		'<td class="preview" rowspan="2">' + previewImage + '</td>' +
-		'<td class="name">' + name + '</td>' +
-		'<td class="score">' + result.score.toFixed(3) + ' r'+ result.rank + '</td>' +
-		'</tr>';
-	if(snippet) {
-		html += '<tr><td class="snippet" colspan="2"> ...';
-		html += highlightText(queryTerms, snippet, '<span class="hili">','</span>');
-		html += '... </td></tr>';
-	}
-	html += '</table>';
+			'<table>' +
+				'<tr>' +
+					'<td class="preview" rowspan="2">' + previewImage + '</td>' +
+					'<td class="name">' + name + '</td>' +
+					'<td class="score">' + result.score.toFixed(3) + ' r'+ result.rank + '</td>' +
+				'</tr>'+ 
+				'<tr>' +
+					'<td>'+  '<input type="button" id="reader" onClick="readBook();" value="Read the Book">' + '</td>'+
+				'</tr>';
 
+	
+if(snippet) {
+html += '<tr><td class="snippet" colspan="2"> ...';
+html += highlightText(queryTerms, snippet, '<span class="hili">','</span>');
+html += '... </td></tr>';
+}
+html += '</table>';
+  
 	return html;
 
 
