@@ -20,6 +20,8 @@ var UI = {};
 
 UI.generateButtons = function() {
   API.getKinds({}, function(data) {
+    UI.defaultKind = data.defaultKind;
+
     var availableKinds = _(data.kinds);
     var buttonDescriptions = _(UI.buttons);
 

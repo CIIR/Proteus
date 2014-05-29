@@ -2,18 +2,15 @@ package ciir.proteus.system;
 
 import ciir.proteus.users.UserDatabase;
 import ciir.proteus.users.UserDatabaseFactory;
-import ciir.proteus.util.RetrievalUtil;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.Retrieval;
 import org.lemurproject.galago.core.retrieval.RetrievalFactory;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.core.retrieval.processing.MaxPassageFinder;
 import org.lemurproject.galago.core.retrieval.query.Node;
-import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.tupleflow.Parameters;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,16 +56,7 @@ public class ProteusSystem {
     }
   }
 
-  public List<ScoredDocument> search(String kind, String query, int requested) {
-    Parameters qp = new Parameters();
-    qp.set("requested", requested);
-
-    return search(kind, StructuredQuery.parse(query), qp);
-  }
-
-  public List<ScoredDocument> findPassages(String kind, String query, List<ScoredDocument> docs) {
-    List<String> names = RetrievalUtil.names(docs);
-
+  public List<ScoredDocument> findPassages(String kind, Node query, List<String> names) {
     // find max passage for each document
     Parameters qp = new Parameters();
     qp.set("working", names);
@@ -77,8 +65,7 @@ public class ProteusSystem {
     qp.set("passageSize", 100);
     qp.set("passageShift", 50);
 
-
-    return search(kind, StructuredQuery.parse(query), qp);
+    return search(kind, query, qp);
   }
 
   public void close() throws IOException {
@@ -101,8 +88,4 @@ public class ProteusSystem {
   }
 
   public Parameters getConfig() { return config; }
-
-  public Collection<Retrieval> getRetrievals() {
-    return kinds.values();
-  }
 }

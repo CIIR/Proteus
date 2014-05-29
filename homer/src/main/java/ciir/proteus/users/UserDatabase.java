@@ -57,7 +57,7 @@ public interface UserDatabase {
 
   public Map<String, List<String>> getTags(Credentials creds, List<String> resources) throws DBError;
 
-  public Map<String, List<String>> getAllTags(String res1) throws DBError;
+  public Map<String, List<String>> getAllTags(String resource) throws DBError;
 
   public Map<String, Map<String, List<String>>> getAllTags(List<String> resources) throws DBError;
 

@@ -243,7 +243,6 @@ public class H2Database implements UserDatabase {
     Map<String, Map<String, List<String>>> results = getAllTags(Arrays.asList(resource));
     return results.get(resource);
   }
-
   public Map<String, Map<String, List<String>>> getAllTags(List<String> resources) throws DBError {
 
     Map<String, Map<String, List<String>>> results = new HashMap<String, Map<String, List<String>>>();
