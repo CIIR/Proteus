@@ -16,31 +16,31 @@ var searchButtons = $("#search-buttons");
 
 
 queryBox.keypress(function(e)
-{
-if (e.keyCode == 13)
-handleEnter();
-});
+    {
+    if (e.keyCode == 13)
+    handleEnter();
+    });
 
 // UI object/namespace
 var UI = {};
 
 UI.generateButtons = function() {
   API.getKinds({}, function(data) {
-    var availableKinds = _(data.kinds);
-    var buttonDescriptions = _(UI.buttons);
+      var availableKinds = _(data.kinds);
+      var buttonDescriptions = _(UI.buttons);
 
-    _.forIn(data.kinds, function(spec, kind) {
-      spec.kind = kind; // so the onClick knows what kind it was
-      if (!spec.button) {
+      _.forIn(data.kinds, function(spec, kind) {
+        spec.kind = kind; // so the onClick knows what kind it was
+        if (!spec.button) {
         UI.showError("You need to specify a \"button\" display attribute for kind \"" + kind + "\"");
-      }
-      var button = $('<input type="button" value="' + spec.button + '" />');
-      button.click(function() {
-        UI.onClickSearchButton(spec);
+        }
+        var button = $('<input type="button" value="' + spec.button + '" />');
+        button.click(function() {
+          UI.onClickSearchButton(spec);
+          });
+        searchButtons.append(button)
+        });
       });
-      searchButtons.append(button)
-    });
-  });
 };
 
 UI.clear = function() {
@@ -78,73 +78,70 @@ UI.setQuery = function(q) {
   queryBox.val(q);
 };
 
-/**
- * Render a single search result.
- * @see render.js
- */
-UI.makeResult = function(queryTerms, result) {
-  var renderer = getResultRenderer(result.viewKind);
-  return '<div class="result">' + renderer(queryTerms, result) + '</div>';
-};
 
 /**
- * Renders search results into UI after current results
+* Renders search results into UI after current results
  */
 
 
 UI.appendResults = function(queryTerms, results) {
   UI.showProgress("Ajax response received!");
+    _(results).forEach(function(result) {
+        console.debug("result name: " + result.name);
+      
+        var renderer = getResultRenderer(result.viewKind);
+        var resDiv = $('<div>');
+          resDiv.attr('class', 'result');
+          resDiv.attr('id',result.name);
+          $(resDiv).append(renderer(queryTerms, result));
+      resultsDiv.append(resDiv);
 
-  _(results).forEach(function(result) {
-    console.debug("result name: " + result.name);
-    resultsDiv.append(UI.makeResult(queryTerms, result));
 
+      var tagName = "#tags_" + result.name;
 
-    var tagName = "#tags_" + result.name;
+      $(tagName).tagit({
+availableTags: GLOBAL.uniqTypes,
+autocomplete: {delay: 0, minLength: 0},
+allowSpaces: true,
+placeholderText: "Add a Label",
+// uniqueID: result.name
 
-    $(tagName).tagit({
-      availableTags: GLOBAL.uniqTypes,
-      autocomplete: {delay: 0, minLength: 0},
-      allowSpaces: true,
-      placeholderText: "Add a Label",
-      // uniqueID: result.name
+afterTagRemoved: function(event, ui) {
 
-      afterTagRemoved: function(event, ui) {
+deleteTag(ui.tagLabel, result.name);
+return true;
 
-        deleteTag(ui.tagLabel, result.name);
-        return true;
+},
+beforeTagAdded: function(event, ui) {
+if (!ui.duringInitialization) {
+// only ask "are you sure" if this is a NEW tag TYPE
+tmp = ui.tagLabel.split(":");
 
-      },
-      beforeTagAdded: function(event, ui) {
-        if (!ui.duringInitialization) {
-          // only ask "are you sure" if this is a NEW tag TYPE
-          tmp = ui.tagLabel.split(":");
+var res = true;
+if (tmp.length === 2 && $.inArray(tmp[0], GLOBAL.uniqTypes) === -1) {
+res = confirm("Are you sure you want to create the label type \"" + tmp[0] + "\"?");
+// add the new type to our list
+GLOBAL.uniqTypes.push(tmp[0]);
+UI.appendMyTag(tmp[0]);
 
-          var res = true;
-          if (tmp.length === 2 && $.inArray(tmp[0], GLOBAL.uniqTypes) === -1) {
-            res = confirm("Are you sure you want to create the label type \"" + tmp[0] + "\"?");
-            // add the new type to our list
-            GLOBAL.uniqTypes.push(tmp[0]);
-            UI.appendMyTag(tmp[0]);
+}
+if (res == true) {
+  addTag(ui.tagLabel, result.name);
+}
+return res;
 
-          }
-          if (res == true) {
-            addTag(ui.tagLabel, result.name);
-          }
-          return res;
+} else {
+  return true;
+}
+}
+});
+$(".read-only-tags").tagit({
+readOnly: true
+});
 
-        } else {
-          return true;
-        }
-      }
-    });
-    $(".read-only-tags").tagit({
-      readOnly: true
-    });
+moreButton.show();
 
-    moreButton.show();
-
-  });
+});
 };
 
 
@@ -153,9 +150,9 @@ UI.appendResults = function(queryTerms, results) {
  */
 UI.setReadyHandler = function(callback) {
   $(document).ready(function() {
-    UI.generateButtons();
-    callback();
-  });
+      UI.generateButtons();
+      callback();
+      });
 };
 UI.setMoreHandler = function(callback) {
   moreButton.click(callback);
@@ -167,20 +164,20 @@ UI.setUserName = function(user) {
   } else {
     loginInfo.html("Welcome " + user + " <input id='ui-go-logout' type='button' value='LogOut' />");
     $("#ui-go-logout").click(function() {
-      logOut();
-    });
+        logOut();
+        });
   }
 };
 
 UI.clearUserName = function() {
   loginInfo.html(" <input id='ui-username' type='text' /> " +
-          "<input id='ui-go-login' type='button' value='Login' />");
+      "<input id='ui-go-login' type='button' value='Login' />");
   // have to bind click event here because that ID doesn't exist until we do this.
   $("#ui-go-login").click(function() {
-    var username = $("#ui-username").val();
-    logIn(username);
-    UI.setUserName(username);
-  });
+      var username = $("#ui-username").val();
+      logIn(username);
+      UI.setUserName(username);
+      });
 };
 
 UI.renderTags = function(result) {

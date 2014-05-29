@@ -47,7 +47,6 @@ var renderResult = function(queryTerms, result) {
 		'<img class="thumbnail" src="' + pageThumbnail(identifier, pageNum) + '"/>' +
 		'</a>';
 	var html =
-		'<div class="result">' +
 			'<table>' +
 				'<tr>' +
 					'<td class="preview" rowspan="2">' + previewImage + '</td>' +
