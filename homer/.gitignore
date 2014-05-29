@@ -3,3 +3,4 @@
 *.jar
 *.class
 examples/
+/build_example/

@@ -28,7 +28,6 @@
 
   $.widget('ui.tagit', {
     options: {
-      uniqueID: null, // MCZ added so we know the id
       allowDuplicates: false,
       caseSensitive: true,
       fieldName: 'tags',
@@ -97,8 +96,6 @@
     _create: function() {
       // for handling static scoping inside callbacks
       var that = this;
-      var divID = "#dialog-form-" + that.options.uniqueID;
-      $(divID).hide();
       // There are 2 kinds of DOM nodes this widget can be instantiated on:
       //     1. UL, OL, or some element containing either of these.
       //     2. INPUT, in which case 'singleField' is overridden to true,
@@ -164,7 +161,6 @@
               .addClass('tagit')
               .addClass('ui-widget ui-widget-content ui-corner-all')
               // Create the input field.
-              // MCZ - changing to be pop-up
               .append($('<li class="tagit-new"></li>').append(this.tagInput))
               .click(function(e) {
         var target = $(e.target);
@@ -177,72 +173,10 @@
           // Sets the focus() to the input field, if the user
           // clicks anywhere inside the UL. This is needed
           // because the input field needs to be of a small size.
-          // that.tagInput.focus();
-          $(divID).show();
-
-          // close the div if they click outside (from: http://stackoverflow.com/questions/1403615/use-jquery-to-hide-a-div-when-the-user-clicks-outside-of-it)
-          $(document).mouseup(function(e)
-          {
-            var container = $("#dialog-form-" + that.options.uniqueID);
-
-            if (!container.is(e.target) // if the target of the click isn't the container...
-                    && container.has(e.target).length === 0) // ... nor a descendant of the container
-            {
-              container.hide();
-            }
-          });
-
-          $(divID + " #value").focus();
-
-          var createTagFunc = function() {
-
-
-            // make sure we have values
-            var type = $(divID + " #type").val();
-            var value = $(divID + " #value").val();
-
-            // enormous hack - for some reason when we .hide() at the end of this, it
-            // causes multiple calls.
-            if ($(divID).is(":visible") === false) {
-              return;
-            }
-
-            if ($.trim(type) === '') {
-              alert("Please Enter a Type");
-              $(divID + " #type").focus();
-              return;
-            }
-            if ($.trim(value) === '') {
-              alert("Please Enter a Value");
-              $(divID + " #value").focus();
-              return;
-            }
-
-            that.createTag(type + ":" + value);
-            $(divID).hide();
-            return;
-
-          };
-
-          $(divID + " #create-tag").click(function() {
-            createTagFunc();
-          });
-
-          $(divID + " #cancel-tag").click(function() {
-            $(divID).hide();
-          });
-          $(divID).on('keydown', function(e) {
-            if (e.keyCode === 27) { // ESC
-              $(divID).hide();
-            }
-
-            if (e.keyCode === $.ui.keyCode.ENTER) {
-              createTagFunc();
-            }
-          });
+          that.tagInput.focus();
         }
-
       });
+
       // Single field support.
       var addedExistingFromSingleFieldNode = false;
       if (this.options.singleField) {
@@ -339,9 +273,15 @@
       if (this.options.availableTags || this.options.tagSource || this.options.autocomplete.source) {
         var autocompleteOptions = {
           select: function(event, ui) {
-            that.createTag(ui.item.value);
+
+            // MZ: don't create tag when they select something from auto complete
+            //that.createTag(ui.item.value);
+            ui.item.value = ui.item.value + ":";
+            that.tagInput.value = ui.item.value;
+            that.tagInput.text(that.tagInput.value);
             // Preventing the tag input to be updated with the chosen value.
-            return false;
+            return true; // MZ  - show what we selected in the input field
+            //return false;
           }
         };
         $.extend(autocompleteOptions, this.options.autocomplete);
@@ -497,7 +437,6 @@
           existingTag: existingTag,
           duringInitialization: duringInitialization
         }) !== false) {
-          alert("That tag already exists");
           if (this._effectExists('highlight')) {
             existingTag.effect('highlight');
           }
@@ -530,7 +469,6 @@
                 .append(removeTagIcon)
                 .click(function(e) {
           // Removes a tag when the little 'x' is clicked.
-          e.stopPropagation(); // MCZ stop this from perculating up to the div which would show the "new label" dialog
           that.removeTag(tag);
         });
         tag.append(removeTag);
