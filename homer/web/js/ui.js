@@ -15,6 +15,12 @@ var moreButton = $("#ui-go-more");
 var searchButtons = $("#search-buttons");
 
 
+queryBox.keypress(function(e)
+{
+if (e.keyCode == 13)
+handleEnter();
+});
+
 // UI object/namespace
 var UI = {};
 
