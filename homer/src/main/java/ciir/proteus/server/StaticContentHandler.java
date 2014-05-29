@@ -94,6 +94,8 @@ public class StaticContentHandler {
       return "application/javascript";
     } else if(extension.equals("css")) {
       return "text/css";
+    } else if(extension.equals("png")) {
+      return "image/png";
     } else {
       log.warning("Unhandled extension type: '"+extension+"' for file path: "+path);
     }

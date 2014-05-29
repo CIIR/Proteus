@@ -26,8 +26,11 @@ var UI = {};
 
 UI.generateButtons = function() {
   API.getKinds({}, function(data) {
-      var availableKinds = _(data.kinds);
-      var buttonDescriptions = _(UI.buttons);
+    UI.defaultKind = data.defaultKind;
+
+    var availableKinds = _(data.kinds);
+    var buttonDescriptions = _(UI.buttons);
+
 
       _.forIn(data.kinds, function(spec, kind) {
         spec.kind = kind; // so the onClick knows what kind it was

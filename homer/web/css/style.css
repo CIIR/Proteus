@@ -13,10 +13,6 @@ body {
   font-weight: bold;
 }
 
-#parsedQuery {
-  font-family: monospace;
-  display: none;
-}
 #request {
   display: none;
 }
