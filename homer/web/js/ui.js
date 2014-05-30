@@ -167,7 +167,7 @@ UI.setUserName = function(user) {
   if (!user) {
     UI.clearUserName();
   } else {
-    loginInfo.html("Welcome " + user + " <input id='ui-go-logout' type='button' value='LogOut' />");
+    loginInfo.html("<span id='login-form-text'> Welcome " + user + "</span> <input id='ui-go-logout' type='button' value='LogOut' />");
     $("#ui-go-logout").click(function() {
       logOut();
     });
