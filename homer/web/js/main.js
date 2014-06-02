@@ -140,7 +140,7 @@ var addTag = function(tagText, resourceID) {
     var userName = getCookie("username");
     var userToken = getCookie("token");
 
-    var tmp = '{ "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + tagText + '": ["' + resourceID + '"]}}';
+    var tmp = '{ "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
     var args = JSON.parse(tmp);
     API.createTags(args, null, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
@@ -154,7 +154,7 @@ var deleteTag = function(tagText, resourceID) {
     var userName = getCookie("username");
     var userToken = getCookie("token");
 
-    var tmp = '{ "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + tagText + '": ["' + resourceID + '"]}}';
+    var tmp = '{ "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
 
     var args = JSON.parse(tmp);
     API.deleteTags(args, null, function(req, status, err) {
@@ -171,7 +171,7 @@ var getAllTagsByUser = function() {
     var userToken = getCookie("token");
     var uniqType = [];
 
-    UI.clearAllMyTags();
+    UI.hideMyTagsFunctionality();
 
     var args = {resource: ["%"], user: userName, token: userToken};
     API.getAllTagsByUser(args, function(origresult) {
@@ -195,15 +195,27 @@ var getAllTagsByUser = function() {
             var myTypes = [];
             tags = GLOBAL.allTags[userName].toString().split(',');
             for (tag in tags) {
-                myTypes.push(tags[tag].split(":")[0]);
+                var kv = tags[tag].split(":");
+                myTypes.push(kv[0]);
             }
 
             var type;
             var myUniq = _.uniq(myTypes);
             for (type in myUniq) {
-                UI.appendMyTag(myUniq[type]);
+                // get the values just for this type
+                var myValues = [];
+                var tags = GLOBAL.allTags[userName].toString().split(',');
+                for (tag in tags) {
+                    var kv = tags[tag].split(":");
+
+                    if ((kv[0] === myUniq[type]) && (!_.isUndefined(kv[1]))) {
+                        myValues.push(kv[1]);
+                    }
+                }
+                UI.createLabelMultiselect(myUniq[type], myValues.join(","), type);
             }
         }
+        UI.toggleMyTags();
 
     }, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
