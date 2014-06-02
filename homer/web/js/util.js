@@ -35,6 +35,13 @@ var getURLParams = function() {
     while ((match = search.exec(query))) {
         var key = decode(match[1]);
         var value = decode(match[2]);
+        if(value === "null") {
+          value = null;
+        } else if(value === "true") {
+          value = true;
+        } else if(value === "false") {
+          value = false;
+        }
         urlParams[key] = value;
     }
     return urlParams;
