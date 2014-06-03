@@ -17,19 +17,19 @@ var searchButtons = $("#search-buttons");
 
 queryBox.keypress(function(e)
 {
-if (e.keyCode == 13)
-handleEnter();
+    if (e.keyCode == 13)
+        handleEnter();
 });
 
 // UI object/namespace
 var UI = {};
 
 UI.generateButtons = function() {
-  API.getKinds({}, function(data) {
-    UI.defaultKind = data.defaultKind;
+    API.getKinds({}, function(data) {
+        UI.defaultKind = data.defaultKind;
 
-    var availableKinds = _(data.kinds);
-    var buttonDescriptions = _(UI.buttons);
+        var availableKinds = _(data.kinds);
+        var buttonDescriptions = _(UI.buttons);
 
         _.forIn(data.kinds, function(spec, kind) {
             spec.kind = kind; // so the onClick knows what kind it was
@@ -109,8 +109,12 @@ function addLabelToButtons(newLabel) {
     var found = false;
     $(".proteus-labels").each(function() {
         if (type === $(this).attr("name")) {
-            $("#multiselect-" + i).append('<option value="' + value + '">' + value + '</option>');
-            $("#multiselect-" + i).multiselect('rebuild');
+            // don't add the value if it already exists
+            if ($('#multiselect-' + i + ' option[value="' + value + '"]').length == 0) {
+                $("#multiselect-" + i).append('<option value="' + value + '">' + value + '</option>');
+                $("#multiselect-" + i).multiselect('rebuild');
+            }
+
             found = true;
         }
 
@@ -122,6 +126,39 @@ function addLabelToButtons(newLabel) {
     }
 
 }
+
+// delete label from our button bar when they remove one
+/* This needs more thought - can't just remove a type/value because
+ * it may be attached to another document
+ * 
+ function deleteLabelFromButtons(newLabel) {
+ // get the two parts of the label
+ var tmp = newLabel.split(":");
+ var type = tmp[0];
+ var value = tmp[1];
+ 
+ // handle the special case of when they don't enter a TYPE
+ // IF there is no type, add it to the "special" group
+ if (_.isUndefined(value)) {
+ value = type;
+ type = NO_TYPE_CONST();
+ }
+ 
+ var i = 0; // counter to get uniq elements
+ // see if there is a matching button
+ 
+ $(".proteus-labels").each(function() {
+ if (type === $(this).attr("name")) {
+ // ???? ONLY remove if it's not used ANYWHERE else
+ $('#multiselect-' + i + ' option[value="' + value + '"]').remove();
+ $("#multiselect-" + i).multiselect('rebuild');
+ }
+ i += 1;
+ });
+ 
+ }
+ */
+
 /**
  * Renders search results into UI after current results
  */
@@ -143,6 +180,9 @@ UI.appendResults = function(queryTerms, results) {
             afterTagRemoved: function(event, ui) {
 
                 deleteTag(ui.tagLabel, result.name);
+                // update the buttons
+                //deleteLabelFromButtons(ui.tagLabel);
+
                 return true;
             },
             beforeTagAdded: function(event, ui) {
@@ -236,15 +276,16 @@ UI.renderTags = function(result) {
 UI.hideMyTagsFunctionality = function() {
     $("#my-tags").html("");
     $("#toggle-my-tags-img").hide();
-    $("#my-tags").hide();
+    $("#my-tags-container").hide();
 };
+
 UI.toggleMyTags = function() {
     // if no one is loged in, we don't show anything
     if (getCookie("username") === "") {
         UI.hideMyTagsFunctionality();
         return;
     }
-    var ele = $("#my-tags");
+    var ele = $("#my-tags-container");
     if (ele.is(":visible")) {
         $("#toggle-my-tags-img").attr("src", "/images/down_arrows.png");
         ele.hide();
@@ -255,7 +296,6 @@ UI.toggleMyTags = function() {
     }
     $("#toggle-my-tags-img").show();
 };
-
 
 UI.createLabelMultiselect = function(type, valueList, index) {
     // note we're using the index value as part of the ID because the
@@ -281,5 +321,24 @@ UI.createLabelMultiselect = function(type, valueList, index) {
         buttonLabel: function(options, select) {
             return  this.nonSelectedText + ' <b class="caret"></b>';
         }
+    });
+};
+
+UI.addLabelActionButtons = function() {
+    $("#search-labels-button").html("");
+    $("#search-labels-button").append('<input id="ui-label-search" type="button" onclick="getResourcesForLabels();" value="Search Labels">');
+    $("#search-labels-button").append('<input id="ui-label-clear" type="button" onclick="UI.clearSelectedLabels();" value="Clear Selections">');
+}
+
+UI.clearSelectedLabels = function() {
+    var i = 0; // counter to get uniq elements
+
+    $(".proteus-labels").each(function() {
+
+        $('option', $('#multiselect-' + i)).each(function(element) {
+            $('#multiselect-' + i).multiselect('deselect', $(this).val());
+        });
+        $("#multiselect-" + i).multiselect('refresh'); // this clears the "select all" option
+        i += 1;
     });
 };

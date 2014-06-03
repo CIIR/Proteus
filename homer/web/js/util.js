@@ -80,8 +80,8 @@ function getSelectedLabels() {
         i += 1;
     });
     //console.log(JSON.stringify(selectedLabels));
+    return selectedLabels;
 
-    getResourcesForLabels(selectedLabels);
 
 }
 

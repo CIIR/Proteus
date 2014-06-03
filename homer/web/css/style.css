@@ -137,7 +137,7 @@ img.thumbnail {
     background-color: red;
 }
 
-#my-tags {
+#my-tags-container {
     background-color:   lightgrey;
     padding: 5px;
 }
@@ -148,4 +148,4 @@ img.thumbnail {
 .type-button{
     margin: 2px 5px 2px 0;
 }
- 
+

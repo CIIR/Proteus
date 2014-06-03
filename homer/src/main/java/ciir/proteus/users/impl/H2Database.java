@@ -19,6 +19,7 @@ import java.util.logging.Logger;
  */
 public class H2Database implements UserDatabase {
 
+    private static final Logger log = Logger.getLogger(H2Database.class.getName());
     private Connection conn;
     private PreparedStatement getAllTagsSQL = null;
     private PreparedStatement getResourcesForLabelsAndUserSQL = null;
@@ -316,9 +317,11 @@ public class H2Database implements UserDatabase {
             int numRows = stmt.executeUpdate();
 
             if (numRows == 0) {
+                log.info("user: '" + creds.user + "', resource: '" + resource + "', tag: '" + tag + "'");
                 throw new NoTuplesAffected();
             }
         } catch (SQLException e) {
+            log.info("user: '" + creds.user + "', resource: '" + resource + "', tag: '" + tag + "'");
             throw new RuntimeException(e);
         }
     }

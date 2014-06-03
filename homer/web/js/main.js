@@ -215,6 +215,7 @@ var getAllTagsByUser = function() {
                 UI.createLabelMultiselect(myUniq[type], myValues.join(","), type);
             }
         }
+        UI.addLabelActionButtons();
         UI.toggleMyTags();
 
     }, function(req, status, err) {
@@ -224,16 +225,18 @@ var getAllTagsByUser = function() {
 };
 
 
-var getResourcesForLabels = function(labelList) {
+var getResourcesForLabels = function() {
     var userName = getCookie("username");
     var userToken = getCookie("token");
 
-    var tmp = '{ "user": "' + userName + '", "token" :"' + userToken + '", "labels":  ' + JSON.stringify(labelList) + '}';
+    var labelList = getSelectedLabels();
+
+    var tmp = '{ "user": "' + userName + '", "token" :"' + userToken + '", "kind" : "' + UI.defaultKind + '", "labels":  ' + JSON.stringify(labelList) + '}';
     console.log(tmp);
+    UI.clearError();
+    UI.clearResults();
     var args = JSON.parse(tmp);
-    API.getResourcesForLabels(args, function(data) {
-        console.log(JSON.stringify(data));
-    }, function(req, status, err) {
+    API.getResourcesForLabels(args, onSearchSuccess, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
         throw err;
     });
