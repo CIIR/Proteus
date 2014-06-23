@@ -57,7 +57,7 @@ public interface UserDatabase {
 
     public Map<String, List<String>> getTags(Credentials creds, List<String> resources) throws DBError;
 
-  public Map<String, List<String>> getAllTags(String resource) throws DBError;
+    public Map<String, List<String>> getAllTags(String resource) throws DBError;
 
     public Map<String, Map<String, List<String>>> getAllTags(List<String> resources) throws DBError;
 
@@ -66,4 +66,6 @@ public interface UserDatabase {
     public void addTag(Credentials creds, String resource, String tag) throws DBError;
 
     public List<String> getResourcesForLabels(String user, List<String> labels) throws DBError;
+
+    public List<String> getResourcesForLabels(String user, List<String> labels, Integer numResults, Integer startIndex) throws DBError;
 }

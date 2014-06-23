@@ -35,12 +35,12 @@ var getURLParams = function() {
     while ((match = search.exec(query))) {
         var key = decode(match[1]);
         var value = decode(match[2]);
-        if(value === "null") {
-          value = null;
-        } else if(value === "true") {
-          value = true;
-        } else if(value === "false") {
-          value = false;
+        if (value === "null") {
+            value = null;
+        } else if (value === "true") {
+            value = true;
+        } else if (value === "false") {
+            value = false;
         }
         urlParams[key] = value;
     }
@@ -71,28 +71,11 @@ var highlightText = function(queryTerms, text, beforeTag, afterTag) {
 };
 
 function getSelectedLabels() {
-    var selectedLabels = [];
-    var i = 0; // counter to get uniq elements
-    // get all the elements with the class "proteus-labels"
-    $(".proteus-labels").each(function() {
-        var type = $(this).attr("name");
 
-        // have to go through by index. Ideally we'd the TYPE as an identifier,
-        // but they can have spaces
-        var selected = $($("#multiselect-" + i), 'option:selected');
-        for (var value in selected.val()) {
-            //console.log(selected.val()[value]);
-            selectedLabels.push(type + ":" + selected.val()[value]);
-        }
-        i += 1;
-    });
-    //console.log(JSON.stringify(selectedLabels));
-    return selectedLabels;
-
+    //  console.log("LABELS: " + $('#multiselect-all').val());
+    return($('#multiselect-all').val());
 
 }
-
-
 
 // users have the ability to just type a value w/o a type,
 // in order to let them choose these, we need to "group" them

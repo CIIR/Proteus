@@ -23,6 +23,7 @@ public class H2Database implements UserDatabase {
     private Connection conn;
     private PreparedStatement getAllTagsSQL = null;
     private PreparedStatement getResourcesForLabelsAndUserSQL = null;
+    private PreparedStatement getResourcesForLabelsAndUserWithLimitSQL = null;
 
     public H2Database(Parameters conf) {
         try {
@@ -46,8 +47,10 @@ public class H2Database implements UserDatabase {
             // using LIKE for user so we can pass in '%' and get ALL of them.
 
             // perpared statements don't like "in(...)" clauses, hence the cryptic SQL to do this:
-            //  SELECT DISTINCT resource FROM tags WHERE user LIKE ? AND tag IN (?)  
-            getResourcesForLabelsAndUserSQL = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t inner join tags on t.x=tags.tag AND tags.user LIKE ? ");
+            //  SELECT DISTINCT resource FROM tags WHERE user LIKE ? AND tag IN (?) 
+            // we need to ORDER BY to ensure the result sets will always be in the same order.
+            getResourcesForLabelsAndUserWithLimitSQL = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.tag AND tags.user LIKE ? ORDER BY resource LIMIT ? OFFSET ?");
+            getResourcesForLabelsAndUserSQL = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.tag AND tags.user LIKE ? ORDER BY resource");
 
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
@@ -344,6 +347,11 @@ public class H2Database implements UserDatabase {
 
     @Override
     public List<String> getResourcesForLabels(String user, List<String> labels) throws DBError {
+        return getResourcesForLabels(user, labels, -1, -1);
+    }
+
+    @Override
+    public List<String> getResourcesForLabels(String user, List<String> labels, Integer numResults, Integer startIndex) throws DBError {
 
         try {
             List<String> resources = new ArrayList<String>();
@@ -352,10 +360,19 @@ public class H2Database implements UserDatabase {
             for (String label : labels) {
                 objLabels[i++] = label;
             }
+            ResultSet results = null;
 
-            getResourcesForLabelsAndUserSQL.setObject(1, objLabels);
-            getResourcesForLabelsAndUserSQL.setString(2, user);
-            ResultSet results = getResourcesForLabelsAndUserSQL.executeQuery();
+            if (numResults == -1) {
+                getResourcesForLabelsAndUserSQL.setObject(1, objLabels);
+                getResourcesForLabelsAndUserSQL.setString(2, user);
+                results = getResourcesForLabelsAndUserSQL.executeQuery();
+            } else {
+                getResourcesForLabelsAndUserWithLimitSQL.setObject(1, objLabels);
+                getResourcesForLabelsAndUserWithLimitSQL.setString(2, user);
+                getResourcesForLabelsAndUserWithLimitSQL.setInt(3, numResults);
+                getResourcesForLabelsAndUserWithLimitSQL.setInt(4, startIndex);
+                results = getResourcesForLabelsAndUserWithLimitSQL.executeQuery();
+            }
             while (results.next()) {
                 String res = results.getString(1);
                 resources.add(res);

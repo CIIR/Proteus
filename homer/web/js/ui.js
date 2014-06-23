@@ -13,24 +13,19 @@ var queryBox = $("#ui-search");
 var loginInfo = $("#ui-login-info");
 var moreButton = $("#ui-go-more");
 var searchButtons = $("#search-buttons");
-
-
 queryBox.keypress(function(e)
 {
     if (e.keyCode == 13)
         handleEnter();
 });
-
 // UI object/namespace
 var UI = {};
-
 UI.generateButtons = function() {
+
     API.getKinds({}, function(data) {
         UI.defaultKind = data.defaultKind;
-
         var availableKinds = _(data.kinds);
         var buttonDescriptions = _(UI.buttons);
-
         _.forIn(data.kinds, function(spec, kind) {
             spec.kind = kind; // so the onClick knows what kind it was
             if (!spec.button) {
@@ -44,42 +39,34 @@ UI.generateButtons = function() {
         });
     });
 };
-
 UI.clear = function() {
     UI.clearResults();
     UI.clearError();
     viewResourceDiv.html('');
 };
-
 UI.clearResults = function() {
     viewResourceDiv.hide();
     resultsDiv.html('');
     resultsDiv.show();
     moreButton.hide();
 };
-
 UI.showProgress = function(str) {
     progressDiv.html(str);
 };
-
 UI.showError = function(str) {
     errorDiv.html(str);
     errorDiv.show();
 };
-
 UI.clearError = function() {
     errorDiv.html('');
     errorDiv.hide();
 };
-
 UI.getQuery = function() {
     return queryBox.val();
 };
-
 UI.setQuery = function(q) {
     queryBox.val(q);
 };
-
 /**
  * Render a single search result.
  * @see render.js
@@ -89,14 +76,13 @@ UI.makeResult = function(queryTerms, result) {
     return '<div class="result">' + renderer(queryTerms, result) + '</div>';
 };
 
-
 // added labels to our button bar when they add a new one
+
 function addLabelToButtons(newLabel) {
     // get the two parts of the label
     var tmp = newLabel.split(":");
     var type = tmp[0];
     var value = tmp[1];
-
     // handle the special case of when they don't enter a TYPE
     // IF there is no type, add it to the "special" group
     if (_.isUndefined(value)) {
@@ -104,70 +90,30 @@ function addLabelToButtons(newLabel) {
         type = NO_TYPE_CONST();
     }
 
-    var i = 0; // counter to get uniq elements
-    // see if there is a matching button
-    var found = false;
-    $(".proteus-labels").each(function() {
-        if (type === $(this).attr("name")) {
-            // don't add the value if it already exists
-            if ($('#multiselect-' + i + ' option[value="' + value + '"]').length == 0) {
-                $("#multiselect-" + i).append('<option value="' + value + '">' + value + '</option>');
-                $("#multiselect-" + i).multiselect('rebuild');
-            }
+    newLabel = type + ":" + value;
 
-            found = true;
+    // see if that value is in the list
+    if ($('#multiselect-all optgroup[label="' + type + '"]').length == 0) {
+        $("#multiselect-all").append('<optgroup  label="' + type + '"><option value="' + newLabel + '">' + value + '</option></optgroup >');
+        $("#multiselect-all").multiselect('rebuild');
+    } else {
+        // see if the value exists
+        if ($('#multiselect-all optgroup[label="' + type + '"] option[value="' + newLabel + '"]').length == 0) {
+            $('#multiselect-all optgroup[label="' + type + '"]').append('<option value="' + newLabel + '">' + value + '</option>');
+            $("#multiselect-all").multiselect('rebuild');
         }
-
-        i += 1;
-    });
-    if (!found) {
-        // add a new one
-        UI.createLabelMultiselect(type, value, i);
     }
 
 }
-
-// delete label from our button bar when they remove one
-/* This needs more thought - can't just remove a type/value because
- * it may be attached to another document
- * 
- function deleteLabelFromButtons(newLabel) {
- // get the two parts of the label
- var tmp = newLabel.split(":");
- var type = tmp[0];
- var value = tmp[1];
- 
- // handle the special case of when they don't enter a TYPE
- // IF there is no type, add it to the "special" group
- if (_.isUndefined(value)) {
- value = type;
- type = NO_TYPE_CONST();
- }
- 
- var i = 0; // counter to get uniq elements
- // see if there is a matching button
- 
- $(".proteus-labels").each(function() {
- if (type === $(this).attr("name")) {
- // ???? ONLY remove if it's not used ANYWHERE else
- $('#multiselect-' + i + ' option[value="' + value + '"]').remove();
- $("#multiselect-" + i).multiselect('rebuild');
- }
- i += 1;
- });
- 
- }
- */
 
 /**
  * Renders search results into UI after current results
  */
 
 
-UI.appendResults = function(queryTerms, results) {
+UI.appendResults = function(queryTerms, results, usingLabels) {
 
     UI.showProgress("Ajax response received!");
-
     _(results).forEach(function(result) {
         console.debug("result name: " + result.name);
         resultsDiv.append(UI.makeResult(queryTerms, result));
@@ -209,9 +155,17 @@ UI.appendResults = function(queryTerms, results) {
         $(".read-only-tags").tagit({
             readOnly: true
         });
-        moreButton.show();
-    });
 
+        // don't show the more button if we searched within labels - cuz
+        // we return ALL results (for now)
+
+        if (usingLabels) {
+            moreButton.hide();
+        } else {
+            moreButton.show();
+        }
+
+    });
 }
 ;
 /**
@@ -252,7 +206,6 @@ UI.renderTags = function(result) {
     var ro_html = ''; // read only tags
 
     var username = getCookie("username");
-
     for (var user in result.tags) {
 
         tags = result.tags[user].toString().split(',');
@@ -271,14 +224,10 @@ UI.renderTags = function(result) {
 
     return '<div><ul id="tags_' + result.name + '">' + my_html + '</ul>' + ro_html + '</div>';
 };
-
 // used when we don't want to dispaly any of the "my tags" features
 UI.hideMyTagsFunctionality = function() {
-    $("#my-tags").html("");
-    $("#toggle-my-tags-img").hide();
-    $("#my-tags-container").hide();
+    $("#all-my-tags").html("");
 };
-
 UI.toggleMyTags = function() {
     // if no one is loged in, we don't show anything
     if (getCookie("username") === "") {
@@ -296,39 +245,46 @@ UI.toggleMyTags = function() {
     }
     $("#toggle-my-tags-img").show();
 };
+// param is array of uniq types
+UI.createLabelMultiselect = function(myUniqTypes) {
 
-UI.createLabelMultiselect = function(type, valueList, index) {
-    // note we're using the index value as part of the ID because the
-    // actual values could have spaces.
-    var html = '<select id="multiselect-' + index + '" class="proteus-labels" multiple="multiple" name="' + type + '">';
-
-    var tags = valueList.split(',');
-    for (tag in tags) {
-        html += '<option value="' + tags[tag] + '">' + tags[tag] + '</option>';
+    var userName = getCookie("username");
+    if (userName === "") {
+        $("#all-my-tags").html("");
+        return;
     }
 
-    html += ' </select>';
+    var html = '<select id="multiselect-all" class="proteus-labels" multiple="multiple" >';
+    for (type in myUniqTypes) {
 
-    $("#my-tags").append(html);
-
-    $('#multiselect-' + index).multiselect({
-        includeSelectAllOption: true,
-        nonSelectedText: type,
-        nSelectedText: type,
-        buttonText: function(options, select) {
-            return  this.nonSelectedText + ' <b class="caret"></b>';
-        },
-        buttonLabel: function(options, select) {
-            return  this.nonSelectedText + ' <b class="caret"></b>';
+        html += '<optgroup label="' + myUniqTypes[type] + '">'
+        // get the values just for this type
+        var myValues = [];
+        var tags = GLOBAL.allTags[userName].toString().split(',');
+        for (tag in tags) {
+            var kv = tags[tag].split(":");
+            if ((kv[0] === myUniqTypes[type]) && (!_.isUndefined(kv[1]))) {
+                myValues.push(kv[1]);
+            }
         }
-    });
-};
 
-UI.addLabelActionButtons = function() {
-    $("#search-labels-button").html("");
-    $("#search-labels-button").append('<input id="ui-label-search" type="button" onclick="getResourcesForLabels();" value="Search Labels">');
-    $("#search-labels-button").append('<input id="ui-label-clear" type="button" onclick="UI.clearSelectedLabels();" value="Clear Selections">');
+        // var tags = valueList.split(',');
+        for (tag in myValues) {
+            // note we inlclude the "type" part so we can get the values easily later
+            html += '<option value="' + myUniqTypes[type] + ":" + myValues[tag] + '">' + myValues[tag] + '</option>';
+        }
+        html += '</optgroup>';
+    }
+    html += ' </select>';
+    $("#all-my-tags").append(html);
+    $('#multiselect-all').multiselect(
+            {
+                includeSelectAllOption: true,
+            }
+    );
 }
+;
+
 
 UI.clearSelectedLabels = function() {
     var i = 0; // counter to get uniq elements

@@ -30,16 +30,19 @@ public class GetResourcesForLabels extends DBAction {
 
     @Override
     public Parameters handle(String method, String path, Parameters reqp) throws HTTPError {
+
         Credentials creds = Credentials.fromJSON(reqp);
         List<String> labels = reqp.getAsList("labels", String.class);
         String kind = reqp.get("kind", system.defaultKind);
+        int numResults = (int) reqp.get("n", 10);
+        int skipResults = (int) reqp.get("skip", 0);
 
         log.info("GetResourcesForLabels creds=" + creds + " labels=" + labels + " kind=" + kind);
         List<String> resList = null;
         Parameters resources = new Parameters();
         try {
 
-            resList = userdb.getResourcesForLabels(creds.user, labels);
+            resList = userdb.getResourcesForLabels(creds.user, labels, numResults, skipResults);
 
             // now get results
             Parameters param = new Parameters();

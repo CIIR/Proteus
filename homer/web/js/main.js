@@ -81,7 +81,6 @@ UI.onClickSearchButton = function(buttonDesc) {
 UI.setMoreHandler(function() {
     var prev = Model.request;
     prev.skip = Model.results.length;
-    prev.n = 10;
     doActionRequest(prev);
 });
 
@@ -149,7 +148,6 @@ var addTag = function(tagText, resourceID) {
 
 };
 
-
 var deleteTag = function(tagText, resourceID) {
     var userName = getCookie("username");
     var userToken = getCookie("token");
@@ -163,7 +161,6 @@ var deleteTag = function(tagText, resourceID) {
     });
 
 };
-
 
 // function to get all the tags for all users.
 var getAllTagsByUser = function() {
@@ -201,6 +198,7 @@ var getAllTagsByUser = function() {
 
             var type;
             var myUniq = _.uniq(myTypes);
+            UI.createLabelMultiselect(myUniq);
             for (type in myUniq) {
                 // get the values just for this type
                 var myValues = [];
@@ -212,11 +210,8 @@ var getAllTagsByUser = function() {
                         myValues.push(kv[1]);
                     }
                 }
-                UI.createLabelMultiselect(myUniq[type], myValues.join(","), type);
             }
         }
-        UI.addLabelActionButtons();
-        UI.toggleMyTags();
 
     }, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
@@ -224,24 +219,6 @@ var getAllTagsByUser = function() {
     });
 };
 
-
-var getResourcesForLabels = function() {
-    var userName = getCookie("username");
-    var userToken = getCookie("token");
-
-    var labelList = getSelectedLabels();
-
-    var tmp = '{ "user": "' + userName + '", "token" :"' + userToken + '", "kind" : "' + UI.defaultKind + '", "labels":  ' + JSON.stringify(labelList) + '}';
-    console.log(tmp);
-    UI.clearError();
-    UI.clearResults();
-    var args = JSON.parse(tmp);
-    API.getResourcesForLabels(args, onSearchSuccess, function(req, status, err) {
-        UI.showError("ERROR: ``" + err + "``");
-        throw err;
-    });
-
-};
 
 // get all tags grouped by user on start up
 getAllTagsByUser();

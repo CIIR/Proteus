@@ -36,21 +36,18 @@
         <script src="js/bootstrap-multiselect.js"></script>
         <link href="css/bootstrap-multiselect.css" rel="stylesheet" type="text/css">
 
-        <script>
-            $(document).ready(function() {
-                UI.hideMyTagsFunctionality();
-            });
-        </script>
     </head>
     <body>
 
         <div class="container-fluid" id="ui">
-            <span id="title">Proteus</span>
+            <span id="title">Proteus</span> 
+
             <span id="search-buttons">
+                <span id="all-my-tags"> </span>
                 <input id="ui-search" placeholder="Search..." type="search" />
             </span>
             <div id="user-info">
-                <span id="toggle-my-tags"><img id="toggle-my-tags-img" src="/images/up_arrows.png" onclick="UI.toggleMyTags()"></span>
+
                 <span id="login-form">
                     <span id="ui-login-info"></span>
                 </span>
@@ -60,7 +57,7 @@
         <div id="request"></div>
         <div id="view-resource"></div>
         <div id="all-tags"></div>
-        <div id="my-tags-container"> <span id="my-tags"></span><span id="search-labels-button"></span></div>
+
         <div id="results"></div>
 
         <div id="results"></div>

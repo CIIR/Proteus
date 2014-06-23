@@ -67,27 +67,21 @@ body {
     float:right;
     height: 20pt;
     vertical-align: middle;
+    width: 50%;
 } 
+
+
+#ui-search {
+    width: 50%;
+}
 #login-form-text{
     color: #fff;
     text-align: right;
 }
 #login-form {
-
-
     float:right;
     height: 20pt;
     vertical-align: middle;
-
-}
-
-#toggle-my-tags{
-    color: #fff;
-    text-align: right;
-    float:left;
-    height: 20pt;
-    vertical-align: middle;
-
 }
 
 #login-form a:hover, #login-form  a:visited {
@@ -137,11 +131,6 @@ img.thumbnail {
     background-color: red;
 }
 
-#my-tags-container {
-    background-color:   lightgrey;
-    padding: 5px;
-}
-
 #tag-values{
     background-color: dimgray;
 }
@@ -149,3 +138,11 @@ img.thumbnail {
     margin: 2px 5px 2px 0;
 }
 
+/* styles for the drop down list by the search edit box */
+.multiselect-item {
+    text-align: left;
+}
+#all-my-tags > div > ul > li  > a > label  
+{
+    text-align: left;
+}
