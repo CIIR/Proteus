@@ -39,20 +39,28 @@
     </head>
     <body>
 
-        <div class="container-fluid" id="ui">
-            <span id="title">Proteus</span> 
+        <div class="container-fluid " id="ui">
+            <div class="row clearfix">
+                <div id="title" class="col-md-2 column">Proteus</div>
+                <div class="col-md-10 column right-align">
+                    <div class="row clearfix ">
+                        <div   class="col-md-12 column ">  
+                            <span id="all-my-tags"> </span>
+                            <input id="ui-search" placeholder="Search..." type="search" />
+                            <span id="search-buttons">  </span>
+                        </div>
+                    </div>
+                    <div class="row clearfix  ">
+                        <div   class="col-md-12 column ">  
+                            <span id="login-formx"  >      </span>
+                            <span id="ui-login-info" >    </span>
+                        </div>
+                    </div>
+                </div>
 
-            <span id="search-buttons">
-                <span id="all-my-tags"> </span>
-                <input id="ui-search" placeholder="Search..." type="search" />
-            </span>
-            <div id="user-info">
-
-                <span id="login-form">
-                    <span id="ui-login-info"></span>
-                </span>
             </div>
         </div>
+
         <div id="error"></div>
         <div id="request"></div>
         <div id="view-resource"></div>

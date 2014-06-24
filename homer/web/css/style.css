@@ -47,13 +47,20 @@ body {
 }
 
 #ui {
+
     margin: 0;
     padding-bottom: 10pt;
     padding-top: 10pt;
     background-color: #009;
+
+} 
+
+#ui-search {
+    width: 50%;
 }
 
 #title {
+    float: left;
     margin: 0;
     vertical-align: middle;
     padding-right: 20pt;
@@ -62,18 +69,13 @@ body {
     height: 20pt;
     color: #fff;
 }
-#search-buttons {
+#user-info {
     text-align: right;
     float:right;
     height: 20pt;
     vertical-align: middle;
-    width: 50%;
 } 
 
-
-#ui-search {
-    width: 50%;
-}
 #login-form-text{
     color: #fff;
     text-align: right;
@@ -86,10 +88,6 @@ body {
 
 #login-form a:hover, #login-form  a:visited {
     color: #fff;
-}
-
-#ui {
-    vertical-align: middle;
 }
 
 .result {
@@ -146,3 +144,7 @@ img.thumbnail {
 {
     text-align: left;
 }
+.right-align{
+    text-align: right;
+}
+
