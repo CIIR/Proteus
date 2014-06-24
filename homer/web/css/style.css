@@ -80,6 +80,7 @@ body {
     color: #fff;
     text-align: right;
 }
+/*
 #login-form {
     float:right;
     height: 20pt;
@@ -89,7 +90,7 @@ body {
 #login-form a:hover, #login-form  a:visited {
     color: #fff;
 }
-
+*/
 .result {
     /*border-bottom: 1px solid grey;*/
     padding-left: 20pt;

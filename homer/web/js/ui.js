@@ -280,6 +280,7 @@ UI.createLabelMultiselect = function(myUniqTypes) {
     $('#multiselect-all').multiselect(
             {
                 includeSelectAllOption: true,
+                buttonWidth: '200px'
             }
     );
 }
