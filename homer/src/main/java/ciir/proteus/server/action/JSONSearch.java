@@ -36,8 +36,10 @@ public class JSONSearch implements JSONHandler {
         List<String> resList = null;
         if (reqp.containsKey("labels")) {
             labels = reqp.getAsList("labels", String.class);
-            // we could do the "N at a time" thing IFF there is no query.
-            resList = system.userdb.getResourcesForLabels(user, labels); // get all
+            // we pass in labels on the URL so it's possible that somenoe could share
+            // a URL with you that has THEIR tags. So we get the same results, we'll use the
+            // "labelOwner" to get the labels. 
+            resList = system.userdb.getResourcesForLabels(reqp.get("labelOwner", user), labels); // get all
             log.info("We have labels: " + labels.toString());
         } else {
             // if we're searching by labels display ALL so only check if we 

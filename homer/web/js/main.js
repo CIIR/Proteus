@@ -45,12 +45,13 @@ UI.setReadyHandler(function() {
 
     UI.setUserName(getCookie("username"));
 
-    if (params.action == "search" && !isBlank(params.q)) {
+    if (params.action == "search" && (!isBlank(params.q) || !isBlank(params.labels))) {
         UI.setQuery(params.q);
         doActionRequest(params);
     } else if (params.action == "view") {
         doActionRequest(params);
     }
+
 });
 
 /**

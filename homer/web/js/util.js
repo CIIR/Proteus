@@ -15,10 +15,22 @@ var isBlank = function(str) {
 };
 
 var pushURLParams = function(params) {
-    var urlParams = "?" + _(params).map(function(val, key) {
-        return encodeURIComponent(key) + "=" + encodeURIComponent(val);
+    var urlParams = "?" + _(params).map(function(vals, key) {
+        //console.log(key + ":" + vals);
+        // some values - like labels - can have multiple comma 
+        // separated value. If these are passed like "labels=a,b,c"
+        // they get interpreted as one value. So if there are multiples
+        // we'll pass multiple key/value pairs like: labels=a&labels=b&labels=c
+        return  _.map(vals.toString().split(","), function(val) {
+            //console.log("          " + key + ":" + val);
+            return encodeURIComponent(key) + "=" + encodeURIComponent(val);
+        }).join('&');
     }).join('&');
 
+    // if there are labels AND we don't have a "labelOwner" param, add the user that owns them
+    if (!_.isUndefined(params.labels) && urlParams.indexOf("labelOwner") == -1) {
+        urlParams += "&labelOwner=" + getCookie("username");
+    }
     History.pushState(null, null, urlParams);
 };
 
@@ -42,7 +54,13 @@ var getURLParams = function() {
         } else if (value === "false") {
             value = false;
         }
-        urlParams[key] = value;
+        // it's possible there are multiple values for things such as labels
+        if (_.isUndefined(urlParams[key])) {
+            urlParams[key] = value;
+        } else {
+            // urlParams[key] += "&" + key + "=" + value;
+            urlParams[key] += "," + value;
+        }
     }
     return urlParams;
 };

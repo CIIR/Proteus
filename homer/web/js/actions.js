@@ -10,6 +10,21 @@ var doSearchRequest = function(args) {
         metadata: true
     };
 
+    // we could have args passed in esp if they're reusing an URL
+    if (_.isUndefined(args.labels)) {
+        var labelList = getSelectedLabels();
+
+        if (!_.isEmpty(labelList)) {
+            var labelArgs = '{ "labels":  ' + JSON.stringify(labelList) + '}';
+            args = _.merge(args, JSON.parse(labelArgs));
+        }
+    } else {
+        // format them correctly
+        var labelArgs = '{ "labels":  ' + JSON.stringify(args.labels.split(",")) + '}';
+        args.labels = "";
+        args = _.merge(args, JSON.parse(labelArgs));
+    }
+
     // if we didn't ask for more
     if (!args.skip || args.skip === 0) {
         Model.clearResults();
@@ -30,14 +45,7 @@ var doSearchRequest = function(args) {
     }
     var actualArgs = _.merge(defaultArgs, args);
 
-    var labelList = getSelectedLabels();
-
-    if (!_.isEmpty(labelList)) {
-        var labelArgs = '{ "labels":  ' + JSON.stringify(labelList) + '}';
-        actualArgs = _.merge(actualArgs, JSON.parse(labelArgs));
-    }
-
-    if ((!actualArgs.q || isBlank(actualArgs.q)) && (_.isEmpty(labelList))) {
+    if ((!actualArgs.q || isBlank(actualArgs.q)) && (_.isEmpty(actualArgs.labels))) {
         UI.showProgress("Query is blank!");
         return;
     }
@@ -84,6 +92,13 @@ var onSearchSuccess = function(data) {
     var usingLabels = false;
     if (!_.isUndefined(data.request.labels)) {
         usingLabels = true;
+
+        // if the labels are on the URL AND they're ours, select them
+        if (!_.isUndefined(data.request.labelOwner) && data.request.labelOwner == getCookie("username"))
+            for (var val in data.request.labels) {
+                $("#multiselect-all").multiselect('select', data.request.labels[val]);
+
+            }
     }
     UI.appendResults(data.queryTerms, newResults, usingLabels);
 };
