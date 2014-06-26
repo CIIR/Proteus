@@ -14,37 +14,16 @@ var loginInfo = $("#ui-login-info");
 var moreButton = $("#ui-go-more");
 var searchButtons = $("#search-buttons");
 queryBox.keypress(function(e)
-<<<<<<< HEAD
-    {
-    if (e.keyCode == 13)
-    handleEnter();
-    });
-
-=======
 {
     if (e.keyCode == 13)
         handleEnter();
 });
->>>>>>> upstream/master
+
 // UI object/namespace
 var UI = {};
 UI.generateButtons = function() {
 
-<<<<<<< HEAD
 
-      _.forIn(data.kinds, function(spec, kind) {
-        spec.kind = kind; // so the onClick knows what kind it was
-        if (!spec.button) {
-        UI.showError("You need to specify a \"button\" display attribute for kind \"" + kind + "\"");
-        }
-        var button = $('<input type="button" value="' + spec.button + '" />');
-        button.click(function() {
-          UI.onClickSearchButton(spec);
-          });
-        searchButtons.append(button)
-        });
-      });
-=======
     API.getKinds({}, function(data) {
         UI.defaultKind = data.defaultKind;
         var availableKinds = _(data.kinds);
@@ -61,7 +40,6 @@ UI.generateButtons = function() {
             searchButtons.append(button)
         });
     });
->>>>>>> upstream/master
 };
 UI.clear = function() {
     UI.clearResults();
@@ -91,75 +69,6 @@ UI.getQuery = function() {
 UI.setQuery = function(q) {
     queryBox.val(q);
 };
-<<<<<<< HEAD
-
-
-/**
-* Renders search results into UI after current results
- */
-
-
-UI.appendResults = function(queryTerms, results) {
-  UI.showProgress("Ajax response received!");
-    _(results).forEach(function(result) {
-        console.debug("result name: " + result.name);
-      
-        var renderer = getResultRenderer(result.viewKind);
-        var resDiv = $('<div>');
-          resDiv.attr('class', 'result');
-          resDiv.attr('id',result.name);
-          $(resDiv).append(renderer(queryTerms, result));
-      resultsDiv.append(resDiv);
-
-
-      var tagName = "#tags_" + result.name;
-
-      $(tagName).tagit({
-availableTags: GLOBAL.uniqTypes,
-autocomplete: {delay: 0, minLength: 0},
-allowSpaces: true,
-placeholderText: "Add a Label",
-// uniqueID: result.name
-
-afterTagRemoved: function(event, ui) {
-
-deleteTag(ui.tagLabel, result.name);
-return true;
-
-},
-beforeTagAdded: function(event, ui) {
-if (!ui.duringInitialization) {
-// only ask "are you sure" if this is a NEW tag TYPE
-tmp = ui.tagLabel.split(":");
-
-var res = true;
-if (tmp.length === 2 && $.inArray(tmp[0], GLOBAL.uniqTypes) === -1) {
-res = confirm("Are you sure you want to create the label type \"" + tmp[0] + "\"?");
-// add the new type to our list
-GLOBAL.uniqTypes.push(tmp[0]);
-UI.appendMyTag(tmp[0]);
-
-}
-if (res == true) {
-  addTag(ui.tagLabel, result.name);
-}
-return res;
-
-} else {
-  return true;
-}
-}
-});
-$(".read-only-tags").tagit({
-readOnly: true
-});
-
-moreButton.show();
-
-});
-};
-
-=======
 /**
  * Render a single search result.
  * @see render.js
@@ -257,7 +166,6 @@ UI.appendResults = function(queryTerms, results, usingLabels) {
         } else {
             moreButton.show();
         }
->>>>>>> upstream/master
 
     });
 }
@@ -266,32 +174,15 @@ UI.appendResults = function(queryTerms, results, usingLabels) {
  * A set of functions for reacting to events in other, more general code.
  */
 UI.setReadyHandler = function(callback) {
-<<<<<<< HEAD
-  $(document).ready(function() {
-      UI.generateButtons();
-      callback();
-      });
-=======
     $(document).ready(function() {
         UI.generateButtons();
         callback();
     });
->>>>>>> upstream/master
 };
 UI.setMoreHandler = function(callback) {
     moreButton.click(callback);
 };
 UI.setUserName = function(user) {
-<<<<<<< HEAD
-  if (!user) {
-    UI.clearUserName();
-  } else {
-    loginInfo.html("Welcome " + user + " <input id='ui-go-logout' type='button' value='LogOut' />");
-    $("#ui-go-logout").click(function() {
-        logOut();
-        });
-  }
-=======
     if (!user) {
         UI.clearUserName();
     } else {
@@ -300,19 +191,8 @@ UI.setUserName = function(user) {
             logOut();
         });
     }
->>>>>>> upstream/master
 };
 UI.clearUserName = function() {
-<<<<<<< HEAD
-  loginInfo.html(" <input id='ui-username' type='text' /> " +
-      "<input id='ui-go-login' type='button' value='Login' />");
-  // have to bind click event here because that ID doesn't exist until we do this.
-  $("#ui-go-login").click(function() {
-      var username = $("#ui-username").val();
-      logIn(username);
-      UI.setUserName(username);
-      });
-=======
     loginInfo.html(" <input id='ui-username' type='text' /> " +
             "<input id='ui-go-login' type='button' value='Login' />");
     // have to bind click event here because that ID doesn't exist until we do this.
@@ -321,7 +201,6 @@ UI.clearUserName = function() {
         logIn(username);
         UI.setUserName(username);
     });
->>>>>>> upstream/master
 };
 UI.renderTags = function(result) {
 
