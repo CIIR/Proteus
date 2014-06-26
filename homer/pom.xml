@@ -1,115 +1,113 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>ciir.proteus</groupId>
-  <artifactId>homer</artifactId>
-  <version>0.4-SNAPSHOT</version>
-  <packaging>jar</packaging>
-  <name>homer</name>
-  <url>http://github.com/CIIR/Proteus</url>
-  <description>
-    Contains parsing code extensions for dealing with mbtei-format xml data in Galago.
-  </description>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>ciir.proteus</groupId>
+    <artifactId>homer</artifactId>
+    <version>0.4-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>homer</name>
+    <url>http://github.com/CIIR/Proteus</url>
+    <description>
+        Contains parsing code extensions for dealing with mbtei-format xml data in Galago.
+    </description>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <javaVersion>1.6</javaVersion>
-    <galagoVersion>3.6-SNAPSHOT</galagoVersion>
-    <mainClass>ciir.proteus.build.Main</mainClass>
-  </properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javaVersion>1.6</javaVersion>
+        <galagoVersion>3.7-SNAPSHOT</galagoVersion>
+        <mainClass>ciir.proteus.build.Main</mainClass>
+    </properties>
 
-  <repositories>
-    <repository>
-      <id>edu.umass.ciir.releases</id>
-      <url>http://scm-ciir.cs.umass.edu:8080/nexus/content/repositories/releases</url>
-    </repository>
-    <repository>
-      <id>edu.umass.ciir.snapshots</id>
-      <url>http://scm-ciir.cs.umass.edu:8080/nexus/content/repositories/snapshots</url>
-    </repository>
-  </repositories>
+    <repositories>
+        <repository>
+            <id>edu.umass.ciir.releases</id>
+            <url>http://scm-ciir.cs.umass.edu:8080/nexus/content/repositories/releases</url>
+        </repository>
+        <repository>
+            <id>edu.umass.ciir.snapshots</id>
+            <url>http://scm-ciir.cs.umass.edu:8080/nexus/content/repositories/snapshots</url>
+        </repository>
+    </repositories>
 
-  <dependencies>
+    <dependencies>
 
-    <dependency>
-      <groupId>org.lemurproject.galago</groupId>
-      <artifactId>core</artifactId>
-      <version>${galagoVersion}</version>
-    </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <!--<version>8.1.14.v20131031</version>-->
+            <version>7.6.8.v20121106</version>
+        </dependency>
 
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-server</artifactId>
-      <!--<version>8.1.14.v20131031</version>-->
-      <version>7.6.8.v20121106</version>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.3</version>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.3.3</version>
-    </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.3.175</version>
+        </dependency>
 
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <version>1.3.175</version>
-    </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.lemurproject.galago</groupId>
+            <artifactId>core</artifactId>
+            <version>3.7-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-      <type>jar</type>
-    </dependency>
+    <build>
+        <plugins>
 
-  </dependencies>
+            <!-- build a jar with relative classpath -->
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <index>true</index>
+                        <manifest>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>${mainClass}</mainClass>
+                            <useUniqueVersions>false</useUniqueVersions>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>${javaVersion}</source>
+                    <target>${javaVersion}</target>
+                </configuration>
+            </plugin>
 
-  <build>
-    <plugins>
+            <!-- copy dependencies to relative classpath -->
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
-      <!-- build a jar with relative classpath -->
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
-        <configuration>
-          <archive>
-            <index>true</index>
-            <manifest>
-              <classpathPrefix>lib/</classpathPrefix>
-              <addClasspath>true</addClasspath>
-              <mainClass>${mainClass}</mainClass>
-              <useUniqueVersions>false</useUniqueVersions>
-            </manifest>
-          </archive>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>${javaVersion}</source>
-          <target>${javaVersion}</target>
-        </configuration>
-      </plugin>
-
-      <!-- copy dependencies to relative classpath -->
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/lib</outputDirectory>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-    </plugins>
-  </build>
+        </plugins>
+    </build>
 </project>

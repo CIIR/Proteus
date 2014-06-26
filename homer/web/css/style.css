@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 body {
   margin: 0;
   padding: 0;
@@ -144,3 +145,156 @@ img.thumbnail {
   margin: 2px 5px 2px 0;
 
 }
+=======
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.snippet {
+    padding-left: 20pt;
+    color: #666;
+}
+
+.hili {
+    color: black;
+    font-weight: bold;
+}
+
+#parsedQuery {
+    font-family: monospace;
+    display: none;
+}
+#request {
+    display: none;
+}
+
+#progress {
+    color: white;
+    text-align: right;
+    vertical-align: middle;
+    font-family: monospace;
+    display:inline;
+}
+
+#error {
+    color: white;
+    background-color: #a00;
+    font-weight: bold;
+    text-align: center;
+    display:none;
+    padding:10pt;
+    margin:0;
+}
+
+#footer {
+    margin: 0;
+    margin-top: 40pt;
+    padding: 10pt;
+    background-color: #009;
+}
+
+#ui {
+
+    margin: 0;
+    padding-bottom: 10pt;
+    padding-top: 10pt;
+    background-color: #009;
+
+} 
+
+#ui-search {
+    width: 50%;
+}
+
+#title {
+    float: left;
+    margin: 0;
+    vertical-align: middle;
+    padding-right: 20pt;
+    font-size: 20pt;
+    font-weight: bold;
+    height: 20pt;
+    color: #fff;
+}
+#user-info {
+    text-align: right;
+    float:right;
+    height: 20pt;
+    vertical-align: middle;
+} 
+
+#login-form-text{
+    color: #fff;
+    text-align: right;
+}
+/*
+#login-form {
+    float:right;
+    height: 20pt;
+    vertical-align: middle;
+}
+
+#login-form a:hover, #login-form  a:visited {
+    color: #fff;
+}
+*/
+.result {
+    /*border-bottom: 1px solid grey;*/
+    padding-left: 20pt;
+    padding-right: 20pt;
+}
+
+.result .preview {
+    padding: 10pt;
+}
+
+img.thumbnail {
+    width: 100px;
+    height: 120px;
+}
+
+.result .rank {
+    color: grey;
+    padding-right:10pt;
+}
+
+.result .name { }
+.result .score {
+    color: grey;
+    text-align: right;
+}
+
+.create-label-form {
+    background-color: yellow;
+    box-shadow: 10px 10px 5px #888888;
+    padding:10px;
+    border:2px solid gray;
+    margin:0px; 
+}
+
+
+.read-only-li{
+    background-color: red;
+}
+
+#tag-values{
+    background-color: dimgray;
+}
+.type-button{
+    margin: 2px 5px 2px 0;
+}
+
+/* styles for the drop down list by the search edit box */
+.multiselect-item {
+    text-align: left;
+}
+#all-my-tags > div > ul > li  > a > label  
+{
+    text-align: left;
+}
+.right-align{
+    text-align: right;
+}
+
+>>>>>>> upstream/master

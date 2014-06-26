@@ -6,27 +6,28 @@
  *
  */
 
-var bookImage = function(archiveId){
-	return pageImage(archiveId,"0");
+var bookImage = function(archiveId) {
+    return pageImage(archiveId, "0");
 }
 
-var bookThumbnail = function(archiveId){
-	return pageThumbnail(archiveId, "0");
+var bookThumbnail = function(archiveId) {
+    return pageThumbnail(archiveId, "0");
 }
 
 var pageImage = function(archiveId, pageNum) {
-	return "http://www.archive.org/download/" + archiveId + "/page/n" + pageNum + ".jpg";
+    return "http://www.archive.org/download/" + archiveId + "/page/n" + pageNum + ".jpg";
 };
 
 var pageThumbnail = function(archiveId, pageNum) {
-	return "http://www.archive.org/download/" + archiveId + "/page/n" + pageNum + "_thumb.jpg";
+    return "http://www.archive.org/download/" + archiveId + "/page/n" + pageNum + "_thumb.jpg";
 };
 
 
 
-console.log("Defining table, renderResult="+renderResult);
+console.log("Defining table, renderResult=" + renderResult);
 var renderResult = function(queryTerms, result) {
 
+<<<<<<< HEAD
 	var name = result.meta.title || result.name;
 	var identifier = result.name.split('_')[0];
 	var snippet = result.snippet;
@@ -66,6 +67,45 @@ html += '... </td></tr>';
 html += '</table>';
   
 	return html;
+=======
+    var name = result.meta.title || result.name;
+    var identifier = result.name.split('_')[0];
+    var snippet = result.snippet;
+    var pageNum = result.name.split('_')[1];
+    var iaURL = result.meta["identifier-access"];
+
+
+    // console.log(result);
+
+    if (iaURL) {
+
+
+        name = '<a href="' + iaURL + '">' + name + '</a>';
+    }
+    name += ' pp. ' + pageNum;
+
+    var previewImage = '<a href="' + pageImage(identifier, pageNum) + '">' +
+            '<img class="thumbnail" src="' + pageThumbnail(identifier, pageNum) + '"/>' +
+            '</a>';
+    var html =
+            '<div class="result">' +
+            '<table>' +
+            '<tr>' +
+            '<td class="preview" rowspan="2">' + previewImage + '</td>' +
+            '<td class="name">' + name + '</td>' +
+            '<td class="score">' + result.score.toFixed(3) + ' r' + result.rank + '</td>' +
+            '</tr>';
+    if (snippet) {
+        html += '<tr><td class="snippet" colspan="2"> ...';
+        html += highlightText(queryTerms, snippet, '<span class="hili">', '</span>');
+        html += '... </td></tr>';
+    }
+    html += '</table>';
+    if (result.tags) {
+        html += UI.renderTags(result);
+    }
+    return html;
+>>>>>>> upstream/master
 
 
 };

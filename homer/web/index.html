@@ -1,64 +1,85 @@
-<html>
-  <head>
-    <title>Proteus: Search</title>
-    <link href="css/easyui.css" rel="stylesheet" type="text/css">
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/history.js/1.8/native.history.min.js"></script>
+﻿<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Proteus: Search</title>
 
+        <!-- Bootstrap -->
+        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
 
-    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/history.js/1.8/native.history.min.js"></script>
 
-    <!-- scripts included here evaluate before the page loads -->
-    <script src="js/API.js"></script>
-    <script src="js/util.js"></script>
-    <script src="js/render.js"></script>
-    <script src="js/internetArchive.js"></script>
-    <script src="js/acmdl.js"></script>
-    <script src="js/capent.js"></script>
-    <link rel="stylesheet" href="css/style.css" type="text/css" />
-    <script src="js/tag-it.js" type="text/javascript" charset="utf-8"></script>
-    <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/flick/jquery-ui.css">
-    <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 
-    <script>
-      $(document).ready(function() {
-        UI.hideMyTagsFunctionality();
-      });
+        <!-- scripts included here evaluate before the page loads -->
+        <script src="js/API.js"></script>
+        <script src="js/util.js"></script>
+        <script src="js/render.js"></script>
+        <script src="js/internetArchive.js"></script>
+        <script src="js/acmdl.js"></script>
+        <script src="js/capent.js"></script>
+        <link rel="stylesheet" href="css/style.css" type="text/css" />
+        <script src="js/tag-it.js" type="text/javascript" charset="utf-8"></script>
+        <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/flick/jquery-ui.css">
+        <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
+        <script src="js/bootstrap-multiselect.js"></script>
+        <link href="css/bootstrap-multiselect.css" rel="stylesheet" type="text/css">
 
-    </script>
-  </head>
-  <body>
+    </head>
+    <body>
 
-    <div id="ui">
-      <span id="title">Proteus</span>
-      <span id="search-buttons">
-        <input id="ui-search" placeholder="Search..." type="search" />
-      </span>
-      <div id="user-info">
-        <span id="toggle-my-tags"><img id="toggle-my-tags-img" src="/images/up_arrows.png" onclick="UI.toggleMyTags()"></span>
-        <span id="login-form">
-          <span id="ui-login-info"></span>
-        </span>
-      </div>
-    </div>
-    <div id="error"></div>
-    <div id="request"></div>
-    <div id="view-resource"></div>
-    <div id="all-tags"></div>
-    <div id="my-tags"></div>
-    <div id="results"></div>
+        <div class="container-fluid " id="ui">
+            <div class="row clearfix">
+                <div id="title" class="col-md-2 column">Proteus</div>
+                <div class="col-md-10 column right-align">
+                    <div class="row clearfix ">
+                        <div   class="col-md-12 column ">  
+                            <span id="all-my-tags"> </span>
+                            <input id="ui-search" placeholder="Search..." type="search" />
+                            <span id="search-buttons">  </span>
+                        </div>
+                    </div>
+                    <div class="row clearfix  ">
+                        <div   class="col-md-12 column ">  
+                            <span id="login-form "  >      </span>
+                            <span id="ui-login-info" >    </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div id="more"><input id="ui-go-more" type="button" value="More" /></div>
-    <div id="footer">
-      <div id="progress"></div>
-    </div>
-  </body>
-  <!-- scripts included here evaluate after the page loads -->
-  <script src="js/ui.js"></script>
-  <script src="js/actions.js"></script>
-  <script src="js/main.js"></script>
+        <div id="error"></div>
+        <div id="request"></div>
+        <div id="view-resource"></div>
+        <div id="all-tags"></div>
+
+        <div id="results"></div>
+
+        <div id="results"></div>
+
+        <div id="more"><input id="ui-go-more" type="button" value="More" /></div>
+        <div id="footer">
+            <div id="progress"></div>
+        </div>
+        <!-- scripts included here evaluate after the page loads -->
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="bootstrap/js/bootstrap.min.js"></script>
+        <script src="js/ui.js"></script>
+        <script src="js/actions.js"></script>
+        <script src="js/main.js"></script>
+    </body>
+
 
 </html>
