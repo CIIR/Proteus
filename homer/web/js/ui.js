@@ -18,9 +18,11 @@ queryBox.keypress(function(e)
     if (e.keyCode == 13)
         handleEnter();
 });
+
 // UI object/namespace
 var UI = {};
 UI.generateButtons = function() {
+
 
     API.getKinds({}, function(data) {
         UI.defaultKind = data.defaultKind;
@@ -70,11 +72,11 @@ UI.setQuery = function(q) {
 /**
  * Render a single search result.
  * @see render.js
+ * I'm adding comments now since i regret it 
+ * when I dont
+ * deleted UI.makeResult since its useless.
+
  */
-UI.makeResult = function(queryTerms, result) {
-    var renderer = getResultRenderer(result.viewKind);
-    return '<div class="result">' + renderer(queryTerms, result) + '</div>';
-};
 
 // added labels to our button bar when they add a new one
 
@@ -115,8 +117,14 @@ UI.appendResults = function(queryTerms, results, usingLabels) {
 
     UI.showProgress("Ajax response received!");
     _(results).forEach(function(result) {
-        console.debug("result name: " + result.name);
-        resultsDiv.append(UI.makeResult(queryTerms, result));
+        console.debug("result nAME: " + result.name);
+ var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
+        var resDiv = $('<div>'); 
+          resDiv.attr('class', 'result'); 
+          resDiv.attr('id',result.name);
+          $(resDiv).append(renderer(queryTerms, result)); 
+      resultsDiv.append(resDiv); //* 6/26/2014
+        
         var tagName = "#tags_" + result.name;
         $(tagName).tagit({
             availableTags: GLOBAL.uniqTypes,
