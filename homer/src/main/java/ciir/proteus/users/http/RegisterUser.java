@@ -1,9 +1,7 @@
 package ciir.proteus.users.http;
 
 import ciir.proteus.server.HTTPError;
-import ciir.proteus.server.action.JSONHandler;
 import ciir.proteus.system.ProteusSystem;
-import ciir.proteus.users.UserDatabase;
 import ciir.proteus.users.Users;
 import ciir.proteus.users.error.NoTuplesAffected;
 import org.lemurproject.galago.tupleflow.Parameters;

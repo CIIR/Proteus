@@ -48,9 +48,7 @@ public class QueryUtil {
    * @return true if node is terminal and operator matches
    */
   public static boolean isTextNode(Node node) {
-    String operator = node.getOperator();
-    return node.numChildren() == 0 &&
-        ("text".equals(operator) || "counts".equals(operator) || "extents".equals(operator));
+    return node.isText();
   }
 
   /**

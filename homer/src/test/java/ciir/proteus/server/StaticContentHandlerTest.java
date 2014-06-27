@@ -35,7 +35,7 @@ public class StaticContentHandlerTest {
 
     response = HTTPUtil.get(url, "/", new Parameters());
     assertEquals(200, response.status);
-    assertEquals(Utility.readFileToString(new File("web/index.html")), response.body);
+    assertEquals(Utility.readFileToString(new File("web/index.html")).replaceAll("\r\n", "\n"), response.body.replaceAll("\r\n", "\n"));
 
     response = HTTPUtil.get(url, "/favicon.ico", new Parameters());
     assertEquals(HTTPError.NotFound, response.status);
