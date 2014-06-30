@@ -2,7 +2,7 @@ package ciir.proteus.users.http;
 
 import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 /**
  * @author jfoley.
@@ -22,7 +22,7 @@ public class LoginUser extends DBAction {
       throw new HTTPError(HTTPError.BadRequest, "No such user!");
     }
 
-    Parameters creds = new Parameters();
+    Parameters creds = Parameters.instance();
     creds.set("token", token);
     log.info("LoginUser SUCCESS user="+user+" token="+token);
 

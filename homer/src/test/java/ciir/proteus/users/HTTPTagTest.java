@@ -7,7 +7,7 @@ import ciir.proteus.util.HTTPUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.web.WebServerException;
 
 import java.io.IOException;
@@ -66,14 +66,14 @@ public class HTTPTagTest {
     HTTPUtil.Response response;
 
     // expect a bad request with unregistered user
-    requestJSON = new Parameters();
+    requestJSON = Parameters.instance();
     requestJSON.set("user", "fake-user");
     response = post("/api/login", requestJSON);
     assertEquals(HTTPError.BadRequest, response.status);
     assertEquals("No such user!", response.reason);
 
     // empty success response to register
-    requestJSON = new Parameters();
+    requestJSON = Parameters.instance();
     requestJSON.set("user", "register-me");
     response = post("/api/register", requestJSON);
     assertOK(response);
@@ -81,7 +81,7 @@ public class HTTPTagTest {
     assertEquals(0, responseJSON.size());
 
     // token success response to login
-    requestJSON = new Parameters();
+    requestJSON = Parameters.instance();
     requestJSON.set("user", "register-me");
     response = post("/api/login", requestJSON);
     assertOK(response);
@@ -92,7 +92,7 @@ public class HTTPTagTest {
     String token = responseJSON.getString("token");
 
     // use token to list tags
-    requestJSON = new Parameters();
+    requestJSON = Parameters.instance();
     requestJSON.set("user", "register-me");
     requestJSON.set("token", token);
     requestJSON.set("resource", Arrays.asList("fake-resource0", "fake-resource1"));
@@ -112,7 +112,7 @@ public class HTTPTagTest {
     Parameters creds = env.creds.toJSON();
 
     // put
-    Parameters put = new Parameters();
+    Parameters put = Parameters.instance();
     put.copyFrom(creds);
     put.set("tags", Parameters.parseArray(
             "funny", Arrays.asList("res1", "res2", "res12", "res22"),
@@ -121,7 +121,7 @@ public class HTTPTagTest {
     assertOK(HTTPUtil.postJSON(env.url, "/api/tags/create", put));
 
     // get
-    Parameters getp = new Parameters();
+    Parameters getp = Parameters.instance();
     getp.copyFrom(creds);
     getp.set("resource", Arrays.asList("res1", "res12", "res22", "res2", "res17"));
     HTTPUtil.Response resp = get("/api/tags", getp);
@@ -130,9 +130,9 @@ public class HTTPTagTest {
 
     // validate
 
-    Parameters dummy = new Parameters();
+    Parameters dummy = Parameters.instance();
     dummy.set("wrongKey", "wrongValue");
-    Parameters tmp = new Parameters();
+    Parameters tmp = Parameters.instance();
 
     tmp = json.get("res1", dummy);
     assertEquals("funny", tmp.getAsList("proteustestuser", String.class).get(0));
@@ -156,7 +156,7 @@ public class HTTPTagTest {
     assertEquals(1, tmp.getAsList("proteustestuser", String.class).size());
 
     // delete
-    Parameters del = new Parameters();
+    Parameters del = Parameters.instance();
     del.copyFrom(creds);
     del.set("tags", Parameters.parseArray(
             "funny", Arrays.asList("res1", "res2", "res12", "res22"),

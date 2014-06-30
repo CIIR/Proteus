@@ -4,7 +4,7 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.NoTuplesAffected;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 /**
  * @author jfoley.
@@ -24,6 +24,6 @@ public class LogoutUser extends DBAction {
       throw new HTTPError(HTTPError.BadRequest, "No such user/session.");
     }
 
-    return new Parameters();
+    return Parameters.instance();
   }
 }

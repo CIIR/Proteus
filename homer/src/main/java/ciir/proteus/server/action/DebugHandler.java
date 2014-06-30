@@ -1,6 +1,6 @@
 package ciir.proteus.server.action;
 
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 /**
  * @author jfoley.
@@ -8,7 +8,7 @@ import org.lemurproject.galago.tupleflow.Parameters;
 public class DebugHandler implements JSONHandler {
   @Override
   public Parameters handle(String method, String path, Parameters reqp) {
-    Parameters debug = new Parameters();
+    Parameters debug = Parameters.instance();
     debug.set("http-method", method);
     debug.set("http-path", path);
     debug.set("request", reqp);

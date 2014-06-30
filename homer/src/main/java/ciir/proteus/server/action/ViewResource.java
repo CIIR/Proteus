@@ -4,7 +4,7 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
 import org.lemurproject.galago.core.parse.Document;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
 import java.util.Map;
@@ -38,14 +38,14 @@ public class ViewResource implements JSONHandler {
       log.log(Level.WARNING, "IOException while trying to get document=" + docId + " for kind=" + kind, e);
     }
 
-    Parameters response = new Parameters();
+    Parameters response = Parameters.instance();
     if(doc == null) {
       response.put("found", false);
       return response;
     }
     response.put("found", true);
 
-    Parameters metadata = new Parameters();
+    Parameters metadata = Parameters.instance();
     for(Map.Entry<String,String> kv : doc.metadata.entrySet()) {
       metadata.put(kv.getKey(), kv.getValue());
     }

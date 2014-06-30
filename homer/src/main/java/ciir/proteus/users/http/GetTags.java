@@ -5,7 +5,7 @@ import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
 import java.util.ArrayList;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class GetTags extends DBAction {
 
     log.info("GetTags creds=" + creds + " resources=" + resources);
 
-    Parameters rtags = new Parameters();
+    Parameters rtags = Parameters.instance();
 
     for (String resource : resources) {
       try {
@@ -36,7 +36,7 @@ public class GetTags extends DBAction {
 
         // currently Parameters doesn't quite handle the data structure
         // we're using so we have to trick it into using it.
-        Parameters tmp = new Parameters();
+        Parameters tmp = Parameters.instance();
         for (Map.Entry<String, List<String>> entry : tagsAndUsers.entrySet()) {
           tmp.put(entry.getKey(), entry.getValue());
         }

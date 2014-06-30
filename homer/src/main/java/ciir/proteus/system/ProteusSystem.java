@@ -8,7 +8,7 @@ import org.lemurproject.galago.core.retrieval.RetrievalFactory;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.core.retrieval.processing.MaxPassageFinder;
 import org.lemurproject.galago.core.retrieval.query.Node;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -58,7 +58,7 @@ public class ProteusSystem {
 
   public List<ScoredDocument> findPassages(String kind, Node query, List<String> names) {
     // find max passage for each document
-    Parameters qp = new Parameters();
+    Parameters qp = Parameters.instance();
     qp.set("working", names);
     qp.set("processingModel", MaxPassageFinder.class.getCanonicalName());
     qp.set("passageQuery", true);

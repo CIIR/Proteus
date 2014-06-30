@@ -7,7 +7,7 @@ import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.core.retrieval.ScoredPassage;
 import org.lemurproject.galago.core.retrieval.query.Node;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class DocumentAnnotator {
     ArrayList<Parameters> resultData = new ArrayList<Parameters>(results.size());
     for (ScoredDocument sdoc : results) {
       Document doc = pulled.get(sdoc.documentName);
-      Parameters docp = new Parameters();
+      Parameters docp = Parameters.instance();
 
       // default annotations
       docp.put("name", sdoc.documentName);
@@ -82,7 +82,7 @@ public class DocumentAnnotator {
 
         // get the tags for this resource
         if (docTags.containsKey(sdoc.documentName)) {
-          Parameters tmp = new Parameters();
+          Parameters tmp = Parameters.instance();
           for (Map.Entry<String, List<String>> entry : docTags.get(sdoc.documentName).entrySet()) {
             tmp.put(entry.getKey(), entry.getValue());
           }

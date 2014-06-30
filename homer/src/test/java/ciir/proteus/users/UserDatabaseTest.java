@@ -7,7 +7,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lemurproject.galago.tupleflow.FileUtility;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
 import java.io.File;
@@ -35,7 +35,7 @@ public class UserDatabaseTest {
     String dbpath = folder.getPath() + "/users";
     log.info(dbpath);
 
-    Parameters dbp = new Parameters();
+    Parameters dbp = Parameters.instance();
     dbp.set("path", dbpath);
     dbp.set("user", "junit");
     dbp.set("pass", "");

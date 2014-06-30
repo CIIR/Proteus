@@ -4,7 +4,7 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 import java.util.List;
 
@@ -28,6 +28,6 @@ public class PutTags extends DBAction {
       }
     }
 
-    return new Parameters();
+    return Parameters.instance();
   }
 }

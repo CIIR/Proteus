@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 /**
  *
@@ -39,13 +39,13 @@ public class GetResourcesForLabels extends DBAction {
 
         log.info("GetResourcesForLabels creds=" + creds + " labels=" + labels + " kind=" + kind);
         List<String> resList = null;
-        Parameters resources = new Parameters();
+        Parameters resources = Parameters.instance();
         try {
 
             resList = userdb.getResourcesForLabels(creds.user, labels, numResults, skipResults);
 
             // now get results
-            Parameters param = new Parameters();
+            Parameters param = Parameters.instance();
             param.set("snippets", false);
             param.set("tags", true);
 
@@ -56,7 +56,7 @@ public class GetResourcesForLabels extends DBAction {
 
             List<Parameters> results = DocumentAnnotator.annotate(system, kind, fakeDocs, null, param);
 
-            Parameters response = new Parameters();
+            Parameters response = Parameters.instance();
             response.set("results", results);
             return response;
 

@@ -6,7 +6,7 @@ import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.users.http.*;
 import ciir.proteus.util.HTTPUtil;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.web.WebHandler;
 
 import javax.servlet.http.HttpServletRequest;

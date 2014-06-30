@@ -1,6 +1,6 @@
 package ciir.proteus.server;
 
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
 import javax.servlet.http.HttpServletResponse;

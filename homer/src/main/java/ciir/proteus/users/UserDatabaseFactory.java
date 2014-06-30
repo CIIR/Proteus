@@ -1,7 +1,7 @@
 package ciir.proteus.users;
 
 import ciir.proteus.users.impl.H2Database;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 /**
  * @author jfoley.

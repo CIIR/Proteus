@@ -7,11 +7,10 @@ import ciir.proteus.users.error.BadSessionException;
 import ciir.proteus.users.error.BadUserException;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.users.error.NoTuplesAffected;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 import java.sql.*;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**

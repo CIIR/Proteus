@@ -4,7 +4,7 @@ import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.NoTuplesAffected;
 import org.lemurproject.galago.tupleflow.FileUtility;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.tupleflow.web.WebServer;
 import org.lemurproject.galago.tupleflow.web.WebServerException;
@@ -51,18 +51,18 @@ public class TestEnvironment {
 
   public static Parameters testParams(File tmpDir) {
     String dbpath = tmpDir.getPath() + "/users";
-    Parameters dbp = new Parameters();
+    Parameters dbp = Parameters.instance();
     dbp.set("path", dbpath);
     dbp.set("user", "junit");
     dbp.set("pass", "");
     dbp.set("auto_server", "TRUE"); // allows us to query the DB outside this process
 
-    Parameters content = new Parameters();
+    Parameters content = Parameters.instance();
     content.set("dir", Arrays.asList("web", "src/test/resources"));
 
-    Parameters testSetup = new Parameters();
+    Parameters testSetup = Parameters.instance();
     testSetup.set("defaultKind", "fake-kind");
-    testSetup.set("kinds", new Parameters());
+    testSetup.set("kinds", Parameters.instance());
     testSetup.set("userdb", dbp);
     testSetup.set("content", content);
 

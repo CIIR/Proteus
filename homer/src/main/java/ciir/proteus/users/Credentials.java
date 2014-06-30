@@ -1,6 +1,6 @@
 package ciir.proteus.users;
 
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 /**
  * @author jfoley.
@@ -28,7 +28,7 @@ public class Credentials {
   }
 
   public Parameters toJSON() {
-    Parameters p = new Parameters();
+    Parameters p = Parameters.instance();
     p.put("user", user);
     p.put("token", token);
     return p;

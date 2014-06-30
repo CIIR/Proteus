@@ -4,7 +4,7 @@ import ciir.proteus.util.HTTPUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
 import java.io.File;
@@ -33,17 +33,17 @@ public class StaticContentHandlerTest {
 
     HTTPUtil.Response response;
 
-    response = HTTPUtil.get(url, "/", new Parameters());
+    response = HTTPUtil.get(url, "/", Parameters.instance());
     assertEquals(200, response.status);
     assertEquals(Utility.readFileToString(new File("web/index.html")).replaceAll("\r\n", "\n"), response.body.replaceAll("\r\n", "\n"));
 
-    response = HTTPUtil.get(url, "/favicon.ico", new Parameters());
+    response = HTTPUtil.get(url, "/favicon.ico", Parameters.instance());
     assertEquals(HTTPError.NotFound, response.status);
 
-    response = HTTPUtil.get(url, "/../evil/path.html", new Parameters());
+    response = HTTPUtil.get(url, "/../evil/path.html", Parameters.instance());
     assertEquals(HTTPError.BadRequest, response.status);
 
-    response = HTTPUtil.get(url, "/metadata/metadata.trectext", new Parameters());
+    response = HTTPUtil.get(url, "/metadata/metadata.trectext", Parameters.instance());
     assertEquals(200, response.status);
     assertEquals(Utility.readFileToString(new File("src/test/resources/metadata/metadata.trectext")), response.body);
   }

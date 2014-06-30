@@ -3,7 +3,7 @@ package ciir.proteus.util;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.traversal.SetFieldTraversal;
 import org.lemurproject.galago.core.retrieval.traversal.Traversal;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,7 +21,7 @@ public class QueryUtil {
   public static List<String> queryTerms(Node query) {
     final HashSet<String> terms = new HashSet<String>();
 
-    walk(query, new Parameters(), new BeforeTraversal() {
+    walk(query, Parameters.instance(), new BeforeTraversal() {
       @Override
       public void beforeNode(Node original, Parameters queryParameters) throws Exception {
         if(isTextNode(original)) {

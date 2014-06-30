@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.types.DocumentSplit;
 import org.lemurproject.galago.tupleflow.FileUtility;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
 import javax.xml.stream.XMLStreamException;
@@ -31,7 +31,7 @@ public class MBTEIPageParserTest {
     DocumentSplit split = new DocumentSplit();
     split.fileName = tmp.getAbsolutePath();
     split.fileType = "mbtei";
-    MBTEIPageParser parser = new MBTEIPageParser(split, new Parameters());
+    MBTEIPageParser parser = new MBTEIPageParser(split, Parameters.instance());
 
     Document page1 = parser.nextDocument();
     Assert.assertNotNull(page1);
@@ -50,19 +50,19 @@ public class MBTEIPageParserTest {
   public void testParseCrapDocument() throws IOException {
     DocumentSplit input = new DocumentSplit();
     input.fileName = "src/test/resources/EmptyFile";
-    MBTEIPageParser pages = new MBTEIPageParser(input, new Parameters());
+    MBTEIPageParser pages = new MBTEIPageParser(input, Parameters.instance());
     Assert.assertNotNull(pages);
     Assert.assertNull(pages.nextDocument());
     pages.close();
 
     input.fileName = ".gitignore";
-    pages = new MBTEIPageParser(input, new Parameters());
+    pages = new MBTEIPageParser(input, Parameters.instance());
     Assert.assertNotNull(pages);
     Assert.assertNull(pages.nextDocument());
     pages.close();
 
     input.fileName = "src/test/resources/nearly-empty.mbtei.gz";
-    pages = new MBTEIPageParser(input, new Parameters());
+    pages = new MBTEIPageParser(input, Parameters.instance());
     Assert.assertNotNull(pages);
     Assert.assertNull(pages.nextDocument());
     pages.close();

@@ -3,14 +3,16 @@ package ciir.proteus.util;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
-import org.lemurproject.galago.tupleflow.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
-import org.lemurproject.galago.tupleflow.json.JSONUtil;
+import org.lemurproject.galago.utility.Parameters;
+import org.lemurproject.galago.utility.StreamUtil;
+import org.lemurproject.galago.utility.json.JSONUtil;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +32,7 @@ public class HTTPUtil {
   private final static Logger log =Logger.getLogger(HTTPUtil.class.getName());
 
   public static Parameters fromHTTPRequest(HttpServletRequest req) throws IOException {
-    Parameters reqp = new Parameters();
+    Parameters reqp = Parameters.instance();
 
     String contentType = req.getContentType();
     // chrome likes to send:
@@ -165,7 +167,7 @@ public class HTTPUtil {
     Response(HttpResponse response) throws IOException {
       this.status = response.getStatusLine().getStatusCode();
       this.reason = response.getStatusLine().getReasonPhrase();
-      this.body = Utility.copyStreamToString(response.getEntity().getContent());
+      this.body = StreamUtil.copyStreamToString(response.getEntity().getContent());
     }
 
     @Override

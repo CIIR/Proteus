@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,9 +56,9 @@ public class JSONSearch implements JSONHandler {
             pquery = StructuredQuery.parse(query);
         }
 
-        Parameters qp = new Parameters();
+        Parameters qp = Parameters.instance();
         qp.put("requested", numResults + skipResults);
-        Parameters response = new Parameters();
+        Parameters response = Parameters.instance();
 
         List<Parameters> results = Collections.emptyList();
         List<ScoredDocument> docs = null;

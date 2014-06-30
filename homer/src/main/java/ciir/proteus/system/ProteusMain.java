@@ -2,7 +2,7 @@ package ciir.proteus.system;
 
 import ciir.proteus.server.HTTPRouter;
 import org.lemurproject.galago.core.tools.AppFunction;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.web.WebServer;
 
 import java.io.File;

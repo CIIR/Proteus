@@ -12,7 +12,7 @@ import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.core.tools.apps.BuildIndex;
 import org.lemurproject.galago.tupleflow.FileUtility;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
 import java.io.File;
@@ -24,7 +24,7 @@ import java.util.List;
 public class BuildIndexTest {
 
   public static List<ScoredDocument> runQuery(Retrieval r, String input) throws Exception {
-    Parameters qp = new Parameters();
+    Parameters qp = Parameters.instance();
     Node parsed = StructuredQuery.parse(input);
     Node ready = r.transformQuery(parsed, qp);
     return r.executeQuery(ready, qp).scoredDocuments;
@@ -34,7 +34,7 @@ public class BuildIndexTest {
   public void buildTokteiPagesIndex() throws Exception {
     File tmpIndex = FileUtility.createTemporaryDirectory();
 
-    Parameters buildP = new Parameters();
+    Parameters buildP = Parameters.instance();
     buildP.set("server", false);
     buildP.set("corpus", true);
     buildP.set("indexPath", tmpIndex.getAbsolutePath());
@@ -46,7 +46,7 @@ public class BuildIndexTest {
 
     Assert.assertTrue(tmpIndex.exists());
 
-    Parameters runP = new Parameters();
+    Parameters runP = Parameters.instance();
     runP.set("index", tmpIndex.getAbsolutePath());
     Retrieval ret = RetrievalFactory.instance(runP);
     List<ScoredDocument> results = runQuery(ret, "romeo");
@@ -80,7 +80,7 @@ public class BuildIndexTest {
   public void buildTokteiBooksIndex() throws Exception {
     File tmpIndex = FileUtility.createTemporaryDirectory();
 
-    Parameters buildP = new Parameters();
+    Parameters buildP = Parameters.instance();
     buildP.set("server", false);
     buildP.set("corpus", true);
     buildP.set("indexPath", tmpIndex.getAbsolutePath());
@@ -92,7 +92,7 @@ public class BuildIndexTest {
 
     Assert.assertTrue(tmpIndex.exists());
 
-    Parameters runP = new Parameters();
+    Parameters runP = Parameters.instance();
     runP.set("index", tmpIndex.getAbsolutePath());
     Retrieval ret = RetrievalFactory.instance(runP);
     List<ScoredDocument> results = runQuery(ret, "romeo");

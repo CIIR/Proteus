@@ -4,7 +4,7 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Users;
 import ciir.proteus.users.error.NoTuplesAffected;
-import org.lemurproject.galago.tupleflow.Parameters;
+import org.lemurproject.galago.utility.Parameters;
 
 /**
  * @author jfoley.
@@ -29,6 +29,6 @@ public class RegisterUser extends DBAction {
       throw new HTTPError(ex);
     }
 
-    return new Parameters();
+    return Parameters.instance();
   }
 }
