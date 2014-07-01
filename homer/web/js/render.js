@@ -16,7 +16,7 @@ var getResultRenderer = function(kind) {
   return resultRenderers["default"];
 };
 /** This is the default, plain result renderer */
-resultRenderers["default"] = function(queryTerms, result) {
+resultRenderers["default"] = function(queryTerms, result, resDiv) {
   var html = '<table><tr>';
   html += '<td class="rank">' + result.rank + '</td>';
   html += '<td class="name">' + Render.makeViewLink(result.name, result.kind, result.name) + '</a></td>';
@@ -45,7 +45,9 @@ resultRenderers["default"] = function(queryTerms, result) {
     html += UI.renderTags(result);
   } // end if display tags
 
-  return html;
+  //return html;
+  resDiv.html(html);
+  return resDiv;
 };
 
 Render.makeViewLink = function(id, kind, label) {

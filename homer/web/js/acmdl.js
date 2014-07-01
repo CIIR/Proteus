@@ -1,7 +1,7 @@
 /**
  * Render an article from the acm digital library
  */
-resultRenderers["article"] = function(queryTerms, result) {
+resultRenderers["article"] = function(queryTerms, result, resDiv) {
   var title = result.meta["title"];
   var snippet = result.snippet;
 
@@ -60,7 +60,9 @@ resultRenderers["article"] = function(queryTerms, result) {
   if (result.tags) {
     html += UI.renderTags(result);
   } // end if display tags
-  return html;
+  resDiv.html(html);
+  return resDiv;
+  //return html;
 };
 
 

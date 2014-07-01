@@ -122,8 +122,7 @@ UI.appendResults = function(queryTerms, results, usingLabels) {
         var resDiv = $('<div>'); 
           resDiv.attr('class', 'result'); 
           resDiv.attr('id',result.name);
-          $(resDiv).append(renderer(queryTerms, result)); 
-      resultsDiv.append(resDiv); //* 6/26/2014
+          resultsDiv.append(renderer(queryTerms, result, resDiv)); //* 6/26/2014
         
         var tagName = "#tags_" + result.name;
         $(tagName).tagit({

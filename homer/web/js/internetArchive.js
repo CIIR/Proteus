@@ -25,7 +25,7 @@ var pageThumbnail = function(archiveId, pageNum) {
 
 
 console.log("Defining table, renderResult=" + renderResult);
-var renderResult = function(queryTerms, result) {
+var renderResult = function(queryTerms, result, resDiv) {
 
     var name = result.meta.title || result.name;
     var identifier = result.name.split('_')[0];
@@ -33,8 +33,6 @@ var renderResult = function(queryTerms, result) {
     var pageNum = result.name.split('_')[1];
     var iaURL = result.meta["identifier-access"];
 
-
-    // console.log(result);
 
     if (iaURL) {
 
@@ -63,8 +61,10 @@ var renderResult = function(queryTerms, result) {
     if (result.tags) {
         html += UI.renderTags(result);
     }
-    return html;
-
+    resDiv.html(html);
+    console.log("hey its working");
+    return resDiv;
+    //return html;
 
 };
 
