@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.types.DocumentSplit;
+import org.lemurproject.galago.core.util.DocumentSplitFactory;
 import org.lemurproject.galago.tupleflow.FileUtility;
 import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
@@ -28,9 +29,7 @@ public class MBTEIPageParserTest {
     File tmp = FileUtility.createTemporary();
     Utility.copyStringToFile(data, tmp);
 
-    DocumentSplit split = new DocumentSplit();
-    split.fileName = tmp.getAbsolutePath();
-    split.fileType = "mbtei";
+    DocumentSplit split = DocumentSplitFactory.file(tmp, "mbtei");
     MBTEIPageParser parser = new MBTEIPageParser(split, Parameters.instance());
 
     Document page1 = parser.nextDocument();
@@ -48,8 +47,7 @@ public class MBTEIPageParserTest {
 
   @Test
   public void testParseCrapDocument() throws IOException {
-    DocumentSplit input = new DocumentSplit();
-    input.fileName = "src/test/resources/EmptyFile";
+    DocumentSplit input = DocumentSplitFactory.file("src/test/resources/EmptyFile");
     MBTEIPageParser pages = new MBTEIPageParser(input, Parameters.instance());
     Assert.assertNotNull(pages);
     Assert.assertNull(pages.nextDocument());
