@@ -35,6 +35,48 @@
         <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
         <script src="js/bootstrap-multiselect.js"></script>
         <link href="css/bootstrap-multiselect.css" rel="stylesheet" type="text/css">
+        <script>
+            /*
+             function changeForm() {
+             // alert("poop!");
+             $("#ui-go-login").html("Send me my password");
+             $("#login-password").hide();
+             $("#lost-password").hide();
+             }
+             
+             // reset everytime they open - they could have been in
+             // "forgot password" and we want to show all the fields
+             function resetLoginForm() {
+             $("#ui-go-login").html("Sign in");
+             $("#login-password").show();
+             $("#lost-password").show();
+             }
+             */
+
+            $(document).ready(function() {
+
+                // we're using the default validation for the email field,
+                // so if that validation passes, perform the login
+                $('#login-nav').submit(function(event) {
+
+                    event.preventDefault();
+
+                    $("#login-form").removeClass("open"); // close the form
+                    var username = $("#login-email").val();
+                    logIn(username);
+
+
+                });
+                /*
+                 //Handles menu drop down
+                 $('.dropdown-menu').find('form').click(function(e) {
+                 e.stopPropagation();
+                 });
+                 */
+            });
+
+
+        </script>
 
     </head>
     <body>
@@ -50,10 +92,42 @@
                             <span id="search-buttons">  </span>
                         </div>
                     </div>
-                    <div class="row clearfix  ">
-                        <div   class="col-md-12 column ">  
-                            <span id="login-form "  >      </span>
-                            <span id="ui-login-info" >    </span>
+
+                    <!-- login based on code from http://bootsnipp.com/snippets/featured/nav-bar-with-popup-sign-in -->
+
+                    <div id="ui-user-info" class="row clearfix">
+                        <div  class="col-md-12 column ">  </div>
+                    </div>
+                    <div id="ui-login-form"  class="row clearfix">
+                        <div class="col-md-12 column ">  
+                            <ul class="nav navbar-nav navbar-right   ">
+
+                                <li id="login-form" class="dropdown">
+                                    <a class="dropdown-toggle"   data-toggle="dropdown">Sign in <b class="caret"></b></a>
+                                    <ul class="dropdown-menu" style="padding: 15px;min-width: 250px;">
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <form class="form" role="form"   accept-charset="UTF-8" id="login-nav">
+                                                        <div class="form-group">
+                                                            <label class="sr-only" for="login-email">Email address</label>
+                                                            <input type="email" class="form-control" id="login-email" placeholder="Email address" required>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <button  id="ui-go-loginx"  type="submit"  class="btn  btn-success  btn-block ">Sign in</button>
+                                                        </div>
+
+                                                    </form>
+
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                    </ul>
+                                </li>
+                            </ul>
+
                         </div>
                     </div>
                 </div>

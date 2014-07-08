@@ -43,3 +43,4 @@ API.logout = method("POST", "/api/logout");
 API.register = method("POST", "/api/register");
 API.getAllTagsByUser = method("POST", "/api/alltags");
 API.getResourcesForLabels = method("POST", "/api/resourcesforlabels");
+API.getServerOS = method("POST", "/api/getos");

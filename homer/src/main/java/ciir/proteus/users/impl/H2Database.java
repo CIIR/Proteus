@@ -62,7 +62,7 @@ public class H2Database implements UserDatabase {
     private void initDB() {
         try {
             conn.prepareStatement("create table IF NOT EXISTS users ("
-                    + "user varchar(" + Users.UserMaxLength + ")"
+                    + "user varchar(" + Users.UserMaxLength + ") "
                     + ")").execute();
             conn.prepareStatement("create table IF NOT EXISTS sessions ("
                     + "user varchar(" + Users.UserMaxLength + "), "

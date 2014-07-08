@@ -43,7 +43,7 @@ UI.setReadyHandler(function() {
     var params = _.omit(getURLParams(), privateURLParams);
     console.log(params);
 
-    UI.setUserName(getCookie("username"));
+    UI.dispalyUserName( );
 
     if (params.action == "search" && (!isBlank(params.q) || !isBlank(params.labels))) {
         UI.setQuery(params.q);
@@ -99,6 +99,7 @@ var logIn = function(userName) {
         API.login(args, function(data) {
             document.cookie = "username=" + userName + ";";
             document.cookie = "token=" + data.token + ";";
+            UI.dispalyUserName();
             // update the type tags
             getAllTagsByUser();
             Model.user = userName;
@@ -126,13 +127,14 @@ var logOut = function() {
         getAllTagsByUser();
         Model.user = null;
         Model.token = null;
+        UI.dispalyUserName();
+        UI.hideMyTagsFunctionality();
     }, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
         throw err;
     });
 
-    UI.setUserName("");
-    UI.hideMyTagsFunctionality();
+
 
 };
 
@@ -220,6 +222,15 @@ var getAllTagsByUser = function() {
     });
 };
 
+var getServerOS = function() {
+    var args = {};
+    API.getServerOS(args, function(data) {
+        alert("Success! OS: " + data.OS);
+    }, function(req, status, err) {
+        UI.showError("ERROR: ``" + err + "``");
+        throw err;
+    });
 
+};
 // get all tags grouped by user on start up
 getAllTagsByUser();
