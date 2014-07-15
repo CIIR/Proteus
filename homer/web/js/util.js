@@ -29,7 +29,7 @@ var pushURLParams = function(params) {
 
     // if there are labels AND we don't have a "labelOwner" param, add the user that owns them
     if (!_.isUndefined(params.labels) && urlParams.indexOf("labelOwner") == -1) {
-        urlParams += "&labelOwner=" + getCookie("username");
+        urlParams += "&labelOwner=" + getCookie("userid");
     }
     History.pushState(null, null, urlParams);
 };

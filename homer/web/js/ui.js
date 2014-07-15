@@ -187,26 +187,23 @@ UI.setReadyHandler = function(callback) {
 UI.setMoreHandler = function(callback) {
     moreButton.click(callback);
 };
-UI.setUserName = function(user) {
-    if (!user) {
-        UI.clearUserName();
-    } else {
-        loginInfo.html("<span id='login-form-text'> Welcome " + user + "</span> <input id='ui-go-logout' type='button' value='LogOut' />");
+UI.dispalyUserName = function() {
+    // if it's an email address, just display the first part
+    var user = getCookie("username").split("@")[0];
+
+    if (user) {
+        $("#ui-login-form").hide();
+        $("#ui-user-info").html("<span id='login-form-text'> Welcome " + user + "</span> <input id='ui-go-logout' type='button' value='LogOut' />")
+                .show();
+
         $("#ui-go-logout").click(function() {
+            $("#ui-user-info").hide();
             logOut();
+            $("#ui-login-form").show();
         });
     }
 };
-UI.clearUserName = function() {
-    loginInfo.html(" <input id='ui-username' type='text' /> " +
-            "<input id='ui-go-login' type='button' value='Login' />");
-    // have to bind click event here because that ID doesn't exist until we do this.
-    $("#ui-go-login").click(function() {
-        var username = $("#ui-username").val();
-        logIn(username);
-        UI.setUserName(username);
-    });
-};
+
 UI.renderTags = function(result) {
 
     var my_html = '';

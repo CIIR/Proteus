@@ -96,7 +96,7 @@ var onSearchSuccess = function(data) {
         usingLabels = true;
 
         // if the labels are on the URL AND they're ours, select them
-        if (!_.isUndefined(data.request.labelOwner) && data.request.labelOwner == getCookie("username"))
+        if (!_.isUndefined(data.request.labelOwner) && data.request.labelOwner == getCookie("userid"))
             for (var val in data.request.labels) {
                 $("#multiselect-all").multiselect('select', data.request.labels[val]);
 
