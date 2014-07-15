@@ -28,10 +28,12 @@ UI.generateButtons = function() {
         UI.defaultKind = data.defaultKind;
         var availableKinds = _(data.kinds);
         var buttonDescriptions = _(UI.buttons);
+        // for all kinds the server gives back, make a button
         _.forIn(data.kinds, function(spec, kind) {
             spec.kind = kind; // so the onClick knows what kind it was
             if (!spec.button) {
                 UI.showError("You need to specify a \"button\" display attribute for kind \"" + kind + "\"");
+                return;
             }
             var button = $('<input type="button" value="' + spec.button + '" />');
             button.click(function() {
