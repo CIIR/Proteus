@@ -18,7 +18,7 @@ public class RegisterUser extends DBAction {
   @Override
   public Parameters handle(String method, String path, Parameters reqp) throws HTTPError {
     String username = reqp.getString("user");
-    if(username.length() > Users.UserMaxLength) {
+    if(username.length() > Users.UserEmailMaxLength) {
       throw new HTTPError(HTTPError.BadRequest, "User name too long.");
     }
 

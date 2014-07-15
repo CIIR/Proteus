@@ -75,7 +75,7 @@ UI.setQuery = function(q) {
  * I'm adding comments now since i regret it 
  * when I dont
  * deleted UI.makeResult since its useless.
-
+ 
  */
 
 // added labels to our button bar when they add a new one
@@ -117,13 +117,13 @@ UI.appendResults = function(queryTerms, results, usingLabels) {
 
     UI.showProgress("Ajax response received!");
     _(results).forEach(function(result) {
-        console.debug("result nAME: " + result.name);
- var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
-        var resDiv = $('<div>'); 
-          resDiv.attr('class', 'result'); 
-          resDiv.attr('id',result.name);
-          resultsDiv.append(renderer(queryTerms, result, resDiv)); //* 6/26/2014
-        
+        console.debug("result name: " + result.name);
+        var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
+        var resDiv = $('<div>');
+        resDiv.attr('class', 'result');
+        resDiv.attr('id', result.name);
+        resultsDiv.append(renderer(queryTerms, result, resDiv)); //* 6/26/2014
+
         var tagName = "#tags_" + result.name;
         $(tagName).tagit({
             availableTags: GLOBAL.uniqTypes,
@@ -212,12 +212,12 @@ UI.renderTags = function(result) {
     var my_html = '';
     var ro_html = ''; // read only tags
 
-    var username = getCookie("username");
+    var userid = getCookie("userid");
     for (var user in result.tags) {
 
         tags = result.tags[user].toString().split(',');
         for (tag in tags) {
-            if (user !== username) {
+            if (user !== userid) {
                 ro_html += '  <li> ' + formatLabelForDispaly(tags[tag]) + ' </li> ';
             } else {
                 my_html += '  <li> ' + formatLabelForDispaly(tags[tag]) + ' </li> ';
@@ -256,6 +256,7 @@ UI.toggleMyTags = function() {
 UI.createLabelMultiselect = function(myUniqTypes) {
 
     var userName = getCookie("username");
+    var userID = getCookie("userid");
     if (userName === "") {
         $("#all-my-tags").html("");
         return;
@@ -267,7 +268,7 @@ UI.createLabelMultiselect = function(myUniqTypes) {
         html += '<optgroup label="' + myUniqTypes[type] + '">'
         // get the values just for this type
         var myValues = [];
-        var tags = GLOBAL.allTags[userName].toString().split(',');
+        var tags = GLOBAL.allTags[userID].toString().split(',');
         for (tag in tags) {
             var kv = tags[tag].split(":");
             if ((kv[0] === myUniqTypes[type]) && (!_.isUndefined(kv[1]))) {

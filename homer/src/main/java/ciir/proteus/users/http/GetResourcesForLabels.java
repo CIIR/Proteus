@@ -42,7 +42,7 @@ public class GetResourcesForLabels extends DBAction {
         Parameters resources = Parameters.instance();
         try {
 
-            resList = userdb.getResourcesForLabels(creds.user, labels, numResults, skipResults);
+            resList = userdb.getResourcesForLabels(creds.userid, labels, numResults, skipResults);
 
             // now get results
             Parameters param = Parameters.instance();

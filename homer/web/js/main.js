@@ -20,6 +20,7 @@ var Model = {
     results: [],
     // user login data
     user: null,
+    userid: null,
     token: null
 };
 
@@ -98,10 +99,12 @@ var logIn = function(userName) {
     var loginFunc = function() {
         API.login(args, function(data) {
             document.cookie = "username=" + userName + ";";
+            document.cookie = "userid=" + data.userid + ";";
             document.cookie = "token=" + data.token + ";";
             // update the type tags
             getAllTagsByUser();
             Model.user = userName;
+            Model.userid = data.userid;
             Model.token = data.token;
         }, function(req, status, err) {
             UI.showError("ERROR: ``" + err + "``");
@@ -116,16 +119,19 @@ var logIn = function(userName) {
 var logOut = function() {
 
     var userName = getCookie("username");
+    var userID = getCookie("userid");
     var userToken = getCookie("token");
 
-    var args = {user: userName, token: userToken};
+    var args = {user: userName, token: userToken, userid: userID};
     API.logout(args, function() {
         document.cookie = "username=;";
         document.cookie = "token=;";
+        document.cookie = "userid=;";
         // update the type tags
         getAllTagsByUser();
         Model.user = null;
         Model.token = null;
+        Model.userid = null;
     }, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
         throw err;
@@ -139,8 +145,9 @@ var logOut = function() {
 var addTag = function(tagText, resourceID) {
     var userName = getCookie("username");
     var userToken = getCookie("token");
+    var userID = getCookie("userid");
 
-    var tmp = '{ "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
+    var tmp = '{  "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
     var args = JSON.parse(tmp);
     API.createTags(args, null, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
@@ -151,9 +158,10 @@ var addTag = function(tagText, resourceID) {
 
 var deleteTag = function(tagText, resourceID) {
     var userName = getCookie("username");
+    var userID = getCookie("userid");
     var userToken = getCookie("token");
 
-    var tmp = '{ "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
+    var tmp = '{ "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
 
     var args = JSON.parse(tmp);
     API.deleteTags(args, null, function(req, status, err) {
@@ -166,12 +174,13 @@ var deleteTag = function(tagText, resourceID) {
 // function to get all the tags for all users.
 var getAllTagsByUser = function() {
     var userName = getCookie("username");
+    var userID = getCookie("userid");
     var userToken = getCookie("token");
     var uniqType = [];
 
     UI.hideMyTagsFunctionality();
 
-    var args = {resource: ["%"], user: userName, token: userToken};
+    var args = {resource: ["%"], user: userName, userid: userID, token: userToken};
     API.getAllTagsByUser(args, function(origresult) {
 
         var keys = Object.keys(origresult);
@@ -188,10 +197,10 @@ var getAllTagsByUser = function() {
         GLOBAL.uniqTypes = _.uniq(uniqType);
         var typeHTML = "";
 
-        if (typeof GLOBAL.allTags[userName] !== 'undefined') {
+        if (typeof GLOBAL.allTags[userID] !== 'undefined') {
             // get just our types
             var myTypes = [];
-            tags = GLOBAL.allTags[userName].toString().split(',');
+            tags = GLOBAL.allTags[userID].toString().split(',');
             for (tag in tags) {
                 var kv = tags[tag].split(":");
                 myTypes.push(kv[0]);
@@ -203,7 +212,7 @@ var getAllTagsByUser = function() {
             for (type in myUniq) {
                 // get the values just for this type
                 var myValues = [];
-                var tags = GLOBAL.allTags[userName].toString().split(',');
+                var tags = GLOBAL.allTags[userID].toString().split(',');
                 for (tag in tags) {
                     var kv = tags[tag].split(":");
 
