@@ -77,7 +77,7 @@ UI.setQuery = function(q) {
  * I'm adding comments now since i regret it 
  * when I dont
  * deleted UI.makeResult since its useless.
-
+ 
  */
 
 // added labels to our button bar when they add a new one
@@ -119,13 +119,13 @@ UI.appendResults = function(queryTerms, results, usingLabels) {
 
     UI.showProgress("Ajax response received!");
     _(results).forEach(function(result) {
-        console.debug("result nAME: " + result.name);
- var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
-        var resDiv = $('<div>'); 
-          resDiv.attr('class', 'result'); 
-          resDiv.attr('id',result.name);
-          resultsDiv.append(renderer(queryTerms, result, resDiv)); //* 6/26/2014
-        
+        console.debug("result name: " + result.name);
+        var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
+        var resDiv = $('<div>');
+        resDiv.attr('class', 'result');
+        resDiv.attr('id', result.name);
+        resultsDiv.append(renderer(queryTerms, result, resDiv)); //* 6/26/2014
+
         var tagName = "#tags_" + result.name;
         $(tagName).tagit({
             availableTags: GLOBAL.uniqTypes,
@@ -189,37 +189,34 @@ UI.setReadyHandler = function(callback) {
 UI.setMoreHandler = function(callback) {
     moreButton.click(callback);
 };
-UI.setUserName = function(user) {
-    if (!user) {
-        UI.clearUserName();
-    } else {
-        loginInfo.html("<span id='login-form-text'> Welcome " + user + "</span> <input id='ui-go-logout' type='button' value='LogOut' />");
+UI.dispalyUserName = function() {
+    // if it's an email address, just display the first part
+    var user = getCookie("username").split("@")[0];
+
+    if (user) {
+        $("#ui-login-form").hide();
+        $("#ui-user-info").html("<span id='login-form-text'> Welcome " + user + "</span> <input id='ui-go-logout' type='button' value='LogOut' />")
+                .show();
+
         $("#ui-go-logout").click(function() {
+            $("#ui-user-info").hide();
             logOut();
+            $("#ui-login-form").show();
         });
     }
 };
-UI.clearUserName = function() {
-    loginInfo.html(" <input id='ui-username' type='text' /> " +
-            "<input id='ui-go-login' type='button' value='Login' />");
-    // have to bind click event here because that ID doesn't exist until we do this.
-    $("#ui-go-login").click(function() {
-        var username = $("#ui-username").val();
-        logIn(username);
-        UI.setUserName(username);
-    });
-};
+
 UI.renderTags = function(result) {
 
     var my_html = '';
     var ro_html = ''; // read only tags
 
-    var username = getCookie("username");
+    var userid = getCookie("userid");
     for (var user in result.tags) {
 
         tags = result.tags[user].toString().split(',');
         for (tag in tags) {
-            if (user !== username) {
+            if (user !== userid) {
                 ro_html += '  <li> ' + formatLabelForDispaly(tags[tag]) + ' </li> ';
             } else {
                 my_html += '  <li> ' + formatLabelForDispaly(tags[tag]) + ' </li> ';
@@ -258,6 +255,7 @@ UI.toggleMyTags = function() {
 UI.createLabelMultiselect = function(myUniqTypes) {
 
     var userName = getCookie("username");
+    var userID = getCookie("userid");
     if (userName === "") {
         $("#all-my-tags").html("");
         return;
@@ -269,7 +267,7 @@ UI.createLabelMultiselect = function(myUniqTypes) {
         html += '<optgroup label="' + myUniqTypes[type] + '">'
         // get the values just for this type
         var myValues = [];
-        var tags = GLOBAL.allTags[userName].toString().split(',');
+        var tags = GLOBAL.allTags[userID].toString().split(',');
         for (tag in tags) {
             var kv = tags[tag].split(":");
             if ((kv[0] === myUniqTypes[type]) && (!_.isUndefined(kv[1]))) {

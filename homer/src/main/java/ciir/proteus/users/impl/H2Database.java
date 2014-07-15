@@ -6,6 +6,7 @@ import ciir.proteus.users.Users;
 import ciir.proteus.users.error.BadSessionException;
 import ciir.proteus.users.error.BadUserException;
 import ciir.proteus.users.error.DBError;
+import ciir.proteus.users.error.DuplicateUser;
 import ciir.proteus.users.error.NoTuplesAffected;
 import org.lemurproject.galago.utility.Parameters;
 
@@ -42,14 +43,13 @@ public class H2Database implements UserDatabase {
             initDB();
 
             // prepare the SQL just once
-            getAllTagsSQL = conn.prepareStatement("SELECT user, tag FROM tags WHERE resource LIKE ? GROUP BY user, tag ORDER BY user, tag");
-            // using LIKE for user so we can pass in '%' and get ALL of them.
+            getAllTagsSQL = conn.prepareStatement("SELECT user_id, label_type || ':' || label_value AS tag FROM tags WHERE resource LIKE ? GROUP BY user_id, tag ORDER BY user_id, tag");
 
             // perpared statements don't like "in(...)" clauses, hence the cryptic SQL to do this:
             //  SELECT DISTINCT resource FROM tags WHERE user LIKE ? AND tag IN (?) 
             // we need to ORDER BY to ensure the result sets will always be in the same order.
-            getResourcesForLabelsAndUserWithLimitSQL = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.tag AND tags.user LIKE ? ORDER BY resource LIMIT ? OFFSET ?");
-            getResourcesForLabelsAndUserSQL = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.tag AND tags.user LIKE ? ORDER BY resource");
+            getResourcesForLabelsAndUserWithLimitSQL = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value AND tags.user_id = ? ORDER BY resource LIMIT ? OFFSET ?");
+            getResourcesForLabelsAndUserSQL = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value AND tags.user_id = ? ORDER BY resource");
 
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
@@ -60,19 +60,38 @@ public class H2Database implements UserDatabase {
 
     private void initDB() {
         try {
+            /*
+             conn.prepareStatement("create table IF NOT EXISTS users ("
+             + "user varchar(" + Users.UserMaxLength + ")"
+             + ")").execute();
+             conn.prepareStatement("create table IF NOT EXISTS sessions ("
+             + "user varchar(" + Users.UserMaxLength + "), "
+             + "session char(" + Users.SessionIdLength + "), "
+             + "foreign key (user) references users(user)"
+             + ")").execute();
+             conn.prepareStatement("create table IF NOT EXISTS tags ("
+             + "user varchar(" + Users.UserMaxLength + "), "
+             + "resource varchar(256), "
+             + "tag varchar(256), "
+             + "foreign key (user) references users(user)"
+             + ")").execute();
+             */
             conn.prepareStatement("create table IF NOT EXISTS users ("
-                    + "user varchar(" + Users.UserMaxLength + ")"
+                    + "ID BIGINT NOT NULL IDENTITY, EMAIL VARCHAR(" + Users.UserEmailMaxLength + ") NOT NULL, PRIMARY KEY (ID)"
                     + ")").execute();
+            conn.prepareStatement("create unique index IF NOT EXISTS user_uniq_email_idx on users(email)").execute();
+
             conn.prepareStatement("create table IF NOT EXISTS sessions ("
-                    + "user varchar(" + Users.UserMaxLength + "), "
+                    + "user_id bigint, "
                     + "session char(" + Users.SessionIdLength + "), "
-                    + "foreign key (user) references users(user)"
+                    + "foreign key (user_id) references users(id)"
                     + ")").execute();
+
             conn.prepareStatement("create table IF NOT EXISTS tags ("
-                    + "user varchar(" + Users.UserMaxLength + "), "
+                    + "USER_ID BIGINT,  "
                     + "resource varchar(256), "
-                    + "tag varchar(256), "
-                    + "foreign key (user) references users(user)"
+                    + "LABEL_TYPE VARCHAR_IGNORECASE(256), LABEL_VALUE VARCHAR_IGNORECASE(256), "
+                    + "foreign key (user_id) references users(id)"
                     + ")").execute();
 
         } catch (SQLException e) {
@@ -92,12 +111,10 @@ public class H2Database implements UserDatabase {
     }
 
     @Override
-    public void register(String username) throws NoTuplesAffected {
+    public void register(String username) throws NoTuplesAffected, DuplicateUser {
         try {
-            // MCZ: note that we lower case the user PK. This means we need to always LOWER() the
-            // value we're usin to search that key. We'll display (on the web front end) whatever
-            // they type in, but "MichaelZ", "michaelz", etc are all equivalent. 
-            PreparedStatement stmt = conn.prepareStatement("insert into users (user) values (LOWER(?))");
+
+            PreparedStatement stmt = conn.prepareStatement("insert into users (email) values (LOWER(?))");
             stmt.setString(1, username);
             int numRows = stmt.executeUpdate();
             if (numRows == 0) {
@@ -105,32 +122,47 @@ public class H2Database implements UserDatabase {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException(e);
+            throw new DuplicateUser();
         }
     }
 
     @Override
-    public String login(String username) {
+    public Parameters login(String username) {
         if (!validUser(username)) {
             return null;
         }
-        String session = Users.generateSessionId();
+        Parameters ret = Parameters.instance();
+        ret.put("user", username);
+        Integer userid = -1;
 
         try {
-            PreparedStatement stmt = conn.prepareStatement("insert into sessions (user,session) values (LOWER(?), ?)");
+            // get the user id
+            PreparedStatement user_id_stmt = conn.prepareStatement("select id from users where email=LOWER(?)");
+            user_id_stmt.setString(1, username);
+            ResultSet results = user_id_stmt.executeQuery();
 
-            stmt.setString(1, username);
+            if (results.next()) {
+                userid = results.getInt(1);
+                ret.put("userid", userid);
+            }
+            results.close();
+
+            String session = Users.generateSessionId();
+
+            PreparedStatement stmt = conn.prepareStatement("insert into sessions (user_id,session) values (?, ?)");
+
+            stmt.setInt(1, userid);
             stmt.setString(2, session);
 
             // should create 1 row
             if (1 == stmt.executeUpdate()) {
-                return session;
+                ret.put("token", session);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return null;
+        return ret;
     }
 
     @Override
@@ -140,8 +172,8 @@ public class H2Database implements UserDatabase {
         }
 
         try {
-            PreparedStatement stmt = conn.prepareStatement("delete from sessions where user=LOWER(?) and session=?");
-            stmt.setString(1, creds.user);
+            PreparedStatement stmt = conn.prepareStatement("delete from sessions where user_id=? and session=?");
+            stmt.setInt(1, creds.userid);
             stmt.setString(2, creds.token);
 
             int numRows = stmt.executeUpdate();
@@ -165,7 +197,7 @@ public class H2Database implements UserDatabase {
         boolean found = false;
         try {
 
-            PreparedStatement stmt = conn.prepareStatement("select count(*) from users where user=LOWER(?)");
+            PreparedStatement stmt = conn.prepareStatement("select count(*) from users where email=LOWER(?)");
             stmt.setString(1, username);
             ResultSet results = stmt.executeQuery();
 
@@ -187,8 +219,8 @@ public class H2Database implements UserDatabase {
         boolean found = false;
 
         try {
-            PreparedStatement stmt = conn.prepareStatement("select (user,session) from sessions where user=LOWER(?) and session=?");
-            stmt.setString(1, creds.user);
+            PreparedStatement stmt = conn.prepareStatement("select (user_id,session) from sessions where user_id=? and session=?");
+            stmt.setInt(1, creds.userid);
             stmt.setString(2, creds.token);
 
             ResultSet results = stmt.executeQuery();
@@ -225,8 +257,8 @@ public class H2Database implements UserDatabase {
         Map<String, List<String>> results = new HashMap<String, List<String>>();
 
         try {
-            PreparedStatement stmt = conn.prepareStatement("select tag from tags where user=LOWER(?) and resource=?");
-            stmt.setString(1, creds.user);
+            PreparedStatement stmt = conn.prepareStatement("select label_type || ':' || label_value from tags where user_id=? and resource=?");
+            stmt.setInt(1, creds.userid);
 
             for (String resource : resources) {
                 List<String> tags = new ArrayList<String>();
@@ -249,37 +281,38 @@ public class H2Database implements UserDatabase {
 
     // returns resources and a list of users and their tags.
     @Override
-    public Map<String, List<String>> getAllTags(String resource) throws DBError {
-        Map<String, Map<String, List<String>>> results = getAllTags(Arrays.asList(resource));
+    public Map<Integer, List<String>> getAllTags(String resource) throws DBError {
+        Map<String, Map<Integer, List<String>>> results = getAllTags(Arrays.asList(resource));
         return results.get(resource);
     }
 
-    public Map<String, Map<String, List<String>>> getAllTags(List<String> resources) throws DBError {
+    @Override
+    public Map<String, Map<Integer, List<String>>> getAllTags(List<String> resources) throws DBError {
 
-        Map<String, Map<String, List<String>>> results = new HashMap<String, Map<String, List<String>>>();
+        Map<String, Map<Integer, List<String>>> results = new HashMap<String, Map<Integer, List<String>>>();
 
         try {
 
             for (String resource : resources) {
-                Map<String, List<String>> userTags = new HashMap<String, List<String>>();
+                Map<Integer, List<String>> userTags = new HashMap<Integer, List<String>>();
                 getAllTagsSQL.setString(1, resource);
 
                 ResultSet tuples = getAllTagsSQL.executeQuery();
 
-                String currentUser = new String();
+                Integer currentUser = -1;
                 List<String> tags = new ArrayList<String>();
 
                 while (tuples.next()) {
 
-                    String user = tuples.getString(1);
+                    Integer user = tuples.getInt(1);
 
-                    if (currentUser.isEmpty()) {   // first time through
+                    if (currentUser == -1) {   // first time through
                         currentUser = user;
                     }
 
                     String tag = tuples.getString(2);
 
-                    if (!currentUser.equals(user)) {
+                    if (currentUser != user) {
                         userTags.put(currentUser, tags);
                         results.put(resource, userTags); // put user/tags in results for the resource
 
@@ -292,7 +325,7 @@ public class H2Database implements UserDatabase {
                 } // end while we have rows
 
                 // put in the last user - if there is one
-                if (!currentUser.isEmpty()) {
+                if (currentUser != -1) {
                     userTags.put(currentUser, tags);
                 }
                 results.put(resource, userTags);
@@ -310,12 +343,20 @@ public class H2Database implements UserDatabase {
     @Override
     public void deleteTag(Credentials creds, String resource, String tag) throws DBError {
         checkSession(creds);
-
+        String labelParts[] = tag.split(":");
         try {
-            PreparedStatement stmt = conn.prepareStatement("delete from tags where user=LOWER(?) and resource=? and tag=(?)");
-            stmt.setString(1, creds.user);
+            PreparedStatement stmt = conn.prepareStatement("delete from tags where user_id=? and resource=? and label_type=? and label_value=? ");
+            stmt.setInt(1, creds.userid);
             stmt.setString(2, resource);
-            stmt.setString(3, tag);
+            // if there is only 1 part to the tag, use the "wildcard" for the label type
+            if (labelParts.length == 1) {
+                stmt.setString(3, "*");
+                stmt.setString(4, labelParts[0]);
+            } else {
+                stmt.setString(3, labelParts[0]);
+                stmt.setString(4, labelParts[1]);
+            }
+
             int numRows = stmt.executeUpdate();
 
             if (numRows == 0) {
@@ -332,11 +373,22 @@ public class H2Database implements UserDatabase {
     public void addTag(Credentials creds, String resource, String tag) throws DBError {
         checkSession(creds);
 
+        String labelParts[] = tag.split(":");
         try {
-            PreparedStatement stmt = conn.prepareStatement("insert into tags (user,resource,tag) values (LOWER(?),?, (?))");
-            stmt.setString(1, creds.user);
+            // TODO - move this prepere to constructor/init code.
+            PreparedStatement stmt = conn.prepareStatement("insert into tags (user_id,resource,label_type, label_value) values (?,?,?,?)");
+            stmt.setInt(1, creds.userid);
             stmt.setString(2, resource);
-            stmt.setString(3, tag);
+
+            // if there is only 1 part to the tag, use the "wildcard" for the label type
+            if (labelParts.length == 1) {
+                stmt.setString(3, "*");
+                stmt.setString(4, labelParts[0]);
+            } else {
+                stmt.setString(3, labelParts[0]);
+                stmt.setString(4, labelParts[1]);
+            }
+
             int numRows = stmt.executeUpdate();
             assert (numRows == 1);
         } catch (SQLException e) {
@@ -345,12 +397,12 @@ public class H2Database implements UserDatabase {
     }
 
     @Override
-    public List<String> getResourcesForLabels(String user, List<String> labels) throws DBError {
-        return getResourcesForLabels(user, labels, -1, -1);
+    public List<String> getResourcesForLabels(Integer userid, List<String> labels) throws DBError {
+        return getResourcesForLabels(userid, labels, -1, -1);
     }
 
     @Override
-    public List<String> getResourcesForLabels(String user, List<String> labels, Integer numResults, Integer startIndex) throws DBError {
+    public List<String> getResourcesForLabels(Integer userid, List<String> labels, Integer numResults, Integer startIndex) throws DBError {
 
         try {
             List<String> resources = new ArrayList<String>();
@@ -363,11 +415,11 @@ public class H2Database implements UserDatabase {
 
             if (numResults == -1) {
                 getResourcesForLabelsAndUserSQL.setObject(1, objLabels);
-                getResourcesForLabelsAndUserSQL.setString(2, user);
+                getResourcesForLabelsAndUserSQL.setInt(2, userid);
                 results = getResourcesForLabelsAndUserSQL.executeQuery();
             } else {
                 getResourcesForLabelsAndUserWithLimitSQL.setObject(1, objLabels);
-                getResourcesForLabelsAndUserWithLimitSQL.setString(2, user);
+                getResourcesForLabelsAndUserWithLimitSQL.setInt(2, userid);
                 getResourcesForLabelsAndUserWithLimitSQL.setInt(3, numResults);
                 getResourcesForLabelsAndUserWithLimitSQL.setInt(4, startIndex);
                 results = getResourcesForLabelsAndUserWithLimitSQL.executeQuery();

@@ -30,16 +30,16 @@ public class JSONSearch implements JSONHandler {
         String kind = reqp.get("kind", system.defaultKind);
         int numResults = (int) reqp.get("n", 10);
         int skipResults = (int) reqp.get("skip", 0);
-        String user = reqp.get("user", "");
+        String userid = reqp.get("userid", "-1");
 
         List<String> labels = new ArrayList<String>(); // empty list
         List<String> resList = null;
         if (reqp.containsKey("labels")) {
             labels = reqp.getAsList("labels", String.class);
-            // we pass in labels on the URL so it's possible that somenoe could share
+            // we pass in labels on the URL so it's possible that someone could share
             // a URL with you that has THEIR tags. So we get the same results, we'll use the
             // "labelOwner" to get the labels. 
-            resList = system.userdb.getResourcesForLabels(reqp.get("labelOwner", user), labels); // get all
+            resList = system.userdb.getResourcesForLabels(Integer.parseInt(reqp.get("labelOwner", userid)), labels); // get all
             log.info("We have labels: " + labels.toString());
         } else {
             // if we're searching by labels display ALL so only check if we 

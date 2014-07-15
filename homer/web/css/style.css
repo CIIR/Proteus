@@ -144,8 +144,18 @@ img.thumbnail {
 #all-my-tags > div > ul > li  > a > label  
 {
     text-align: left;
+
 }
 .right-align{
     text-align: right;
 }
 
+/* make navbar smaller (http://stackoverflow.com/questions/19576175/how-do-you-decrease-navbar-height-in-bootstrap-3) */
+.navbar-nav > li > a {padding-top:5px !important; padding-bottom:5px !important; color: white;}
+.navbar-nav > li > a:hover {
+    padding-top:5px !important; 
+    padding-bottom:5px !important; 
+    background-color: white !important; 
+    color: blue;
+    cursor: pointer;}
+.navbar {min-height:32px !important}
