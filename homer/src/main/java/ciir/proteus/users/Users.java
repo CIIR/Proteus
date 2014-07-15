@@ -7,7 +7,7 @@ import java.security.SecureRandom;
  */
 public class Users {
   public static final SecureRandom random = new SecureRandom();
-  public static final int UserMaxLength = 64;
+  public static final int UserEmailMaxLength = 64;
   public static final int SessionIdLength = generateSessionId().length();
 
   public static String generateSessionId() {

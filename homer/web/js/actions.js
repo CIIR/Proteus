@@ -36,9 +36,11 @@ var doSearchRequest = function(args) {
 
     if (userName != "") {
         var userToken = getCookie("token");
+        var userID = getCookie("userid");
         var tagArgs = {
             tags: true,
             user: userName,
+            userid: userID,
             token: userToken
         };
         args = _.merge(args, tagArgs);

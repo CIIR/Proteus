@@ -6,31 +6,40 @@ import org.lemurproject.galago.utility.Parameters;
  * @author jfoley.
  */
 public class Credentials {
-  public String user;
-  public String token;
 
-  public Credentials(String user, String token) {
-    this.user = user;
-    this.token = token;
-  }
+    public String user;
+    public String token;
+    public Integer userid;
 
-  public static Credentials login(String user, UserDatabase db) {
-    return new Credentials(user, db.login(user));
-  }
+    public Credentials(Parameters loginParam) {
+        this.user = loginParam.getAsString("user");
+        this.token = loginParam.getAsString("token");
+        String tmp = loginParam.getAsString("userid");
+        if (tmp.length() == 0) {
+            this.userid = null;
+        } else {
+            this.userid = Integer.parseInt(tmp);
+        }
+    }
 
-  public static Credentials fromJSON(Parameters p) {
-    return new Credentials(p.getAsString("user"), p.getAsString("token"));
-  }
+    public static Credentials login(String user, UserDatabase db) {
+        return new Credentials(db.login(user));
+    }
 
-  @Override
-  public String toString() {
-    return toJSON().toString();
-  }
+    public static Credentials fromJSON(Parameters p) {
+        return new Credentials(p);
+    }
 
-  public Parameters toJSON() {
-    Parameters p = Parameters.instance();
-    p.put("user", user);
-    p.put("token", token);
-    return p;
-  }
+    @Override
+    public String toString() {
+        return toJSON().toString();
+    }
+
+    public Parameters toJSON() {
+        Parameters p = Parameters.instance();
+        p.put("user", user);
+        p.put("userid", userid);
+        p.put("token", token);
+        return p;
+    }
 }
