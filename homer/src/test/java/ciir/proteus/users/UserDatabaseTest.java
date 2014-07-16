@@ -8,8 +8,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lemurproject.galago.tupleflow.FileUtility;
+import org.lemurproject.galago.utility.FSUtil;
 import org.lemurproject.galago.utility.Parameters;
-import org.lemurproject.galago.tupleflow.Utility;
 
 import java.io.File;
 import java.util.Arrays;
@@ -48,7 +48,7 @@ public class UserDatabaseTest {
     @AfterClass
     public static void tearDown() throws Exception {
         db.close();
-        Utility.deleteDirectory(folder);
+        FSUtil.deleteDirectory(folder);
     }
 
     @Test

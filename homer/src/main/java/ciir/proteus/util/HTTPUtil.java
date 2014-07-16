@@ -9,7 +9,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
-import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.utility.StreamUtil;
 import org.lemurproject.galago.utility.json.JSONUtil;
@@ -62,7 +61,7 @@ public class HTTPUtil {
     } else if(contentType.equals("application/json")) {
       // request body as JSON handling
       ServletInputStream sis = req.getInputStream();
-      String body = Utility.copyStreamToString(sis);
+      String body = StreamUtil.copyStreamToString(sis);
       sis.close();
 
       return Parameters.parseString(body);
