@@ -5,6 +5,7 @@ import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DuplicateUser;
 import ciir.proteus.users.error.NoTuplesAffected;
 import org.lemurproject.galago.tupleflow.FileUtility;
+import org.lemurproject.galago.utility.FSUtil;
 import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.tupleflow.web.WebServer;
@@ -73,6 +74,6 @@ public class TestEnvironment {
     public void close() throws WebServerException, IOException {
         server.stop();
         proteus.close();
-        Utility.deleteDirectory(folder);
+        FSUtil.deleteDirectory(folder);
     }
 }
