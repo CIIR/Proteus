@@ -12,8 +12,8 @@ import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.core.tools.apps.BuildIndex;
 import org.lemurproject.galago.tupleflow.FileUtility;
+import org.lemurproject.galago.utility.FSUtil;
 import org.lemurproject.galago.utility.Parameters;
-import org.lemurproject.galago.tupleflow.Utility;
 
 import java.io.File;
 import java.util.List;
@@ -73,7 +73,7 @@ public class BuildIndexTest {
     Assert.assertEquals(bookName, doc.metadata.get("identifier"));
 
 
-    Utility.deleteDirectory(tmpIndex);
+    FSUtil.deleteDirectory(tmpIndex);
   }
 
   @Test
@@ -99,6 +99,6 @@ public class BuildIndexTest {
 
     Assert.assertFalse(results.isEmpty());
 
-    Utility.deleteDirectory(tmpIndex);
+    FSUtil.deleteDirectory(tmpIndex);
   }
 }
