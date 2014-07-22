@@ -33,11 +33,9 @@ var renderResult = function(queryTerms, result, resDiv) {
     var pageNum = result.name.split('_')[1];
     var iaURL = result.meta["identifier-access"];
 
-
     if (iaURL) {
         name = '<a href="' + iaURL + '">' + name + '</a>';
     }
-
     var pgImage = iaURL;
     if (!_.isUndefined(pageNum)) {
         // MCZ : removing page number for now as it does not match up with 
@@ -51,11 +49,11 @@ var renderResult = function(queryTerms, result, resDiv) {
             '</a>';
     var html =
             '<div class="result">' +
-            '<table style="width: 100%">' +
+            '<table>' +
             '<tr>' +
             '<td class="preview" rowspan="2">' + previewImage + '</td>' +
             '<td class="name">' + name + '</td>' +
-            '<td class="score">' + result.score.toFixed(3) + ' r' + result.rank + '</td>' +
+            '<td class="score">&nbsp;&nbsp;' + result.score.toFixed(3) + ' r' + result.rank + '</td>' +
             '</tr>';
     if (snippet) {
         html += '<tr><td class="snippet" colspan="2"> ...';
@@ -67,9 +65,7 @@ var renderResult = function(queryTerms, result, resDiv) {
         html += UI.renderTags(result);
     }
     resDiv.html(html);
-
     return resDiv;
-    //return html;
 
 };
 

@@ -57,6 +57,11 @@ public class DocumentAnnotator {
         ArrayList<Parameters> resultData = new ArrayList<Parameters>(results.size());
         for (ScoredDocument sdoc : results) {
             Document doc = pulled.get(sdoc.documentName);
+
+            if (doc == null) {
+                continue;
+            }
+
             Parameters docp = Parameters.instance();
 
             // default annotations
@@ -65,11 +70,11 @@ public class DocumentAnnotator {
             docp.put("score", sdoc.score);
 
             // metadata annotation
-            if (doc != null && metadata) {
+            if (metadata) {
                 docp.put("meta", Parameters.parseMap(doc.metadata));
             }
             // snippet annotation
-            if (doc != null && snippets) {
+            if (snippets) {
                 ScoredPassage psg = (ScoredPassage) sdoc;
                 String snippet
                         = (Utility.join(ListUtil.slice(doc.terms, psg.begin, psg.end), " "));
