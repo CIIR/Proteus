@@ -35,18 +35,23 @@ var renderResult = function(queryTerms, result, resDiv) {
 
 
     if (iaURL) {
-
-
         name = '<a href="' + iaURL + '">' + name + '</a>';
     }
-    name += ' pp. ' + pageNum;
 
-    var previewImage = '<a href="' + pageImage(identifier, pageNum) + '">' +
+    var pgImage = iaURL;
+    if (!_.isUndefined(pageNum)) {
+        // MCZ : removing page number for now as it does not match up with 
+        // the physical page number shown on the page
+        //name += ' pp. ' + pageNum;
+        pgImage = pageImage(identifier, pageNum);
+    }
+
+    var previewImage = '<a href="' + pgImage + '">' +
             '<img class="thumbnail" src="' + pageThumbnail(identifier, pageNum) + '"/>' +
             '</a>';
     var html =
             '<div class="result">' +
-            '<table>' +
+            '<table style="width: 100%">' +
             '<tr>' +
             '<td class="preview" rowspan="2">' + previewImage + '</td>' +
             '<td class="name">' + name + '</td>' +
@@ -62,7 +67,7 @@ var renderResult = function(queryTerms, result, resDiv) {
         html += UI.renderTags(result);
     }
     resDiv.html(html);
-    console.log("hey its working");
+
     return resDiv;
     //return html;
 
@@ -70,5 +75,6 @@ var renderResult = function(queryTerms, result, resDiv) {
 
 resultRenderers["ia-books"] = renderResult;
 resultRenderers["ia-pages"] = renderResult;
+resultRenderers["ia-all"] = renderResult;
 
 
