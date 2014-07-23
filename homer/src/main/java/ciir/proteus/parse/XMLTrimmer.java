@@ -26,34 +26,38 @@ import javax.xml.stream.events.XMLEvent;
  *
  * @author bzifkin
  */
+/**
+ * This class takes in a DjVU/XMl document and using the iterator API of StAX
+ * creates another DjVU/XML document that contains only the token found in the
+ * outer 10% of the original document
+ */
 public class XMLTrimmer {
-    int marginUp = 0;
-        int marginDown = 0;
-        int marginLeft = 0;
-        int marginRight = 0;
-        int pageWidth = 0;
-        int pageHeight = 0;
-        int dpi = 0;
-        int quarterInch = 0;
-        boolean goodWord = false;
 
+    int marginUp = 0; //these are the margins which determines if a token is eligible or not
+    int marginDown = 0;
+    int marginLeft = 0;
+    int marginRight = 0;
+    int pageWidth = 0;
+    int pageHeight = 0;
+    int dpi = 0;
+    int quarterInch = 0;
+    boolean goodWord = false;
 
-    public static void main(String args[]) throws IOException, XMLStreamException {      
+    public static void main(String args[]) throws IOException, XMLStreamException {
         int xOne = 0;
         int yOne = 0;
         int xTwo = 0;
         int yTwo = 0;
-        
+
         XMLTrimmer xr = new XMLTrimmer();
 
-        XMLInputFactory factory = XMLInputFactory.newInstance();
+        XMLInputFactory factory = XMLInputFactory.newInstance();  //initiate readers/writers/factories
         XMLOutputFactory outputFactory = XMLOutputFactory.newFactory();
 
         XMLEventWriter writer = null;
         try {
             writer = outputFactory
                     .createXMLEventWriter(new FileOutputStream(args[1]), "UTF-8");
-           
 
         } catch (XMLStreamException ex) {
             Logger.getLogger(XMLTrimmer.class.getName()).log(Level.SEVERE, null, ex);
@@ -65,9 +69,9 @@ public class XMLTrimmer {
         writer.add(startDocument);
         XMLEventReader reader = null; //intializing the eventreader
 
-        try {
+        try { //main loop with logic, continues as long as reader has a next event
+            //two main if loops in here, one looking for end elemnets the other start elements
             reader = factory.createXMLEventReader(new FileInputStream(args[0]));
-            
 
             XMLEvent event = null;
 
@@ -75,7 +79,7 @@ public class XMLTrimmer {
 
                 event = reader.nextEvent();
 
-                if (event.isStartElement()) {
+                if (event.isStartElement()) { //first it looks for start elements
                     StartElement se = event.asStartElement();
                     if ("OBJECT".equals(se.getName().getLocalPart())) {
 
@@ -83,6 +87,7 @@ public class XMLTrimmer {
                         while (attributes.hasNext()) {
 
                             Attribute attribute = attributes.next();
+                            //grabs some attributes set the value to variables
 
                             if (attribute.getName().toString().equals("height")) {
                                 xr.pageHeight = Integer.valueOf(attribute.getValue());
@@ -96,13 +101,11 @@ public class XMLTrimmer {
                         xr.calculateMargins(xr.pageHeight, xr.pageWidth); //how to make sure this isnt called everytime
 
                     } else if ("MAP".equals(se.getName().getLocalPart())) {
-                        writer.add(se);
-                        //System.out.println("<MAP>");
+                        writer.add(se);                   
 
                     } else if ("BODY".equals(se.getName().getLocalPart())) {
                         writer.add(se);
-                        //System.out.println("<MAP>");
-
+                       
                     } else if ("PARAM".equals(se.getName().getLocalPart())) {
                         //System.out.println("<PARAM>");
                         Iterator<Attribute> attributes = se.getAttributes();
@@ -144,7 +147,7 @@ public class XMLTrimmer {
 
                         }
 
-                        if (xr.inMargin2(xOne, yOne, xTwo, yTwo)) {
+                        if (xr.inMargin2(xOne, yOne, xTwo, yTwo)) { //check to see if in margins, if it is the end tag is written immediately, otherwise nothing is written
                             writer.add(se);
                             EndElement wordEnd = eventFactory.createEndElement("", "", "WORD");
                             Characters characters = eventFactory.createCharacters(reader.getElementText());
@@ -155,23 +158,21 @@ public class XMLTrimmer {
                     }
 
                 } else if (event.isEndElement()) {
-                    
+
                     EndElement ee = event.asEndElement();
                     if ("LINE".equals(ee.getName().getLocalPart())) {
                         writer.add(ee);
-                        
-                    } else if ("PARAGRAPH".equals(ee.getName().getLocalPart())) {             
+
+                    } else if ("PARAGRAPH".equals(ee.getName().getLocalPart())) {
                         writer.add(ee);
-                        
+
                     } else if ("MAP".equals(ee.getName().getLocalPart())) {
                         writer.add(ee);
-                        
+
                     } else if ("BODY".equals(ee.getName().getLocalPart())) {
                         writer.add(ee);
                     }
-                } else if (event.isCharacters()) {
-
-                }
+                } 
             }
 
         } catch (FileNotFoundException e) {
@@ -185,14 +186,14 @@ public class XMLTrimmer {
         }
 
     }
-
+//calculate margins to be outer 10%
     public void calculateMargins(int ph, int pw) {
         marginUp = (int) (ph * .1);
         marginDown = pageHeight - ((int) (ph * .1));
         marginLeft = (int) (pw * .1);
         marginRight = pageWidth - ((int) (pw * .1));
     }
-
+//see if in margins
     public boolean inMargin2(int xone, int yone, int xtwo, int ytwo) {
         if (xone <= (marginLeft + quarterInch) || yone >= (marginDown - quarterInch) || xtwo >= (marginRight - quarterInch) || ytwo <= (marginUp + quarterInch)) {
             goodWord = true;
