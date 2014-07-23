@@ -101,28 +101,28 @@ public class XMLTrimmer {
                         xr.calculateMargins(xr.pageHeight, xr.pageWidth); //how to make sure this isnt called everytime
 
                     } else if ("MAP".equals(se.getName().getLocalPart())) {
-                        writer.add(se);                   
+                        writer.add(se);
 
                     } else if ("BODY".equals(se.getName().getLocalPart())) {
                         writer.add(se);
-                       
+
                     } else if ("PARAM".equals(se.getName().getLocalPart())) {
-                        //System.out.println("<PARAM>");
+
                         Iterator<Attribute> attributes = se.getAttributes();
                         while (attributes.hasNext()) {
 
                             Attribute attribute = attributes.next();
 
-                            if (attribute.getValue().toString().equals("DPI") || attribute.getValue().toString().equals("PPI")) {
-                                attributes.next();
-                                if (attribute.getValue().toString().equals("value")) {
-                                    xr.dpi = Integer.valueOf(attribute.getValue());
+                            if (attribute.getValue().toString().equals("DPI")) {
+                                
+                               
+                                    xr.dpi = Integer.valueOf(attributes.next().getValue());
                                 }
                                 xr.quarterInch = (int) (xr.dpi * .25);
 
                             }
 
-                        }
+                        
                     } else if ("PARAGRAPH".equals(se.getName().getLocalPart())) {
                         //System.out.println("<PARAGRAPH>");
                         writer.add(se);
@@ -172,7 +172,7 @@ public class XMLTrimmer {
                     } else if ("BODY".equals(ee.getName().getLocalPart())) {
                         writer.add(ee);
                     }
-                } 
+                }
             }
 
         } catch (FileNotFoundException e) {
@@ -184,16 +184,28 @@ public class XMLTrimmer {
             writer.flush();
             writer.close();
         }
+        xr.showMargins();
 
     }
 //calculate margins to be outer 10%
+
     public void calculateMargins(int ph, int pw) {
         marginUp = (int) (ph * .1);
         marginDown = pageHeight - ((int) (ph * .1));
         marginLeft = (int) (pw * .1);
         marginRight = pageWidth - ((int) (pw * .1));
+
     }
+
+   /* public void showMargins() {
+        System.out.println("margin up: " + (marginUp + quarterInch));
+        System.out.println("margin down: " + (marginDown - quarterInch));
+        System.out.println("margin right: " + (marginRight - quarterInch));
+        System.out.println("margin left: " + (marginLeft + quarterInch));
+        System.out.println("qi: " + quarterInch);
+    }*/
 //see if in margins
+
     public boolean inMargin2(int xone, int yone, int xtwo, int ytwo) {
         if (xone <= (marginLeft + quarterInch) || yone >= (marginDown - quarterInch) || xtwo >= (marginRight - quarterInch) || ytwo <= (marginUp + quarterInch)) {
             goodWord = true;
