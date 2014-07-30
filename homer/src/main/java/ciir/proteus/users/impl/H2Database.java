@@ -60,39 +60,25 @@ public class H2Database implements UserDatabase {
 
     private void initDB() {
         try {
-            /*
-             conn.prepareStatement("create table IF NOT EXISTS users ("
-             + "user varchar(" + Users.UserMaxLength + ")"
-             + ")").execute();
-             conn.prepareStatement("create table IF NOT EXISTS sessions ("
-             + "user varchar(" + Users.UserMaxLength + "), "
-             + "session char(" + Users.SessionIdLength + "), "
-             + "foreign key (user) references users(user)"
-             + ")").execute();
-             conn.prepareStatement("create table IF NOT EXISTS tags ("
-             + "user varchar(" + Users.UserMaxLength + "), "
-             + "resource varchar(256), "
-             + "tag varchar(256), "
-             + "foreign key (user) references users(user)"
-             + ")").execute();
-             */
+            // NOTE: H2 will automatically create an index on any foreign keys.
             conn.prepareStatement("create table IF NOT EXISTS users ("
                     + "ID BIGINT NOT NULL IDENTITY, EMAIL VARCHAR(" + Users.UserEmailMaxLength + ") NOT NULL, PRIMARY KEY (ID)"
                     + ")").execute();
             conn.prepareStatement("create unique index IF NOT EXISTS user_uniq_email_idx on users(email)").execute();
 
             conn.prepareStatement("create table IF NOT EXISTS sessions ("
-                    + "user_id bigint, "
+                    + "user_id bigint NOT NULL, "
                     + "session char(" + Users.SessionIdLength + "), "
                     + "foreign key (user_id) references users(id)"
                     + ")").execute();
 
             conn.prepareStatement("create table IF NOT EXISTS tags ("
-                    + "USER_ID BIGINT,  "
-                    + "resource varchar(256), "
-                    + "LABEL_TYPE VARCHAR_IGNORECASE(256), LABEL_VALUE VARCHAR_IGNORECASE(256), "
+                    + "USER_ID BIGINT NOT NULL,  "
+                    + "resource varchar(256) NOT NULL, "
+                    + "LABEL_TYPE VARCHAR_IGNORECASE(256) NOT NULL, LABEL_VALUE VARCHAR_IGNORECASE(256) NOT NULL, "
                     + "foreign key (user_id) references users(id)"
                     + ")").execute();
+            conn.prepareStatement("create index IF NOT EXISTS label_resource_idx on tags(resource)").execute();
 
         } catch (SQLException e) {
             e.printStackTrace();
