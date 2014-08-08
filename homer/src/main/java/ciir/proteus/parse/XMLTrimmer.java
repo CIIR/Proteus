@@ -1,28 +1,15 @@
 package ciir.proteus.parse;
 
 //import ciir.proteus.parse.Pages.Word;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
+import javax.xml.stream.*;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
-import javax.xml.stream.XMLEventFactory;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
 
 /**
  *
@@ -98,7 +85,7 @@ public class XMLTrimmer {
 
             Attribute attribute = attributes.next();
 
-            if (attribute.getValue().toString().equals("DPI")) {
+            if (attribute.getValue().equals("DPI")) {
 
                 dpi = Integer.valueOf(attributes.next().getValue());
             }
@@ -148,7 +135,7 @@ public class XMLTrimmer {
         }
     }
 
-    public boolean isArabicNum(String text) {
+    public static boolean isArabicNum(String text) {
         String bs = text;
 
         try {
@@ -171,6 +158,7 @@ public class XMLTrimmer {
      don't think this will cause problems
      */
     public static int romanToDecimal(String number) {
+        assert(isRomanNum(number));
         int decimal = 0;
         int lastNumber = 0;
         String romanNumeral = number.toUpperCase();
@@ -226,8 +214,9 @@ public class XMLTrimmer {
         }
     }
 
-    public boolean isRomanNum(String text) {
+    public static boolean isRomanNum(String text) {
         text = text.toUpperCase();
+
         if (text.contains("A") || text.contains("B") || text.contains("E") || text.contains("F") || text.contains("G") || text.contains("H") || text.contains("J") || text.contains("K") || text.contains("N") || text.contains("O") || text.contains("P") || text.contains("Q") || text.contains("R") || text.contains("S") || text.contains("T") || text.contains("U") || text.contains("W") || text.contains("Y") || text.contains("Z") || text.contains(" ") || text.contains(".") || text.contains(",")) {
             return false;
         }
@@ -248,7 +237,7 @@ public class XMLTrimmer {
                     getPageHeightAndWidth(se);
 
                 } else if ("MAP".equals(se.getName().getLocalPart())) {
-                    int pageCount = 0;
+                    //int pageCount = 0;
                     Pages page = new Pages();
                     page.acmPageNum = pageList.size();
                     //pageCount++;
@@ -299,7 +288,7 @@ public class XMLTrimmer {
         return pageList;
     }
 
-    public ArrayList<NumScheme> findPageNumbers(List<Pages> pagelist) {
+    public static ArrayList<NumScheme> findPageNumbers(List<Pages> pagelist) {
         ArrayList<NumScheme> possPageSeqs = new ArrayList<NumScheme>();
         for (Pages p : pagelist) {
             System.out.println("searching pages " + possPageSeqs.size());
@@ -333,7 +322,7 @@ public class XMLTrimmer {
         return possPageSeqs;
     }
 
-    public ArrayList<NumScheme> handleArabic(ArrayList<NumScheme> pps, Pages.Word w) {
+    public static ArrayList<NumScheme> handleArabic(ArrayList<NumScheme> pps, Pages.Word w) {
 
         NumScheme temp = new NumScheme();
         System.out.println("calling findsequence");
@@ -347,7 +336,7 @@ public class XMLTrimmer {
         return pps;
     }
 
-    public NumScheme findSequence(ArrayList<NumScheme> pps, Pages.Word w) {
+    public static NumScheme findSequence(ArrayList<NumScheme> pps, Pages.Word w) {
         if (pps.size() == 0) {
             System.out.println("returning null b/c of size");
             return null;
@@ -390,7 +379,7 @@ public class XMLTrimmer {
         return null;
     }
 
-    public ArrayList<NumScheme> handleRoman(ArrayList<NumScheme> pps, Pages.Word w) {
+    public static ArrayList<NumScheme> handleRoman(ArrayList<NumScheme> pps, Pages.Word w) {
 
         NumScheme temp = new NumScheme();
         System.out.println("calling findsequence");
@@ -462,21 +451,10 @@ public class XMLTrimmer {
 
         public int getNumOfBlanks() {
             int numOfBlanks = 0;
-            if (this.sequence.size() > 0) {
-
-                for (int i = this.sequence.size() - 1; i >= 0; i--) {
-
-                    if (this.sequence.get(i).isBlank) {
-
-                        numOfBlanks++;
-                    } else {
-                        break;
-                    }
-                }
-                return numOfBlanks;
-            } else {
-                return 0;
+            for (Pages.Word word : this.sequence) {
+                if(word.isBlank) numOfBlanks++;
             }
+            return numOfBlanks;
         }
 
     }
