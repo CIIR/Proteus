@@ -84,11 +84,6 @@ public class XMLTrimmerTest {
 
     @Test
     public void testRomanToDecimal() throws Exception {
-        String yeahright = "<BODY><OBJECT  height=\"1650\" width=\"1275\">"
-                + "</OBJECT></BODY>";
-        InputStream is = new ByteArrayInputStream(yeahright.getBytes());
-
-        XMLTrimmer instance = new XMLTrimmer(is);
 
         String a = "iii";
         String b = "i v";
@@ -100,12 +95,12 @@ public class XMLTrimmerTest {
         String h = "xmix";
         //String a = "";
 
-        assertEquals(3, instance.romanToDecimal(a));
+        assertEquals(3, RomanNumeral.romanToDecimal(a));
         //assertEquals(0, instance.romanToDecimal(b));
-        assertEquals(99, instance.romanToDecimal(c));
-        assertEquals(9, instance.romanToDecimal(d));
-        assertEquals(90, instance.romanToDecimal(e));
-        assertEquals(1954, instance.romanToDecimal(f));
+        assertEquals(99, RomanNumeral.romanToDecimal(c));
+        assertEquals(9, RomanNumeral.romanToDecimal(d));
+        assertEquals(90, RomanNumeral.romanToDecimal(e));
+        assertEquals(1954, RomanNumeral.romanToDecimal(f));
         //assertEquals(0, instance.romanToDecimal(g)); //get ten...should be invalid, 
         //assertEquals(0, instance.romanToDecimal(h)); //get 990 should be invalid
 
@@ -113,11 +108,6 @@ public class XMLTrimmerTest {
 
     @Test
     public void testIsRomanNum() throws Exception {
-        String yeahright = "<BODY><OBJECT  height=\"1650\" width=\"1275\">"
-                + "</OBJECT></BODY>";
-        InputStream is = new ByteArrayInputStream(yeahright.getBytes());
-
-        XMLTrimmer instance = new XMLTrimmer(is);
 
         String a = "i";
         String b = "i v";
@@ -129,19 +119,19 @@ public class XMLTrimmerTest {
         String h = "xm";
         //String a = "";
 
-        assertEquals(true, instance.isRomanNum(a));
-        assertEquals(false, instance.isRomanNum(b));
-        assertEquals(true, instance.isRomanNum(c));
-        assertEquals(false, instance.isRomanNum(d));
-        assertEquals(false, instance.isRomanNum(e));
-        assertEquals(true, instance.isRomanNum(f));
-        assertEquals(true, instance.isRomanNum(g));
-        assertEquals(true, instance.isRomanNum(h));
+        assertEquals(true, RomanNumeral.isRomanNum(a));
+        assertEquals(false, RomanNumeral.isRomanNum(b));
+        assertEquals(false, RomanNumeral.isRomanNum(c));
+        assertEquals(false, RomanNumeral.isRomanNum(d));
+        assertEquals(false, RomanNumeral.isRomanNum(e));
+        assertEquals(true, RomanNumeral.isRomanNum(f));
+        assertEquals(false, RomanNumeral.isRomanNum(g));
+        assertEquals(false, RomanNumeral.isRomanNum(h));
 
     }
 
     @Test
-    public void testFindPageNumbers() throws Exception {
+    public void testSearchForSchemes() throws Exception {
         String yeahright = "<BODY><OBJECT  height=\"1650\" width=\"1275\">"
                 + "</OBJECT></BODY>";
         InputStream is = new ByteArrayInputStream(yeahright.getBytes());
@@ -152,37 +142,58 @@ public class XMLTrimmerTest {
         Pages p1 = new Pages();
         Word word1 = new Word("i");
         Word word4 = new Word("1");
-         p1.wordsOnPage.add(word1);
+       p1.wordsOnPage.add(word1);
         p1.wordsOnPage.add(word4);
         pageList.add(p1);
 
         Pages p2 = new Pages();
-        
-         Word word5 = new Word("ii");
-        //p2.wordsOnPage.add(word2);
-        p2.wordsOnPage.add(word5);
+        Word word14 = new Word("2");
+        Word word5 = new Word("ii");
+      p2.wordsOnPage.add(word14);
+      p2.wordsOnPage.add(word5);
         pageList.add(p2);
 
         Pages p3 = new Pages();
-        Word word2 = new Word("3");
-        Word word7 = new Word("iii");
-        p3.wordsOnPage.add(word2);
+        //Word word8 = new Word("3");
+      Word word7 = new Word("iii");
         p3.wordsOnPage.add(word7);
-        
+       // p3.wordsOnPage.add(word8);
         pageList.add(p3);
 
         Pages p4 = new Pages();
-        Word word3 = new Word("iv");
-        Word word6 = new Word("4");
-         p4.wordsOnPage.add(word3);
-        p4.wordsOnPage.add(word6);
+        //Word word3 = new Word("4");
+      // Word word6 = new Word("iv");
+    // p4.wordsOnPage.add(word6);
+       // p4.wordsOnPage.add(word3);
         pageList.add(p4);
-        ArrayList<XMLTrimmer.NumScheme> test = instance.findPageNumbers(pageList);
-        for (XMLTrimmer.NumScheme ben : test) {
+
+        Pages p5 = new Pages();
+      //Word word10 = new Word("v");
+        Word word2 = new Word("19");
+      // p5.wordsOnPage.add(word10);
+       p5.wordsOnPage.add(word2);
+        pageList.add(p5);
+
+        Pages p6 = new Pages();
+       // Word word15 = new Word("6");
+       Word word13 = new Word("vi");
+       p6.wordsOnPage.add(word13);
+        //p6.wordsOnPage.add(word15);
+        pageList.add(p6);
+
+        Pages p7 = new Pages();
+        Word word17 = new Word("vii");
+        Word word16 = new Word("21");
+        p7.wordsOnPage.add(word17);
+        p7.wordsOnPage.add(word16);
+        pageList.add(p7);
+
+        ArrayList<NumScheme> test = instance.searchForSchemes(pageList);
+        for (NumScheme ben : test) {
             System.out.println(ben.toString());
             System.out.println("------------------");
         }
-        assertEquals(2, test.size());
+        assertEquals(3, test.size());
 
     }
 
@@ -195,7 +206,7 @@ public class XMLTrimmerTest {
         XMLTrimmer instance = new XMLTrimmer(is);
         List<Pages> pageList = new ArrayList<Pages>();
 
-        XMLTrimmer.NumScheme ns = new XMLTrimmer.NumScheme();
+        NumScheme ns = new NumScheme();
 
         Word word1 = new Word();
         word1.isBlank = true;
@@ -206,19 +217,19 @@ public class XMLTrimmerTest {
         Word word4 = new Word();
         word4.isBlank = false;
         Word word5 = new Word();
-        word5.isBlank = true;
+        word5.isBlank = false;
         Word word6 = new Word();
         word6.isBlank = true;
 
         ns.sequence.add(word1);
-        ns.sequence.add(word2);
+        ns.sequence.add(word2); 
         ns.sequence.add(word3);
         ns.sequence.add(word4);
         ns.sequence.add(word5);
         ns.sequence.add(word6);
 
         int result = ns.getNumOfBlanks();
-        assertEquals(2, result);
+        assertEquals(1, result);
 
     }
 
