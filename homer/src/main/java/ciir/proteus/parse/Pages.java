@@ -1,4 +1,4 @@
-package ciir.proteus.parse;
+//package ciir.proteus.parse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +56,7 @@ public class Pages {
         public String toString() {
             String stuff = "";
 
-            stuff = acmNum + " WORD: " + text + "   (" + xOne + " , " + yOne + ")  (" + xTwo + " , " + yTwo + ")\n";
+            stuff = "acm Index: " +acmNum + " WORD: " + text + "   (" + xOne + " , " + yOne + ")  (" + xTwo + " , " + yTwo + ")\n";
             return stuff;
         }
     }

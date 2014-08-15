@@ -1,4 +1,4 @@
-package ciir.proteus.parse;
+//package ciir.proteus.parse;
 
 //import ciir.proteus.parse.Pages.Word;
 import javax.xml.stream.*;
@@ -147,12 +147,9 @@ public class XMLTrimmer {
                     getPageHeightAndWidth(se);
 
                 } else if ("MAP".equals(se.getName().getLocalPart())) {
-                    //int pageCount = 0;
+                    
                     Pages page = new Pages();
                     page.acmPageNum = pageList.size();
-                    //pageCount++;
-
-                    //System.out.println("pagecount: " + pageCount);
                     pageList.add(page);
 
                 } else if ("PARAM".equals(se.getName().getLocalPart())) {
@@ -220,23 +217,23 @@ public class XMLTrimmer {
         ArrayList<NumScheme> possPageSeqs = new ArrayList<NumScheme>(); // create a list of all the possible sequences
         //iterate through pages to find schemes
         for (Pages p : pagelist) {
-            System.out.println("searching pages, poss # of seqs:  " + possPageSeqs.size());
+          //  System.out.println("searching pages, poss # of seqs:  " + possPageSeqs.size());
             
             //setting the parking lot
             for (NumScheme ns : possPageSeqs) {
                 if (ns.sequence.size() > 2) {
-                    System.out.println("calling set parking lot");
+                 //   System.out.println("calling set parking lot");
                     ns.setParkingLot();
                 }
 
             }
             for (Pages.Word w : p.wordsOnPage) {
-                System.out.println("searching words");
+               // System.out.println("searching words");
                 if (isArabicNum(w.text)) {
-                    System.out.println("found arabic: " + w.text);
+                   // System.out.println("found arabic: " + w.text);
                     handleArabic(possPageSeqs, w);
                 } else if (RomanNumeral.isRomanNum(w.text)) {
-                    System.out.println("found roman: " + w.text);
+                    //System.out.println("found roman: " + w.text);
                     handleRoman(possPageSeqs, w);
 
                 }
@@ -245,14 +242,14 @@ public class XMLTrimmer {
             for (NumScheme ns : possPageSeqs) {
                 //adding blanks if nothing was found and the scheme isnt in the parking lot
                 if (ns.foundElementOnCurrPage == false && ns.inParkLot == false) {
-                    System.out.println("adding blank");
+                    //System.out.println("adding blank");
 
                     ns.addBlank();
                 }
             }
 
             for (NumScheme num : possPageSeqs) {
-                //1System.out.println("setting to false");
+                //System.out.println("setting to false");
                 num.foundElementOnCurrPage = false;
             }
 
@@ -264,9 +261,9 @@ public class XMLTrimmer {
     public static ArrayList<NumScheme> handleArabic(ArrayList<NumScheme> pps, Pages.Word w) {
 
         NumScheme temp = new NumScheme();
-        System.out.println("calling findArabsequence");
+        //System.out.println("calling findArabsequence");
         if (findArabicSequence(pps, w) == null) {
-            System.out.println("creating new an");
+          //  System.out.println("creating new an");
             temp.foundElementOnCurrPage = true;
             temp.sequence.add(w);
             pps.add(temp);
@@ -278,10 +275,10 @@ public class XMLTrimmer {
     public static ArrayList<NumScheme> handleRoman(ArrayList<NumScheme> pps, Pages.Word w) {
 
         NumScheme temp = new NumScheme();
-        System.out.println("calling findRomansequence");
+       // System.out.println("calling findRomansequence");
         if (findRomanSequence(pps, w) == null) {
             
-            System.out.println("creating new rn");
+          //  System.out.println("creating new rn");
             temp.foundElementOnCurrPage = true;
             temp.sequence.add(w);
             pps.add(temp);
@@ -294,39 +291,39 @@ public class XMLTrimmer {
     public static NumScheme findArabicSequence(ArrayList<NumScheme> pps, Pages.Word w) {
       
         if (pps.size() == 0) {
-            System.out.println("returning null b/c of size");
+          //  System.out.println("returning null b/c of size");
             return null;
         }
         for (NumScheme ns : pps) {
             
-            if (isArabicNum(ns.sequence.get(0).text) && ns.inParkLot == false) {
+            if (isArabicNum(ns.sequence.get(0).text) && ns.inParkLot == false && ns.foundElementOnCurrPage ==false) {
                 
                 int numBlanks = ns.getNumOfBlanks();             
                 int valueOfLast = Integer.valueOf(ns.sequence.get(ns.sequence.size() - (1 + numBlanks)).text);  
                 int valueOfCurr = Integer.valueOf(w.text);
                 
-               System.out.println("word: " + w.text + "number of blanks: " + numBlanks);
+              // System.out.println("word: " + w.text + "number of blanks: " + numBlanks);
                 if (valueOfLast + (1 + numBlanks) == valueOfCurr) {
                     
                     ns.foundElementOnCurrPage = true;
-                    System.out.println("adding to sequence of an");
+                    //System.out.println("adding to sequence of an");
                     ns.sequence.add(w);
                     return ns;
                 }
             }
         }
-        System.out.println("returning null b/c no schemes fit");
+        //System.out.println("returning null b/c no schemes fit");
         return null;
     }
 
     public static NumScheme findRomanSequence(ArrayList<NumScheme> pps, Pages.Word w) {
         
         if (pps.size() == 0) {
-            System.out.println("returning null b/c of size");
+            //System.out.println("returning null b/c of size");
             return null;
         }
         for (NumScheme ns : pps) {
-            if (RomanNumeral.isRomanNum(ns.sequence.get(0).text) && ns.inParkLot == false) {
+            if (RomanNumeral.isRomanNum(ns.sequence.get(0).text) && ns.inParkLot == false && ns.foundElementOnCurrPage ==false) {
                 
                 int currNumeral = RomanNumeral.romanToDecimal(w.text);
                 int numBlanks = ns.getNumOfBlanks();              
@@ -336,13 +333,13 @@ public class XMLTrimmer {
                 if (valueOfLast + (1 + numBlanks) == currNumeral) {
                     
                     ns.foundElementOnCurrPage = true;
-                    System.out.println("adding to sequence of rn");
+                   //System.out.println("adding to sequence of rn");
                     ns.sequence.add(w);
                     return ns;
                 }
             }
         }
-        System.out.println("returning null b/c no schemes fit");
+        //System.out.println("returning null b/c no schemes fit");
         return null;
     }
 
@@ -356,13 +353,14 @@ public class XMLTrimmer {
 
         List<Pages> work = xr.trim(event);
         String output = "";
+        
         System.out.println("number of pages: " + work.size());
-        for (Pages p : work) {
-            
-            System.out.println("number of words on page: " + p.wordsOnPage.size());
-            output = p.toString();
-            System.out.println(output);
-        }
+       List<NumScheme> numbering  = xr.searchForSchemes(work);
+       for (NumScheme ns : numbering){
+          // if(ns.sequence.size()>3)
+        output = output+ ns.toString();
+       }
+          System.out.println(output);
 
     }
 

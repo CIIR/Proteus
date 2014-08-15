@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package ciir.proteus.parse;
+//package ciir.proteus.parse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,17 +33,18 @@ import java.util.List;
 
             Pages.Word blank = new Pages.Word();
             blank.isBlank = true;
-            blank.text = "";
+            blank.text = "blank";
             sequence.add(blank);
 
         }
 
         public String toString() {
             String result = "";
+            String divider = "-------------------------------------------------\n";
             for (Pages.Word w : this.sequence) {
                 result = result + w.toString();
             }
-            return result;
+            return result + divider;
         }
 
 //use this function to count backwards to last non-blank number...useful for extrapolating missing #s
@@ -79,10 +80,10 @@ import java.util.List;
             }
             double ratio = (double) (totalPagesLookedAt - totalNumBlanks) / (double) totalPagesLookedAt;
             if (ratio <= .50) {
-                System.out.println("setting p-lot to true. ratio: " + ratio);
+                //System.out.println("setting p-lot to true. ratio: " + ratio);
                 this.inParkLot = true;
             } else {
-                System.out.println("p-lot still false. ratio " + ratio);
+              //  System.out.println("p-lot still false. ratio " + ratio);
                 this.inParkLot = false;
             }
         }
