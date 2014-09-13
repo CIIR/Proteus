@@ -1,6 +1,6 @@
-//package ciir.proteus.parse;
+package ciir.proteus.parse;
 
-//import ciir.proteus.parse.Pages.Word;
+import ciir.proteus.parse.Pages.Word;
 import javax.xml.stream.*;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
