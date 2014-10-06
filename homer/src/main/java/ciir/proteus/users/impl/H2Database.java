@@ -13,19 +13,20 @@ import org.lemurproject.galago.utility.Parameters;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
+import com.mchange.v2.c3p0.*;
+import java.beans.PropertyVetoException;
 
 /**
- * @author jfoley.
+ * @author jfoley. Updates: MichaelZ
  */
 public class H2Database implements UserDatabase {
 
     private static final Logger log = Logger.getLogger(H2Database.class.getName());
-    private Connection conn;
-    private PreparedStatement getAllTagsSQL = null;
-    private PreparedStatement getResourcesForLabelsAndUserSQL = null;
-    private PreparedStatement getResourcesForLabelsAndUserWithLimitSQL = null;
 
-    public H2Database(Parameters conf) {
+    private ComboPooledDataSource cpds = null;
+
+    public H2Database(Parameters conf) throws SQLException {
+
         try {
             // prime JDBC driver
             Class.forName("org.h2.Driver");
@@ -36,79 +37,85 @@ public class H2Database implements UserDatabase {
             // setting AUTO_SERVER to TRUE allows multiple processes to 
             // connect to the DB - useful for debugging with a DB viewer
             String autoServer = conf.get("auto_server", "FALSE");
-            // open a connection
-            conn = DriverManager.getConnection("jdbc:h2:" + path + ";AUTO_SERVER=" + autoServer, dbuser, dbpass);
+            // create the connection pool
+            cpds = new ComboPooledDataSource();
+            cpds.setDriverClass("org.h2.Driver"); //loads the jdbc driver            
+            cpds.setJdbcUrl("jdbc:h2:" + path + ";AUTO_SERVER=" + autoServer);
+            cpds.setUser(dbuser);
+            cpds.setPassword(dbpass);
+            cpds.setAutoCommitOnClose(true); // without this - connections don't close unless you explicitly commit
+            cpds.setMaxPoolSize((int) conf.get("max_pool_size", 1000));
+            cpds.setInitialPoolSize((int) conf.get("initial_pool_size", 50));
+            cpds.setMaxStatementsPerConnection((int) conf.get("max_prepared_statements_per_connection", 10));  // allow for prepared statements
 
             // create tables if needed
             initDB();
 
-            // prepare the SQL just once
-            getAllTagsSQL = conn.prepareStatement("SELECT user_id, label_type || ':' || label_value AS tag FROM tags WHERE resource LIKE ? GROUP BY user_id, tag ORDER BY user_id, tag");
-
-            // perpared statements don't like "in(...)" clauses, hence the cryptic SQL to do this:
-            //  SELECT DISTINCT resource FROM tags WHERE user LIKE ? AND tag IN (?) 
-            // we need to ORDER BY to ensure the result sets will always be in the same order.
-            getResourcesForLabelsAndUserWithLimitSQL = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value AND tags.user_id = ? ORDER BY resource LIMIT ? OFFSET ?");
-            getResourcesForLabelsAndUserSQL = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value AND tags.user_id = ? ORDER BY resource");
-
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
-        } catch (SQLException e) {
+        } catch (PropertyVetoException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
 
     private void initDB() {
+        Connection conn = null;
         try {
+            conn = cpds.getConnection();
             // NOTE: H2 will automatically create an index on any foreign keys.
-            conn.prepareStatement("create table IF NOT EXISTS users ("
+            conn.createStatement().executeUpdate("create table IF NOT EXISTS users ("
                     + "ID BIGINT NOT NULL IDENTITY, EMAIL VARCHAR(" + Users.UserEmailMaxLength + ") NOT NULL, PRIMARY KEY (ID)"
-                    + ")").execute();
-            conn.prepareStatement("create unique index IF NOT EXISTS user_uniq_email_idx on users(email)").execute();
+                    + ")");
+            conn.createStatement().executeUpdate("create unique index IF NOT EXISTS user_uniq_email_idx on users(email)");
 
-            conn.prepareStatement("create table IF NOT EXISTS sessions ("
+            conn.createStatement().executeUpdate("create table IF NOT EXISTS sessions ("
                     + "user_id bigint NOT NULL, "
                     + "session char(" + Users.SessionIdLength + "), "
                     + "foreign key (user_id) references users(id)"
-                    + ")").execute();
+                    + ")");
 
-            conn.prepareStatement("create table IF NOT EXISTS tags ("
+            conn.createStatement().executeUpdate("create table IF NOT EXISTS tags ("
                     + "USER_ID BIGINT NOT NULL,  "
                     + "resource varchar(256) NOT NULL, "
                     + "LABEL_TYPE VARCHAR_IGNORECASE(256) NOT NULL, LABEL_VALUE VARCHAR_IGNORECASE(256) NOT NULL, "
                     + "foreign key (user_id) references users(id)"
-                    + ")").execute();
-            conn.prepareStatement("create index IF NOT EXISTS label_resource_idx on tags(resource)").execute();
+                    + ")");
+            conn.createStatement().executeUpdate("create index IF NOT EXISTS label_resource_idx on tags(resource)");
 
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        } finally {
+            attemptClose(conn);
         }
     }
 
     @Override
     public void close() {
         try {
-            conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            DataSources.destroy(cpds);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
 
     @Override
     public void register(String username) throws NoTuplesAffected, DuplicateUser {
+        Connection conn = null;
         try {
+            conn = cpds.getConnection();
+            int numRows = conn.createStatement().executeUpdate("insert into users (email) values (LOWER('" + username + "'))");
 
-            PreparedStatement stmt = conn.prepareStatement("insert into users (email) values (LOWER(?))");
-            stmt.setString(1, username);
-            int numRows = stmt.executeUpdate();
             if (numRows == 0) {
                 throw new NoTuplesAffected();
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DuplicateUser();
+        } finally {
+            attemptClose(conn);
         }
     }
 
@@ -117,35 +124,37 @@ public class H2Database implements UserDatabase {
         if (!validUser(username)) {
             return null;
         }
+
+        System.out.println("Logging in user " + username);
         Parameters ret = Parameters.instance();
         ret.put("user", username);
         Integer userid = -1;
-
+        Connection conn = null;
         try {
+            conn = cpds.getConnection();
             // get the user id
-            PreparedStatement user_id_stmt = conn.prepareStatement("select id from users where email=LOWER(?)");
-            user_id_stmt.setString(1, username);
-            ResultSet results = user_id_stmt.executeQuery();
+            ResultSet results = conn.createStatement().executeQuery("select id from users where email=LOWER('" + username + "')");
 
             if (results.next()) {
                 userid = results.getInt(1);
                 ret.put("userid", userid);
             }
+
             results.close();
 
             String session = Users.generateSessionId();
 
-            PreparedStatement stmt = conn.prepareStatement("insert into sessions (user_id,session) values (?, ?)");
-
-            stmt.setInt(1, userid);
-            stmt.setString(2, session);
+            int numRows = conn.createStatement().executeUpdate("insert into sessions (user_id,session) values (" + userid + ",'" + session + "')");
 
             // should create 1 row
-            if (1 == stmt.executeUpdate()) {
+            if (1 == numRows) {
                 ret.put("token", session);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            attemptClose(conn);
         }
 
         return ret;
@@ -156,21 +165,22 @@ public class H2Database implements UserDatabase {
         if (!validSession(creds)) {
             return;
         }
-
+        Connection conn = null;
         try {
-            PreparedStatement stmt = conn.prepareStatement("delete from sessions where user_id=? and session=?");
-            stmt.setInt(1, creds.userid);
-            stmt.setString(2, creds.token);
+            conn = cpds.getConnection();
+            int numRows = conn.createStatement().executeUpdate("delete from sessions where user_id=" + creds.userid + " and session='" + creds.token + "'");
 
-            int numRows = stmt.executeUpdate();
             if (numRows == 0) {
                 // since validSession was true,
                 // this probably should have worked, barring race conditions
                 throw new NoTuplesAffected();
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        } finally {
+            attemptClose(conn);
         }
     }
 
@@ -181,41 +191,40 @@ public class H2Database implements UserDatabase {
         }
 
         boolean found = false;
+        Connection conn = null;
         try {
-
-            PreparedStatement stmt = conn.prepareStatement("select count(*) from users where email=LOWER(?)");
-            stmt.setString(1, username);
-            ResultSet results = stmt.executeQuery();
+            conn = cpds.getConnection();
+            ResultSet results = conn.createStatement().executeQuery("select count(*) from users where email=LOWER('" + username + "')");
 
             if (results.next()) {
                 int numUsers = results.getInt(1);
                 found = (numUsers == 1);
             }
-            results.close();
 
         } catch (SQLException ex) {
             ex.printStackTrace();
+        } finally {
+            attemptClose(conn);
         }
         return found;
     }
 
     @Override
-    public boolean validSession(Credentials creds
-    ) {
+    public boolean validSession(Credentials creds) {
         boolean found = false;
-
+        Connection conn = null;
         try {
-            PreparedStatement stmt = conn.prepareStatement("select (user_id,session) from sessions where user_id=? and session=?");
-            stmt.setInt(1, creds.userid);
-            stmt.setString(2, creds.token);
+            conn = cpds.getConnection();
+            ResultSet results = conn.createStatement().executeQuery("select (user_id,session) from sessions where user_id=" + creds.userid + " and session='" + creds.token + "'");
 
-            ResultSet results = stmt.executeQuery();
             if (results.next()) {
                 found = true;
             }
-            results.close();
+
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            attemptClose(conn);
         }
 
         return found;
@@ -242,15 +251,19 @@ public class H2Database implements UserDatabase {
 
         Map<String, List<String>> results = new HashMap<String, List<String>>();
 
+        Connection conn = null;
         try {
-            PreparedStatement stmt = conn.prepareStatement("select label_type || ':' || label_value from tags where user_id=? and resource=?");
-            stmt.setInt(1, creds.userid);
+            conn = cpds.getConnection();
+
+            PreparedStatement sql = conn.prepareStatement("select label_type || ':' || label_value from tags where user_id=? and resource=?");
+
+            sql.setInt(1, creds.userid);
 
             for (String resource : resources) {
                 List<String> tags = new ArrayList<String>();
-                stmt.setString(2, resource);
+                sql.setString(2, resource);
 
-                ResultSet tuples = stmt.executeQuery();
+                ResultSet tuples = sql.executeQuery();
                 while (tuples.next()) {
                     String tag = tuples.getString(1);
                     tags.add(tag);
@@ -258,8 +271,11 @@ public class H2Database implements UserDatabase {
                 tuples.close();
                 results.put(resource, tags);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            attemptClose(conn);
         }
 
         return results;
@@ -277,13 +293,16 @@ public class H2Database implements UserDatabase {
 
         Map<String, Map<Integer, List<String>>> results = new HashMap<String, Map<Integer, List<String>>>();
 
+        Connection conn = null;
         try {
+            conn = cpds.getConnection();
 
+            PreparedStatement sql = conn.prepareStatement("SELECT user_id, label_type || ':' || label_value AS tag FROM tags WHERE resource LIKE ? GROUP BY user_id, tag ORDER BY user_id, tag");
             for (String resource : resources) {
                 Map<Integer, List<String>> userTags = new HashMap<Integer, List<String>>();
-                getAllTagsSQL.setString(1, resource);
+                sql.setString(1, resource);
 
-                ResultSet tuples = getAllTagsSQL.executeQuery();
+                ResultSet tuples = sql.executeQuery();
 
                 Integer currentUser = -1;
                 List<String> tags = new ArrayList<String>();
@@ -319,8 +338,12 @@ public class H2Database implements UserDatabase {
                 tuples.close();
 
             }
+            //     getAllTagsSQL.close();
+
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            attemptClose(conn);
         }
 
         return results;
@@ -330,28 +353,31 @@ public class H2Database implements UserDatabase {
     public void deleteTag(Credentials creds, String resource, String tag) throws DBError {
         checkSession(creds);
         String labelParts[] = tag.split(":");
+        String labelType = null;
+        String labelValue = null;
+        if (labelParts.length == 1) {
+            labelType = "*";
+            labelValue = labelParts[0];
+        } else {
+            labelType = labelParts[0];
+            labelValue = labelParts[1];
+        }
+        Connection conn = null;
         try {
-            PreparedStatement stmt = conn.prepareStatement("delete from tags where user_id=? and resource=? and label_type=? and label_value=? ");
-            stmt.setInt(1, creds.userid);
-            stmt.setString(2, resource);
-            // if there is only 1 part to the tag, use the "wildcard" for the label type
-            if (labelParts.length == 1) {
-                stmt.setString(3, "*");
-                stmt.setString(4, labelParts[0]);
-            } else {
-                stmt.setString(3, labelParts[0]);
-                stmt.setString(4, labelParts[1]);
-            }
-
-            int numRows = stmt.executeUpdate();
+            conn = cpds.getConnection();
+            int numRows = conn.createStatement().executeUpdate("delete from tags where user_id= " + creds.userid
+                    + " and resource='" + resource + "' and label_type='" + labelType + "' and label_value='" + labelValue + "'");
 
             if (numRows == 0) {
                 log.info("user: '" + creds.user + "', resource: '" + resource + "', tag: '" + tag + "'");
                 throw new NoTuplesAffected();
             }
+
         } catch (SQLException e) {
             log.info("user: '" + creds.user + "', resource: '" + resource + "', tag: '" + tag + "'");
             throw new RuntimeException(e);
+        } finally {
+            attemptClose(conn);
         }
     }
 
@@ -360,25 +386,30 @@ public class H2Database implements UserDatabase {
         checkSession(creds);
 
         String labelParts[] = tag.split(":");
+        Connection conn = null;
         try {
-            // TODO - move this prepere to constructor/init code.
-            PreparedStatement stmt = conn.prepareStatement("insert into tags (user_id,resource,label_type, label_value) values (?,?,?,?)");
-            stmt.setInt(1, creds.userid);
-            stmt.setString(2, resource);
+            conn = cpds.getConnection();
+            PreparedStatement sql = conn.prepareStatement("insert into tags (user_id,resource,label_type, label_value) values (?,?,?,?)");
+
+            sql.setInt(1, creds.userid);
+            sql.setString(2, resource);
 
             // if there is only 1 part to the tag, use the "wildcard" for the label type
             if (labelParts.length == 1) {
-                stmt.setString(3, "*");
-                stmt.setString(4, labelParts[0]);
+                sql.setString(3, "*");
+                sql.setString(4, labelParts[0]);
             } else {
-                stmt.setString(3, labelParts[0]);
-                stmt.setString(4, labelParts[1]);
+                sql.setString(3, labelParts[0]);
+                sql.setString(4, labelParts[1]);
             }
 
-            int numRows = stmt.executeUpdate();
+            int numRows = sql.executeUpdate();
+
             assert (numRows == 1);
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            attemptClose(conn);
         }
     }
 
@@ -390,7 +421,10 @@ public class H2Database implements UserDatabase {
     @Override
     public List<String> getResourcesForLabels(Integer userid, List<String> labels, Integer numResults, Integer startIndex) throws DBError {
 
+        Connection conn = null;
         try {
+            conn = cpds.getConnection();
+
             List<String> resources = new ArrayList<String>();
             Object[] objLabels = new Object[labels.size()];
             int i = 0;
@@ -400,26 +434,46 @@ public class H2Database implements UserDatabase {
             ResultSet results = null;
 
             if (numResults == -1) {
-                getResourcesForLabelsAndUserSQL.setObject(1, objLabels);
-                getResourcesForLabelsAndUserSQL.setInt(2, userid);
-                results = getResourcesForLabelsAndUserSQL.executeQuery();
+                PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value AND tags.user_id = ? ORDER BY resource");
+                sql.setObject(1, objLabels);
+                sql.setInt(2, userid);
+                results = sql.executeQuery();
             } else {
-                getResourcesForLabelsAndUserWithLimitSQL.setObject(1, objLabels);
-                getResourcesForLabelsAndUserWithLimitSQL.setInt(2, userid);
-                getResourcesForLabelsAndUserWithLimitSQL.setInt(3, numResults);
-                getResourcesForLabelsAndUserWithLimitSQL.setInt(4, startIndex);
-                results = getResourcesForLabelsAndUserWithLimitSQL.executeQuery();
+                // perpared statements don't like "in(...)" clauses, hence the cryptic SQL to do this:
+                //  SELECT DISTINCT resource FROM tags WHERE user LIKE ? AND tag IN (?) 
+                // we need to ORDER BY to ensure the result sets will always be in the same order.
+                PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value AND tags.user_id = ? ORDER BY resource LIMIT ? OFFSET ?");
+
+                sql.setObject(1, objLabels);
+                sql.setInt(2, userid);
+                sql.setInt(3, numResults);
+                sql.setInt(4, startIndex);
+                results = sql.executeQuery();
             }
             while (results.next()) {
                 String res = results.getString(1);
                 resources.add(res);
             }
+
             results.close();
 
             return resources;
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            attemptClose(conn);
+        }
+    }
+
+    // "borrowed" from the C3P0 examples: http://sourceforge.net/projects/c3p0/files/c3p0-src/c3p0-0.9.2.1/
+    static void attemptClose(Connection o) {
+        try {
+            if (o != null) {
+                o.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
