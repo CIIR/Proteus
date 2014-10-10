@@ -26,7 +26,7 @@ public class GetResourcesForLabelsTest {
     private static boolean PARANOID = true; // set to true to verify existing functionalidy
 
     @BeforeClass
-    public static void setup() throws IOException, WebServerException, NoTuplesAffected, DuplicateUser {
+    public static void setup() throws IOException, WebServerException, NoTuplesAffected, DuplicateUser, Exception {
         env = new TestEnvironment();
     }
 

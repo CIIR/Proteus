@@ -29,7 +29,7 @@ public class TestEnvironment {
     public String url;
     public Credentials creds;
 
-    public TestEnvironment() throws IOException, WebServerException, NoTuplesAffected, DuplicateUser {
+    public TestEnvironment() throws IOException, WebServerException, NoTuplesAffected, DuplicateUser, Exception {
         folder = FileUtility.createTemporaryDirectory();
         proteus = new ProteusSystem(testParams(folder));
 

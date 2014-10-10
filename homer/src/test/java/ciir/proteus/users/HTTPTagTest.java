@@ -28,7 +28,7 @@ public class HTTPTagTest {
     public static TestEnvironment env;
 
     @BeforeClass
-    public static void setup() throws IOException, WebServerException, NoTuplesAffected, DuplicateUser {
+    public static void setup() throws IOException, WebServerException, NoTuplesAffected, DuplicateUser, Exception {
         env = new TestEnvironment();
     }
 
