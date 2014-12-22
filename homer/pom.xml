@@ -13,8 +13,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <javaVersion>1.6</javaVersion>
-        <galagoVersion>3.7-SNAPSHOT</galagoVersion>
+        <javaVersion>1.7</javaVersion>
+        <galagoVersion>3.8-SNAPSHOT</galagoVersion>
         <mainClass>ciir.proteus.build.Main</mainClass>
     </properties>
 

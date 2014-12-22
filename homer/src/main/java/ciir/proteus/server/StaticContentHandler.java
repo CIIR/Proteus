@@ -1,7 +1,7 @@
 package ciir.proteus.server;
 
 import org.lemurproject.galago.utility.Parameters;
-import org.lemurproject.galago.tupleflow.Utility;
+import org.lemurproject.galago.utility.StreamUtil;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -120,7 +120,7 @@ public class StaticContentHandler {
       resp.setContentType(determineContentType(fp.getPath()));
       resp.setStatus(200);
       out = resp.getOutputStream();
-      Utility.copyFileToStream(fp, out);
+      StreamUtil.copyFileToStream(fp, out);
       out.close();
     } catch (IOException e) {
       throw new HTTPError(e);
