@@ -49,7 +49,7 @@ public class GetResourcesForLabels extends DBAction {
             param.set("snippets", false);
             param.set("tags", true);
 
-            List<ScoredDocument> fakeDocs = new ArrayList<ScoredDocument>();
+            List<ScoredDocument> fakeDocs = new ArrayList<>();
             for (String id : resList) {
                 fakeDocs.add(new ScoredDocument(id, 0, 0.0));
             }

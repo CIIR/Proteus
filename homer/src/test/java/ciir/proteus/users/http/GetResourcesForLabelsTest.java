@@ -53,7 +53,7 @@ public class GetResourcesForLabelsTest {
             assertArrayEquals(new String[]{"type1:value1"}, res1tags.toArray());
         }
 
-        List<String> labels = new ArrayList<String>();
+        List<String> labels = new ArrayList<>();
         labels.add("type1:value1");
         List<String> resources = env.proteus.userdb.getResourcesForLabels(userid, labels, 10, 0);
         assertArrayEquals(new String[]{"res1"}, resources.toArray());

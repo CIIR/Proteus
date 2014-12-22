@@ -1,6 +1,5 @@
 package ciir.proteus.parse;
 
-import ciir.proteus.parse.Pages.Word;
 import javax.xml.stream.*;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
@@ -135,7 +134,7 @@ public class XMLTrimmer {
 
     public List<Pages> trim(XMLEvent event) throws XMLStreamException {
         System.out.println("calling run");
-        List<Pages> pageList = new ArrayList<Pages>();
+        List<Pages> pageList = new ArrayList<>();
         while (reader.hasNext()) {
 
             event = reader.nextEvent();
@@ -214,7 +213,7 @@ public class XMLTrimmer {
     */
 
     public static ArrayList<NumScheme> searchForSchemes(List<Pages> pagelist) {
-        ArrayList<NumScheme> possPageSeqs = new ArrayList<NumScheme>(); // create a list of all the possible sequences
+        ArrayList<NumScheme> possPageSeqs = new ArrayList<>(); // create a list of all the possible sequences
         //iterate through pages to find schemes
         for (Pages p : pagelist) {
           //  System.out.println("searching pages, poss # of seqs:  " + possPageSeqs.size());

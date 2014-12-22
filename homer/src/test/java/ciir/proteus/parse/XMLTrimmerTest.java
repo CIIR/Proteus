@@ -137,7 +137,7 @@ public class XMLTrimmerTest {
         InputStream is = new ByteArrayInputStream(yeahright.getBytes());
 
         XMLTrimmer instance = new XMLTrimmer(is);
-        List<Pages> pageList = new ArrayList<Pages>();
+        List<Pages> pageList = new ArrayList<>();
 
         Pages p1 = new Pages();
         Word word1 = new Word("i");
@@ -204,7 +204,7 @@ public class XMLTrimmerTest {
         InputStream is = new ByteArrayInputStream(yeahright.getBytes());
 
         XMLTrimmer instance = new XMLTrimmer(is);
-        List<Pages> pageList = new ArrayList<Pages>();
+        List<Pages> pageList = new ArrayList<>();
 
         NumScheme ns = new NumScheme();
 

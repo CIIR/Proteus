@@ -12,7 +12,7 @@ public class ListUtil {
    * @return the new list
    */
   public static <T> List<T> drop(List<T> input, int amt) {
-    ArrayList<T> res = new ArrayList<T>();
+    ArrayList<T> res = new ArrayList<>();
     for(int i=amt; i<input.size(); i++) {
       res.add(input.get(i));
     }
@@ -27,7 +27,7 @@ public class ListUtil {
    * @return the new list
    */
   public static <T> List<T> take(List<T> input, int amt) {
-    ArrayList<T> res = new ArrayList<T>();
+    ArrayList<T> res = new ArrayList<>();
     for(int i=0; i<input.size()&&i<amt; i++) {
       res.add(input.get(i));
     }
@@ -35,7 +35,7 @@ public class ListUtil {
   }
 
   public static <T> List<T> slice(List<T> input, int start, int end) {
-    ArrayList<T> res = new ArrayList<T>();
+    ArrayList<T> res = new ArrayList<>();
     for(int i=start; i<input.size()&&i<end; i++) {
       res.add(input.get(i));
     }

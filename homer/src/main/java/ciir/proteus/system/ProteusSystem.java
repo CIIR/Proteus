@@ -26,7 +26,7 @@ public class ProteusSystem {
         this.config = argp;
         this.defaultKind = argp.getString("defaultKind");
 
-        kinds = new HashMap<String, Retrieval>();
+        kinds = new HashMap<>();
         Parameters kindCfg = argp.getMap("kinds");
         for (String kind : kindCfg.keySet()) {
             try {

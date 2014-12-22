@@ -22,7 +22,7 @@ public class DocumentAnnotator {
 
     public static List<Parameters> annotate(ProteusSystem system, String kind, List<String> names, Parameters reqp) throws DBError {
         reqp.put("metadata", false);
-        List<ScoredDocument> fakeDocs = new ArrayList<ScoredDocument>();
+        List<ScoredDocument> fakeDocs = new ArrayList<>();
         for (String id : names) {
             fakeDocs.add(new ScoredDocument(id, 0, 0.0));
         }
@@ -54,7 +54,7 @@ public class DocumentAnnotator {
         }
 
         // result data
-        ArrayList<Parameters> resultData = new ArrayList<Parameters>(results.size());
+        ArrayList<Parameters> resultData = new ArrayList<>(results.size());
         for (ScoredDocument sdoc : results) {
             Document doc = pulled.get(sdoc.documentName);
 

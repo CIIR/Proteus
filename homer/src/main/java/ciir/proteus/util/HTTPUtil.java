@@ -86,7 +86,7 @@ public class HTTPUtil {
    * @return a list of NameValuePair objects for Apache's HttpClient
    */
   private static List<NameValuePair> fromParameters(Parameters p) {
-    List<NameValuePair> parms = new ArrayList<NameValuePair>();
+    List<NameValuePair> parms = new ArrayList<>();
     for(String key : p.keySet()) {
       if(p.isList(key)) {
         for(Object val : p.getList(key)) {
@@ -116,45 +116,36 @@ public class HTTPUtil {
   public static Response post(String url, String path, Parameters p) throws IOException {
     log.info("POST url="+url+" path="+path+" p="+p);
     assert(path.startsWith("/"));
-    CloseableHttpClient client = HttpClientBuilder.create().build();
 
-    try {
-      HttpPost post = new HttpPost(url+path);
+    try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+      HttpPost post = new HttpPost(url + path);
       post.setEntity(new UrlEncodedFormEntity(fromParameters(p)));
       HttpResponse response = client.execute(post);
       return new Response(response);
-    } finally {
-      client.close();
     }
   }
 
   public static Response get(String url, String path, Parameters p) throws IOException {
     log.info("GET url="+url+" path="+path+" p="+p);
     assert(path.startsWith("/"));
-    CloseableHttpClient client = HttpClientBuilder.create().build();
 
-    try {
-      String urlWithParams = encodeInURL(url+path, p);
+    try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+      String urlWithParams = encodeInURL(url + path, p);
       HttpGet get = new HttpGet(urlWithParams);
       HttpResponse response = client.execute(get);
       return new Response(response);
-    } finally {
-      client.close();
     }
   }
 
   public static Response postJSON(String url, String path, Parameters body) throws IOException {
     log.info("DELETE url="+url+" path="+path+" body="+body);
     assert(path.startsWith("/"));
-    CloseableHttpClient client = HttpClientBuilder.create().build();
 
-    try {
-      HttpPost post = new HttpPost(url+path);
+    try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
+      HttpPost post = new HttpPost(url + path);
       post.setHeader("Content-Type", "application/json");
       post.setEntity(new StringEntity(body.toString()));
       return new Response(client.execute(post));
-    } finally {
-      client.close();
     }
   }
 

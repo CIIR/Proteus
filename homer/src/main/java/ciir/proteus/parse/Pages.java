@@ -11,7 +11,7 @@ public class Pages {
 
     int pageNum = -1;
     int acmPageNum;
-    List<Word> wordsOnPage = new ArrayList<Word>();
+    List<Word> wordsOnPage = new ArrayList<>();
 
     public Pages() {
         

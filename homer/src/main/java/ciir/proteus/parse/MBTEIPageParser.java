@@ -38,9 +38,7 @@ public class MBTEIPageParser extends DocumentStreamParser {
         this.xml = null;
         try {
             this.xml = xmlFactory.createXMLStreamReader(getBufferedInputStream(split));
-        } catch (XMLStreamException e) {
-            log.log(Level.WARNING, "Failed to create page parser for split=" + split.fileName + " ", e);
-        } catch (IOException e) {
+        } catch (XMLStreamException | IOException e) {
             log.log(Level.WARNING, "Failed to create page parser for split=" + split.fileName + " ", e);
         }
     }

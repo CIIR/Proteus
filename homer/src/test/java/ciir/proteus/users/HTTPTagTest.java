@@ -141,7 +141,7 @@ public class HTTPTagTest {
         assertEquals(1, tmp.getAsList(userid, String.class).size());
 
         tmp = json.get("res2", dummy);
-        Set<String> res2tags = new HashSet<String>(tmp.getAsList(userid, String.class));
+        Set<String> res2tags = new HashSet<>(tmp.getAsList(userid, String.class));
         assertTrue(res2tags.contains("type:romeo"));
         assertTrue(res2tags.contains("type:funny"));
 

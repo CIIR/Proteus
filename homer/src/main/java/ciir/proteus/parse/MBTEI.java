@@ -62,7 +62,7 @@ public class MBTEI {
   }
 
   public static Map<String,String> parseMetadata(XMLStreamReader xml) throws XMLStreamException {
-    Map<String,String> metadata = new HashMap<String,String>();
+    Map<String,String> metadata = new HashMap<>();
 
     if(!xml.hasNext())
       return null;

@@ -3,10 +3,10 @@ package ciir.proteus.users;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.users.error.DuplicateUser;
 import ciir.proteus.users.error.NoTuplesAffected;
+import org.lemurproject.galago.utility.Parameters;
 
 import java.util.List;
 import java.util.Map;
-import org.lemurproject.galago.utility.Parameters;
 
 /**
  * @author jfoley.
@@ -21,7 +21,6 @@ public interface UserDatabase {
     /**
      * Add a user to the database
      *
-     * @param username
      */
     public void register(String username) throws NoTuplesAffected, DuplicateUser;
 

@@ -5,12 +5,12 @@ import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.util.ListUtil;
 import ciir.proteus.util.QueryUtil;
-import java.util.ArrayList;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.utility.Parameters;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
@@ -32,7 +32,7 @@ public class JSONSearch implements JSONHandler {
         int skipResults = (int) reqp.get("skip", 0);
         String userid = reqp.get("userid", "-1");
 
-        List<String> labels = new ArrayList<String>(); // empty list
+        List<String> labels = new ArrayList<>(); // empty list
         List<String> resList = null;
         if (reqp.containsKey("labels")) {
             labels = reqp.getAsList("labels", String.class);
@@ -69,7 +69,7 @@ public class JSONSearch implements JSONHandler {
                 results = DocumentAnnotator.annotate(this.system, kind, docs, pquery, reqp);
             }
         } else {
-            docs = new ArrayList<ScoredDocument>();
+            docs = new ArrayList<>();
             for (String id : resList) {
                 docs.add(new ScoredDocument(id, 0, 0.0));
             }

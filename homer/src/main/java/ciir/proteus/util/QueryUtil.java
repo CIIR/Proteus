@@ -19,7 +19,7 @@ public class QueryUtil {
    * @return a set of terms as a list
    */
   public static List<String> queryTerms(Node query) {
-    final HashSet<String> terms = new HashSet<String>();
+    final HashSet<String> terms = new HashSet<>();
 
     walk(query, Parameters.instance(), new BeforeTraversal() {
       @Override
@@ -30,7 +30,7 @@ public class QueryUtil {
       }
     });
 
-    return new ArrayList<String>(terms);
+    return new ArrayList<>(terms);
   }
 
   /**

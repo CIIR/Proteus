@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class RetrievalUtil {
   public static List<String> names(List<ScoredDocument> docs) {
-    ArrayList<String> names = new ArrayList<String>();
+    ArrayList<String> names = new ArrayList<>();
     for (ScoredDocument doc : docs) {
       names.add(doc.documentName);
     }

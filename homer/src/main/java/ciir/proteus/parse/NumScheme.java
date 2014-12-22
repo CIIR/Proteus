@@ -20,7 +20,7 @@ import java.util.List;
         //int pages;
 
         boolean inParkLot = false;
-        List<Pages.Word> sequence = new ArrayList<Pages.Word>();
+        List<Pages.Word> sequence = new ArrayList<>();
 
         public NumScheme() {
         }

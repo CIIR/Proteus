@@ -23,7 +23,7 @@ public class StaticContentHandler {
     Parameters p = argp.getMap("content");
 
     // collect list of content directories
-    baseDirs = new ArrayList<File>();
+    baseDirs = new ArrayList<>();
     for(String dir : p.getAsList("dir", String.class)) {
       // assert that we have a content directory that seems to exist
       File baseDirectory = new File(dir);
@@ -88,16 +88,18 @@ public class StaticContentHandler {
     int extensionIndex = path.lastIndexOf('.');
     String extension = path.substring(extensionIndex+1);
 
-    if(extension.equals("html")) {
-      return "text/html";
-    } else if(extension.equals("js")) {
-      return "application/javascript";
-    } else if(extension.equals("css")) {
-      return "text/css";
-    } else if(extension.equals("png")) {
-      return "image/png";
-    } else {
-      log.warning("Unhandled extension type: '"+extension+"' for file path: "+path);
+    switch (extension) {
+      case "html":
+        return "text/html";
+      case "js":
+        return "application/javascript";
+      case "css":
+        return "text/css";
+      case "png":
+        return "image/png";
+      default:
+        log.warning("Unhandled extension type: '" + extension + "' for file path: " + path);
+        break;
     }
     return "text/plain"; // default
   }
