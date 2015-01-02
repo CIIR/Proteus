@@ -65,12 +65,12 @@
         <dependency>
             <groupId>org.lemurproject.galago</groupId>
             <artifactId>core</artifactId>
-            <version>3.7-SNAPSHOT</version>
+            <version>${galagoVersion}</version>
         </dependency>
         <dependency>
             <groupId>org.lemurproject.galago</groupId>
             <artifactId>utility</artifactId>
-            <version>3.7-SNAPSHOT</version>
+            <version>${galagoVersion}</version>
         </dependency>
 
     </dependencies>
