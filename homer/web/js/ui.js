@@ -83,6 +83,7 @@ UI.setQuery = function(q) {
 // added labels to our button bar when they add a new one
 
 function addLabelToButtons(newLabel) {
+    //alert("addLabelToButtons");
     // get the two parts of the label
     var tmp = newLabel.split(":");
     var type = tmp[0];
@@ -96,18 +97,33 @@ function addLabelToButtons(newLabel) {
 
     newLabel = type + ":" + value;
 
-    // see if that value is in the list
-    if ($('#multiselect-all optgroup[label="' + type + '"]').length == 0) {
-        $("#multiselect-all").append('<optgroup  label="' + type + '"><option value="' + newLabel + '">' + value + '</option></optgroup >');
-        $("#multiselect-all").multiselect('rebuild');
-    } else {
-        // see if the value exists
-        if ($('#multiselect-all optgroup[label="' + type + '"] option[value="' + newLabel + '"]').length == 0) {
-            $('#multiselect-all optgroup[label="' + type + '"]').append('<option value="' + newLabel + '">' + value + '</option>');
-            $("#multiselect-all").multiselect('rebuild');
-        }
-    }
+    // new labels:
 
+    var tree = $("#tree").fancytree("getTree");
+    // search for the parent to attach it to
+    var node = tree.getNodeByKey(type);
+    if (node !== null) {
+        node.addChildren({
+            title: value,
+            key: newLabel
+        });
+        tree.render();
+    } else {
+        // get the root node
+        var root = tree.getFirstChild();
+        //add the parent & child
+        var newNode = root.addChildren({
+            title: type,
+            key: type,
+            folder: true
+        });
+        newNode.addChildren({
+            title: value,
+            key: newLabel
+        });
+        newNode.setExpanded(true);
+        tree.render();
+    }
 }
 
 /**
@@ -195,11 +211,11 @@ UI.dispalyUserName = function() {
 
     if (user) {
         $("#ui-login-form").hide();
-        $("#ui-user-info").html("<span id='login-form-text'> Welcome " + user + "</span> <input id='ui-go-logout' type='button' value='LogOut' />")
+        $("#user-info").html("<span id='login-form-text'> Welcome " + user + "</span> <input id='ui-go-logout' type='button' value='LogOut' />")
                 .show();
 
         $("#ui-go-logout").click(function() {
-            $("#ui-user-info").hide();
+            $("#user-info").hide();
             logOut();
             $("#ui-login-form").show();
         });
@@ -254,6 +270,7 @@ UI.toggleMyTags = function() {
 // param is array of uniq types
 UI.createLabelMultiselect = function(myUniqTypes) {
 
+    // alert("createLabelMultiselect");
     var userName = getCookie("username");
     var userID = getCookie("userid");
     if (userName === "") {
@@ -261,10 +278,22 @@ UI.createLabelMultiselect = function(myUniqTypes) {
         return;
     }
 
-    var html = '<select id="multiselect-all" class="proteus-labels" multiple="multiple" >';
+    var node0 = $("#tree").fancytree("getRootNode");
+    //   var all_key = ALL_NODE_KEY();
+    var rootNode = node0.addChildren({
+        title: "All",
+        //     key: all_key,
+        folder: true
+    });
+
     for (type in myUniqTypes) {
 
-        html += '<optgroup label="' + myUniqTypes[type] + '">'
+        var childNode = rootNode.addChildren({
+            title: myUniqTypes[type],
+            key: myUniqTypes[type],
+            folder: true
+        });
+
         // get the values just for this type
         var myValues = [];
         var tags = GLOBAL.allTags[userID].toString().split(',');
@@ -277,19 +306,15 @@ UI.createLabelMultiselect = function(myUniqTypes) {
 
         // var tags = valueList.split(',');
         for (tag in myValues) {
-            // note we inlclude the "type" part so we can get the values easily later
-            html += '<option value="' + myUniqTypes[type] + ":" + myValues[tag] + '">' + myValues[tag] + '</option>';
+            childNode.addChildren({
+                title: myValues[tag],
+                key: myUniqTypes[type] + ":" + myValues[tag]
+            });
         }
-        html += '</optgroup>';
     }
-    html += ' </select>';
-    $("#all-my-tags").append(html);
-    $('#multiselect-all').multiselect(
-            {
-                includeSelectAllOption: true,
-                buttonWidth: '200px'
-            }
-    );
+    $("#tree").fancytree("getRootNode").visit(function(node) {
+        node.setExpanded(true);
+    });
 }
 ;
 

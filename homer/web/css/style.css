@@ -1,10 +1,66 @@
+#results-left{
+	 
+	background-color: white;
+ 	 border-right: 1px solid #888;
+	    height: 100%;
+}
+
+#zzmenubar {
+    width:100%;
+    background-color:#444;
+    color: #fff;
+    padding: 10px;
+}
+
+#zzbutton {
+    cursor:pointer;
+}
+
+#zzmenu, #zzright {
+    display:inline;
+}
+
+#zzmenu li a {
+    padding: 10px;
+    display: block;
+    color: white;
+    text-decoration: none;
+}
+
+#zzright {
+    width:100%;
+    background-color: #fff;
+    z-index: 5;
+    position: fixed;
+    left: 0px;
+    height: 100%;
+    -webkit-box-shadow:  -5px 0px 4px 0px rgba(0, 0, 0, 0.2);
+        moz-box-shadow:  -5px 0px 4px 0px rgba(0, 0, 0, 0.2);
+          o-box-shadow:  -5px 0px 4px 0px rgba(0, 0, 0, 0.2);
+            box-shadow:  -5px 0px 4px 0px rgba(0, 0, 0, 0.2);
+}
+
+#zzright p {
+    padding: 10px;
+}
+
+#zzmenu {
+    float:left;
+    width: 350px;
+    height: 100%;
+}
+
+#zzmenu li {
+    background-color:#444;
+    border-bottom: 1px solid #888;
+}
 body {
     margin: 0;
     padding: 0;
 }
 
 .snippet {
-    padding-left: 20pt;
+    padding: 10pt;
     color: #666;
 }
 
@@ -44,7 +100,11 @@ body {
     margin-top: 40pt;
     padding: 10pt;
     background-color: #009;
+	 text-align: left;
 }
+#more{
+ text-align: left;
+ }
 
 #ui {
 
@@ -78,6 +138,9 @@ body {
 
 #login-form-text{
     color: #fff;
+    text-align: right;
+}
+#ui-go-logout{
     text-align: right;
 }
 /*
@@ -122,7 +185,7 @@ img.thumbnail {
     box-shadow: 10px 10px 5px #888888;
     padding:10px;
     border:2px solid gray;
-    margin:0;
+    margin:0px; 
 }
 
 
@@ -159,3 +222,42 @@ img.thumbnail {
     color: blue;
     cursor: pointer;}
 .navbar {min-height:32px !important}
+
+
+.MZresult .MZthumbnail {
+    width: 100px;
+    float: left;
+    height: 120px;
+
+}
+.MZresult .MZname {
+    float: left;
+    display: inline-block;
+}
+.MZresult .MZscore {
+    float: right;
+    display: inline-block;
+}
+.MZresult-header {
+    float: left;
+    position: relative;
+}
+.MZsnippet  {
+    float: left;
+    white-space: normal;
+    display: inline-block;
+    position: absolute;
+    z-index: 1;
+}
+.MZresult {
+    display: inline-block;
+}
+
+#sidebar-button{ float:left; color: white;   cursor: hand;   font-weight: bold;}
+
+/* override FancyTree CSS */
+ul.fancytree-container {
+ border: none;
+ }
+
+ 

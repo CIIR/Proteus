@@ -24,7 +24,7 @@ var pageThumbnail = function(archiveId, pageNum) {
 
 
 
-console.log("Defining table, renderResult=" + renderResult);
+//console.log("Defining table, renderResult=" + renderResult);
 var renderResult = function(queryTerms, result, resDiv) {
 
     var name = result.meta.title || result.name;
@@ -38,6 +38,10 @@ var renderResult = function(queryTerms, result, resDiv) {
     }
     var pgImage = iaURL;
     if (!_.isUndefined(pageNum)) {
+        // if page result - make the link go to the page
+        name = '<a href="https://archive.org/stream/' + identifier + '#page/n' + pageNum + '/mode/2up' + '">' + result.meta.title || result.name + '</a>';
+
+
         // MCZ : removing page number for now as it does not match up with 
         // the physical page number shown on the page
         //name += ' pp. ' + pageNum;

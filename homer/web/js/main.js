@@ -232,3 +232,25 @@ var getAllTagsByUser = function() {
 
 // get all tags grouped by user on start up
 getAllTagsByUser();
+
+var showSideBar = true;
+
+$('#sidebar-button').click(function() {
+    if (showSideBar == true) {
+        $('#sidebar-button').html(">>");
+        $("#results-left").hide();
+        $("#results-right").removeClass("col-md-10");
+        $("#results-right").addClass("col-md-12");
+        showSideBar = false;
+    } else {
+        $('#sidebar-button').html("<<");
+        $("#results-left").show();
+        showSideBar = true;
+        $("#results-right").removeClass("col-md-12");
+        $("#results-right").addClass("col-md-10");
+    }
+}
+);
+
+
+						

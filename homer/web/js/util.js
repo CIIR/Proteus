@@ -90,8 +90,22 @@ var highlightText = function(queryTerms, text, beforeTag, afterTag) {
 
 function getSelectedLabels() {
 
-    //  console.log("LABELS: " + $('#multiselect-all').val());
-    return($('#multiselect-all').val());
+    var labels = "";
+    var tree = $("#tree").fancytree("getTree");
+    var selNodes = tree.getSelectedNodes();
+    selNodes.forEach(function(node) {
+        if (labels != "")
+            labels += ","
+
+        labels += node.key;
+
+    });
+
+    console.log("    NEW LABELS: " + labels);
+    // if (labels === "")
+    //   return null;
+
+    return labels;
 
 }
 

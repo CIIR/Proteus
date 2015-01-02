@@ -92,14 +92,14 @@ var onSearchSuccess = function(data) {
         return;
     }
     var usingLabels = false;
+    var tree = $("#tree").fancytree("getTree");
     if (!_.isUndefined(data.request.labels)) {
         usingLabels = true;
 
         // if the labels are on the URL AND they're ours, select them
         if (!_.isUndefined(data.request.labelOwner) && data.request.labelOwner == getCookie("userid"))
             for (var val in data.request.labels) {
-                $("#multiselect-all").multiselect('select', data.request.labels[val]);
-
+                tree.getNodeByKey(data.request.labels[val]).setSelected(true);
             }
     }
     UI.appendResults(data.queryTerms, newResults, usingLabels);
