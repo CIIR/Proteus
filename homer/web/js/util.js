@@ -90,23 +90,19 @@ var highlightText = function(queryTerms, text, beforeTag, afterTag) {
 
 function getSelectedLabels() {
 
-    var labels = "";
+    var labels = [];
     var tree = $("#tree").fancytree("getTree");
     var selNodes = tree.getSelectedNodes();
 
     selNodes.forEach(function(node) {
 
         if (!node.hasChildren()) {// ONLY count leaf nodes
-            if (labels != "")
-                labels += ","
 
-            labels += node.key;
+            labels.push(node.key);
         }
     });
 
-    console.log("    NEW LABELS: " + labels);
-    // if (labels === "")
-    //   return null;
+    console.log("LABELS: " + labels);
 
     return labels;
 
