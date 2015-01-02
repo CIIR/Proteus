@@ -93,12 +93,15 @@ function getSelectedLabels() {
     var labels = "";
     var tree = $("#tree").fancytree("getTree");
     var selNodes = tree.getSelectedNodes();
+
     selNodes.forEach(function(node) {
-        if (labels != "")
-            labels += ","
 
-        labels += node.key;
+        if (!node.hasChildren()) {// ONLY count leaf nodes
+            if (labels != "")
+                labels += ","
 
+            labels += node.key;
+        }
     });
 
     console.log("    NEW LABELS: " + labels);
