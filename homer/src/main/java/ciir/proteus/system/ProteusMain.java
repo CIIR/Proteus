@@ -1,13 +1,12 @@
 package ciir.proteus.system;
 
 import ciir.proteus.server.HTTPRouter;
-import org.lemurproject.galago.core.tools.AppFunction;
+import org.lemurproject.galago.utility.tools.AppFunction;
 import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.web.WebServer;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.util.logging.Logger;
 
 public class ProteusMain extends AppFunction {
   public static void main(String[] args) throws Exception {
