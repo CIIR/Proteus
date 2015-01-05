@@ -8,6 +8,7 @@ import org.lemurproject.galago.core.util.DocumentSplitFactory;
 import org.lemurproject.galago.tupleflow.FileUtility;
 import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
+import org.lemurproject.galago.utility.StreamUtil;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -28,10 +29,10 @@ public class MBTEIPageParserTest {
                 + "</TEI>";
 
         File tmp = FileUtility.createTemporary();
-        Utility.copyStringToFile(data, tmp);
+        StreamUtil.copyStringToFile(data, tmp);
 
         DocumentSplit split = DocumentSplitFactory.file(tmp, "mbtei");
-        MBTEIPageParser parser = new MBTEIPageParser(split, Parameters.instance());
+        MBTEIPageParser parser = new MBTEIPageParser(split, Parameters.create());
 
         Document page1 = parser.nextDocument();
         Assert.assertNotNull(page1);
@@ -68,10 +69,10 @@ public class MBTEIPageParserTest {
                 + "</TEI>";
 
         File tmp = FileUtility.createTemporary();
-        Utility.copyStringToFile(data, tmp);
+        StreamUtil.copyStringToFile(data, tmp);
 
         DocumentSplit split = DocumentSplitFactory.file(tmp, "mbtei");
-        MBTEIPageParser parser = new MBTEIPageParser(split, Parameters.instance());
+        MBTEIPageParser parser = new MBTEIPageParser(split, Parameters.create());
         {
             Document page = parser.nextDocument();
             Assert.assertNotNull(page);
@@ -97,19 +98,19 @@ public class MBTEIPageParserTest {
     @Test
     public void testParseCrapDocument() throws IOException {
         DocumentSplit input = DocumentSplitFactory.file("src/test/resources/EmptyFile");
-        MBTEIPageParser pages = new MBTEIPageParser(input, Parameters.instance());
+        MBTEIPageParser pages = new MBTEIPageParser(input, Parameters.create());
         Assert.assertNotNull(pages);
         Assert.assertNull(pages.nextDocument());
         pages.close();
 
         input.fileName = ".gitignore";
-        pages = new MBTEIPageParser(input, Parameters.instance());
+        pages = new MBTEIPageParser(input, Parameters.create());
         Assert.assertNotNull(pages);
         Assert.assertNull(pages.nextDocument());
         pages.close();
 
         input.fileName = "src/test/resources/nearly-empty.mbtei.gz";
-        pages = new MBTEIPageParser(input, Parameters.instance());
+        pages = new MBTEIPageParser(input, Parameters.create());
         Assert.assertNotNull(pages);
         Assert.assertNull(pages.nextDocument());
         pages.close();

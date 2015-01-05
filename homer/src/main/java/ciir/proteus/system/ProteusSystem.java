@@ -30,7 +30,7 @@ public class ProteusSystem {
         Parameters kindCfg = argp.getMap("kinds");
         for (String kind : kindCfg.keySet()) {
             try {
-                kinds.put(kind, RetrievalFactory.instance(kindCfg.getMap(kind)));
+                kinds.put(kind, RetrievalFactory.create(kindCfg.getMap(kind)));
             } catch (Exception e) {
                 throw new IllegalArgumentException(e);
             }
@@ -59,7 +59,7 @@ public class ProteusSystem {
 
     public List<ScoredDocument> findPassages(String kind, Node query, List<String> names) {
         // find max passage for each document
-        Parameters qp = Parameters.instance();
+        Parameters qp = Parameters.create();
         qp.set("working", names);
         qp.set("processingModel", MaxPassageFinder.class.getCanonicalName());
         qp.set("passageQuery", true);

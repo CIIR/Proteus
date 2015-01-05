@@ -26,7 +26,7 @@ public class GetTags extends DBAction {
 
         log.info("GetTags creds=" + creds + " resources=" + resources);
 
-        Parameters rtags = Parameters.instance();
+        Parameters rtags = Parameters.create();
 
         for (String resource : resources) {
             try {
@@ -36,7 +36,7 @@ public class GetTags extends DBAction {
 
         // currently Parameters doesn't quite handle the data structure
                 // we're using so we have to trick it into using it.
-                Parameters tmp = Parameters.instance();
+                Parameters tmp = Parameters.create();
                 for (Map.Entry<Integer, List<String>> entry : tagsAndUsers.entrySet()) {
                     tmp.put(entry.getKey().toString(), entry.getValue());
                 }

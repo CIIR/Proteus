@@ -29,6 +29,6 @@ public class DeleteTags extends DBAction {
       }
     }
 
-    return Parameters.instance();
+    return Parameters.create();
   }
 }

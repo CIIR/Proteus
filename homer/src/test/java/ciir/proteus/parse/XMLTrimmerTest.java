@@ -8,17 +8,12 @@ package ciir.proteus.parse;
 import ciir.proteus.parse.Pages.Word;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
-import org.h2.util.IOUtils;
-import org.junit.After;
-import org.junit.AfterClass;
+
 import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.BeforeClass;
+
 import org.junit.Test;
 
 /**

@@ -36,7 +36,7 @@ public class UserDatabaseTest {
         String dbpath = folder.getPath() + "/users";
         log.info(dbpath);
 
-        Parameters dbp = Parameters.instance();
+        Parameters dbp = Parameters.create();
         dbp.set("path", dbpath);
         dbp.set("user", "junit");
         dbp.set("pass", "");
@@ -64,7 +64,7 @@ public class UserDatabaseTest {
             db.register("user1");
             fail("Expected dupliacte registration exception");
         } catch (DuplicateUser e) {
-
+            assertNotNull(e);
         } catch (Exception e) {
             fail("Wrong execption thrown: " + e.toString());
         }
@@ -81,7 +81,7 @@ public class UserDatabaseTest {
         assertFalse(db.validSession(user1));
 
         // test bad token, correct user id
-        Parameters badParam = Parameters.instance();
+        Parameters badParam = Parameters.create();
         badParam.put("token", "bogus-token");
         badParam.put("userid", p.get("userid"));
         badParam.put("user", "user1");

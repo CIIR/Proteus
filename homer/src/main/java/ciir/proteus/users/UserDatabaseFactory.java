@@ -2,8 +2,7 @@ package ciir.proteus.users;
 
 import ciir.proteus.users.impl.H2Database;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.lemurproject.galago.utility.Parameters;
 
 /**

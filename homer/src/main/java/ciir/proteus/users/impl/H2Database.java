@@ -126,7 +126,7 @@ public class H2Database implements UserDatabase {
         }
 
         System.out.println("Logging in user " + username);
-        Parameters ret = Parameters.instance();
+        Parameters ret = Parameters.create();
         ret.put("user", username);
         Integer userid = -1;
         Connection conn = null;
@@ -317,7 +317,7 @@ public class H2Database implements UserDatabase {
 
                     String tag = tuples.getString(2);
 
-                    if (currentUser != user) {
+                    if (!Objects.equals(currentUser, user)) {
                         userTags.put(currentUser, tags);
                         results.put(resource, userTags); // put user/tags in results for the resource
 

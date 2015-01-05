@@ -36,7 +36,7 @@ public class Credentials {
     }
 
     public Parameters toJSON() {
-        Parameters p = Parameters.instance();
+        Parameters p = Parameters.create();
         p.put("user", user);
         p.put("userid", userid);
         p.put("token", token);

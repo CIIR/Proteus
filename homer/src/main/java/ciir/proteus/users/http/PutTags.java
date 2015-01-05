@@ -28,6 +28,6 @@ public class PutTags extends DBAction {
       }
     }
 
-    return Parameters.instance();
+    return Parameters.create();
   }
 }

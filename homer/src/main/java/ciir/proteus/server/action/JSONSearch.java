@@ -56,9 +56,9 @@ public class JSONSearch implements JSONHandler {
             pquery = StructuredQuery.parse(query);
         }
 
-        Parameters qp = Parameters.instance();
+        Parameters qp = Parameters.create();
         qp.put("requested", numResults + skipResults);
-        Parameters response = Parameters.instance();
+        Parameters response = Parameters.create();
 
         List<Parameters> results = Collections.emptyList();
         List<ScoredDocument> docs = null;
