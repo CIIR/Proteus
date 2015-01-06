@@ -7,7 +7,6 @@ import org.lemurproject.galago.tupleflow.web.WebServer;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.util.logging.Logger;
 
 public class ProteusMain extends AppFunction {
 
