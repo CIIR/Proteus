@@ -79,6 +79,7 @@ public class H2Database implements UserDatabase {
                     + "USER_ID BIGINT NOT NULL,  "
                     + "resource varchar(256) NOT NULL, "
                     + "LABEL_TYPE VARCHAR_IGNORECASE(256) NOT NULL, LABEL_VALUE VARCHAR_IGNORECASE(256) NOT NULL, "
+                    + "rating int NOT NULL default 0, "
                     + "foreign key (user_id) references users(id)"
                     + ")");
             conn.createStatement().executeUpdate("create index IF NOT EXISTS label_resource_idx on tags(resource)");
