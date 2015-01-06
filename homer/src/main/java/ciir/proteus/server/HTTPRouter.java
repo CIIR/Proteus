@@ -1,6 +1,5 @@
 package ciir.proteus.server;
 
-import ciir.proteus.users.http.GetResourcesForLabels;
 import ciir.proteus.server.action.*;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
@@ -67,12 +66,15 @@ public class HTTPRouter implements WebHandler {
                 }
 
                 String action = reqp.getString("action");
-                if (action.equals("search")) {
-                    handler = search;
-                } else if (action.equals("view")) {
-                    handler = viewResource;
-                } else {
-                    throw new IllegalArgumentException("/api/action doesn't know how to handle action=" + action);
+                switch (action) {
+                    case "search":
+                        handler = search;
+                        break;
+                    case "view":
+                        handler = viewResource;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("/api/action doesn't know how to handle action=" + action);
                 }
             } else if (GET && path.equals("/api/kinds")) {
                 handler = getKinds;

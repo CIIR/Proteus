@@ -30,6 +30,6 @@ public class RegisterUser extends DBAction {
             throw new HTTPError(ex);
         }
 
-        return Parameters.instance();
+        return Parameters.create();
     }
 }

@@ -24,7 +24,7 @@ import java.util.List;
 public class BuildIndexTest {
 
   public static List<ScoredDocument> runQuery(Retrieval r, String input) throws Exception {
-    Parameters qp = Parameters.instance();
+    Parameters qp = Parameters.create();
     Node parsed = StructuredQuery.parse(input);
     Node ready = r.transformQuery(parsed, qp);
     return r.executeQuery(ready, qp).scoredDocuments;
@@ -34,7 +34,7 @@ public class BuildIndexTest {
   public void buildTokteiPagesIndex() throws Exception {
     File tmpIndex = FileUtility.createTemporaryDirectory();
 
-    Parameters buildP = Parameters.instance();
+    Parameters buildP = Parameters.create();
     buildP.set("server", false);
     buildP.set("corpus", true);
     buildP.set("indexPath", tmpIndex.getAbsolutePath());
@@ -46,9 +46,9 @@ public class BuildIndexTest {
 
     Assert.assertTrue(tmpIndex.exists());
 
-    Parameters runP = Parameters.instance();
+    Parameters runP = Parameters.create();
     runP.set("index", tmpIndex.getAbsolutePath());
-    Retrieval ret = RetrievalFactory.instance(runP);
+    Retrieval ret = RetrievalFactory.create(runP);
     List<ScoredDocument> results = runQuery(ret, "romeo");
 
     String aDocumentName = results.get(0).documentName;
@@ -80,7 +80,7 @@ public class BuildIndexTest {
   public void buildTokteiBooksIndex() throws Exception {
     File tmpIndex = FileUtility.createTemporaryDirectory();
 
-    Parameters buildP = Parameters.instance();
+    Parameters buildP = Parameters.create();
     buildP.set("server", false);
     buildP.set("corpus", true);
     buildP.set("indexPath", tmpIndex.getAbsolutePath());
@@ -92,9 +92,9 @@ public class BuildIndexTest {
 
     Assert.assertTrue(tmpIndex.exists());
 
-    Parameters runP = Parameters.instance();
+    Parameters runP = Parameters.create();
     runP.set("index", tmpIndex.getAbsolutePath());
-    Retrieval ret = RetrievalFactory.instance(runP);
+    Retrieval ret = RetrievalFactory.create(runP);
     List<ScoredDocument> results = runQuery(ret, "romeo");
 
     Assert.assertFalse(results.isEmpty());

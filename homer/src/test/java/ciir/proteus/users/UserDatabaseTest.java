@@ -36,7 +36,7 @@ public class UserDatabaseTest {
         String dbpath = folder.getPath() + "/users";
         log.info(dbpath);
 
-        Parameters dbp = Parameters.instance();
+        Parameters dbp = Parameters.create();
         dbp.set("path", dbpath);
         dbp.set("user", "junit");
         dbp.set("pass", "");
@@ -64,7 +64,7 @@ public class UserDatabaseTest {
             db.register("user1");
             fail("Expected dupliacte registration exception");
         } catch (DuplicateUser e) {
-
+            assertNotNull(e);
         } catch (Exception e) {
             fail("Wrong execption thrown: " + e.toString());
         }
@@ -81,7 +81,7 @@ public class UserDatabaseTest {
         assertFalse(db.validSession(user1));
 
         // test bad token, correct user id
-        Parameters badParam = Parameters.instance();
+        Parameters badParam = Parameters.create();
         badParam.put("token", "bogus-token");
         badParam.put("userid", p.get("userid"));
         badParam.put("user", "user1");
@@ -137,7 +137,7 @@ public class UserDatabaseTest {
             }
 
             try {
-                db.addTag(new Credentials(p), "fake-resource", "is-fake");
+                db.addTag(new Credentials(p), "fake-resource", "is-fake", 0);
                 fail("Expected exception user=" + users[i]);
             } catch (BadSessionException e) {
                 assertEquals(users[i], "real-user");
@@ -170,16 +170,16 @@ public class UserDatabaseTest {
         int tag_user_id = cred.userid;
 
         // test single tag
-        db.addTag(cred, "res1", "tag1");
+        db.addTag(cred, "res1", "tag1", 0);
 
         List<String> res1tags = db.getTags(cred, "res1");
         Collections.sort(res1tags); // don't depend on db order
         assertArrayEquals(new String[]{"*:tag1"}, res1tags.toArray());
 
         // test multiple tags for the same thing
-        db.addTag(cred, "res2", "type1:tag1");
-        db.addTag(cred, "res2", "type1:tag2");
-        db.addTag(cred, "res2", "type2:tag3");
+        db.addTag(cred, "res2", "type1:tag1", 0);
+        db.addTag(cred, "res2", "type1:tag2", 0);
+        db.addTag(cred, "res2", "type2:tag3", 0);
 
         List<String> res2tags = db.getTags(cred, "res2");
         Collections.sort(res2tags); // don't depend on db order
@@ -216,9 +216,9 @@ public class UserDatabaseTest {
         int user2_id = cred.userid;
 
         // test single tag
-        db.addTag(cred, "res1", "user2_res1_tag1");
-        db.addTag(cred, "res1", "user2_res1_tag2");
-        db.addTag(cred, "res2", "user2_res2_tag1");
+        db.addTag(cred, "res1", "user2_res1_tag1", 0);
+        db.addTag(cred, "res1", "user2_res1_tag2", 0);
+        db.addTag(cred, "res2", "user2_res2_tag1", 0);
 
         Map<String, Map<Integer, List<String>>> getAllTagsResult;
 
@@ -235,19 +235,19 @@ public class UserDatabaseTest {
         assertNotNull(getAllTagsResult.get("res2").get(tag_user_id));
         assertNotNull(getAllTagsResult.get("res2").get(user2_id));
 
-        assertArrayEquals(new String[]{"*:tag1"}, getAllTagsResult.get("res1").get(tag_user_id).toArray());
-        assertArrayEquals(new String[]{"type1:tag1", "type2:tag3"}, getAllTagsResult.get("res2").get(tag_user_id).toArray());
+        assertArrayEquals(new String[]{"*:tag1@0"}, getAllTagsResult.get("res1").get(tag_user_id).toArray());
+        assertArrayEquals(new String[]{"type1:tag1@0", "type2:tag3@0"}, getAllTagsResult.get("res2").get(tag_user_id).toArray());
 
-        assertArrayEquals(new String[]{"*:user2_res1_tag1", "*:user2_res1_tag2"}, getAllTagsResult.get("res1").get(user2_id).toArray());
-        assertArrayEquals(new String[]{"*:user2_res2_tag1"}, getAllTagsResult.get("res2").get(user2_id).toArray());
+        assertArrayEquals(new String[]{"*:user2_res1_tag1@0", "*:user2_res1_tag2@0"}, getAllTagsResult.get("res1").get(user2_id).toArray());
+        assertArrayEquals(new String[]{"*:user2_res2_tag1@0"}, getAllTagsResult.get("res2").get(user2_id).toArray());
 
         Map<Integer, List<String>> singleResourceResult = db.getAllTags("res1");
 
         assertNotNull(singleResourceResult.get(tag_user_id));
         assertNotNull(singleResourceResult.get(user2_id));
 
-        assertArrayEquals(new String[]{"*:tag1"}, singleResourceResult.get(tag_user_id).toArray());
-        assertArrayEquals(new String[]{"*:user2_res1_tag1", "*:user2_res1_tag2"}, singleResourceResult.get(user2_id).toArray());
+        assertArrayEquals(new String[]{"*:tag1@0"}, singleResourceResult.get(tag_user_id).toArray());
+        assertArrayEquals(new String[]{"*:user2_res1_tag1@0", "*:user2_res1_tag2@0"}, singleResourceResult.get(user2_id).toArray());
 
     }
 }

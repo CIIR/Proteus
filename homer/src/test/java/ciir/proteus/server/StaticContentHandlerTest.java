@@ -33,17 +33,17 @@ public class StaticContentHandlerTest {
 
     HTTPUtil.Response response;
 
-    response = HTTPUtil.get(url, "/", Parameters.instance());
+    response = HTTPUtil.get(url, "/", Parameters.create());
     assertEquals(200, response.status);
     assertEquals(Utility.readFileToString(new File("web/index.html")).replaceAll("\r\n", "\n"), response.body.replaceAll("\r\n", "\n"));
 
-    response = HTTPUtil.get(url, "/favicon.ico", Parameters.instance());
+    response = HTTPUtil.get(url, "/favicon.ico", Parameters.create());
     assertEquals(HTTPError.NotFound, response.status);
 
-    response = HTTPUtil.get(url, "/../evil/path.html", Parameters.instance());
+    response = HTTPUtil.get(url, "/../evil/path.html", Parameters.create());
     assertEquals(HTTPError.BadRequest, response.status);
 
-    response = HTTPUtil.get(url, "/metadata/metadata.trectext", Parameters.instance());
+    response = HTTPUtil.get(url, "/metadata/metadata.trectext", Parameters.create());
     assertEquals(200, response.status);
     assertEquals(Utility.readFileToString(new File("src/test/resources/metadata/metadata.trectext")), response.body);
   }

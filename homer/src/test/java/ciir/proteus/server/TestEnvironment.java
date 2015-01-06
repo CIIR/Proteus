@@ -53,18 +53,18 @@ public class TestEnvironment {
 
     public static Parameters testParams(File tmpDir) {
         String dbpath = tmpDir.getPath() + "/users";
-        Parameters dbp = Parameters.instance();
+        Parameters dbp = Parameters.create();
         dbp.set("path", dbpath);
         dbp.set("user", "junit");
         dbp.set("pass", "");
         dbp.set("auto_server", "TRUE"); // allows us to query the DB outside this process
 
-        Parameters content = Parameters.instance();
+        Parameters content = Parameters.create();
         content.set("dir", Arrays.asList("web", "src/test/resources"));
 
-        Parameters testSetup = Parameters.instance();
+        Parameters testSetup = Parameters.create();
         testSetup.set("defaultKind", "fake-kind");
-        testSetup.set("kinds", Parameters.instance());
+        testSetup.set("kinds", Parameters.create());
         testSetup.set("userdb", dbp);
         testSetup.set("content", content);
 

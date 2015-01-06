@@ -142,12 +142,13 @@ var logOut = function() {
 
 };
 
-var addTag = function(tagText, resourceID) {
+var addTag = function(tagText, resourceID, rating) {
     var userName = getCookie("username");
     var userToken = getCookie("token");
     var userID = getCookie("userid");
 
-    var tmp = '{  "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
+    var tmp = '{  "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "rating" : ' + rating + ',"tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
+    console.log(tmp);
     var args = JSON.parse(tmp);
     API.createTags(args, null, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
@@ -162,7 +163,7 @@ var deleteTag = function(tagText, resourceID) {
     var userToken = getCookie("token");
 
     var tmp = '{ "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
-
+    console.log(tmp);
     var args = JSON.parse(tmp);
     API.deleteTags(args, null, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");

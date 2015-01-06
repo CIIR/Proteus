@@ -12,22 +12,23 @@ import java.util.List;
  * @author jfoley.
  */
 public class PutTags extends DBAction {
-  public PutTags(ProteusSystem proteus) {
-    super(proteus);
-  }
 
-  @Override
-  public Parameters handle(String method, String path, Parameters reqp) throws HTTPError, DBError {
-    Credentials creds = Credentials.fromJSON(reqp);
-    Parameters tags = reqp.getMap("tags");
-
-    for(String tag : tags.keySet()) {
-      List<String> resources = tags.getAsList(tag, String.class);
-      for(String resource : resources) {
-        userdb.addTag(creds, resource, tag);
-      }
+    public PutTags(ProteusSystem proteus) {
+        super(proteus);
     }
 
-    return Parameters.instance();
-  }
+    @Override
+    public Parameters handle(String method, String path, Parameters reqp) throws HTTPError, DBError {
+        Credentials creds = Credentials.fromJSON(reqp);
+        Parameters tags = reqp.getMap("tags");
+        int rating = (int) reqp.getLong("rating");
+        for (String tag : tags.keySet()) {
+            List<String> resources = tags.getAsList(tag, String.class);
+            for (String resource : resources) {
+                userdb.addTag(creds, resource, tag, rating);
+            }
+        }
+
+        return Parameters.create();
+    }
 }

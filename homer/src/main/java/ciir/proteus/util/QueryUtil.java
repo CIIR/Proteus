@@ -21,7 +21,7 @@ public class QueryUtil {
   public static List<String> queryTerms(Node query) {
     final HashSet<String> terms = new HashSet<>();
 
-    walk(query, Parameters.instance(), new BeforeTraversal() {
+    walk(query, Parameters.create(), new BeforeTraversal() {
       @Override
       public void beforeNode(Node original, Parameters queryParameters) throws Exception {
         if(isTextNode(original)) {

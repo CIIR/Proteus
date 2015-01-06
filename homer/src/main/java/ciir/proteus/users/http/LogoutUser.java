@@ -24,6 +24,6 @@ public class LogoutUser extends DBAction {
       throw new HTTPError(HTTPError.BadRequest, "No such user/session.");
     }
 
-    return Parameters.instance();
+    return Parameters.create();
   }
 }

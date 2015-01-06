@@ -66,7 +66,7 @@ public interface UserDatabase {
 
     public void deleteTag(Credentials creds, String resource, String tag) throws DBError;
 
-    public void addTag(Credentials creds, String resource, String tag) throws DBError;
+    public void addTag(Credentials creds, String resource, String tag, Integer rating) throws DBError;
 
     public List<String> getResourcesForLabels(Integer userid, List<String> labels) throws DBError;
 

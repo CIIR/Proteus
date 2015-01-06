@@ -84,7 +84,7 @@ UI.setQuery = function(q) {
 
 function addLabelToButtons(newLabel) {
     //alert("addLabelToButtons");
-    // get the two parts of the label
+    // get the two parts of the label, remove the rating
     var tmp = newLabel.split(":");
     var type = tmp[0];
     var value = tmp[1];
@@ -96,6 +96,7 @@ function addLabelToButtons(newLabel) {
     }
 
     newLabel = type + ":" + value;
+
 
     // new labels:
 
@@ -111,6 +112,12 @@ function addLabelToButtons(newLabel) {
     } else {
         // get the root node
         var root = tree.getFirstChild();
+
+        // special logic for the first label
+        if (_.isUndefined(root)) {
+            getAllTagsByUser();
+            return;
+        }
         //add the parent & child
         var newNode = root.addChildren({
             title: type,
@@ -157,21 +164,19 @@ UI.appendResults = function(queryTerms, results, usingLabels) {
                 return true;
             },
             beforeTagAdded: function(event, ui) {
+                var that = this;
                 if (!ui.duringInitialization) {
                     // only ask "are you sure" if this is a NEW tag TYPE
                     tmp = ui.tagLabel.split(":");
                     var res = true;
                     if (tmp.length === 2 && $.inArray(tmp[0], GLOBAL.uniqTypes) === -1) {
                         res = confirm("Are you sure you want to create the label type \"" + tmp[0] + "\"?");
+                        if (res == false)
+                            return false;
                         // add the new type to our list
                         GLOBAL.uniqTypes.push(tmp[0]);
                     }
-                    if (res == true) {
-                        addTag(ui.tagLabel, result.name);
-                        // update the buttons
-                        addLabelToButtons(ui.tagLabel);
-                    }
-                    return res;
+
                 } else {
                     return true;
                 }
@@ -277,7 +282,7 @@ UI.createLabelMultiselect = function(myUniqTypes) {
         $("#all-my-tags").html("");
         return;
     }
-
+    $("#empty-tree").html("");
     var node0 = $("#tree").fancytree("getRootNode");
     //   var all_key = ALL_NODE_KEY();
     var rootNode = node0.addChildren({
@@ -300,7 +305,8 @@ UI.createLabelMultiselect = function(myUniqTypes) {
         for (tag in tags) {
             var kv = tags[tag].split(":");
             if ((kv[0] === myUniqTypes[type]) && (!_.isUndefined(kv[1]))) {
-                myValues.push(kv[1]);
+                // remove the rating
+                myValues.push(kv[1].split("@")[0]);
             }
         }
 

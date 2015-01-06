@@ -40,6 +40,7 @@
 
             $(document).ready(function() {
 
+                $('#rateDialog').hide();
                 // we're using the default validation for the email field,
                 // so if that validation passes, perform the login
                 $('#login-nav').submit(function(event) {
@@ -49,7 +50,7 @@
                     var username = $("#login-email").val();
                     logIn(username);
                 });
-                //    $("#tree").fancytree();
+
 
             });</script>
         <script type="text/javascript">
@@ -61,34 +62,10 @@
                     checkbox: true,
                     selectMode: 3,
                     source: treeData,
-                    //     persist: {
-                    //        expandLazy: false,
-                    //        // overrideSource: false, // true: cookie takes precedence over `source` data attributes.
-                    //       store: "cookie" // 'cookie', 'local': use localStore, 'session': sessionStore
-                    //   },
-                    //     lazyLoad: function(event, ctx) {
-                    //       ctx.result = {url: "ajax-sub2.json", debugDelay: 1000};
-                    // },
                     loadChildren: function(event, ctx) {
                         ctx.node.fixSelection3AfterClick();
                     },
-                    select: function(event, data) {
-                        /*
-                         // Get a list of all selected nodes, and convert to a key array:
-                         var selKeys = $.map(data.tree.getSelectedNodes(), function(node) {
-                         return node.key;
-                         });
-                         $("#echoSelection3").text(selKeys.join(", "));
-                         // Get a list of all selected TOP nodes
-                         var selRootNodes = data.tree.getSelectedNodes(true);
-                         // ... and convert to a key array:
-                         var selRootKeys = $.map(selRootNodes, function(node) {
-                         return node.key;
-                         });
-                         $("#echoSelectionRootKeys3").text(selRootKeys.join(", "));
-                         $("#echoSelectionRoots3").text(selRootNodes.join(", "));
-                         */
-                    },
+                    select: null,
                     dblclick: function(event, data) {
                         data.node.toggleSelected();
                     },
@@ -103,6 +80,13 @@
                     cookieId: "fancytree-Cb3",
                     idPrefix: "fancytree-Cb3-"
                 });
+
+                var node0 = $("#tree").fancytree("getRootNode");
+                if (!node0.hasChildren()) {
+
+                    $("#empty-tree").html("no labels yet");
+                }
+
             });</script>
     </head>
     <body>
@@ -126,6 +110,7 @@
                 <div class="col-md-2 column">
 
                     <div id="sidebar-button"><<</div>
+
                 </div>
                 <div id="user-info" class="col-md-10 column">   </div>
                 <div id="ui-login-form"  class="col-md-10 column">
@@ -169,8 +154,7 @@
 
         <div id="results-left" class="col-md-2 column">
 
-            <div id="tree">
-            </div>
+            <div id="tree"><div id="empty-tree"> </div>  </div>
 
         </div>
         <div id="results-right" class="col-md-10 column right-align">
@@ -193,6 +177,17 @@
         <script src="js/ui.js"></script>
         <script src="js/actions.js"></script>
         <script src="js/main.js"></script>
+
+        <div id="rateDialog"   title="Rate Label">
+            <div >
+                <form id="d-form" action="" method="post">
+                    <input type="radio" name="rating-value"  value="1" checked> 1 (Fair) <br>
+                    <input type="radio" name="rating-value" value="2"> 2 (Good) <br>
+                    <input type="radio" name="rating-value" value="3"> 3 (Excellent)  <br>
+                    <input type="radio" name="rating-value" value="4"> 4 (Perfect) <br>
+                </form>
+            </div>
+        </div>
     </body>
 
 

@@ -118,19 +118,31 @@ function NO_TYPE_CONST() {
 // we want to allow them to select type/values to filter/search by/etc. So we'll store
 // them with a special "*" type, and as long as we don't display that, all the existing
 // code works nicely.
+// Also remove the rating
 function formatLabelForDatabase(origLabel) {
 
-    if (origLabel.indexOf(":") === -1) {
-        return NO_TYPE_CONST() + ":" + origLabel;
+    var labelWithoutRating = origLabel;
+
+    // if we have a rating, remove it
+    var idx = origLabel.lastIndexOf(" (");
+    if (idx > 0) {
+        labelWithoutRating = origLabel.substring(0, idx).trim();
+    }
+    if (labelWithoutRating.indexOf(":") === -1) {
+        return NO_TYPE_CONST() + ":" + labelWithoutRating;
     }
 
-    return origLabel;
+    return labelWithoutRating;
 }
-// when displaying tags, don't show the "*:"
+// when displaying tags, don't show the "*:" and display the
+// rating in a user friendly way
 function formatLabelForDispaly(origLabel) {
 
     if (origLabel.substring(0, 2) === NO_TYPE_CONST() + ":") {
-        return  origLabel.substr(2);
+        var label = origLabel.substr(2).split("@");
+        return  label[0] + " (" + label[1] + ")";
     }
-    return origLabel;
+    var label = origLabel.split("@");
+    return  label[0] + " (" + label[1] + ")";
+
 }

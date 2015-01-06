@@ -298,7 +298,7 @@ public class H2Database implements UserDatabase {
         try {
             conn = cpds.getConnection();
 
-            PreparedStatement sql = conn.prepareStatement("SELECT user_id, label_type || ':' || label_value AS tag FROM tags WHERE resource LIKE ? GROUP BY user_id, tag ORDER BY user_id, tag");
+            PreparedStatement sql = conn.prepareStatement("SELECT user_id, label_type || ':' || label_value || '@' || tags.rating AS tag FROM tags WHERE resource LIKE ? GROUP BY user_id, tag ORDER BY user_id, tag");
             for (String resource : resources) {
                 Map<Integer, List<String>> userTags = new HashMap<>();
                 sql.setString(1, resource);
@@ -383,17 +383,18 @@ public class H2Database implements UserDatabase {
     }
 
     @Override
-    public void addTag(Credentials creds, String resource, String tag) throws DBError {
+    public void addTag(Credentials creds, String resource, String tag, Integer rating) throws DBError {
         checkSession(creds);
 
         String labelParts[] = tag.split(":");
         Connection conn = null;
         try {
             conn = cpds.getConnection();
-            PreparedStatement sql = conn.prepareStatement("insert into tags (user_id,resource,label_type, label_value) values (?,?,?,?)");
+            PreparedStatement sql = conn.prepareStatement("insert into tags (user_id,resource,label_type, label_value, rating) values (?,?,?,?,?)");
 
             sql.setInt(1, creds.userid);
             sql.setString(2, resource);
+            sql.setInt(5, rating);
 
             // if there is only 1 part to the tag, use the "wildcard" for the label type
             if (labelParts.length == 1) {

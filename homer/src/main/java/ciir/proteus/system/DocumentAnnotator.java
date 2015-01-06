@@ -62,7 +62,7 @@ public class DocumentAnnotator {
                 continue;
             }
 
-            Parameters docp = Parameters.instance();
+            Parameters docp = Parameters.create();
 
             // default annotations
             docp.put("name", sdoc.documentName);
@@ -87,7 +87,7 @@ public class DocumentAnnotator {
 
                 // get the tags for this resource
                 if (docTags.containsKey(sdoc.documentName)) {
-                    Parameters tmp = Parameters.instance();
+                    Parameters tmp = Parameters.create();
                     for (Map.Entry<Integer, List<String>> entry : docTags.get(sdoc.documentName).entrySet()) {
                         tmp.put(entry.getKey().toString(), entry.getValue());
                     }

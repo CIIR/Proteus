@@ -17,7 +17,7 @@ public class GetKinds implements JSONHandler {
 
   @Override
   public Parameters handle(String method, String path, Parameters reqp) throws HTTPError, DBError {
-    Parameters p = Parameters.instance();
+    Parameters p = Parameters.create();
     p.put("defaultKind", system.defaultKind);
     p.put("kinds", system.getConfig().getMap("kinds"));
     return p;

@@ -45,7 +45,7 @@ public class GetResourcesForLabelsTest {
         int userid = cred.userid;
 
         // test one label
-        env.proteus.userdb.addTag(cred, "res1", "type1:value1");
+        env.proteus.userdb.addTag(cred, "res1", "type1:value1", 5);
         // assuming existing functionality works.  
         if (PARANOID) {
             List<String> res1tags = env.proteus.userdb.getTags(cred, "res1");
@@ -65,7 +65,7 @@ public class GetResourcesForLabelsTest {
         assertArrayEquals(new String[]{"res1"}, resources.toArray());
 
         // now add that label
-        env.proteus.userdb.addTag(cred, "res1", "type1:value2");
+        env.proteus.userdb.addTag(cred, "res1", "type1:value2", 5);
         // assuming existing functionality works.  
         if (PARANOID) {
             List<String> res1tags = env.proteus.userdb.getTags(cred, "res1");
@@ -86,7 +86,7 @@ public class GetResourcesForLabelsTest {
         assertEquals(0, resources.size());
 
         // add some new resources that should NOT get returned for the labels passed in
-        env.proteus.userdb.addTag(cred, "res2", "type1:don't look for me");
+        env.proteus.userdb.addTag(cred, "res2", "type1:don't look for me", 0);
         if (PARANOID) {
             List<String> res1tags = env.proteus.userdb.getTags(cred, "res2");
             Collections.sort(res1tags); // don't depend on db order
@@ -97,7 +97,7 @@ public class GetResourcesForLabelsTest {
         assertArrayEquals(new String[]{"res1"}, resources.toArray());
 
         // now label another resource with an existing tag
-        env.proteus.userdb.addTag(cred, "res3", "type1:value1");
+        env.proteus.userdb.addTag(cred, "res3", "type1:value1", 5);
         // assuming existing functionality works.  
         if (PARANOID) {
             List<String> res1tags = env.proteus.userdb.getTags(cred, "res3");
@@ -112,7 +112,7 @@ public class GetResourcesForLabelsTest {
         for (int i = 1; i <= 5; i++) {
             // insert new resources for a single label "0"
             String tmp = Integer.toString(i);
-            env.proteus.userdb.addTag(cred, "0-" + tmp, "type:0");
+            env.proteus.userdb.addTag(cred, "0-" + tmp, "type:0", 5);
             // assuming existing functionality works.  
             if (PARANOID) {
                 List<String> res1tags = env.proteus.userdb.getTags(cred, "0-" + tmp);
@@ -136,7 +136,7 @@ public class GetResourcesForLabelsTest {
         for (int i = 1; i <= 5; i++) {
 
             String tmp = Integer.toString(i);
-            env.proteus.userdb.addTag(cred, "1-" + tmp, "type:1");
+            env.proteus.userdb.addTag(cred, "1-" + tmp, "type:1", i);
             // assuming existing functionality works.  
             if (PARANOID) {
                 List<String> res1tags = env.proteus.userdb.getTags(cred, "1-" + tmp);

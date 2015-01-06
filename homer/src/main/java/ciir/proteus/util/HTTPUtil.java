@@ -31,7 +31,7 @@ public class HTTPUtil {
   private final static Logger log =Logger.getLogger(HTTPUtil.class.getName());
 
   public static Parameters fromHTTPRequest(HttpServletRequest req) throws IOException {
-    Parameters reqp = Parameters.instance();
+    Parameters reqp = Parameters.create();
 
     String contentType = req.getContentType();
     // chrome likes to send:
