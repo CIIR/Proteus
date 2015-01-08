@@ -95,15 +95,20 @@ function addLabelToButtons(newLabel) {
         type = NO_TYPE_CONST();
     }
 
-    newLabel = type + ":" + value;
+    var tree = $("#tree").fancytree("getTree");
 
+    newLabel = type + ":" + value;
+    // make sure we don't already have this
+    var check = tree.getNodeByKey(newLabel);
+    if (check !== null)
+        return;
 
     // new labels:
 
-    var tree = $("#tree").fancytree("getTree");
     // search for the parent to attach it to
     var node = tree.getNodeByKey(type);
     if (node !== null) {
+
         node.addChildren({
             title: value,
             key: newLabel
