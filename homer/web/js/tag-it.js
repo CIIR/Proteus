@@ -593,7 +593,8 @@
 
                         // update the label with the rating 
                         var foundTag = that._findTagByLabel(label);
-                        $(foundTag).text(label + " (" + rating + ")");
+
+                        $(foundTag).outerText = label + " (" + rating + ")";
 
                         // now get the resource name
                         var resource = $(foundTag).parent().attr("id").substring(5); // ignore the "tags_" prefix
