@@ -490,12 +490,6 @@
                 return;
             }
 
-            // MCZ: added logic for rating
-            if (!duringInitialization) {
-                // have them rate the label for the resource
-                this._getRating(value);
-
-            }
             if (this.options.singleField) {
                 var tags = this.assignedTags();
                 tags.push(value);
@@ -515,6 +509,19 @@
                 tagLabel: this.tagLabel(tag),
                 duringInitialization: duringInitialization
             });
+
+
+            // MCZ: added logic for rating
+            if (!duringInitialization) {
+                // have them rate the label for the resource
+
+                // get the parent so we know where to display the dialog
+                var foundTag = that._findTagByLabel(value);
+                var parentID = $(foundTag).parent().attr("id");
+
+                this._getRating(value, parentID);
+
+            }
 
             if (this.options.showAutocompleteOnFocus && !duringInitialization) {
                 setTimeout(function() {
@@ -575,14 +582,13 @@
             });
         },
         // MCZ: added
-        _getRating: function(label) {
+        _getRating: function(label, parentID) {
             var that = this;
             var rating = 0;
             $('#rateDialog').dialog({
                 closeOnEscape: false,
                 autoOpen: false,
                 open: function(event, ui) {
-
                     $(".ui-dialog-titlebar-close").hide();
                 },
                 buttons: {
@@ -598,7 +604,7 @@
                         $(foundTag).html(newHTML);
 
                         // now get the resource name
-                        var resource = $(foundTag).parent().attr("id").substring(5); // ignore the "tags_" prefix
+                        var resource = parentID.substring(5); // ignore the "tags_" prefix
                         // put the label in the DB
                         addTag(label, resource, rating);
 
@@ -607,7 +613,9 @@
                 },
                 width: '400px'
             }); //end update dialog
+            $('#rateDialog').dialog("option", "position", {my: "center", at: "center", of: $("#" + parentID)});
             $('#rateDialog').dialog('open');
+
         }
 
     });
