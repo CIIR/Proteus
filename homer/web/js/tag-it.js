@@ -476,7 +476,7 @@
 
             // Unless options.singleField is set, each tag has a hidden input field inline.
             if (!this.options.singleField) {
-                var escapedValue = label.html();
+                var escapedValue = label.html().split(" (")[0]; // MCZ: store JUST the label value, not any rating
                 tag.append('<input type="hidden" value="' + escapedValue + '" name="' + this.options.fieldName + '" class="tagit-hidden-field" />');
             }
 

@@ -218,7 +218,7 @@ var getAllTagsByUser = function() {
                     var kv = tags[tag].split(":");
 
                     if ((kv[0] === myUniq[type]) && (!_.isUndefined(kv[1]))) {
-                        myValues.push(kv[1]);
+                        myValues.push(kv[1].split("@")[0]); // remove the rating
                     }
                 }
             }
