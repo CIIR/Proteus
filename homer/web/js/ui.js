@@ -259,6 +259,7 @@ UI.renderTags = function(result) {
 // used when we don't want to dispaly any of the "my tags" features
 UI.hideMyTagsFunctionality = function() {
     $("#all-my-tags").html("");
+    $("#tree").html("");
 };
 UI.toggleMyTags = function() {
     // if no one is loged in, we don't show anything
@@ -309,9 +310,12 @@ UI.createLabelMultiselect = function(myUniqTypes) {
         var tags = GLOBAL.allTags[userID].toString().split(',');
         for (tag in tags) {
             var kv = tags[tag].split(":");
+            // remove any rating info
             if ((kv[0] === myUniqTypes[type]) && (!_.isUndefined(kv[1]))) {
-                // remove the rating
-                myValues.push(kv[1].split("@")[0]);
+                // remove the rating, an add only if not already there 
+                var val = kv[1].split("@")[0];
+                if (myValues.indexOf(val) == -1)
+                    myValues.push(val);
             }
         }
 
