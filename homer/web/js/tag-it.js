@@ -110,10 +110,8 @@
             }
 
             this.tagInput = $('<input type="text" />').addClass('ui-widget-content');
-
             if (this.options.readOnly)
                 this.tagInput.attr('disabled', 'disabled');
-
             if (this.options.tabIndex) {
                 this.tagInput.attr('tabindex', this.options.tabIndex);
             }
@@ -141,7 +139,6 @@
                 this.tagInput.focus(function(event, ui) {
                     that._showAutocomplete();
                 });
-
                 if (typeof this.options.autocomplete.minLength === 'undefined') {
                     this.options.autocomplete.minLength = 0;
                 }
@@ -176,7 +173,6 @@
                             that.tagInput.focus();
                         }
                     });
-
             // Single field support.
             var addedExistingFromSingleFieldNode = false;
             if (this.options.singleField) {
@@ -268,7 +264,6 @@
                  }
                  */
             });
-
             // Autocomplete.
             if (this.options.availableTags || this.options.tagSource || this.options.autocomplete.source) {
                 var autocompleteOptions = {
@@ -285,28 +280,22 @@
                     }
                 };
                 $.extend(autocompleteOptions, this.options.autocomplete);
-
                 // tagSource is deprecated, but takes precedence here since autocomplete.source is set by default,
                 // while tagSource is left null by default.
                 autocompleteOptions.source = this.options.tagSource || autocompleteOptions.source;
-
                 this.tagInput.autocomplete(autocompleteOptions).bind('autocompleteopen.tagit', function(event, ui) {
                     that.tagInput.data('autocomplete-open', true);
                 }).bind('autocompleteclose.tagit', function(event, ui) {
                     that.tagInput.data('autocomplete-open', false)
                 });
-
                 this.tagInput.autocomplete('widget').addClass('tagit-autocomplete');
             }
         },
         destroy: function() {
             $.Widget.prototype.destroy.call(this);
-
             this.element.unbind('.tagit');
             this.tagList.unbind('.tagit');
-
             this.tagInput.removeData('autocomplete-open');
-
             this.tagList.removeClass([
                 'tagit',
                 'ui-widget',
@@ -314,7 +303,6 @@
                 'ui-corner-all',
                 'tagit-hidden-field'
             ].join(' '));
-
             if (this.element.is('input')) {
                 this.element.removeClass('tagit-hidden-field');
                 this.tagList.remove();
@@ -333,11 +321,9 @@
                             'tagit-choice-editable',
                             'tagit-choice-read-only'
                         ].join(' '));
-
                         $(this).text($(this).children('.tagit-label').text());
                     }
                 });
-
                 if (this.singleFieldNode) {
                     this.singleFieldNode.remove();
                 }
@@ -420,9 +406,7 @@
         },
         createTag: function(value, additionalClass, duringInitialization) {
             var that = this;
-
             value = $.trim(value);
-
             if (this.options.preprocessTag) {
                 value = this.options.preprocessTag(value);
             }
@@ -450,13 +434,11 @@
             }
 
             var label = $(this.options.onTagClicked ? '<a class="tagit-label"></a>' : '<span class="tagit-label"></span>').text(value);
-
             // Create tag.
             var tag = $('<li></li>')
                     .addClass('tagit-choice ui-widget-content ui-state-default ui-corner-all')
                     .addClass(additionalClass)
                     .append(label);
-
             if (this.options.readOnly) {
                 tag.addClass('tagit-choice-read-only');
             } else {
@@ -498,19 +480,14 @@
 
             // DEPRECATED.
             this._trigger('onTagAdded', null, tag);
-
             this.tagInput.val('');
-
             // Insert tag.
             this.tagInput.parent().before(tag);
-
             this._trigger('afterTagAdded', null, {
                 tag: tag,
                 tagLabel: this.tagLabel(tag),
                 duringInitialization: duringInitialization
             });
-
-
             // MCZ: added logic for rating
             if (!duringInitialization) {
                 // have them rate the label for the resource
@@ -518,7 +495,8 @@
                 // get the parent so we know where to display the dialog
                 var foundTag = that._findTagByLabel(value);
                 var parentID = $(foundTag).parent().attr("id");
-
+                // MCZ - remove the tag, we'll re-add it once we have a rating
+                this.removeTag(foundTag, false, false);
                 this._getRating(value, parentID);
 
             }
@@ -529,14 +507,14 @@
                 }, 0);
             }
         },
-        removeTag: function(tag, animate) {
+        // MCZ - added 3rd param so we skip deleting from the db
+        removeTag: function(tag, animate, delFromDB) {
             animate = typeof animate === 'undefined' ? this.options.animate : animate;
+            delFromDB = typeof delFromDB === 'undefined' ? true : delFromDB;
 
             tag = $(tag);
-
             // DEPRECATED.
             this._trigger('onTagRemoved', null, tag);
-
             if (this._trigger('beforeTagRemoved', null, {tag: tag, tagLabel: this.tagLabel(tag)}) === false) {
                 return;
             }
@@ -553,18 +531,19 @@
             if (animate) {
                 tag.addClass('removed'); // Excludes this tag from _tags.
                 var hide_args = this._effectExists('blind') ? ['blind', {direction: 'horizontal'}, 'fast'] : ['fast'];
-
                 var thisTag = this;
                 hide_args.push(function() {
                     tag.remove();
-                    thisTag._trigger('afterTagRemoved', null, {tag: tag, tagLabel: thisTag.tagLabel(tag)});
+                    if (delFromDB)
+                        thisTag._trigger('afterTagRemoved', null, {tag: tag, tagLabel: thisTag.tagLabel(tag)});
                 });
-
                 tag.fadeOut('fast').hide.apply(tag, hide_args).dequeue();
             } else {
                 tag.remove();
-                this._trigger('afterTagRemoved', null, {tag: tag, tagLabel: this.tagLabel(tag)});
+                if (delFromDB)
+                    this._trigger('afterTagRemoved', null, {tag: tag, tagLabel: this.tagLabel(tag)});
             }
+
 
         },
         removeTagByLabel: function(tagLabel, animate) {
@@ -588,6 +567,7 @@
             $('#rateDialog').dialog({
                 closeOnEscape: false,
                 autoOpen: false,
+                modal: true,
                 open: function(event, ui) {
                     $(".ui-dialog-titlebar-close").hide();
                 },
@@ -596,18 +576,13 @@
 
                         $(this).dialog('close');
                         rating = $("input[name=rating-value]:checked").val();
-
-                        // update the label with the rating 
-                        var foundTag = that._findTagByLabel(label);
-                        var html = $(foundTag).html();
-                        var newHTML = html.replace(">" + label + "<", ">" + label + " (" + rating + ")<")
-                        $(foundTag).html(newHTML);
-
+                        // now add the tag - note we pass TRUE for "duringInitialization"
+                        that.createTag(label + " (" + rating + ")", "", true);
+                        // put the label in the DB
                         // now get the resource name
                         var resource = parentID.substring(5); // ignore the "tags_" prefix
-                        // put the label in the DB
-                        addTag(label, resource, rating);
 
+                        addTag(label, resource, rating);
                         addLabelToButtons(label);
                     }
                 },
@@ -615,9 +590,7 @@
             }); //end update dialog
             $('#rateDialog').dialog("option", "position", {my: "center", at: "center", of: $("#" + parentID)});
             $('#rateDialog').dialog('open');
-
         }
-
     });
 })(jQuery);
 
