@@ -36,6 +36,10 @@ UI.generateButtons = function() {
                 return;
             }
             var button = $('<input type="button" value="' + spec.button + '" />');
+            // see if we're the default button
+            if (kind === UI.defaultKind) {
+                button.addClass("default-search-button")
+            }
             button.click(function() {
                 UI.onClickSearchButton(spec);
             });
