@@ -31,11 +31,10 @@
         <script src="js/render.js"></script>
         <script src="js/internetArchive.js"></script>
         <script src="js/acmdl.js"></script>
-        <script src="js/capent.js"></script>
-        <link rel="stylesheet" href="css/style.css" type="text/css" />
         <script src="js/tag-it.js" type="text/javascript" charset="utf-8"></script>
         <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/flick/jquery-ui.css">
         <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="css/style.css" type="text/css" />
         <script>
 
             $(document).ready(function() {
@@ -93,63 +92,64 @@
             });</script>
     </head>
     <body>
-        <div class="container-fluid " id="ui">
-            <div class="row clearfix">
-                <div id="title" class="col-md-2 column">Proteus</div><a href="https://github.com/CIIR/Proteus/issues/new">Report an issue or make a suggestion</a>
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container-fluid " id="ui">
+                <div class="row clearfix">
+                    <div id="title" class="col-md-2 column">Proteus</div><a href="https://github.com/CIIR/Proteus/issues/new">Report an issue or make a suggestion</a>
 
-                <div class="col-md-10 column right-align">
-                    <div class="row clearfix ">
-                        <div   class="col-md-12 column ">  
-                            <span id="all-my-tags"> </span>
-                            <input id="ui-search" placeholder="Search..." type="search" />
-                            <span id="search-buttons">  </span>
+                    <div class="col-md-10 column right-align">
+                        <div class="row clearfix ">
+                            <div   class="col-md-12 column ">  
+                                <span id="all-my-tags"> </span>
+                                <input id="ui-search" placeholder="Search..." type="search" />
+                                <span id="search-buttons">  </span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- login based on code from http://bootsnipp.com/snippets/featured/nav-bar-with-popup-sign-in -->
-            <div  class="row clearfix">
-                <div class="col-md-2 column">
+                <!-- login based on code from http://bootsnipp.com/snippets/featured/nav-bar-with-popup-sign-in -->
+                <div  class="row clearfix">
+                    <div class="col-md-2 column">
 
-                    <div id="sidebar-button"><<</div>
+                        <div id="sidebar-button"><<</div>
 
-                </div>
-                <div id="user-info" class="col-md-10 column">   </div>
-                <div id="ui-login-form"  class="col-md-10 column">
+                    </div>
+                    <div id="user-info" class="col-md-10 column">   </div>
+                    <div id="ui-login-form"  class="col-md-10 column">
 
-                    <ul class="nav navbar-nav navbar-right   ">
+                        <ul class="nav navbar-nav navbar-right   ">
 
-                        <li id="login-form" class="dropdown">
-                            <a class="dropdown-toggle"   data-toggle="dropdown">Sign in <b class="caret"></b></a>
-                            <ul class="dropdown-menu" style="padding: 15px;min-width: 250px;">
-                                <li>
-                                    <div class="row"> 
-                                        <div class="col-md-12">
-                                            <form class="form" role="form"   accept-charset="UTF-8" id="login-nav">
-                                                <div class="form-group">
-                                                    <label class="sr-only" for="login-email">Email address</label>
-                                                    <input type="email" class="form-control" id="login-email" placeholder="Email address" required>
-                                                </div>
+                            <li id="login-form" class="dropdown">
+                                <a class="dropdown-toggle"   data-toggle="dropdown">Sign in <b class="caret"></b></a>
+                                <ul class="dropdown-menu" style="padding: 15px;min-width: 250px;">
+                                    <li>
+                                        <div class="row"> 
+                                            <div class="col-md-12">
+                                                <form class="form" role="form"   accept-charset="UTF-8" id="login-nav">
+                                                    <div class="form-group">
+                                                        <label class="sr-only" for="login-email">Email address</label>
+                                                        <input type="email" class="form-control" id="login-email" placeholder="Email address" required>
+                                                    </div>
 
-                                                <div class="form-group">
-                                                    <button  id="ui-go-loginx"  type="submit"  class="btn  btn-success  btn-block ">Sign in</button>
-                                                </div>
+                                                    <div class="form-group">
+                                                        <button  id="ui-go-loginx"  type="submit"  class="btn  btn-success  btn-block ">Sign in</button>
+                                                    </div>
 
-                                            </form>
+                                                </form>
 
+                                            </div>
                                         </div>
-                                    </div>
-                                </li>
+                                    </li>
 
-                            </ul>
-                        </li>
-                    </ul>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+
                 </div>
-
             </div>
-        </div>
-
+        </nav> 
         <div id="error"></div>
         <div id="request"></div>
         <div id="view-resource"></div>
