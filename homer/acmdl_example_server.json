@@ -1,6 +1,6 @@
 {
     "port": 1234,
-    "defaultKind": "ia-pages",
+    "defaultKind": "ia-books",
     "kinds": {
         "ia-pages": {"index": "F:\\data\\page-index-new", "button": "Pages"},
         "ia-books": {"index": "F:\\data\\books-index_small", "button": "Books"},
@@ -20,6 +20,7 @@
         "max_pool_size": 50,
         "initial_pool_size": 10,
         "max_prepared_statements_per_connection": 10
-    }
+    },
+	"title" : "Proteus Book Search (Alpha)"
 }
 

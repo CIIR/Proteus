@@ -20,6 +20,8 @@ UI.generateButtons = function() {
 
 
     API.getKinds({}, function(data) {
+        if (data.title)
+            $("#proteus-title").html(data.title);
         UI.defaultKind = data.defaultKind;
         var availableKinds = _(data.kinds);
         var buttonDescriptions = _(UI.buttons);
