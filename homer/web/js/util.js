@@ -79,9 +79,16 @@ var getCookie = function(cname) {
 };
 
 var highlightText = function(queryTerms, text, beforeTag, afterTag) {
+    console.log("text:" + text);
+    // remove any punctuation. For papers the authors are listed
+    // spearated by semicolons.
+    // Note we use toString(), because if a string like "2014" is passed
+    // in, JS will think it's a numeric datatype.
+    text = text.toString().replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g, "");
     var words = text.split(/\s/);
+
     return _(words).map(function(word) {
-        if (_.contains(queryTerms, word)) {
+        if (_.contains(queryTerms, word.toLowerCase())) {
             return beforeTag + word + afterTag;
         }
         return word;
@@ -145,4 +152,7 @@ function formatLabelForDispaly(origLabel) {
     var label = origLabel.split("@");
     return  label[0] + " (" + label[1] + ")";
 
+}
+function isLoggedIn() {
+    return Model.user != null;
 }

@@ -55,6 +55,11 @@
                     var username = $("#login-email").val();
                     logIn(username);
                 });
+
+                // if not logged in, hide the user info
+                if (isLoggedIn() == false)
+                    $("#user-info").hide();
+
             });</script>
         <script type="text/javascript">
             var treeData = [];

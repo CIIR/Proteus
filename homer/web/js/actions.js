@@ -102,7 +102,15 @@ var onSearchSuccess = function(data) {
                 tree.getNodeByKey(data.request.labels[val]).setSelected(true);
             }
     }
-    UI.appendResults(data.queryTerms, newResults, usingLabels);
+    // lowercase the query terms so when we hilight we match 
+    // regardless of case
+
+    var lowerTerms = [];
+
+    for (var i = 0; i < data.queryTerms.length; i++) {
+        lowerTerms.push(data.queryTerms[i].toLowerCase());
+    }
+    UI.appendResults(lowerTerms, newResults, usingLabels);
 };
 
 var doViewRequest = function(args) {
