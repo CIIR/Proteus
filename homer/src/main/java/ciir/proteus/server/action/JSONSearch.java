@@ -8,6 +8,7 @@ import ciir.proteus.util.QueryUtil;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
+import org.lemurproject.galago.core.retrieval.query.SimpleQuery;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.util.ArrayList;
@@ -53,7 +54,11 @@ public class JSONSearch implements JSONHandler {
 
         // it's possible for the query to be empty IF we're searching just by labels
         if (!query.isEmpty()) {
-            pquery = StructuredQuery.parse(query);
+            if (system.getConfig().get("queryType").equals("simple")) {
+                pquery = SimpleQuery.parseTree(query);
+            } else {
+                pquery = StructuredQuery.parse(query);
+            }
         }
 
         Parameters qp = Parameters.create();

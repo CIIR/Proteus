@@ -79,7 +79,7 @@ var getCookie = function(cname) {
 };
 
 var highlightText = function(queryTerms, text, beforeTag, afterTag) {
-    console.log("text:" + text);
+
     // remove any punctuation. For papers the authors are listed
     // spearated by semicolons.
     // Note we use toString(), because if a string like "2014" is passed
