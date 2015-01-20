@@ -198,3 +198,7 @@ body {
     padding-top: 100px; 
     overflow-y: hidden;
 }
+
+#search-form{  
+    margin-bottom: 0px;
+}
