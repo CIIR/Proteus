@@ -27,8 +27,8 @@ resultRenderers["article"] = function(queryTerms, result, resDiv) {
     var html = '<div class="result"><table>';
 
     html += '<tr>' +
-            '<td class="title"><a href="' + url_art + '">' + title + '</a></td>' +
-            '<td class="citation">Citation: ' + citation + '</td>' +
+            '<td class="title"><a href="' + url_art + '">' + highlightText(queryTerms, title, '<span class="hili">', '</span>') + '</a></td>' +
+            '<td class="citation">Citation: ' + highlightText(queryTerms, citation, '<span class="hili">', '</span>') + '</td>' +
             '<td class="score">' + result.score.toFixed(3) + ' r' + result.rank + '</td>' +
             '</tr>';
 
