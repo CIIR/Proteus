@@ -17,11 +17,11 @@ resultRenderers["article"] = function(queryTerms, result, resDiv) {
     var url_proc = "http://dl.acm.org/";
 
     if (artid != null) {
-        url_art = url_art + "citation.cfm?id=" + artid;
+        url_art = url_art + "citation.cfm?id=" + encodeURIComponent(artid);
     }
 
     if (procid != null) {
-        url_proc = url_proc + "citation.cfm?id=" + procid;
+        url_proc = url_proc + "citation.cfm?id=" + encodeURIComponent(procid);
     }
 
     var html = '<div class="result"><table>';
