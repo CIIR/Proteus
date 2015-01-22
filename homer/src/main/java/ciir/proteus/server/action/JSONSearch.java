@@ -54,7 +54,7 @@ public class JSONSearch implements JSONHandler {
 
         // it's possible for the query to be empty IF we're searching just by labels
         if (!query.isEmpty()) {
-            if (system.getConfig().get("queryType").equals("simple")) {
+            if (system.getConfig().get("queryType", "simple").equals("simple")) {
                 pquery = SimpleQuery.parseTree(query);
             } else {
                 pquery = StructuredQuery.parse(query);
