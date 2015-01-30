@@ -5,6 +5,7 @@ import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.util.ListUtil;
 import ciir.proteus.util.QueryUtil;
+import java.io.IOException;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
@@ -26,7 +27,7 @@ public class JSONSearch implements JSONHandler {
     }
 
     @Override
-    public Parameters handle(String method, String path, Parameters reqp) throws DBError {
+    public Parameters handle(String method, String path, Parameters reqp) throws DBError, IOException {
         String query = reqp.getAsString("q");
         String kind = reqp.get("kind", system.defaultKind);
         int numResults = (int) reqp.get("n", 10);

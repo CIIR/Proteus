@@ -18,6 +18,7 @@ var Model = {
     request: {},
     query: "",
     results: [],
+    queryType: null,
     // user login data
     user: null,
     userid: null,
