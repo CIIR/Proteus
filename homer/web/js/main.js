@@ -108,6 +108,7 @@ var logIn = function(userName) {
             Model.user = userName;
             Model.userid = data.userid;
             Model.token = data.token;
+            location.reload(true);
         }, function(req, status, err) {
             UI.showError("ERROR: ``" + err + "``");
             throw err;
