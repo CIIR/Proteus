@@ -2,6 +2,8 @@
  * Render an article from the acm digital library
  */
 resultRenderers["article"] = function(queryTerms, result, resDiv) {
+
+    console.log(Model.query);
     var title = result.meta["title"];
     var snippet = result.snippet;
 
@@ -27,7 +29,7 @@ resultRenderers["article"] = function(queryTerms, result, resDiv) {
     var html = '<div class="result"><table>';
 
     html += '<tr>' +
-            '<td class="title"><a href="' + url_art + '">' + highlightText(queryTerms, title, '<span class="hili">', '</span>') + '</a></td>' +
+            '<td class="title">' + Render.getDocumentURL(url_art, title, queryTerms, result.rank) + '</td>' +
             '<td class="citation">Citation: ' + highlightText(queryTerms, citation, '<span class="hili">', '</span>') + '</td>' +
             '<td class="score">' + result.score.toFixed(3) + ' r' + result.rank + '</td>' +
             '</tr>';
@@ -35,21 +37,21 @@ resultRenderers["article"] = function(queryTerms, result, resDiv) {
     if (proc != null) {
         html += '<tr>' +
                 '<td class="proc">Published in: <a href="' + url_proc + '">';
-        html += highlightText(queryTerms, proc, '<span class="hili">', '</span>');
+        html += highlightText(queryTerms, proc, '<span class="hili">', '</span>', 'proc');
         html += '</a>, ';
-        html += highlightText(queryTerms, pubyear, '<span class="hili">', '</span>');
+        html += highlightText(queryTerms, pubyear, '<span class="hili">', '</span>', 'pubyear');
         html += '</td></tr>';
     }
 
     if (author != null) {
         html += '<tr><td class="author">Written by: ';
-        html += highlightText(queryTerms, author, '<span class="hili">', '</span>');
+        html += highlightText(queryTerms, author, '<span class="hili">', '</span>', 'author');
         html += '</td></tr>';
     }
 
     if (institution != null) {
         html += '<tr><td class="insti">From: ';
-        html += highlightText(queryTerms, institution, '<span class="hili">', '</span>');
+        html += highlightText(queryTerms, institution, '<span class="hili">', '</span>', 'institution');
         html += '</td></tr>';
     }
 

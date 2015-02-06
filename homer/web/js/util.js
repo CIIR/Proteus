@@ -80,6 +80,11 @@ var getCookie = function(cname) {
 
 var highlightText = function(queryTerms, text, beforeTag, afterTag) {
 
+    // there are situations where the "text" is actually an image such
+    // as a thumbnail so skip those.
+    if (text.toString().substring(0, 4) == "<img")
+        return text;
+
     // remove any punctuation. For papers the authors are listed
     // spearated by semicolons.
     // Note we use toString(), because if a string like "2014" is passed

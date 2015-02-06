@@ -34,23 +34,21 @@ var renderResult = function(queryTerms, result, resDiv) {
     var iaURL = result.meta["identifier-access"];
 
     if (iaURL) {
-        name = '<a href="' + iaURL + '">' + name + '</a>';
+        name = Render.getDocumentURL(iaURL, name, queryTerms, result.rank);
     }
     var pgImage = iaURL;
     if (!_.isUndefined(pageNum)) {
         // if page result - make the link go to the page
-        name = '<a href="https://archive.org/stream/' + identifier + '#page/n' + pageNum + '/mode/2up' + '">' + result.meta.title || result.name + '</a>';
-
+        name = Render.getDocumentURL('https://archive.org/stream/' + identifier + '#page/n' + pageNum + '/mode/2up', result.meta.title || result.name, queryTerms, result.rank);
 
         // MCZ : removing page number for now as it does not match up with 
         // the physical page number shown on the page
         //name += ' pp. ' + pageNum;
         pgImage = pageImage(identifier, pageNum);
     }
+    var thumbnail = '<img class="thumbnail" src="' + pageThumbnail(identifier, pageNum) + '"/>';
+    var previewImage = Render.getDocumentURL(pgImage, thumbnail, queryTerms, result.rank);
 
-    var previewImage = '<a href="' + pgImage + '">' +
-            '<img class="thumbnail" src="' + pageThumbnail(identifier, pageNum) + '"/>' +
-            '</a>';
     var html =
             '<div class="result">' +
             '<table>' +

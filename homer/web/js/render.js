@@ -52,6 +52,12 @@ resultRenderers["default"] = function(queryTerms, result, resDiv) {
 
 Render.makeViewLink = function(id, kind, label) {
     return '<a href="/?action=view' +
-        '&id=' + encodeURIComponent(id) +
-        '&kind=' + encodeURIComponent(kind) + '">' + label + '</a>';
+            '&id=' + encodeURIComponent(id) +
+            '&kind=' + encodeURIComponent(kind) + '">' + label + '</a>';
 };
+
+Render.getDocumentURL = function(url, title, queryTerms, rank) {
+
+    return '<a href="' + url + '" onmousedown="return rwt(this,' + rank + ')" target="_blank">' + highlightText(queryTerms, title, '<span class="hili">', '</span>', 'title') + '</a>';
+
+}

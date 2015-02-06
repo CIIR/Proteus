@@ -52,8 +52,10 @@ public class HTTPRouter implements WebHandler {
     @Override
     public void handle(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
+
             String method = req.getMethod();
             String path = req.getPathInfo();
+
             Parameters reqp = HTTPUtil.fromHTTPRequest(req);
 
             final boolean GET = method.equals("GET");
@@ -94,6 +96,9 @@ public class HTTPRouter implements WebHandler {
                 handler = register;
             } else if (POST && path.equals("/api/resourcesforlabels")) {
                 handler = resourcesforlabels;
+            } else if (path.equals("/url")) {
+                handleRedirect(reqp, resp);
+                return;
             } else if (path.equals("/api/debug")) {
                 handler = debug;
             } else if (GET && !path.startsWith("/api/")) {
@@ -139,4 +144,9 @@ public class HTTPRouter implements WebHandler {
         }
 
     }
+
+    private void handleRedirect(Parameters reqp, HttpServletResponse resp) throws IOException {
+        resp.sendRedirect(reqp.getString("url"));
+    }
+
 }
