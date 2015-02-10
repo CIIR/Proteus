@@ -74,6 +74,8 @@ var onSearchSuccess = function(data) {
 
     // mark up results with rank and kind
     Model.query = data.request.q;
+    Model.queryType = data.queryType;
+
     var rank = Model.results.length + 1;
     var newResults = _(data.results).map(function(result) {
         result.viewKind = data.request.viewKind || data.request.kind;
@@ -107,7 +109,12 @@ var onSearchSuccess = function(data) {
 
     var lowerTerms = [];
 
-    for (var i = 0; i < data.queryTerms.length; i++) {
+    var termLen = 0;
+
+    if (!_.isUndefined(data.queryTerms))
+        termLen = data.queryTerms.length;
+
+    for (var i = 0; i < termLen; i++) {
         lowerTerms.push(data.queryTerms[i].toLowerCase());
     }
     UI.appendResults(lowerTerms, newResults, usingLabels);

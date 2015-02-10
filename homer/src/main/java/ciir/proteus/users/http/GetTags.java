@@ -9,6 +9,7 @@ import org.lemurproject.galago.utility.Parameters;
 
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author jfoley.
@@ -20,7 +21,7 @@ public class GetTags extends DBAction {
     }
 
     @Override
-    public Parameters handle(String method, String path, Parameters reqp) throws HTTPError {
+    public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError {
         Credentials creds = Credentials.fromJSON(reqp);
         List<String> resources = reqp.getAsList("resource", String.class);
 

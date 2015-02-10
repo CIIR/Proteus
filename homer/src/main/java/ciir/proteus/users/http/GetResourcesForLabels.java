@@ -8,6 +8,7 @@ import ciir.proteus.users.error.DBError;
 import static ciir.proteus.users.http.DBAction.log;
 import java.util.ArrayList;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.utility.Parameters;
@@ -26,7 +27,7 @@ public class GetResourcesForLabels extends DBAction {
     }
 
     @Override
-    public Parameters handle(String method, String path, Parameters reqp) throws HTTPError {
+    public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError {
 
         Credentials creds = Credentials.fromJSON(reqp);
         List<String> labels = reqp.getAsList("labels", String.class);

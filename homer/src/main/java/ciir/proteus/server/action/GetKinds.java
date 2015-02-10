@@ -3,6 +3,7 @@ package ciir.proteus.server.action;
 import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
+import javax.servlet.http.HttpServletRequest;
 import org.lemurproject.galago.utility.Parameters;
 
 /**
@@ -17,7 +18,7 @@ public class GetKinds implements JSONHandler {
     }
 
     @Override
-    public Parameters handle(String method, String path, Parameters reqp) throws HTTPError, DBError {
+    public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DBError {
         Parameters p = Parameters.create();
         p.put("defaultKind", system.defaultKind);
         p.put("kinds", system.getConfig().getMap("kinds"));

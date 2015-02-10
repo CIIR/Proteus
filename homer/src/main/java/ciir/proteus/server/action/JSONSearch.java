@@ -3,6 +3,7 @@ package ciir.proteus.server.action;
 import ciir.proteus.system.DocumentAnnotator;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
+import ciir.proteus.util.ClickLogHelper;
 import ciir.proteus.util.ListUtil;
 import ciir.proteus.util.QueryUtil;
 import java.io.IOException;
@@ -16,25 +17,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.logging.log4j.LogManager;
 
 public class JSONSearch implements JSONHandler {
 
     private final ProteusSystem system;
     public static final Logger log = Logger.getLogger(JSONSearch.class.getName());
+    private static final org.apache.logging.log4j.Logger proteusLog = LogManager.getLogger("Proteus");
 
     public JSONSearch(ProteusSystem sys) {
         this.system = sys;
     }
 
     @Override
-    public Parameters handle(String method, String path, Parameters reqp) throws DBError, IOException {
+    public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws DBError, IOException {
         String query = reqp.getAsString("q");
         String kind = reqp.get("kind", system.defaultKind);
         int numResults = (int) reqp.get("n", 10);
         int skipResults = (int) reqp.get("skip", 0);
         String userid = reqp.get("userid", "-1");
 
-        List<String> labels = new ArrayList<>(); // empty list
+        List<String> labels = new ArrayList<>(); // empty list 
         List<String> resList = null;
         if (reqp.containsKey("labels")) {
             labels = reqp.getAsList("labels", String.class);
@@ -61,6 +65,7 @@ public class JSONSearch implements JSONHandler {
                 pquery = StructuredQuery.parse(query);
             }
         }
+        proteusLog.info("SEARCH\t{}\t{}\t{}\t{}\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), query, (pquery == null ? "" : pquery.toString()), labels.toString(), kind, numResults, skipResults);
 
         Parameters qp = Parameters.create();
         qp.put("requested", numResults + skipResults);
@@ -89,6 +94,7 @@ public class JSONSearch implements JSONHandler {
                 results = DocumentAnnotator.annotate(this.system, kind, docs, pquery, reqp);
             }
         }
+        proteusLog.info("RESULTS\t{}\t{}", ClickLogHelper.getID(reqp, req), ClickLogHelper.extractDocID(results).toString());
 
         response.set("results", results);
         if (pquery != null) {

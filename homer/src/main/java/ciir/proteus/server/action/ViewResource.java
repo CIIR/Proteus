@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author jfoley
@@ -23,7 +24,7 @@ public class ViewResource implements JSONHandler {
   }
 
   @Override
-  public Parameters handle(String method, String path, Parameters reqp) throws HTTPError, DBError {
+  public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DBError {
     assert(reqp.getString("action").equals("view"));
     String docId = reqp.getString("id");
     if(!reqp.isString("kind")) {

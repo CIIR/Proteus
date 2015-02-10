@@ -50,8 +50,10 @@ public class ProteusSystem {
     public List<ScoredDocument> search(String kind, Node query, Parameters qp) {
         Retrieval retrieval = getRetrieval(kind);
         try {
+
             Node ready = retrieval.transformQuery(query, qp);
             return retrieval.executeQuery(ready, qp).scoredDocuments;
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
