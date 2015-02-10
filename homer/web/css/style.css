@@ -192,6 +192,10 @@ ul.fancytree-container {
     border: none;
 }
 
+td.metakey {
+    padding: 8px;
+    margin-left: 2cm;
+}
 
 body {
     margin: 0;
