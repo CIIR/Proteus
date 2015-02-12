@@ -75,7 +75,7 @@ UI.setQuery = function(q) {
 /**
  * Render a single search result.
  * @see render.js
- * I'm adding comments now since i regret it 
+ * I'm adding comments now since i regret it
  * when I dont
  * deleted UI.makeResult since its useless.
  
@@ -91,6 +91,7 @@ function addLabelToButtons(newLabel) {
     var value = tmp[1];
     // handle the special case of when they don't enter a TYPE
     // IF there is no type, add it to the "special" group
+
     if (_.isUndefined(value)) {
         value = type;
         type = NO_TYPE_CONST();
@@ -111,8 +112,7 @@ function addLabelToButtons(newLabel) {
     if (node !== null) {
 
         node.addChildren({
-            title: value,
-            key: newLabel
+            title: value, key: newLabel
         });
         tree.render();
     } else {
@@ -126,13 +126,10 @@ function addLabelToButtons(newLabel) {
         }
         //add the parent & child
         var newNode = root.addChildren({
-            title: type,
-            key: type,
-            folder: true
+            title: type, key: type, folder: true
         });
         newNode.addChildren({
-            title: value,
-            key: newLabel
+            title: value, key: newLabel
         });
         newNode.setExpanded(true);
         tree.render();
@@ -202,8 +199,7 @@ UI.appendResults = function(queryTerms, results, usingLabels) {
         }
 
     });
-}
-;
+};
 /**
  * A set of functions for reacting to events in other, more general code.
  */
@@ -222,8 +218,7 @@ UI.dispalyUserName = function() {
 
     if (user) {
         $("#ui-login-form").hide();
-        $("#user-info").html("<span id='login-form-text'> Welcome " + user + "</span> <input id='ui-go-logout' type='button' value='LogOut' />")
-                .show();
+        $("#user-info").html("<span id='login-form-text'> Welcome " + user + "</span> <input id='ui-go-logout' type='button' value='LogOut' />").show();
 
         $("#ui-go-logout").click(function() {
             $("#user-info").hide();
@@ -257,23 +252,17 @@ UI.renderTags = function(result) {
 
     return '<div><ul id="tags_' + result.name + '">' + my_html + '</ul>' + ro_html + '</div>';
 };
-// used when we don't want to dispaly any of the "my tags" features
-UI.hideMyTagsFunctionality = function() {
-    $("#all-my-tags").html("");
-    $("#tree").html("");
-};
+
 UI.toggleMyTags = function() {
-    // if no one is loged in, we don't show anything
+    // if no one is logged in, we don't show anything
     if (getCookie("username") === "") {
-        UI.hideMyTagsFunctionality();
         return;
     }
     var ele = $("#my-tags-container");
     if (ele.is(":visible")) {
         $("#toggle-my-tags-img").attr("src", "/images/down_arrows.png");
         ele.hide();
-    }
-    else {
+    } else {
         $("#toggle-my-tags-img").attr("src", "/images/up_arrows.png");
         ele.show();
     }
@@ -286,24 +275,20 @@ UI.createLabelMultiselect = function(myUniqTypes) {
     var userName = getCookie("username");
     var userID = getCookie("userid");
     if (userName === "") {
-        $("#all-my-tags").html("");
         return;
     }
     $("#empty-tree").html("");
     var node0 = $("#tree").fancytree("getRootNode");
     //   var all_key = ALL_NODE_KEY();
     var rootNode = node0.addChildren({
-        title: "All",
-        //     key: all_key,
+        title: "All", //     key: all_key,
         folder: true
     });
 
     for (type in myUniqTypes) {
 
         var childNode = rootNode.addChildren({
-            title: myUniqTypes[type],
-            key: myUniqTypes[type],
-            folder: true
+            title: myUniqTypes[type], key: myUniqTypes[type], folder: true
         });
 
         // get the values just for this type
@@ -323,16 +308,15 @@ UI.createLabelMultiselect = function(myUniqTypes) {
         // var tags = valueList.split(',');
         for (tag in myValues) {
             childNode.addChildren({
-                title: myValues[tag],
-                key: myUniqTypes[type] + ":" + myValues[tag]
+                title: myValues[tag], key: myUniqTypes[type] + ":" + myValues[tag]
             });
         }
     }
     $("#tree").fancytree("getRootNode").visit(function(node) {
         node.setExpanded(true);
     });
-}
-;
+
+};
 
 
 UI.clearSelectedLabels = function() {

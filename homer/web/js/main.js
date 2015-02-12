@@ -135,6 +135,9 @@ var logOut = function() {
         Model.user = null;
         Model.token = null;
         Model.userid = null;
+        // quick and dirty, trigger refresh to get rid of
+        // all the label stuff.
+        location.reload(true);
     }, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
         throw err;
@@ -181,8 +184,6 @@ var getAllTagsByUser = function() {
     var userToken = getCookie("token");
     var uniqType = [];
 
-    UI.hideMyTagsFunctionality();
-
     var args = {resource: ["%"], user: userName, userid: userID, token: userToken};
     API.getAllTagsByUser(args, function(origresult) {
 
@@ -190,7 +191,7 @@ var getAllTagsByUser = function() {
 
         GLOBAL.allTags = origresult[keys[0]];
         for (user in GLOBAL.allTags) {
-            // not the most effiecent code in the world
+            // not the most efficient code in the world
             tags = GLOBAL.allTags[user].toString().split(',');
             for (tag in tags) {
                 uniqType.push(tags[tag].split(":")[0]);
@@ -225,6 +226,7 @@ var getAllTagsByUser = function() {
                 }
             }
         }
+
 
     }, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");

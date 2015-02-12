@@ -165,11 +165,6 @@ img.thumbnail {
 .multiselect-item {
     text-align: left;
 }
-#all-my-tags > div > ul > li  > a > label  
-{
-    text-align: left;
-
-}
 .right-align{
     text-align: right;
 }
