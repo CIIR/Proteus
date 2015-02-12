@@ -1,6 +1,7 @@
 package ciir.proteus.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
@@ -30,7 +31,8 @@ public class ClickLogHelper {
     static public List<String> extractDocID(List<?> list) {
 
         if (list == null || list.isEmpty()) {
-            return null;
+            List<String> emptyList = Collections.emptyList();
+            return emptyList;
         }
         List<String> docs = new ArrayList<>();
 

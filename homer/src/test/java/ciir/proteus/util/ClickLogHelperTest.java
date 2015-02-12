@@ -9,12 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
@@ -377,7 +372,7 @@ public class ClickLogHelperTest {
 
         // null input
         List<String> result = ClickLogHelper.extractDocID(null);
-        assertEquals(null, result);
+        assertEquals(Collections.emptyList(), result);
 
         // list of wrong object type
         List<String> strings = Arrays.asList("foo", "bar", "baz");
