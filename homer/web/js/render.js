@@ -19,7 +19,7 @@ var getResultRenderer = function(kind) {
 resultRenderers["default"] = function(queryTerms, result, resDiv) {
     var html = '<table><tr>';
     html += '<td class="rank">' + result.rank + '</td>';
-    html += '<td class="name">' + Render.makeViewLink(result.name, result.kind, result.name) + '</a></td>';
+    html += '<td class="name">' + Render.makeViewLink(result.name, result.kind, result.name, result.rank ) + '</a></td>';
     html += '<td class="score">' + result.score + '</td>';
     html += '</tr>';
     if (result.snippet) {
@@ -50,10 +50,10 @@ resultRenderers["default"] = function(queryTerms, result, resDiv) {
     return resDiv;
 };
 
-Render.makeViewLink = function(id, kind, label) {
+Render.makeViewLink = function(id, kind, label, rank) {
     return '<a href="/?action=view' +
             '&id=' + encodeURIComponent(id) +
-            '&kind=' + encodeURIComponent(kind) + '">' + label + '</a>';
+            '&kind=' + encodeURIComponent(kind) + '" onmousedown="return rwt(this,' + rank + ')" target="_blank">' +  label + '</a>';
 };
 
 Render.getDocumentURL = function(url, title, queryTerms, rank) {

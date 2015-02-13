@@ -165,9 +165,15 @@ img.thumbnail {
 .multiselect-item {
     text-align: left;
 }
-.right-align{
+.right-align {
     text-align: right;
 }
+
+ #view-resource{
+     /* render any HTML with newlines */
+     white-space: pre;
+     text-align: left;
+ }
 
 /* make navbar smaller (http://stackoverflow.com/questions/19576175/how-do-you-decrease-navbar-height-in-bootstrap-3) */
 .navbar-nav > li > a {padding-top:5px !important; padding-bottom:5px !important; color: white;}
