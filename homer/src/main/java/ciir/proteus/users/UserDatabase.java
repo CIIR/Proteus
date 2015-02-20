@@ -71,4 +71,6 @@ public interface UserDatabase {
     public List<String> getResourcesForLabels(Integer userid, List<String> labels) throws DBError;
 
     public List<String> getResourcesForLabels(Integer userid, List<String> labels, Integer numResults, Integer startIndex) throws DBError;
+
+    public Map<String, String> getUsers() throws DBError;
 }

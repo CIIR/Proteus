@@ -468,6 +468,31 @@ public class H2Database implements UserDatabase {
         }
     }
 
+    public Map<String, String> getUsers() throws DBError {
+
+        Map<String, String> results = new HashMap<>();
+
+        Connection conn = null;
+        try {
+            conn = cpds.getConnection();
+
+            PreparedStatement sql = conn.prepareStatement("select id, email from users");
+
+            ResultSet tuples = sql.executeQuery();
+            while (tuples.next()) {
+                results.put(tuples.getString(1), tuples.getString(2));
+            } tuples.close();
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            attemptClose(conn);
+        }
+
+        return results;
+    }
+
     // "borrowed" from the C3P0 examples: http://sourceforge.net/projects/c3p0/files/c3p0-src/c3p0-0.9.2.1/
     static void attemptClose(Connection o) {
         try {

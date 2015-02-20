@@ -12,10 +12,7 @@ import org.lemurproject.galago.utility.FSUtil;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
@@ -248,6 +245,20 @@ public class UserDatabaseTest {
 
         assertArrayEquals(new String[]{"*:tag1@0"}, singleResourceResult.get(tag_user_id).toArray());
         assertArrayEquals(new String[]{"*:user2_res1_tag1@0", "*:user2_res1_tag2@0"}, singleResourceResult.get(user2_id).toArray());
+
+    }
+
+    @Test
+    public void getUsersTest() throws DBError {
+
+        Map<String, String> results = new HashMap<>();
+
+        results = db.getUsers();
+
+        assertTrue(results.values().contains("user1"));
+        assertTrue(results.values().contains("tag-user"));
+        assertTrue(results.values().contains("user2"));
+        assertTrue(results.values().contains("real-user"));
 
     }
 }

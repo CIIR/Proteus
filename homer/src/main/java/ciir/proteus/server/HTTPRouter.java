@@ -32,6 +32,7 @@ public class HTTPRouter implements WebHandler {
     private final JSONHandler logout;
     private final JSONHandler register;
     private final JSONHandler resourcesforlabels;
+    private final JSONHandler getUsers;
     private final StaticContentHandler staticContent;
 
     public HTTPRouter(ProteusSystem proteus) {
@@ -49,6 +50,7 @@ public class HTTPRouter implements WebHandler {
         logout = new LogoutUser(proteus);
         register = new RegisterUser(proteus);
         resourcesforlabels = new GetResourcesForLabels(proteus);
+        getUsers = new GetUsers(proteus);
     }
 
     // handle http requests
@@ -85,7 +87,9 @@ public class HTTPRouter implements WebHandler {
                 handler = getKinds;
             } else if (GET && path.equals("/api/tags")) {
                 handler = tags;
-            } else if (POST && path.equals("/api/alltags")) {
+            } else if (GET && path.equals("/api/users")) {
+                handler = getUsers;
+            }else if (POST && path.equals("/api/alltags")) {
                 handler = tags;
             } else if (POST && path.equals("/api/tags/create")) {
                 handler = putTags;
