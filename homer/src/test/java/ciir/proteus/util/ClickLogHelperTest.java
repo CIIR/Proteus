@@ -357,7 +357,7 @@ public class ClickLogHelperTest {
 
         // have both token and IP
         result = ClickLogHelper.getID(reqp, mockRequest);
-        assertEquals("abc123X", result);
+        assertEquals("abc123", result);
 
     }
 
