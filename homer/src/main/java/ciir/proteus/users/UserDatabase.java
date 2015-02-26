@@ -64,9 +64,13 @@ public interface UserDatabase {
 
     public Map<String, Map<Integer, List<String>>> getAllTags(List<String> resources) throws DBError;
 
+    public Map<String, Map<String, List<String>>> getAllTagsForResources(List<String> resources) throws DBError;
+
     public void deleteTag(Credentials creds, String resource, String tag) throws DBError;
 
-    public void addTag(Credentials creds, String resource, String tag, Integer rating) throws DBError;
+    public void addTag(Credentials creds, String resource, String tag, Integer rating, String comment) throws DBError;
+
+    public void updateTag(Credentials creds, String resource, String tag, Integer rating, String comment) throws DBError;
 
     public List<String> getResourcesForLabels(Integer userid, List<String> labels) throws DBError;
 

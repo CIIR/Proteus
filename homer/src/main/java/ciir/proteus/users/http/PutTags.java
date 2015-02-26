@@ -24,11 +24,13 @@ public class PutTags extends DBAction {
         Credentials creds = Credentials.fromJSON(reqp);
         Parameters tags = reqp.getMap("tags");
         int rating = (int) reqp.getLong("rating");
+        String nullStr = null;
+        String comment = reqp.get("comment", nullStr);
         for (String tag : tags.keySet()) {
             List<String> resources = tags.getAsList(tag, String.class);
             for (String resource : resources) {
-                userdb.addTag(creds, resource, tag, rating);
-                proteusLog.info("ADD-TAG\t{}\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), resource, tag, rating);
+                userdb.addTag(creds, resource, tag, rating, null);
+                proteusLog.info("ADD-TAG\t{}\t{}\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), resource, tag, rating, comment);
 
             }
         }

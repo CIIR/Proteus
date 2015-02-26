@@ -4,9 +4,7 @@ import ciir.proteus.users.error.BadSessionException;
 import ciir.proteus.users.error.BadUserException;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.users.error.DuplicateUser;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.lemurproject.galago.tupleflow.FileUtility;
 import org.lemurproject.galago.utility.FSUtil;
 import org.lemurproject.galago.utility.Parameters;
@@ -27,8 +25,8 @@ public class UserDatabaseTest {
     private static Logger log = Logger.getLogger("tests");
     public static final int NumIterations = 10;
 
-    @BeforeClass
-    public static void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         folder = FileUtility.createTemporaryDirectory();
         String dbpath = folder.getPath() + "/users";
         log.info(dbpath);
@@ -37,13 +35,14 @@ public class UserDatabaseTest {
         dbp.set("path", dbpath);
         dbp.set("user", "junit");
         dbp.set("pass", "");
-        dbp.set("auto_server", "TRUE");
+        dbp.set("AUTO_SERVER", "TRUE");
+
 
         db = UserDatabaseFactory.instance(dbp);
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         db.close();
         FSUtil.deleteDirectory(folder);
     }
@@ -134,7 +133,7 @@ public class UserDatabaseTest {
             }
 
             try {
-                db.addTag(new Credentials(p), "fake-resource", "is-fake", 0);
+                db.addTag(new Credentials(p), "fake-resource", "is-fake", 0, null);
                 fail("Expected exception user=" + users[i]);
             } catch (BadSessionException e) {
                 assertEquals(users[i], "real-user");
@@ -167,16 +166,16 @@ public class UserDatabaseTest {
         int tag_user_id = cred.userid;
 
         // test single tag
-        db.addTag(cred, "res1", "tag1", 0);
+        db.addTag(cred, "res1", "tag1", 0, null);
 
         List<String> res1tags = db.getTags(cred, "res1");
         Collections.sort(res1tags); // don't depend on db order
         assertArrayEquals(new String[]{"*:tag1"}, res1tags.toArray());
 
         // test multiple tags for the same thing
-        db.addTag(cred, "res2", "type1:tag1", 0);
-        db.addTag(cred, "res2", "type1:tag2", 0);
-        db.addTag(cred, "res2", "type2:tag3", 0);
+        db.addTag(cred, "res2", "type1:tag1", 0, null);
+        db.addTag(cred, "res2", "type1:tag2", 0, null);
+        db.addTag(cred, "res2", "type2:tag3", 0, null);
 
         List<String> res2tags = db.getTags(cred, "res2");
         Collections.sort(res2tags); // don't depend on db order
@@ -186,12 +185,12 @@ public class UserDatabaseTest {
         db.deleteTag(cred, "res2", "type1:tag2");
 
         // re-add, then delete testing tag case insensitivity
-//    db.addTag(cred, "res2", "tag2");
-//    db.deleteTag(cred, "res2", "tAG2");
-//
-//    res2tags = db.getTags(cred, "res2");
-//    Collections.sort(res2tags); // don't depend on db order
-//    assertArrayEquals(new String[]{"tag1", "tag3"}, res2tags.toArray());
+        //    db.addTag(cred, "res2", "tag2");
+        //    db.deleteTag(cred, "res2", "tAG2");
+        //
+        //    res2tags = db.getTags(cred, "res2");
+        //    Collections.sort(res2tags); // don't depend on db order
+        //    assertArrayEquals(new String[]{"tag1", "tag3"}, res2tags.toArray());
         // test get multiple
         Map<String, List<String>> getres = db.getTags(cred, Arrays.asList("res1", "res2", "res3"));
         assertNotNull(getres);
@@ -213,9 +212,9 @@ public class UserDatabaseTest {
         int user2_id = cred.userid;
 
         // test single tag
-        db.addTag(cred, "res1", "user2_res1_tag1", 0);
-        db.addTag(cred, "res1", "user2_res1_tag2", 0);
-        db.addTag(cred, "res2", "user2_res2_tag1", 0);
+        db.addTag(cred, "res1", "user2_res1_tag1", 0, null);
+        db.addTag(cred, "res1", "user2_res1_tag2", 0, null);
+        db.addTag(cred, "res2", "user2_res2_tag1", 0, null);
 
         Map<String, Map<Integer, List<String>>> getAllTagsResult;
 
@@ -251,14 +250,113 @@ public class UserDatabaseTest {
     @Test
     public void getUsersTest() throws DBError {
 
+        db.register("test-user-1");
+        db.register("user2");
+        db.register("user1");
+        db.register("real-user");
+        db.register("tag-user");
+
         Map<String, String> results = new HashMap<>();
 
         results = db.getUsers();
 
+        assertTrue(results.size() == 5);
+        assertTrue(results.values().contains("test-user-1"));
         assertTrue(results.values().contains("user1"));
         assertTrue(results.values().contains("tag-user"));
         assertTrue(results.values().contains("user2"));
         assertTrue(results.values().contains("real-user"));
+
+    }
+
+    @Test
+    public void getAllTagsForResourcesTest() throws DBError {
+
+        db.register("user1");
+        Parameters p = db.login("user1");
+        Credentials user1Cred = new Credentials(p);
+        db.addTag(user1Cred, "res1", "tag1", 1, null);
+        db.addTag(user1Cred, "res1", "tag2", 2, null);
+        db.addTag(user1Cred, "res2", "tag1", 1, "user1 res2 tag1");
+        db.addTag(user1Cred, "res2", "tag3", 3, null);
+
+
+        db.register("user2");
+        Parameters p2 = db.login("user2");
+        Credentials user2Cred = new Credentials(p2);
+        db.addTag(user2Cred, "res1", "tag1", 10, null);
+        db.addTag(user2Cred, "res1", "tag4", 20, null);
+        db.addTag(user2Cred, "res2", "tag1", 10, null);
+        db.addTag(user2Cred, "res4", "tag3", 30, null);
+
+        Map<String, Map<String, List<String>>> results;
+
+        results = db.getAllTagsForResources(Arrays.asList("res1"));
+
+        assertNotNull(results);
+        assertTrue(results.size() == 1);
+        assertNotNull(results.get("res1"));
+        assertTrue(results.get("res1").get("*:tag1").size() == 2);
+        assertTrue(results.get("res1").get("*:tag1").contains("1:1:"));
+        assertTrue(results.get("res1").get("*:tag1").contains("2:10:"));
+
+        results = db.getAllTagsForResources(Arrays.asList("res2", "res3", "res4"));
+
+        assertNotNull(results);
+        assertTrue(results.size() == 2);
+        assertNotNull(results.get("res2"));
+
+        assertTrue(results.get("res2").get("*:tag1").size() == 2);
+        assertTrue(results.get("res2").get("*:tag1").contains("1:1:user1 res2 tag1"));
+        assertTrue(results.get("res2").get("*:tag1").contains("2:10:"));
+
+        assertTrue(results.get("res2").get("*:tag3").size() == 1);
+        assertTrue(results.get("res2").get("*:tag3").contains("1:3:"));
+
+        assertNull(results.get("res3"));
+
+        assertNotNull(results.get("res4"));
+        assertTrue(results.get("res4").get("*:tag3").size() == 1);
+        assertTrue(results.get("res4").get("*:tag3").contains("2:30:"));
+
+        results = db.getAllTagsForResources(Arrays.asList("%"));
+        assertTrue(results.size() == 0);
+    }
+
+    @Test
+    public void updateTagTest() throws DBError {
+
+        db.register("user1");
+        Parameters p = db.login("user1");
+        Credentials user1Cred = new Credentials(p);
+        db.addTag(user1Cred, "res1", "tag1", 1, null);
+        db.addTag(user1Cred, "res1", "tag2", 2, "user1 res1 tag2");
+
+        Map<String, Map<String, List<String>>> results;
+
+        results = db.getAllTagsForResources(Arrays.asList("res1"));
+
+        assertNotNull(results);
+        assertTrue(results.size() == 1);
+        assertNotNull(results.get("res1"));
+        assertTrue(results.get("res1").get("*:tag1").size() == 1);
+        assertTrue(results.get("res1").get("*:tag1").contains("1:1:"));
+        assertTrue(results.get("res1").get("*:tag2").contains("1:2:user1 res1 tag2"));
+
+        db.updateTag(user1Cred, "res1", "tag1", 10, "new comment");
+        db.updateTag(user1Cred, "res1", "tag2", 20, "updated!");
+
+        results = db.getAllTagsForResources(Arrays.asList("res1"));
+
+        assertTrue(results.get("res1").get("*:tag1").contains("1:10:new comment"));
+        assertTrue(results.get("res1").get("*:tag2").contains("1:20:updated!"));
+
+        db.updateTag(user1Cred, "res1", "tag2", 2, null);
+
+        results = db.getAllTagsForResources(Arrays.asList("res1"));
+
+        assertTrue(results.get("res1").get("*:tag1").contains("1:10:new comment"));
+        assertTrue(results.get("res1").get("*:tag2").contains("1:2:"));
 
     }
 }
