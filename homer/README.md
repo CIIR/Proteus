@@ -40,5 +40,6 @@ There appears to be some issues with hostname resolution with JDK7 on a Mac. Add
 	Step 3: run the server
 	
 	./example_acmdl/run.sh
+	
 
 
