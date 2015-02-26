@@ -29,7 +29,7 @@ public class PutTags extends DBAction {
         for (String tag : tags.keySet()) {
             List<String> resources = tags.getAsList(tag, String.class);
             for (String resource : resources) {
-                userdb.addTag(creds, resource, tag, rating, null);
+                userdb.addTag(creds, resource, tag, rating, comment);
                 proteusLog.info("ADD-TAG\t{}\t{}\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), resource, tag, rating, comment);
 
             }
