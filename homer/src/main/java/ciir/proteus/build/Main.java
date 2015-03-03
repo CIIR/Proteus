@@ -13,15 +13,12 @@ import java.io.File;
  */
 public class Main {
 
-    private static void addFunction(AppFunction fn) {
-        App.appFunctions.put(fn.getName(), fn);
-    }
-
     public static void main(String[] args) throws Exception {
         System.out.println("java.class.path: " + System.getProperty("java.class.path"));
         System.out.println("cwd: " + (new File(".")).getAbsolutePath());
+        // "register" any Proteus functionality (children of AppFunction) that can be called via the command line
+        App.processClassPath("ciir.proteus");
 
-        addFunction(new ProteusMain());
         App.run(args);
     }
 }
