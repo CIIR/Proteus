@@ -27,8 +27,6 @@ public class GetResourcesForLabelFn extends AppFunction {
   @Override
   public void run(Parameters p, PrintStream output) throws Exception {
 
-    // TODO: add "*" if no ":"
-
     // allow to override the user - helpful when unit testing because
     // the TestEnvironment uses the user "junit"
     if (!p.containsKey("user")) {
@@ -38,7 +36,12 @@ public class GetResourcesForLabelFn extends AppFunction {
 
     List<String> resList;
     List<String> labels = new ArrayList<>();
-    labels.add(p.getAsString("label")); // TODO: assuming just one for now
+    String label = p.getAsString("label");
+    // if there is no ":", add the default type
+    if (!label.contains(":")){
+      label = "*:" + label;
+    }
+    labels.add(label);
 
     resList = userdb.getResourcesForLabels(-1, labels);
     for (String res : resList) {
