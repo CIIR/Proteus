@@ -36,12 +36,12 @@ public class H2Database implements UserDatabase {
             String path = conf.getString("path");
             String dbuser = conf.getString("user");
             String dbpass = conf.get("pass", "");
-            // setting AUTO_SERVER to TRUE allows multiple processes to 
+      // setting AUTO_SERVER to TRUE allows multiple processes to
             // connect to the DB - useful for debugging with a DB viewer
             String autoServer = conf.get("auto_server", "FALSE");
             // create the connection pool
             cpds = new ComboPooledDataSource();
-            cpds.setDriverClass("org.h2.Driver"); //loads the jdbc driver            
+            cpds.setDriverClass("org.h2.Driver"); //loads the jdbc driver
             cpds.setJdbcUrl("jdbc:h2:" + path + ";AUTO_SERVER=" + autoServer);
             cpds.setUser(dbuser);
             cpds.setPassword(dbpass);
@@ -162,7 +162,7 @@ public class H2Database implements UserDatabase {
             int numRows = conn.createStatement().executeUpdate("delete from sessions where user_id=" + creds.userid + " and session='" + creds.token + "'");
 
             if (numRows == 0) {
-                // since validSession was true,
+        // since validSession was true,
                 // this probably should have worked, barring race conditions
                 throw new NoTuplesAffected();
             }
@@ -279,7 +279,7 @@ public class H2Database implements UserDatabase {
         return results.get(resource);
     }
 
-    // get all the tags for a list of resources along with all the labels and each user and their rating and
+  // get all the tags for a list of resources along with all the labels and each user and their rating and
     // (possibly) a comment for the resource/label pair.
     @Override
     public Map<String, Map<String, List<String>>> getAllTagsForResources(List<String> resources) throws DBError {
@@ -328,8 +328,9 @@ public class H2Database implements UserDatabase {
                     tagRatings.put(currentTag, userRatings);
                 }
 
-                if (tagRatings.size() != 0)
+                if (tagRatings.size() != 0) {
                     results.put(resource, tagRatings);
+                }
 
                 tuples.close();
 
@@ -344,7 +345,6 @@ public class H2Database implements UserDatabase {
 
         return results;
     }
-
 
     @Override
     public Map<String, Map<Integer, List<String>>> getAllTags(List<String> resources) throws DBError {
@@ -526,21 +526,30 @@ public class H2Database implements UserDatabase {
             }
             ResultSet results = null;
 
+            // we may want to skip the user_id
+            String userClause = " AND tags.user_id = ? ";
+            if (userid == -1) {
+                userClause = "";
+            }
             if (numResults == -1) {
-                PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value AND tags.user_id = ? ORDER BY resource");
+                PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value " + userClause + " ORDER BY resource");
                 sql.setObject(1, objLabels);
-                sql.setInt(2, userid);
+                if (userid != -1) {
+                    sql.setInt(2, userid);
+                }
                 results = sql.executeQuery();
             } else {
-                // prepared statements don't like "in(...)" clauses, hence the cryptic SQL to do this:
-                //  SELECT DISTINCT resource FROM tags WHERE user LIKE ? AND tag IN (?) 
+        // prepared statements don't like "in(...)" clauses, hence the cryptic SQL to do this:
+                //  SELECT DISTINCT resource FROM tags WHERE user LIKE ? AND tag IN (?)
                 // we need to ORDER BY to ensure the result sets will always be in the same order.
-                PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value AND tags.user_id = ? ORDER BY resource LIMIT ? OFFSET ?");
-
-                sql.setObject(1, objLabels);
-                sql.setInt(2, userid);
-                sql.setInt(3, numResults);
-                sql.setInt(4, startIndex);
+                PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value " + userClause + " ORDER BY resource LIMIT ? OFFSET ?");
+                int paramNum = 1;
+                sql.setObject(paramNum, objLabels);
+                if (userid != -1) {
+                    sql.setInt(++paramNum, userid);
+                }
+                sql.setInt(++paramNum, numResults);
+                sql.setInt(++paramNum, startIndex);
                 results = sql.executeQuery();
             }
             while (results.next()) {
@@ -574,7 +583,6 @@ public class H2Database implements UserDatabase {
                 results.put(tuples.getString(1), tuples.getString(2));
             }
             tuples.close();
-
 
         } catch (SQLException e) {
             e.printStackTrace();
