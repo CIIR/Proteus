@@ -80,7 +80,14 @@
             afterTagAdded: null,
             beforeTagRemoved: null,
             afterTagRemoved: null,
-            onTagClicked: null,
+            onTagClicked:  function() {
+                //alert("poop");
+//                var id = $(this).attr("id");
+//                // remove old one
+//                $(".label-details").html("");
+//                $("#" + id).after('<div class="label-details"><textarea  style="width:80%">This is where the user can enter text... </textarea><button>Comment</button></div>');
+//                console.log(this);
+                },
             onTagLimitExceeded: null,
             // DEPRECATED:
             //
@@ -208,6 +215,10 @@
                         // Backspace is not detected within a keypress, so it must use keydown.
                         if (event.which == $.ui.keyCode.BACKSPACE && that.tagInput.val() === '') {
                             var tag = that._lastTag();
+                            // MCZ 2/2015 - don't allow delete if it's read only
+                            if (tag.hasClass('tagit-choice-read-only'))
+                                return;
+
                             if (!that.options.removeConfirmation || tag.hasClass('remove')) {
                                 // When backspace is pressed, the last tag is deleted.
                                 that.removeTag(tag);
@@ -436,12 +447,45 @@
             var label = $(this.options.onTagClicked ? '<a class="tagit-label"></a>' : '<span class="tagit-label"></span>').text(value);
             // Create tag.
             var tag = $('<li></li>')
+                    .hover(function() { console.log("Entering tag: " + value)},function() { console.log("Leaving tag: " + value)})
+                    .click(function() {
+                        var id = $(this).parent().attr("id").replace("tags_", "");// remove "tag_" prefix
+
+
+                        var html = "";
+                        $(".label-details-wrapper").html(html);
+
+                      html ='<form id="d-form" action="" method="post"><div class="label-details-wrapper">'
+                        + '<div class="label-details">'
+                          + '<div> '
+                            + 'Rating:&nbsp; <input type="radio" name="rating-value"  value="1" checked> 1 (Fair) &nbsp;'
+                            + '<input type="radio" name="rating-value" value="2"> 2 (Good) &nbsp;'
+                            + '<input type="radio" name="rating-value" value="3"> 3 (Excellent) &nbsp;'
+                            + '<input type="radio" name="rating-value" value="4"> 4 (Perfect) &nbsp;'
+                          + '</div> '
+                          + '<div > '
+                           + '<span class="notes-label">Notes:&nbsp;</span><span></span> <textarea  style="width:90%">' + id + ' </textarea></span>'
+                          + '</div> '
+                          + '<div> '
+                           + '<button >Submit</button>'
+                          + '</div>'
+                        + '</div>'
+                      + '</form>';
+
+                      $("#" + id).after(html);
+
+
+                    })
                     .addClass('tagit-choice ui-widget-content ui-state-default ui-corner-all')
                     .addClass(additionalClass)
                     .append(label);
-            if (this.options.readOnly) {
+            // MCZ: 2/19/2015 - allowing read only tags to be mixed in with regular
+            // tags. The code inserting it adds the tagit-choice-read-only class so we
+            // can check it here.
+            if (this.options.readOnly || tag.hasClass('tagit-choice-read-only')) {
                 tag.addClass('tagit-choice-read-only');
             } else {
+
                 tag.addClass('tagit-choice-editable');
                 // Button for removing the tag.
                 var removeTagIcon = $('<span></span>')

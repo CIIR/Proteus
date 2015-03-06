@@ -239,7 +239,7 @@ UI.renderTags = function(result) {
         tags = result.tags[user].toString().split(',');
         for (tag in tags) {
             if (user !== userid) {
-                ro_html += '  <li> ' + formatLabelForDispaly(tags[tag]) + ' </li> ';
+                ro_html += '  <li class="tagit-choice-read-only"> ' + formatLabelForDispaly(tags[tag]) + ' </li> ';
             } else {
                 my_html += '  <li> ' + formatLabelForDispaly(tags[tag]) + ' </li> ';
             }
@@ -247,10 +247,11 @@ UI.renderTags = function(result) {
     }
     // only show the tag box if there is something to show
     if (ro_html !== '') {
-        ro_html = '<ul class="read-only-tags">' + ro_html + '</ul>';
+      //  ro_html = '<ul class="read-only-tags" id="read-only-tags_' + result.name + '">' + ro_html + '</ul>';
     }
 
-    return '<div><ul id="tags_' + result.name + '">' + my_html + '</ul>' + ro_html + '</div>';
+    return '<div><ul id="tags_' + result.name + '">' + my_html  + ro_html+ '</ul>' + '</div>';
+    //return '<div><ul id="tags_' + result.name + '">' + my_html + '</ul>' + ro_html + '</div>';
 };
 
 UI.toggleMyTags = function() {

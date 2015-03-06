@@ -4,7 +4,9 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
+
 import java.util.ArrayList;
+
 import org.lemurproject.galago.utility.Parameters;
 
 import java.util.List;
@@ -35,7 +37,7 @@ public class GetTags extends DBAction {
 
                 tagsAndUsers = userdb.getAllTags(resource);
 
-        // currently Parameters doesn't quite handle the data structure
+                // currently Parameters doesn't quite handle the data structure
                 // we're using so we have to trick it into using it.
                 Parameters tmp = Parameters.create();
                 for (Map.Entry<Integer, List<String>> entry : tagsAndUsers.entrySet()) {
