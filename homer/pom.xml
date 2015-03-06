@@ -134,6 +134,9 @@
                 <artifactId>pitest-maven</artifactId>
                 <version>1.1.4</version>
                 <configuration>
+                    <reportsDirectory>
+                       reports/pit-reports
+                    </reportsDirectory>
                     <targetClasses>
                         <param>ciir.proteus*</param>
                     </targetClasses>
