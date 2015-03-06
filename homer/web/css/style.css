@@ -1,24 +1,23 @@
-#results-left{
+#results-left {
     background-color: white;
     border-right: 1px solid #888;
     height: 100%;
-    top:  0;
+    top: 0;
     bottom: 0;
     left: 0;
-    overflow-y: scroll;	
+    overflow-y: scroll;
 
 }
 
-#results-right{
+#results-right {
 
     height: 100%;
     top: 0;
     bottom: 0;
     right: 0;
-    overflow-y: scroll;	
+    overflow-y: scroll;
 
 }
-
 
 .snippet {
     padding: 10pt;
@@ -34,6 +33,7 @@
     font-family: monospace;
     display: none;
 }
+
 #request {
     display: none;
 }
@@ -43,7 +43,7 @@
     text-align: right;
     vertical-align: middle;
     font-family: monospace;
-    display:inline;
+    display: inline;
 }
 
 #error {
@@ -51,9 +51,9 @@
     background-color: #a00;
     font-weight: bold;
     text-align: center;
-    display:none;
-    padding:10pt;
-    margin:0;
+    display: none;
+    padding: 10pt;
+    margin: 0;
 }
 
 #footer {
@@ -63,7 +63,8 @@
     background-color: #009;
     text-align: left;
 }
-#more{
+
+#more {
     text-align: left;
 }
 
@@ -74,7 +75,7 @@
     padding-top: 10pt;
     background-color: #009;
 
-} 
+}
 
 #ui-search {
     width: 50%;
@@ -90,20 +91,23 @@
     height: 20pt;
     color: #fff;
 }
+
 #user-info {
     text-align: right;
-    float:right;
+    float: right;
     height: 20pt;
     vertical-align: middle;
-} 
+}
 
-#login-form-text{
+#login-form-text {
     color: #fff;
     text-align: right;
 }
-#ui-go-logout{
+
+#ui-go-logout {
     text-align: right;
 }
+
 /*
 #login-form {
     float:right;
@@ -132,10 +136,12 @@ img.thumbnail {
 
 .result .rank {
     color: grey;
-    padding-right:10pt;
+    padding-right: 10pt;
 }
 
-.result .name { }
+.result .name {
+}
+
 .result .score {
     color: grey;
     text-align: right;
@@ -144,20 +150,20 @@ img.thumbnail {
 .create-label-form {
     background-color: yellow;
     box-shadow: 10px 10px 5px #888888;
-    padding:10px;
-    border:2px solid gray;
-    margin:0px; 
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 0px;
 }
 
-
-.read-only-li{
+.read-only-li {
     background-color: red;
 }
 
-#tag-values{
+#tag-values {
     background-color: dimgray;
 }
-.type-button{
+
+.type-button {
     margin: 2px 5px 2px 0;
 }
 
@@ -165,28 +171,42 @@ img.thumbnail {
 .multiselect-item {
     text-align: left;
 }
+
 .right-align {
     text-align: right;
 }
 
- #view-resource{
-     /* render any HTML with newlines */
-     white-space: pre;
-     text-align: left;
- }
+#view-resource {
+    /* render any HTML with newlines */
+    white-space: pre;
+    text-align: left;
+}
 
 /* make navbar smaller (http://stackoverflow.com/questions/19576175/how-do-you-decrease-navbar-height-in-bootstrap-3) */
-.navbar-nav > li > a {padding-top:5px !important; padding-bottom:5px !important; color: white;}
+.navbar-nav > li > a {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    color: white;
+}
+
 .navbar-nav > li > a:hover {
-    padding-top:5px !important; 
-    padding-bottom:5px !important; 
-    background-color: white !important; 
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    background-color: white !important;
     color: blue;
-    cursor: pointer;}
-.navbar {min-height:32px !important}
+    cursor: pointer;
+}
 
+.navbar {
+    min-height: 32px !important
+}
 
-#sidebar-button{ float:left; color: white;   cursor: hand;   font-weight: bold;}
+#sidebar-button {
+    float: left;
+    color: white;
+    cursor: hand;
+    font-weight: bold;
+}
 
 /* override FancyTree CSS */
 ul.fancytree-container {
@@ -200,6 +220,51 @@ td.metakey {
 
 body {
     margin: 0;
-    padding-top: 100px; 
+    padding-top: 100px;
     overflow-y: hidden;
 }
+
+.label-details {
+    background-color: #dedede;
+    border: solid;
+    padding: 5px;
+    box-shadow: 10px 10px 5px #888888;
+    position: relative;
+    text-align: left;
+}
+
+.notes-label {
+    vertical-align: top;
+}
+
+/*
+
+.label-details > textarea{
+
+
+}
+
+.label-details > button{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+     }
+
+     */
+
+.label-details-wrapper {
+    z-index: 99999;
+    position: relative;
+}
+
+#overlay {
+    opacity: 0.4;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: black;
+    width: 100%;
+    height: 100%;
+    z-index: 5000
+}
+

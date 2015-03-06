@@ -8,31 +8,24 @@
  */
 
 var GLOBAL = {
-    uniqTypes: [],
-    allTags: []
+    uniqTypes: [], allTags: [], users: {}
 };
 
 // the JSON of the application state
 var Model = {
     // search result data
-    request: {},
-    query: "",
-    results: [],
-    queryType: null,
-    // user login data
-    user: null,
-    userid: null,
-    token: null
+    request: {}, query: "", results: [], queryType: null, // user login data
+    user: null, userid: null, token: null
 };
 
-Model.clearResults = function() {
+Model.clearResults = function () {
     Model.results = [];
     Model.query = "";
 };
 
 var privateURLParams = _(["user", "token"]);
 
-var updateURL = function(request) {
+var updateURL = function (request) {
     pushURLParams(_.omit(request, privateURLParams));
 };
 
@@ -41,11 +34,11 @@ var updateURL = function(request) {
  *
  * reads the ?q=foo parameters and sends of a JSON API request
  */
-UI.setReadyHandler(function() {
+UI.setReadyHandler(function () {
     var params = _.omit(getURLParams(), privateURLParams);
     console.log(params);
 
-    UI.dispalyUserName( );
+    UI.dispalyUserName();
 
     if (params.action == "search" && (!isBlank(params.q) || !isBlank(params.labels))) {
         UI.setQuery(params.q);
@@ -59,7 +52,7 @@ UI.setReadyHandler(function() {
 /**
  * This main "action-request" delegates to other things. Notice how search requests disappear into actions.js early.
  */
-var doActionRequest = function(args) {
+var doActionRequest = function (args) {
     var action = args.action;
     if (action == "search") {
         return doSearchRequest(args);
@@ -75,19 +68,19 @@ var doActionRequest = function(args) {
 };
 
 /* handlers for search button types */
-UI.onClickSearchButton = function(buttonDesc) {
+UI.onClickSearchButton = function (buttonDesc) {
     var kind = buttonDesc.kind;
     doActionRequest({kind: kind, q: UI.getQuery(), action: "search"});
 };
 
 /* pull the previous request out of the "Model" and send it to the server, but request the next 10 */
-UI.setMoreHandler(function() {
+UI.setMoreHandler(function () {
     var prev = Model.request;
     prev.skip = Model.results.length;
     doActionRequest(prev);
 });
 
-var logIn = function(userName) {
+var logIn = function (userName) {
     if (!userName)
         return;
 
@@ -97,8 +90,8 @@ var logIn = function(userName) {
     // already registered. Eventually we'll want this to be a 2 step process
     // but for now we just want something running. FOR NOW, we'll assume an error
     // means they're already registered (duplicate key error).
-    var loginFunc = function() {
-        API.login(args, function(data) {
+    var loginFunc = function () {
+        API.login(args, function (data) {
             document.cookie = "username=" + userName + ";";
             document.cookie = "userid=" + data.userid + ";";
             document.cookie = "token=" + data.token + ";";
@@ -109,7 +102,7 @@ var logIn = function(userName) {
             Model.userid = data.userid;
             Model.token = data.token;
             location.reload(true);
-        }, function(req, status, err) {
+        }, function (req, status, err) {
             UI.showError("ERROR: ``" + err + "``");
             throw err;
         })
@@ -119,14 +112,14 @@ var logIn = function(userName) {
 
 };
 
-var logOut = function() {
+var logOut = function () {
 
     var userName = getCookie("username");
     var userID = getCookie("userid");
     var userToken = getCookie("token");
 
     var args = {user: userName, token: userToken, userid: userID};
-    API.logout(args, function() {
+    API.logout(args, function () {
         document.cookie = "username=;";
         document.cookie = "token=;";
         document.cookie = "userid=;";
@@ -138,31 +131,32 @@ var logOut = function() {
         // quick and dirty, trigger refresh to get rid of
         // all the label stuff.
         location.reload(true);
-    }, function(req, status, err) {
+    }, function (req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
         throw err;
     });
 
 
-
 };
 
-var addTag = function(tagText, resourceID, rating) {
+var addTag = function (tagText, resourceID, rating, comment) {
     var userName = getCookie("username");
     var userToken = getCookie("token");
     var userID = getCookie("userid");
 
-    var tmp = '{  "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "rating" : ' + rating + ',"tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
+    comment = comment.replace(/\n/g, "\\n");
+    var tmp = '{  "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "rating" : '
+            + rating + ', "comment" : "' + comment + '" ,"tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
     console.log(tmp);
     var args = JSON.parse(tmp);
-    API.createTags(args, null, function(req, status, err) {
+    API.createTags(args, null, function (req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
         throw err;
     });
 
 };
 
-var deleteTag = function(tagText, resourceID) {
+var deleteTag = function (tagText, resourceID) {
     var userName = getCookie("username");
     var userID = getCookie("userid");
     var userToken = getCookie("token");
@@ -170,32 +164,67 @@ var deleteTag = function(tagText, resourceID) {
     var tmp = '{ "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
     console.log(tmp);
     var args = JSON.parse(tmp);
-    API.deleteTags(args, null, function(req, status, err) {
+    API.deleteTags(args, null, function (req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
         throw err;
     });
 
 };
 
+var getAllUsers = function () {
+  var userName = getCookie("username");
+  var userID = getCookie("userid");
+  var userToken = getCookie("token");
+
+  var tmp = '{ "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "labels":  ["*.newTag"]}';
+  console.log(tmp);
+  var args = JSON.parse(tmp);
+    API.getResourcesForLabels(args, function(data){
+      var x = 2332;
+    }, function (req, status, err) {
+      UI.showError("ERROR: ``" + err + "``");
+      throw err;
+    });
+
+    API.getUsers(null, function (data) {
+
+        $.each(data.users, function (key, value) {
+            GLOBAL.users[key] = value;
+        });
+
+        // we have the users/IDs, now get the tags
+        getAllTagsByUser();
+
+    }, function (req, status, err) {
+        UI.showError("ERROR: ``" + err + "``");
+        throw err;
+    });
+};
+
 // function to get all the tags for all users.
-var getAllTagsByUser = function() {
+var getAllTagsByUser = function () {
     var userName = getCookie("username");
     var userID = getCookie("userid");
     var userToken = getCookie("token");
     var uniqType = [];
 
     var args = {resource: ["%"], user: userName, userid: userID, token: userToken};
-    API.getAllTagsByUser(args, function(origresult) {
+    API.getAllTagsByUser(args, function (origresult) {
 
         var keys = Object.keys(origresult);
 
         GLOBAL.allTags = origresult[keys[0]];
+
+        console.log("tags: " + origresult);
+
         for (user in GLOBAL.allTags) {
             // not the most efficient code in the world
             tags = GLOBAL.allTags[user].toString().split(',');
             for (tag in tags) {
                 uniqType.push(tags[tag].split(":")[0]);
             }
+            UI.createLabelMultiselect2(user);
+
         }
 
         GLOBAL.uniqTypes = _.uniq(uniqType);
@@ -212,7 +241,7 @@ var getAllTagsByUser = function() {
 
             var type;
             var myUniq = _.uniq(myTypes);
-            UI.createLabelMultiselect(myUniq);
+            //       UI.createLabelMultiselect(myUniq);
             for (type in myUniq) {
                 // get the values just for this type
                 var myValues = [];
@@ -228,7 +257,7 @@ var getAllTagsByUser = function() {
         }
 
 
-    }, function(req, status, err) {
+    }, function (req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
         throw err;
     });
@@ -236,26 +265,25 @@ var getAllTagsByUser = function() {
 
 
 // get all tags grouped by user on start up
-getAllTagsByUser();
+getAllUsers();
 
 var showSideBar = true;
 
-$('#sidebar-button').click(function() {
+$('#sidebar-button').click(function () {
     if (showSideBar == true) {
-        $('#sidebar-button').html(">>");
+        $('#sidebar-button').html("&gt;&gt;");
         $("#results-left").hide();
         $("#results-right").removeClass("col-md-10");
         $("#results-right").addClass("col-md-12");
         showSideBar = false;
     } else {
-        $('#sidebar-button').html("<<");
+        $('#sidebar-button').html("&lt;&lt;");
         $("#results-left").show();
         showSideBar = true;
         $("#results-right").removeClass("col-md-12");
         $("#results-right").addClass("col-md-10");
     }
-}
-);
+});
 
 
 						

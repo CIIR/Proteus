@@ -35,9 +35,11 @@
         <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/flick/jquery-ui.css">
         <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="css/style.css" type="text/css" />
+
+
         <script>
             $(document).ready(function() {
-
+                $("#overlay").hide();
                 $("#ui-search").keyup(function(evt) {
                     if (evt.keyCode == 13) {
                         $(".default-search-button").click();
@@ -58,6 +60,8 @@
                 // if not logged in, hide the user info
                 if (isLoggedIn() == false)
                     $("#user-info").hide();
+
+
 
             });</script>
         <script type="text/javascript">
@@ -123,7 +127,7 @@
                 <div  class="row clearfix">
                     <div class="col-md-2 column">
 
-                        <div id="sidebar-button"><<</div>
+                        <div id="sidebar-button">&lt;&lt;</div>
 
                     </div>
                     <div id="user-info" class="col-md-10 column">   </div>
@@ -173,7 +177,6 @@
         </div>
         <div id="results-right" class="col-md-10 column right-align">
 
-
             <div id="results"></div>
             <div id="view-resource"></div>
             <div  class="row clearfix ">
@@ -203,6 +206,7 @@
             </div>
         </div>
     </body>
+    <div id='overlay'></div>
 
 
 </html>

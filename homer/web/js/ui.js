@@ -250,7 +250,7 @@ UI.renderTags = function(result) {
       //  ro_html = '<ul class="read-only-tags" id="read-only-tags_' + result.name + '">' + ro_html + '</ul>';
     }
 
-    return '<div><ul id="tags_' + result.name + '">' + my_html  + ro_html+ '</ul>' + '</div>';
+    return '<div><ul id="tags_' + result.name + '">'  + ro_html + my_html+ '</ul>' + '</div>';
     //return '<div><ul id="tags_' + result.name + '">' + my_html + '</ul>' + ro_html + '</div>';
 };
 
@@ -319,7 +319,76 @@ UI.createLabelMultiselect = function(myUniqTypes) {
 
 };
 
+UI.createLabelMultiselect2 = function(userID) {
 
+    $("#empty-tree").html("");
+
+   /*
+    var tags = GLOBAL.allTags[user].toString().split(',');
+    for (tag in tags) {
+        uniqType.push(tags[tag].split(":")[0]);
+    }
+*/
+
+    var node0 = $("#tree").fancytree("getRootNode");
+
+    var rootNode = node0.addChildren({
+        title: GLOBAL.users[userID],
+        folder: true
+    });
+
+    var tags = GLOBAL.allTags[userID].toString().split(',');
+    var lastType = null;
+    for (tag in tags) {
+        //console.log("Tag: " + tags[tag]);
+        var kv = tags[tag].split(":");
+        var key = kv[0];
+        var val = kv[1].split("@")[0];
+        var childNode;
+        if (lastType === null || key != lastType) {
+            childNode = rootNode.addChildren({
+                title: key, key: key, folder: true
+            });
+            lastType = key;
+        }
+            childNode.addChildren({
+                title: val, key: key + ":" + val
+            });
+    }
+/*
+    for (type in myUniqTypes) {
+
+        var childNode = rootNode.addChildren({
+            title: myUniqTypes[type], key: myUniqTypes[type], folder: true
+        });
+
+        // get the values just for this type
+        var myValues = [];
+        var tags = GLOBAL.allTags[userID].toString().split(',');
+        for (tag in tags) {
+            var kv = tags[tag].split(":");
+            // remove any rating info
+            if ((kv[0] === myUniqTypes[type]) && (!_.isUndefined(kv[1]))) {
+                // remove the rating, an add only if not already there
+                var val = kv[1].split("@")[0];
+                if (myValues.indexOf(val) == -1)
+                    myValues.push(val);
+            }
+        }
+
+        // var tags = valueList.split(',');
+        for (tag in myValues) {
+            childNode.addChildren({
+                title: myValues[tag], key: myUniqTypes[type] + ":" + myValues[tag]
+            });
+        }
+    }
+    */
+    $("#tree").fancytree("getRootNode").visit(function(node) {
+        node.setExpanded(true);
+    });
+
+};
 UI.clearSelectedLabels = function() {
     var i = 0; // counter to get uniq elements
 

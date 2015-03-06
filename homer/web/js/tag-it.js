@@ -447,33 +447,21 @@
             var label = $(this.options.onTagClicked ? '<a class="tagit-label"></a>' : '<span class="tagit-label"></span>').text(value);
             // Create tag.
             var tag = $('<li></li>')
-                    .hover(function() { console.log("Entering tag: " + value)},function() { console.log("Leaving tag: " + value)})
+              //      .hover(function() { console.log("Entering tag: " + value)},function() { console.log("Leaving tag: " + value)})
                     .click(function() {
-                        var id = $(this).parent().attr("id").replace("tags_", "");// remove "tag_" prefix
-
-
-                        var html = "";
-                        $(".label-details-wrapper").html(html);
-
-                      html ='<form id="d-form" action="" method="post"><div class="label-details-wrapper">'
-                        + '<div class="label-details">'
-                          + '<div> '
-                            + 'Rating:&nbsp; <input type="radio" name="rating-value"  value="1" checked> 1 (Fair) &nbsp;'
-                            + '<input type="radio" name="rating-value" value="2"> 2 (Good) &nbsp;'
-                            + '<input type="radio" name="rating-value" value="3"> 3 (Excellent) &nbsp;'
-                            + '<input type="radio" name="rating-value" value="4"> 4 (Perfect) &nbsp;'
-                          + '</div> '
-                          + '<div > '
-                           + '<span class="notes-label">Notes:&nbsp;</span><span></span> <textarea  style="width:90%">' + id + ' </textarea></span>'
-                          + '</div> '
-                          + '<div> '
-                           + '<button >Submit</button>'
-                          + '</div>'
-                        + '</div>'
-                      + '</form>';
-
-                      $("#" + id).after(html);
-
+//                      var id = $(this).parent().attr("id").replace("tags_", "");// remove "tag_" prefix
+//
+//                      var html = "";
+//                      $(".label-details-wrapper").html(html);
+//
+//                      // TODO '2' is temp - this needs to be the user specific rating for the resource/label
+//                      html = that._getRatingHTML(2);
+//
+//                      $("#" + id).after(html);
+//                      $("#rating-cancel").click(function() {
+//                        $(".label-details-wrapper").html(""); // close the pop up
+//                      });
+//                      // TODO handle submit button
 
                     })
                     .addClass('tagit-choice ui-widget-content ui-state-default ui-corner-all')
@@ -539,8 +527,6 @@
                 // get the parent so we know where to display the dialog
                 var foundTag = that._findTagByLabel(value);
                 var parentID = $(foundTag).parent().attr("id");
-                // MCZ - remove the tag, we'll re-add it once we have a rating
-                this.removeTag(foundTag, false, false);
                 this._getRating(value, parentID);
 
             }
@@ -551,6 +537,7 @@
                 }, 0);
             }
         },
+        // MCZ: added code
         // MCZ - added 3rd param so we skip deleting from the db
         removeTag: function(tag, animate, delFromDB) {
             animate = typeof animate === 'undefined' ? this.options.animate : animate;
@@ -604,36 +591,73 @@
                 that.removeTag(tag, false);
             });
         },
-        // MCZ: added
-        _getRating: function(label, parentID) {
-            var that = this;
-            var rating = 0;
-            $('#rateDialog').dialog({
-                closeOnEscape: false,
-                autoOpen: false,
-                modal: true,
-                open: function(event, ui) {
-                    $(".ui-dialog-titlebar-close").hide();
-                },
-                buttons: {
-                    'Submit': function() {
+        _getRatingHTML: function(rating, comment){
 
-                        $(this).dialog('close');
-                        rating = $("input[name=rating-value]:checked").val();
-                        // now add the tag - note we pass TRUE for "duringInitialization"
-                        that.createTag(label + " (" + rating + ")", "", true);
-                        // put the label in the DB
-                        // now get the resource name
-                        var resource = parentID.substring(5); // ignore the "tags_" prefix
+          var checked = ["","","",""];
+          var cancelButton  =  '<button id="rating-cancel" >Cancel</button>';
+          if (_.isUndefined(rating) ){
+            rating = 1; // default
+            // if new label, don't allow them to cancel - they have to rate it.
+            cancelButton = "";
+          }
 
-                        addTag(label, resource, rating);
-                        addLabelToButtons(label);
-                    }
-                },
-                width: '400px'
-            }); //end update dialog
-            $('#rateDialog').dialog("option", "position", {my: "center", at: "center", of: $("#" + parentID)});
-            $('#rateDialog').dialog('open');
+          if (_.isUndefined(comment) ){
+            comment = "";
+          }
+
+          if (rating > 0){
+            // provide a cancel button IF this is an update
+            checked[rating - 1] = "checked";
+            }
+
+             var html ='<div class="label-details-wrapper">'
+            + '<div class="label-details">'
+            + '<div> '
+            + 'Rating:&nbsp; <input type="radio" name="rating-value"  value="1" ' + checked[0] + '> 1 (Fair) &nbsp;'
+            + '<input type="radio" name="rating-value" value="2" ' + checked[1] + '> 2 (Good) &nbsp;'
+            + '<input type="radio" name="rating-value" value="3" ' + checked[2] + '> 3 (Excellent) &nbsp;'
+            + '<input type="radio" name="rating-value" value="4" ' + checked[3] + '> 4 (Perfect) &nbsp;'
+            + '</div> '
+            + '<div > '
+            + '<span class="notes-label">Notes:&nbsp;</span><span></span> <textarea id="notes-field" name="label-notes"  style="width:90%">' + comment + ' </textarea></span>'
+            + '</div> '
+            + '<div> '
+            + '<button id="rating-submit" >Submit</button>'
+            + cancelButton
+            + '</div>'
+            + '</div>';
+            return html;
+      },
+        _getRating: function(label, parentID){
+
+          var id = parentID;
+          var resource = parentID.substring(5); // ignore the "tags_" prefix
+
+          var html = "";
+          $(".label-details-wrapper").html(html);
+
+          html = this._getRatingHTML();
+          $("#" + id).after(html);
+
+          $("#overlay").show();
+          $("#notes-field").focus();
+          var docHeight = $(document).height();
+
+          $("#rating-submit").click(function() {
+
+            $("#overlay").hide();
+            rating = $("input[name=rating-value]:checked").val();
+            comment = $("#notes-field").val();
+
+            // update the label with the rating we just gave it
+            $("#"+id).children(".tagit-choice").last().children("a.tagit-label").text(label + " (" + rating + ")");
+
+            addTag(label, resource, rating, comment);
+            addLabelToButtons(label);
+            $(".label-details-wrapper").html(""); // close the pop up
+          });
+
+
         }
     });
 })(jQuery);
