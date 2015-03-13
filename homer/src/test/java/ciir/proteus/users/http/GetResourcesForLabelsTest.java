@@ -79,12 +79,17 @@ public class GetResourcesForLabelsTest {
     assertArrayEquals(new String[]{"res1"}, resources.toArray());
 
     // check that a 2nd user will not get our resources
+    /*
+     * MCZ 3/15 - now that others can rate/comment on another person's
+     * label, we allow them to search by their tags so this test WILL
+     * return the other users resource.
+     */
     String user2 = "new_user";
     env.proteus.userdb.register(user2);
     Parameters p2 = env.proteus.userdb.login(user2);
 
     resources = env.proteus.userdb.getResourcesForLabels((Integer) p2.get("userid"), labels, 10, 0);
-    assertEquals(0, resources.size());
+    assertEquals(1, resources.size());
 
     // add some new resources that should NOT get returned for the labels passed in
     env.proteus.userdb.addTag(cred, "res2", "type1:don't look for me", 0, null);
