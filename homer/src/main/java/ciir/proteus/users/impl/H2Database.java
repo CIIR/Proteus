@@ -357,7 +357,7 @@ public class H2Database implements UserDatabase {
     try {
       conn = cpds.getConnection();
 
-      PreparedStatement sql = conn.prepareStatement("SELECT user_id, label_type || ':' || label_value AS label, rating || ':' || NVL(comment, '') AS user_data FROM tags WHERE resource LIKE ? GROUP BY user_id, label ORDER BY user_id, label");
+      PreparedStatement sql = conn.prepareStatement("SELECT user_id, label_type || ':' || label_value AS label, rating || ':' || NVL(comment, '') AS user_data FROM tags WHERE resource LIKE ? GROUP BY user_id, label, user_data ORDER BY user_id, label");
       for (String resource : resources) {
         Map<Integer,  Map<String, String>> userTags = new HashMap<>();
         sql.setString(1, resource);
