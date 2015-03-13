@@ -491,15 +491,21 @@
                         }
                         $(".label-details-wrapper").html(""); // close the pop up
                         // update the rating in memory
-
+                        // NOTE: this may be the first tag for this document so we need to make sure to add any elements we need
+                        if (_.isUndefined(Model.results[rank].tags[getCookie("userid")])){
+                          Model.results[rank].tags[getCookie("userid")] = formatLabelForDatabase(label);
+                        }
                         Model.results[rank].tags[getCookie("userid")][formatLabelForDatabase(label)] = rating + ":" + comment;
+                        // put a temp place holder
+                        $("#" + id).before('<div id="updateMe"></div>' );
                         // remove the original
                         $("#" + id).remove();
                         // last param tells it to prepend to the results list
                         // 3rd param indicates if we searched within labels, we'll pass a value
                         // depended on the "more" button so it doesn't change
                         var showMoreButton = !(moreButton.is(":visible"));
-                        UI.renderSingleResult(Model.results[rank], Model.queryTerms, showMoreButton, true);
+                        UI.renderSingleResult(Model.results[rank], Model.queryTerms, showMoreButton, "#updateMe");
+                       $("#updateMe").remove();
                       });
 
                     })

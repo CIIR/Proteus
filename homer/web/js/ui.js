@@ -139,17 +139,18 @@ function addLabelToButtons(newLabel) {
  * Renders search results into UI after current results
  */
 
-UI.renderSingleResult = function(result, queryTerms, usingLabels, prepend) {
+UI.renderSingleResult = function(result, queryTerms, usingLabels, prependTo) {
   //console.debug("result name: " + result.name);
   var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
   var resDiv = $('<div>');
   resDiv.attr('class', 'result');
   resDiv.attr('id', result.name);
 
-  if (_.isUndefined(prepend) || prepend === false){
+  // put it at the end unless we pass in where we want it to go
+  if (_.isUndefined(prependTo)){
     resultsDiv.append(renderer(queryTerms, result, resDiv)); //* 6/26/2014
   } else {
-    resultsDiv.prepend(renderer(queryTerms, result, resDiv)); //* 6/26/2014
+    $(prependTo).after(renderer(queryTerms, result, resDiv));
   }
 
 
@@ -284,10 +285,15 @@ UI.renderTags = function(result) {
               continue;
             }
             doneLabels.add(tag);
+            // if we have a decmial, only show 2 place
+            var score = labelScore[tag];
+            if (score.toString().indexOf(".") != -1){
+              score = score.toFixed(2);
+            }
             if (user !== userid || roLabels.has(tag)) {
-                ro_html += '  <li class="tagit-choice-read-only"> ' + formatLabelForDispaly(tag, labelScore[tag]) + ' </li> ';
+                ro_html += '  <li class="tagit-choice-read-only"> ' + formatLabelForDispaly(tag, score) + ' </li> ';
             } else {
-                my_html += '  <li> ' + formatLabelForDispaly(tag, labelScore[tag]) + ' </li> ';
+                my_html += '  <li> ' + formatLabelForDispaly(tag, score) + ' </li> ';
             }
         }
     }
