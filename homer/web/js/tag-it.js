@@ -694,6 +694,10 @@
             addTag(label, resource, rating, comment);
             addLabelToButtons(label);
             // add it to our in memory representation
+            // NOTE: this may be the first tag for this document so we need to make sure to add any elements we need
+            if (_.isUndefined(Model.results[rank].tags[getCookie("userid")])){
+              Model.results[rank].tags[getCookie("userid")] = formatLabelForDatabase(label);
+            }
             Model.results[rank].tags[getCookie("userid")][formatLabelForDatabase(label)] = rating + ":" + comment;
             $(".label-details-wrapper").html(""); // close the pop up
           });
