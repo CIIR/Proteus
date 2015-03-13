@@ -530,6 +530,8 @@ public class H2Database implements UserDatabase {
       ResultSet results = null;
 
       // we may want to skip the user_id
+      // MCZ 3/15 - allow anyone to search using anyone's labels.
+      userid = -1;
       String userClause = " AND tags.user_id = ? ";
       if (userid == -1) {
         userClause = "";

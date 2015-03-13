@@ -29,7 +29,8 @@ var pushURLParams = function(params) {
 
     // if there are labels AND we don't have a "labelOwner" param, add the user that owns them
     if (!_.isUndefined(params.labels) && urlParams.indexOf("labelOwner") == -1) {
-        urlParams += "&labelOwner=" + getCookie("userid");
+        // MCZ 3/2015 - quick hack so we can search by ANYONE'S labels
+        urlParams += "&labelOwner=-1"; //  + getCookie("userid");
     }
     History.pushState(null, null, urlParams);
 };
@@ -157,7 +158,7 @@ function formatLabelForDispaly(origLabel, rating) {
         var label = origLabel.split(":");
         return  label[1] + " (" + _rating + ")";
     }
- 
+
     return  origLabel + " (" + _rating + ")";
 
 }
