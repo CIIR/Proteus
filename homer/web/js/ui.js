@@ -18,7 +18,6 @@ var searchButtons = $("#search-buttons");
 var UI = {};
 UI.generateButtons = function() {
 
-
     API.getKinds({}, function(data) {
         if (data.title)
             $("#proteus-title").html(data.title);
@@ -140,65 +139,72 @@ function addLabelToButtons(newLabel) {
  * Renders search results into UI after current results
  */
 
+UI.renderSingleResult = function(result, queryTerms, usingLabels, prepend) {
+  //console.debug("result name: " + result.name);
+  var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
+  var resDiv = $('<div>');
+  resDiv.attr('class', 'result');
+  resDiv.attr('id', result.name);
+
+  if (_.isUndefined(prepend) || prepend === false){
+    resultsDiv.append(renderer(queryTerms, result, resDiv)); //* 6/26/2014
+  } else {
+    resultsDiv.prepend(renderer(queryTerms, result, resDiv)); //* 6/26/2014
+  }
+
+
+  var tagName = "#tags_" + result.name;
+  $(tagName).tagit({
+    availableTags: GLOBAL.uniqTypes,
+    autocomplete: {delay: 0, minLength: 0},
+    allowSpaces: true,
+    placeholderText: "Add a Label",
+    afterTagRemoved: function(event, ui) {
+
+      deleteTag(ui.tagLabel, result.name);
+      // update the buttons
+      //deleteLabelFromButtons(ui.tagLabel);
+
+      return true;
+    },
+    beforeTagAdded: function(event, ui) {
+      var that = this;
+      if (!ui.duringInitialization) {
+        // only ask "are you sure" if this is a NEW tag TYPE
+        tmp = ui.tagLabel.split(":");
+        var res = true;
+        if (tmp.length === 2 && $.inArray(tmp[0], GLOBAL.uniqTypes) === -1) {
+          res = confirm("Are you sure you want to create the label type \"" + tmp[0] + "\"?");
+          if (res == false)
+            return false;
+          // add the new type to our list
+          GLOBAL.uniqTypes.push(tmp[0]);
+        }
+
+      } else {
+        return true;
+      }
+    }
+  });
+  $(".read-only-tags").tagit({
+    readOnly: true
+  });
+
+  // don't show the more button if we searched within labels - cuz
+  // we return ALL results (for now)
+
+  if (usingLabels) {
+    moreButton.hide();
+  } else {
+    moreButton.show();
+  }
+
+};
 
 UI.appendResults = function(queryTerms, results, usingLabels) {
 
     UI.showProgress("Ajax response received!");
-    _(results).forEach(function(result) {
-        console.debug("result name: " + result.name);
-        var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
-        var resDiv = $('<div>');
-        resDiv.attr('class', 'result');
-        resDiv.attr('id', result.name);
-        resultsDiv.append(renderer(queryTerms, result, resDiv)); //* 6/26/2014
-
-        var tagName = "#tags_" + result.name;
-        $(tagName).tagit({
-            availableTags: GLOBAL.uniqTypes,
-            autocomplete: {delay: 0, minLength: 0},
-            allowSpaces: true,
-            placeholderText: "Add a Label",
-            afterTagRemoved: function(event, ui) {
-
-                deleteTag(ui.tagLabel, result.name);
-                // update the buttons
-                //deleteLabelFromButtons(ui.tagLabel);
-
-                return true;
-            },
-            beforeTagAdded: function(event, ui) {
-                var that = this;
-                if (!ui.duringInitialization) {
-                    // only ask "are you sure" if this is a NEW tag TYPE
-                    tmp = ui.tagLabel.split(":");
-                    var res = true;
-                    if (tmp.length === 2 && $.inArray(tmp[0], GLOBAL.uniqTypes) === -1) {
-                        res = confirm("Are you sure you want to create the label type \"" + tmp[0] + "\"?");
-                        if (res == false)
-                            return false;
-                        // add the new type to our list
-                        GLOBAL.uniqTypes.push(tmp[0]);
-                    }
-
-                } else {
-                    return true;
-                }
-            }
-        });
-        $(".read-only-tags").tagit({
-            readOnly: true
-        });
-
-        // don't show the more button if we searched within labels - cuz
-        // we return ALL results (for now)
-
-        if (usingLabels) {
-            moreButton.hide();
-        } else {
-            moreButton.show();
-        }
-
-    });
+    _(results).forEach(function(result){UI.renderSingleResult(result, queryTerms, usingLabels);});
 };
 /**
  * A set of functions for reacting to events in other, more general code.
@@ -233,25 +239,61 @@ UI.renderTags = function(result) {
     var my_html = '';
     var ro_html = ''; // read only tags
 
-    var userid = getCookie("userid");
+  var labelRatings = {};
+  var labelScore = {};
+  // TODO has to be a more efficient way of doing this than looping through everything twice
+  // get the rating each user gave to a label
+  for (var user in result.tags) {
+
+    tags = result.tags[user];
+    for (tag in tags) {
+
+      if (tag in labelRatings){
+        labelRatings[tag] += " " + tags[tag].split(":")[0];
+      } else {
+        labelRatings[tag] = tags[tag].split(":")[0];
+      }
+    }
+  }
+  // keep track of labels that more than one person has rated - they'll be read-only
+  var roLabels = new Set();
+
+  // now calc the score
+  for (label in labelRatings){
+    var scores = labelRatings[label].split(" ");
+    var sum = _.reduce(scores, function(a,b){return parseInt(a)+parseInt(b);});
+    labelScore[label] = sum / scores.length;
+    if (scores.length > 1)
+      roLabels.add(label);
+  }
+
+  // there now can be duplicates because others can rate labels they didn't
+  // create, so they'll be returned per user. So we'll keep a set of the
+  // labels we've already displayed so we can quickly check.
+  var doneLabels = new Set();
+
+  // the only labels we allow you to delete have to be created by you and no one else
+  // has rated them.
+  var userid = getCookie("userid");
+
     for (var user in result.tags) {
 
-        tags = result.tags[user].toString().split(',');
+        tags = result.tags[user];
         for (tag in tags) {
-            if (user !== userid) {
-                ro_html += '  <li class="tagit-choice-read-only"> ' + formatLabelForDispaly(tags[tag]) + ' </li> ';
+            if (doneLabels.has(tag)){
+              continue;
+            }
+            doneLabels.add(tag);
+            if (user !== userid || roLabels.has(tag)) {
+                ro_html += '  <li class="tagit-choice-read-only"> ' + formatLabelForDispaly(tag, labelScore[tag]) + ' </li> ';
             } else {
-                my_html += '  <li> ' + formatLabelForDispaly(tags[tag]) + ' </li> ';
+                my_html += '  <li> ' + formatLabelForDispaly(tag, labelScore[tag]) + ' </li> ';
             }
         }
     }
-    // only show the tag box if there is something to show
-    if (ro_html !== '') {
-      //  ro_html = '<ul class="read-only-tags" id="read-only-tags_' + result.name + '">' + ro_html + '</ul>';
-    }
 
-    return '<div><ul id="tags_' + result.name + '">'  + ro_html + my_html+ '</ul>' + '</div>';
-    //return '<div><ul id="tags_' + result.name + '">' + my_html + '</ul>' + ro_html + '</div>';
+    return '<div><ul rank="' + result.rank + '" id="tags_' + result.name + '">'  + ro_html + my_html+ '</ul>' + '</div>';
+
 };
 
 UI.toggleMyTags = function() {
@@ -270,65 +312,9 @@ UI.toggleMyTags = function() {
     $("#toggle-my-tags-img").show();
 };
 // param is array of uniq types
-UI.createLabelMultiselect = function(myUniqTypes) {
-
-    // alert("createLabelMultiselect");
-    var userName = getCookie("username");
-    var userID = getCookie("userid");
-    if (userName === "") {
-        return;
-    }
-    $("#empty-tree").html("");
-    var node0 = $("#tree").fancytree("getRootNode");
-    //   var all_key = ALL_NODE_KEY();
-    var rootNode = node0.addChildren({
-        title: "All", //     key: all_key,
-        folder: true
-    });
-
-    for (type in myUniqTypes) {
-
-        var childNode = rootNode.addChildren({
-            title: myUniqTypes[type], key: myUniqTypes[type], folder: true
-        });
-
-        // get the values just for this type
-        var myValues = [];
-        var tags = GLOBAL.allTags[userID].toString().split(',');
-        for (tag in tags) {
-            var kv = tags[tag].split(":");
-            // remove any rating info
-            if ((kv[0] === myUniqTypes[type]) && (!_.isUndefined(kv[1]))) {
-                // remove the rating, an add only if not already there 
-                var val = kv[1].split("@")[0];
-                if (myValues.indexOf(val) == -1)
-                    myValues.push(val);
-            }
-        }
-
-        // var tags = valueList.split(',');
-        for (tag in myValues) {
-            childNode.addChildren({
-                title: myValues[tag], key: myUniqTypes[type] + ":" + myValues[tag]
-            });
-        }
-    }
-    $("#tree").fancytree("getRootNode").visit(function(node) {
-        node.setExpanded(true);
-    });
-
-};
-
-UI.createLabelMultiselect2 = function(userID) {
+UI.createLabelMultiselect = function(userID) {
 
     $("#empty-tree").html("");
-
-   /*
-    var tags = GLOBAL.allTags[user].toString().split(',');
-    for (tag in tags) {
-        uniqType.push(tags[tag].split(":")[0]);
-    }
-*/
 
     var node0 = $("#tree").fancytree("getRootNode");
 
@@ -337,13 +323,13 @@ UI.createLabelMultiselect2 = function(userID) {
         folder: true
     });
 
-    var tags = GLOBAL.allTags[userID].toString().split(',');
+    var tags = GLOBAL.allTags[userID];
     var lastType = null;
     for (tag in tags) {
         //console.log("Tag: " + tags[tag]);
-        var kv = tags[tag].split(":");
+        var kv = tag.split(":");
         var key = kv[0];
-        var val = kv[1].split("@")[0];
+        var val = kv[1];
         var childNode;
         if (lastType === null || key != lastType) {
             childNode = rootNode.addChildren({
@@ -355,35 +341,7 @@ UI.createLabelMultiselect2 = function(userID) {
                 title: val, key: key + ":" + val
             });
     }
-/*
-    for (type in myUniqTypes) {
 
-        var childNode = rootNode.addChildren({
-            title: myUniqTypes[type], key: myUniqTypes[type], folder: true
-        });
-
-        // get the values just for this type
-        var myValues = [];
-        var tags = GLOBAL.allTags[userID].toString().split(',');
-        for (tag in tags) {
-            var kv = tags[tag].split(":");
-            // remove any rating info
-            if ((kv[0] === myUniqTypes[type]) && (!_.isUndefined(kv[1]))) {
-                // remove the rating, an add only if not already there
-                var val = kv[1].split("@")[0];
-                if (myValues.indexOf(val) == -1)
-                    myValues.push(val);
-            }
-        }
-
-        // var tags = valueList.split(',');
-        for (tag in myValues) {
-            childNode.addChildren({
-                title: myValues[tag], key: myUniqTypes[type] + ":" + myValues[tag]
-            });
-        }
-    }
-    */
     $("#tree").fancytree("getRootNode").visit(function(node) {
         node.setExpanded(true);
     });

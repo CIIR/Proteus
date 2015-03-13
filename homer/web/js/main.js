@@ -8,14 +8,13 @@
  */
 
 var GLOBAL = {
-    uniqTypes: [], allTags: [], users: {}
+    uniqTypes: [], allTags: [], users: {}, userComments: []
 };
 
 // the JSON of the application state
 var Model = {
     // search result data
-    request: {}, query: "", results: [], queryType: null, // user login data
-    user: null, userid: null, token: null
+    request: {}, query: "", results: [], queryType: null, queryTerms: []
 };
 
 Model.clearResults = function () {
@@ -98,9 +97,6 @@ var logIn = function (userName) {
             UI.dispalyUserName();
             // update the type tags
             getAllTagsByUser();
-            Model.user = userName;
-            Model.userid = data.userid;
-            Model.token = data.token;
             location.reload(true);
         }, function (req, status, err) {
             UI.showError("ERROR: ``" + err + "``");
@@ -125,9 +121,6 @@ var logOut = function () {
         document.cookie = "userid=;";
         // update the type tags
         getAllTagsByUser();
-        Model.user = null;
-        Model.token = null;
-        Model.userid = null;
         // quick and dirty, trigger refresh to get rid of
         // all the label stuff.
         location.reload(true);
@@ -153,6 +146,24 @@ var addTag = function (tagText, resourceID, rating, comment) {
         UI.showError("ERROR: ``" + err + "``");
         throw err;
     });
+
+};
+
+
+var updateTag = function (tagText, resourceID, rating, comment) {
+  var userName = getCookie("username");
+  var userToken = getCookie("token");
+  var userID = getCookie("userid");
+
+  comment = comment.replace(/\n/g, "\\n");
+  var tmp = '{  "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "rating" : '
+          + rating + ', "comment" : "' + comment + '" ,"tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
+  console.log(tmp);
+  var args = JSON.parse(tmp);
+  API.updateTags(args, null, function (req, status, err) {
+    UI.showError("ERROR: ``" + err + "``");
+    throw err;
+  });
 
 };
 
@@ -217,14 +228,15 @@ var getAllTagsByUser = function () {
 
         console.log("tags: " + origresult);
 
-        for (user in GLOBAL.allTags) {
-            // not the most efficient code in the world
-            tags = GLOBAL.allTags[user].toString().split(',');
-            for (tag in tags) {
-                uniqType.push(tags[tag].split(":")[0]);
-            }
-            UI.createLabelMultiselect2(user);
+      // not the most efficient code in the world
+      for (user in GLOBAL.allTags) {
+            // labels are the keys in a map, the values are the rating and comment
 
+            tags = GLOBAL.allTags[user];
+            for (tag in tags) {
+                uniqType.push(tag.split(":")[0]);
+            }
+            UI.createLabelMultiselect(user);
         }
 
         GLOBAL.uniqTypes = _.uniq(uniqType);
@@ -233,9 +245,9 @@ var getAllTagsByUser = function () {
         if (typeof GLOBAL.allTags[userID] !== 'undefined') {
             // get just our types
             var myTypes = [];
-            tags = GLOBAL.allTags[userID].toString().split(',');
+            tags = GLOBAL.allTags[userID];
             for (tag in tags) {
-                var kv = tags[tag].split(":");
+                var kv = tag.split(":");
                 myTypes.push(kv[0]);
             }
 
@@ -245,12 +257,12 @@ var getAllTagsByUser = function () {
             for (type in myUniq) {
                 // get the values just for this type
                 var myValues = [];
-                var tags = GLOBAL.allTags[userID].toString().split(',');
+                var tags = GLOBAL.allTags[userID];
                 for (tag in tags) {
-                    var kv = tags[tag].split(":");
+                    var kv = tag.split(":");
 
                     if ((kv[0] === myUniq[type]) && (!_.isUndefined(kv[1]))) {
-                        myValues.push(kv[1].split("@")[0]); // remove the rating
+                      myValues.push(kv[1]);
                     }
                 }
             }

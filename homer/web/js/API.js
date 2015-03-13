@@ -37,6 +37,7 @@ API.action = method("POST", "/api/action");
 API.getKinds = method("GET", "/api/kinds");
 API.getTags = method("GET", "/api/tags");
 API.createTags = method("POST", "/api/tags/create");
+API.updateTags = method("POST", "/api/tags/update");
 API.deleteTags = method("POST", "/api/tags/delete");
 API.login = method("POST", "/api/login");
 API.logout = method("POST", "/api/logout");

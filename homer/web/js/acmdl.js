@@ -3,7 +3,6 @@
  */
 resultRenderers["article"] = function(queryTerms, result, resDiv) {
 
-    console.log(Model.query);
     var title = result.meta["title"];
     var snippet = result.snippet;
 

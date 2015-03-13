@@ -80,14 +80,7 @@
             afterTagAdded: null,
             beforeTagRemoved: null,
             afterTagRemoved: null,
-            onTagClicked:  function() {
-                //alert("poop");
-//                var id = $(this).attr("id");
-//                // remove old one
-//                $(".label-details").html("");
-//                $("#" + id).after('<div class="label-details"><textarea  style="width:80%">This is where the user can enter text... </textarea><button>Comment</button></div>');
-//                console.log(this);
-                },
+            onTagClicked:  null,
             onTagLimitExceeded: null,
             // DEPRECATED:
             //
@@ -447,21 +440,67 @@
             var label = $(this.options.onTagClicked ? '<a class="tagit-label"></a>' : '<span class="tagit-label"></span>').text(value);
             // Create tag.
             var tag = $('<li></li>')
-              //      .hover(function() { console.log("Entering tag: " + value)},function() { console.log("Leaving tag: " + value)})
                     .click(function() {
-//                      var id = $(this).parent().attr("id").replace("tags_", "");// remove "tag_" prefix
-//
-//                      var html = "";
-//                      $(".label-details-wrapper").html(html);
-//
-//                      // TODO '2' is temp - this needs to be the user specific rating for the resource/label
-//                      html = that._getRatingHTML(2);
-//
-//                      $("#" + id).after(html);
-//                      $("#rating-cancel").click(function() {
-//                        $(".label-details-wrapper").html(""); // close the pop up
-//                      });
-//                      // TODO handle submit button
+                      var id = $(this).parent().attr("id").replace("tags_", "");// remove "tag_" prefix
+                      var rank = $(this).parent().attr("rank") - 1;
+
+                      var html = "";
+                      $(".label-details-wrapper").html(html);
+
+                      // get the type:value for the tag clicked
+                      var label = formatLabelForDatabase($(this).children("input")[0].defaultValue);
+                      // find the element for that label
+                      // tags are stored as:
+                      //  Model.results[rank].tags[userid].map<label, rating:comments>
+                      // it's possible they're clicking on a label they don't have a rank for
+                      // OR that they don't have any labels at all.
+                      var myRating = Model.results[rank].tags[getCookie("userid")];
+                      if (_.isUndefined(myRating)){
+                        myRating = "-1:";
+                     } else {
+                        myRating = Model.results[rank].tags[getCookie("userid")][label];
+                        if (_.isUndefined(myRating)){
+                          myRating = "-1:";
+                        }
+                      }
+                      userData = myRating.split(":");
+                      html = that._getRatingHTML(userData[0], userData[1]);
+
+                      $("#" + id).after(html);
+                      $("#rating-cancel").click(function() {
+                        $(".label-details-wrapper").html(""); // close the pop up
+                      });
+                      $("#rating-submit").click(function() {
+                        var rating = -1;
+
+                        if ($("input:radio[name='rating-value']").is(":checked") === true ){
+                          rating = $("input:radio[name=rating-value]:checked").val();
+                        }
+
+                        comment = $("#notes-field").val();
+                        if (rating === -1){
+                          alert("Please provide a rating");
+                          return;
+                        }
+                        // ??? UGLY - the use of myRating
+                        // if we're just rating someone eles's tag, add it
+                        if (myRating === "-1:"){
+                          addTag(label, id, rating, comment);
+                        } else {
+                          updateTag(label, id, rating, comment);
+                        }
+                        $(".label-details-wrapper").html(""); // close the pop up
+                        // update the rating in memory
+
+                        Model.results[rank].tags[getCookie("userid")][formatLabelForDatabase(label)] = rating + ":" + comment;
+                        // remove the original
+                        $("#" + id).remove();
+                        // last param tells it to prepend to the results list
+                        // 3rd param indicates if we searched within labels, we'll pass a value
+                        // depended on the "more" button so it doesn't change
+                        var showMoreButton = !(moreButton.is(":visible"));
+                        UI.renderSingleResult(Model.results[rank], Model.queryTerms, showMoreButton, true);
+                      });
 
                     })
                     .addClass('tagit-choice ui-widget-content ui-state-default ui-corner-all')
@@ -619,7 +658,7 @@
             + '<input type="radio" name="rating-value" value="4" ' + checked[3] + '> 4 (Perfect) &nbsp;'
             + '</div> '
             + '<div > '
-            + '<span class="notes-label">Notes:&nbsp;</span><span></span> <textarea id="notes-field" name="label-notes"  style="width:90%">' + comment + ' </textarea></span>'
+            + '<span class="notes-label">Notes:&nbsp;</span><span></span> <textarea id="notes-field" name="label-notes"  style="width:90%">' + comment + '</textarea></span>'
             + '</div> '
             + '<div> '
             + '<button id="rating-submit" >Submit</button>'
@@ -632,7 +671,7 @@
 
           var id = parentID;
           var resource = parentID.substring(5); // ignore the "tags_" prefix
-
+          var rank = $("#" + id).attr("rank") - 1;
           var html = "";
           $(".label-details-wrapper").html(html);
 
@@ -654,6 +693,8 @@
 
             addTag(label, resource, rating, comment);
             addLabelToButtons(label);
+            // add it to our in memory representation
+            Model.results[rank].tags[getCookie("userid")][formatLabelForDatabase(label)] = rating + ":" + comment;
             $(".label-details-wrapper").html(""); // close the pop up
           });
 

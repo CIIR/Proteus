@@ -107,17 +107,15 @@ var onSearchSuccess = function(data) {
     // lowercase the query terms so when we hilight we match 
     // regardless of case
 
-    var lowerTerms = [];
-
     var termLen = 0;
 
     if (!_.isUndefined(data.queryTerms))
         termLen = data.queryTerms.length;
 
     for (var i = 0; i < termLen; i++) {
-        lowerTerms.push(data.queryTerms[i].toLowerCase());
+        Model.queryTerms.push(data.queryTerms[i].toLowerCase());
     }
-    UI.appendResults(lowerTerms, newResults, usingLabels);
+    UI.appendResults(Model.queryTerms, newResults, usingLabels);
 };
 
 var doViewRequest = function(args) {

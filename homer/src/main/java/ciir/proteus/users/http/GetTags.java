@@ -33,15 +33,19 @@ public class GetTags extends DBAction {
 
         for (String resource : resources) {
             try {
-                Map<Integer, List<String>> tagsAndUsers;
+                Map<Integer,  Map<String, String>> tagsAndUsers;
 
                 tagsAndUsers = userdb.getAllTags(resource);
 
                 // currently Parameters doesn't quite handle the data structure
                 // we're using so we have to trick it into using it.
                 Parameters tmp = Parameters.create();
-                for (Map.Entry<Integer, List<String>> entry : tagsAndUsers.entrySet()) {
-                    tmp.put(entry.getKey().toString(), entry.getValue());
+                for (Map.Entry<Integer,  Map<String, String>> entry : tagsAndUsers.entrySet()) {
+                    Parameters userData = Parameters.create();
+                    for (Map.Entry<String, String> ud : entry.getValue().entrySet()){
+                      userData.put(ud.getKey(), ud.getValue());
+                    }
+                    tmp.put(entry.getKey().toString(), userData);
                 }
                 if (tmp.size() == 0) {
                     rtags.put(resource, new ArrayList<String>()); // return an empty list

@@ -27,6 +27,7 @@ public class HTTPRouter implements WebHandler {
     private final JSONHandler getKinds;
     private final JSONHandler tags;
     private final JSONHandler putTags;
+    private final JSONHandler updateTags;
     private final JSONHandler deleteTags;
     private final JSONHandler login;
     private final JSONHandler logout;
@@ -45,6 +46,7 @@ public class HTTPRouter implements WebHandler {
         getKinds = new GetKinds(proteus);
         tags = new GetTags(proteus);
         putTags = new PutTags(proteus);
+        updateTags = new UpdateTags(proteus);
         deleteTags = new DeleteTags(proteus);
         login = new LoginUser(proteus);
         logout = new LogoutUser(proteus);
@@ -92,7 +94,9 @@ public class HTTPRouter implements WebHandler {
             }else if (POST && path.equals("/api/alltags")) {
                 handler = tags;
             } else if (POST && path.equals("/api/tags/create")) {
-                handler = putTags;
+              handler = putTags;
+            } else if (POST && path.equals("/api/tags/update")) {
+              handler = updateTags;
             } else if (POST && path.equals("/api/tags/delete")) {
                 handler = deleteTags;
             } else if (POST && path.equals("/api/login")) {

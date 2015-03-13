@@ -48,7 +48,7 @@ public class DocumentAnnotator {
         }
 
         // if we need to get tags for these documents:
-        Map<String, Map<Integer, List<String>>> docTags = null;
+        Map<String, Map<Integer,  Map<String, String>>> docTags = null;
         if (tags) {
             docTags = system.userdb.getAllTags(RetrievalUtil.names(results));
         }
@@ -88,8 +88,13 @@ public class DocumentAnnotator {
                 // get the tags for this resource
                 if (docTags.containsKey(sdoc.documentName)) {
                     Parameters tmp = Parameters.create();
-                    for (Map.Entry<Integer, List<String>> entry : docTags.get(sdoc.documentName).entrySet()) {
-                        tmp.put(entry.getKey().toString(), entry.getValue());
+                    for (Map.Entry<Integer,  Map<String, String>> entry : docTags.get(sdoc.documentName).entrySet()) {
+                      //  tmp.put(entry.getKey().toString(), entry.getValue());
+                      Parameters userData = Parameters.create();
+                      for (Map.Entry<String, String> ud : entry.getValue().entrySet()){
+                        userData.put(ud.getKey(), ud.getValue());
+                      }
+                      tmp.put(entry.getKey().toString(), userData);
                     }
                     if (tmp.size() == 0) {
                         docp.set("tags", new ArrayList<String>()); // empty list of tags

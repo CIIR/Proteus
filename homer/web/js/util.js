@@ -148,16 +148,19 @@ function formatLabelForDatabase(origLabel) {
 }
 // when displaying tags, don't show the "*:" and display the
 // rating in a user friendly way
-function formatLabelForDispaly(origLabel) {
-
-    if (origLabel.substring(0, 2) === NO_TYPE_CONST() + ":") {
-        var label = origLabel.substr(2).split("@");
-        return  label[0] + " (" + label[1] + ")";
+function formatLabelForDispaly(origLabel, rating) {
+    var _rating = rating.toString().split(":");
+    if (_.isUndefined(_rating[0])){
+      _rating = rating; // they didn't pass in colon sep values
     }
-    var label = origLabel.split("@");
-    return  label[0] + " (" + label[1] + ")";
+    if (origLabel.substring(0, 2) === NO_TYPE_CONST() + ":") {
+        var label = origLabel.split(":");
+        return  label[1] + " (" + _rating + ")";
+    }
+ 
+    return  origLabel + " (" + _rating + ")";
 
 }
 function isLoggedIn() {
-    return Model.user != null;
+    return (getCookie("username") !== "") ;
 }

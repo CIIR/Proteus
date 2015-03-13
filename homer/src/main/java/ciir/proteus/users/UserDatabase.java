@@ -60,9 +60,9 @@ public interface UserDatabase {
 
     public Map<String, List<String>> getTags(Credentials creds, List<String> resources) throws DBError;
 
-    public Map<Integer, List<String>> getAllTags(String resource) throws DBError;
+    public Map<Integer, Map<String, String>> getAllTags(String resource) throws DBError;
 
-    public Map<String, Map<Integer, List<String>>> getAllTags(List<String> resources) throws DBError;
+    public Map<String, Map<Integer, Map<String, String>>> getAllTags(List<String> resources) throws DBError;
 
     public Map<String, Map<String, List<String>>> getAllTagsForResources(List<String> resources) throws DBError;
 
