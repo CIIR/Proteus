@@ -67,22 +67,23 @@ public class GetResourcesForLabelFnTest {
 
     outContent = new ByteArrayOutputStream();
     obj.run(p, new PrintStream(outContent));
-    assertEquals("res1\r\nres2\r\nres4\r\n", outContent.toString());
+    assertEquals("res1" + System.lineSeparator() + "res2" + System.lineSeparator() + "res4" + System.lineSeparator(), outContent.toString());
 
-    // test labels with the default type
-    p.put("label", "value1");
+
+            // test labels with the default type
+            p.put("label", "value1");
     env.proteus.userdb.addTag(cred, "res5", "value1", 0, null);
 
     outContent = new ByteArrayOutputStream();
     obj.run(p, new PrintStream(outContent));
-    assertEquals("res5\r\n", outContent.toString());
+    assertEquals("res5" + System.lineSeparator(), outContent.toString());
 
     p.put("label", "*:value1");
     env.proteus.userdb.addTag(cred, "res6", "*:value1", 0, null);
 
     outContent = new ByteArrayOutputStream();
     obj.run(p, new PrintStream(outContent));
-    assertEquals("res5\r\nres6\r\n", outContent.toString());
+    assertEquals("res5" + System.lineSeparator() + "res6" + System.lineSeparator(), outContent.toString());
 
   }
 
