@@ -236,7 +236,10 @@ UI.dispalyUserName = function() {
 };
 
 UI.renderTags = function(result) {
-
+  // don't show tags if they're not logged in
+  if (!isLoggedIn()){
+    return "<div></div>";
+  }
     var my_html = '';
     var ro_html = ''; // read only tags
 

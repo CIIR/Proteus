@@ -233,6 +233,9 @@ body {
     text-align: left;
 }
 
+#notes-field{
+    width:90%;
+}
 .notes-label {
     vertical-align: top;
 }

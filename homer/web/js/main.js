@@ -183,6 +183,10 @@ var deleteTag = function (tagText, resourceID) {
 };
 
 var getAllUsers = function () {
+
+  if (!isLoggedIn()){
+    return;
+  }
   var userName = getCookie("username");
   var userID = getCookie("userid");
   var userToken = getCookie("token");
@@ -214,6 +218,11 @@ var getAllUsers = function () {
 
 // function to get all the tags for all users.
 var getAllTagsByUser = function () {
+
+  if (!isLoggedIn()){
+    return;
+  }
+  
     var userName = getCookie("username");
     var userID = getCookie("userid");
     var userToken = getCookie("token");

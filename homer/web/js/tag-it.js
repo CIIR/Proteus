@@ -467,6 +467,37 @@
                       html = that._getRatingHTML(userData[0], userData[1]);
 
                       $("#" + id).after(html);
+
+
+                      $("#detail-button").click(function() {
+                        var $el = $(this);
+                        if ($el.text() == "Show Details"){
+                          $el.text("Hide Details");
+                          // GLOBAL.users[userID]
+                          var ratings = "";
+                          for (userid in Model.results[rank].tags){
+                            // don't show our rating
+                            if (userid == getCookie("userid")){
+                              continue;
+                            }
+                            rating = Model.results[rank].tags[userid][label];
+                            if (!_.isUndefined(rating)){
+                              ud = rating.split(":");
+                              ratings += "<b>" + GLOBAL.users[userid] +  "</b>: rating: <b>" + ud[0] + "</b> notes: <b>" + ud[1] + "</b><br>";
+                            }
+
+                          }
+                          if (ratings === ""){
+                            ratings = "No one else has rated this label.";
+                          }
+                          $("#rating-details").html(ratings);
+                        } else {
+                          $el.text("Show Details");
+                          $("#rating-details").html("");
+                        }
+
+                      });
+
                       $("#rating-cancel").click(function() {
                         $(".label-details-wrapper").html(""); // close the pop up
                       });
@@ -639,7 +670,7 @@
         _getRatingHTML: function(rating, comment){
 
           var checked = ["","","",""];
-          var cancelButton  =  '<button id="rating-cancel" >Cancel</button>';
+          var cancelButton  =  '<button id="rating-cancel" >Cancel</button><button id="detail-button">Show Details</button>';
           if (_.isUndefined(rating) ){
             rating = 1; // default
             // if new label, don't allow them to cancel - they have to rate it.
@@ -664,12 +695,13 @@
             + '<input type="radio" name="rating-value" value="4" ' + checked[3] + '> 4 (Perfect) &nbsp;'
             + '</div> '
             + '<div > '
-            + '<span class="notes-label">Notes:&nbsp;</span><span></span> <textarea id="notes-field" name="label-notes"  style="width:90%">' + comment + '</textarea></span>'
+            + '<span class="notes-label">Notes:&nbsp;</span><span></span> <textarea id="notes-field" name="label-notes">' + comment + '</textarea></span>'
             + '</div> '
             + '<div> '
             + '<button id="rating-submit" >Submit</button>'
             + cancelButton
             + '</div>'
+            + '<div id="rating-details"></div>'
             + '</div>';
             return html;
       },
