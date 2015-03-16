@@ -35,8 +35,8 @@ resultRenderers["article"] = function(queryTerms, result, resDiv) {
 
     if (proc != null) {
         html += '<tr>' +
-                '<td class="proc">Published in: ' + Render.getDocumentURL(url_proc, highlightText(queryTerms, proc, '<span class="hili">', '</span>', 'proc'), queryTerms, result.rank) ;
-        html += highlightText(queryTerms, pubyear, '<span class="hili">', '</span>', 'pubyear');
+                '<td class="proc">Published in: ' + Render.getDocumentURL(url_proc, proc, queryTerms, result.rank) ;
+        html += '&nbsp;' + highlightText(queryTerms, pubyear, '<span class="hili">', '</span>', 'pubyear');
         html += '</td></tr>';
     }
 

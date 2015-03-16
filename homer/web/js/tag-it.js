@@ -464,7 +464,7 @@
                         }
                       }
                       userData = myRating.split(":");
-                      html = that._getRatingHTML(userData[0], userData[1]);
+                      html = that._getRatingHTML(userData[0], userData[1], label);
 
                       $("#" + id).after(html);
 
@@ -522,11 +522,15 @@
                         }
                         $(".label-details-wrapper").html(""); // close the pop up
                         // update the rating in memory
+
                         // NOTE: this may be the first tag for this document so we need to make sure to add any elements we need
                         if (_.isUndefined(Model.results[rank].tags[getCookie("userid")])){
-                          Model.results[rank].tags[getCookie("userid")] = formatLabelForDatabase(label);
+                          var text = '{"' +  formatLabelForDatabase(label) + '" : "' + rating + ':' + comment + '"}';
+                          Model.results[rank].tags[getCookie("userid")] =  JSON.parse(text);
+                        } else {
+                          Model.results[rank].tags[getCookie("userid")][formatLabelForDatabase(label)] = rating + ":" + comment;
                         }
-                        Model.results[rank].tags[getCookie("userid")][formatLabelForDatabase(label)] = rating + ":" + comment;
+
                         // put a temp place holder
                         $("#" + id).before('<div id="updateMe"></div>' );
                         // remove the original
@@ -667,7 +671,7 @@
                 that.removeTag(tag, false);
             });
         },
-        _getRatingHTML: function(rating, comment){
+        _getRatingHTML: function(rating, comment, label){
 
           var checked = ["","","",""];
           var cancelButton  =  '<button id="rating-cancel" >Cancel</button><button id="detail-button">Show Details</button>';
@@ -686,8 +690,12 @@
             checked[rating - 1] = "checked";
             }
 
+          // remove any leading "*:"
+          label = label.replace("*:", "");
+
              var html ='<div class="label-details-wrapper">'
             + '<div class="label-details">'
+            + '<div id="rating-label"><b>' + label + '</b></div>'
             + '<div> '
             + 'Rating:&nbsp; <input type="radio" name="rating-value"  value="1" ' + checked[0] + '> 1 (Fair) &nbsp;'
             + '<input type="radio" name="rating-value" value="2" ' + checked[1] + '> 2 (Good) &nbsp;'
@@ -713,7 +721,7 @@
           var html = "";
           $(".label-details-wrapper").html(html);
 
-          html = this._getRatingHTML();
+          html = this._getRatingHTML(undefined, undefined, label);
           $("#" + id).after(html);
 
           $("#overlay").show();
@@ -727,16 +735,21 @@
             comment = $("#notes-field").val();
 
             // update the label with the rating we just gave it
-            $("#"+id).children(".tagit-choice").last().children("a.tagit-label").text(label + " (" + rating + ")");
+            $("#"+id).children(".tagit-choice").last().children("span.tagit-label").text(label + " (" + rating + ")");
 
             addTag(label, resource, rating, comment);
             addLabelToButtons(label);
             // add it to our in memory representation
             // NOTE: this may be the first tag for this document so we need to make sure to add any elements we need
+            var fullLabel = formatLabelForDatabase(label);
+
             if (_.isUndefined(Model.results[rank].tags[getCookie("userid")])){
-              Model.results[rank].tags[getCookie("userid")] = formatLabelForDatabase(label);
+              var text = '{"' +  formatLabelForDatabase(label) + '" : "' + rating + ':' + comment + '"}';
+              Model.results[rank].tags[getCookie("userid")] =  JSON.parse(text);
+            } else {
+              Model.results[rank].tags[getCookie("userid")][formatLabelForDatabase(label)] = rating + ":" + comment;
             }
-            Model.results[rank].tags[getCookie("userid")][formatLabelForDatabase(label)] = rating + ":" + comment;
+
             $(".label-details-wrapper").html(""); // close the pop up
           });
 
