@@ -112,6 +112,8 @@ var onSearchSuccess = function(data) {
     if (!_.isUndefined(data.queryTerms))
         termLen = data.queryTerms.length;
 
+    // clear out previous query terms
+    Model.queryTerms = [];
     for (var i = 0; i < termLen; i++) {
         Model.queryTerms.push(data.queryTerms[i].toLowerCase());
     }
