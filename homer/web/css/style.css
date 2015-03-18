@@ -204,7 +204,7 @@ img.thumbnail {
 #sidebar-button {
     float: left;
     color: white;
-    cursor: hand;
+    cursor: pointer; cursor: hand;
     font-weight: bold;
 }
 
