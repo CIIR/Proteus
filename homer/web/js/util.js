@@ -165,3 +165,18 @@ function formatLabelForDispaly(origLabel, rating) {
 function isLoggedIn() {
     return (getCookie("username") !== "") ;
 }
+
+function enableAutoRetrieve() {
+
+  $('#results-right').bind('scroll', function() {
+    if($(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight) {
+      var prev = Model.request;
+      prev.skip = Model.results.length;
+      doSearchRequest(prev);
+    }
+  });
+}
+
+function disableAutoRetrieve(){
+  $('#results-right').unbind('scroll');
+}

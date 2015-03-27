@@ -536,10 +536,7 @@
                         // remove the original
                         $("#" + id).remove();
                         // last param tells it to prepend to the results list
-                        // 3rd param indicates if we searched within labels, we'll pass a value
-                        // depended on the "more" button so it doesn't change
-                        var showMoreButton = !(moreButton.is(":visible"));
-                        UI.renderSingleResult(Model.results[rank], Model.queryTerms, showMoreButton, "#updateMe");
+                        UI.renderSingleResult(Model.results[rank], Model.queryTerms, "#updateMe");
                        $("#updateMe").remove();
                       });
 

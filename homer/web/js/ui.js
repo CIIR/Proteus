@@ -11,7 +11,6 @@ var viewResourceDiv = $("#view-resource");
 var progressDiv = $("#progress");
 var queryBox = $("#ui-search");
 var loginInfo = $("#ui-login-info");
-var moreButton = $("#ui-go-more");
 var searchButtons = $("#search-buttons");
 
 // UI object/namespace
@@ -52,7 +51,6 @@ UI.clearResults = function() {
     viewResourceDiv.hide();
     resultsDiv.html('');
     resultsDiv.show();
-    moreButton.hide();
 };
 UI.showProgress = function(str) {
     progressDiv.html(str);
@@ -139,73 +137,67 @@ function addLabelToButtons(newLabel) {
  * Renders search results into UI after current results
  */
 
-UI.renderSingleResult = function(result, queryTerms, usingLabels, prependTo) {
-  //console.debug("result name: " + result.name);
-  var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
-  var resDiv = $('<div>');
-  resDiv.attr('class', 'result');
-  resDiv.attr('id', result.name);
+UI.renderSingleResult = function(result, queryTerms,  prependTo) {
+    //console.debug("result name: " + result.name);
+    var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
+    var resDiv = $('<div>');
+    resDiv.attr('class', 'result');
+    resDiv.attr('id', result.name);
 
-  // put it at the end unless we pass in where we want it to go
-  if (_.isUndefined(prependTo)){
-    resultsDiv.append(renderer(queryTerms, result, resDiv)); //* 6/26/2014
-  } else {
-    $(prependTo).after(renderer(queryTerms, result, resDiv));
-  }
-
-
-  var tagName = "#tags_" + result.name;
-  $(tagName).tagit({
-    availableTags: GLOBAL.uniqTypes,
-    autocomplete: {delay: 0, minLength: 0},
-    allowSpaces: true,
-    placeholderText: "Add a Label",
-    afterTagRemoved: function(event, ui) {
-
-      deleteTag(ui.tagLabel, result.name);
-      // update the buttons
-      //deleteLabelFromButtons(ui.tagLabel);
-
-      return true;
-    },
-    beforeTagAdded: function(event, ui) {
-      var that = this;
-      if (!ui.duringInitialization) {
-        // only ask "are you sure" if this is a NEW tag TYPE
-        tmp = ui.tagLabel.split(":");
-        var res = true;
-        if (tmp.length === 2 && $.inArray(tmp[0], GLOBAL.uniqTypes) === -1) {
-          res = confirm("Are you sure you want to create the label type \"" + tmp[0] + "\"?");
-          if (res == false)
-            return false;
-          // add the new type to our list
-          GLOBAL.uniqTypes.push(tmp[0]);
-        }
-
-      } else {
-        return true;
-      }
+    // put it at the end unless we pass in where we want it to go
+    if (_.isUndefined(prependTo)) {
+        resultsDiv.append(renderer(queryTerms, result, resDiv)); //* 6/26/2014
+    } else {
+        $(prependTo).after(renderer(queryTerms, result, resDiv));
     }
-  });
-  $(".read-only-tags").tagit({
-    readOnly: true
-  });
 
-  // don't show the more button if we searched within labels - cuz
-  // we return ALL results (for now)
 
-  if (usingLabels) {
-    moreButton.hide();
-  } else {
-    moreButton.show();
-  }
+    var tagName = "#tags_" + result.name;
+    $(tagName).tagit({
+        availableTags: GLOBAL.uniqTypes,
+        autocomplete: {delay: 0, minLength: 0},
+        allowSpaces: true,
+        placeholderText: "Add a Label",
+        afterTagRemoved: function(event, ui) {
+
+            deleteTag(ui.tagLabel, result.name);
+            // update the buttons
+            //deleteLabelFromButtons(ui.tagLabel);
+
+            return true;
+        },
+        beforeTagAdded: function(event, ui) {
+            var that = this;
+            if (!ui.duringInitialization) {
+                // only ask "are you sure" if this is a NEW tag TYPE
+                tmp = ui.tagLabel.split(":");
+                var res = true;
+                if (tmp.length === 2 && $.inArray(tmp[0], GLOBAL.uniqTypes) === -1) {
+                    res = confirm("Are you sure you want to create the label type \"" + tmp[0] + "\"?");
+                    if (res == false)
+                        return false;
+                    // add the new type to our list
+                    GLOBAL.uniqTypes.push(tmp[0]);
+                }
+
+            } else {
+                return true;
+            }
+        }
+    });
+    $(".read-only-tags").tagit({
+        readOnly: true
+    });
+
 
 };
 
-UI.appendResults = function(queryTerms, results, usingLabels) {
+UI.appendResults = function(queryTerms, results) {
 
     UI.showProgress("Ajax response received!");
-    _(results).forEach(function(result){UI.renderSingleResult(result, queryTerms, usingLabels);});
+    _(results).forEach(function(result) {
+        UI.renderSingleResult(result, queryTerms);
+    });
 };
 /**
  * A set of functions for reacting to events in other, more general code.
@@ -216,9 +208,7 @@ UI.setReadyHandler = function(callback) {
         callback();
     });
 };
-UI.setMoreHandler = function(callback) {
-    moreButton.click(callback);
-};
+
 UI.dispalyUserName = function() {
     // if it's an email address, just display the first part
     var user = getCookie("username").split("@")[0];
@@ -236,62 +226,64 @@ UI.dispalyUserName = function() {
 };
 
 UI.renderTags = function(result) {
-  // don't show tags if they're not logged in
-  if (!isLoggedIn()){
-    return "<div></div>";
-  }
+    // don't show tags if they're not logged in
+    if (!isLoggedIn()) {
+        return "<div></div>";
+    }
     var my_html = '';
     var ro_html = ''; // read only tags
 
-  var labelRatings = {};
-  var labelScore = {};
-  // TODO has to be a more efficient way of doing this than looping through everything twice
-  // get the rating each user gave to a label
-  for (var user in result.tags) {
+    var labelRatings = {};
+    var labelScore = {};
+    // TODO has to be a more efficient way of doing this than looping through everything twice
+    // get the rating each user gave to a label
+    for (var user in result.tags) {
 
-    tags = result.tags[user];
-    for (tag in tags) {
+        tags = result.tags[user];
+        for (tag in tags) {
 
-      if (tag in labelRatings){
-        labelRatings[tag] += " " + tags[tag].split(":")[0];
-      } else {
-        labelRatings[tag] = tags[tag].split(":")[0];
-      }
+            if (tag in labelRatings) {
+                labelRatings[tag] += " " + tags[tag].split(":")[0];
+            } else {
+                labelRatings[tag] = tags[tag].split(":")[0];
+            }
+        }
     }
-  }
-  // keep track of labels that more than one person has rated - they'll be read-only
-  var roLabels = new Set();
+    // keep track of labels that more than one person has rated - they'll be read-only
+    var roLabels = new Set();
 
-  // now calc the score
-  for (label in labelRatings){
-    var scores = labelRatings[label].split(" ");
-    var sum = _.reduce(scores, function(a,b){return parseInt(a)+parseInt(b);});
-    labelScore[label] = sum / scores.length;
-    if (scores.length > 1)
-      roLabels.add(label);
-  }
+    // now calc the score
+    for (label in labelRatings) {
+        var scores = labelRatings[label].split(" ");
+        var sum = _.reduce(scores, function(a, b) {
+            return parseInt(a) + parseInt(b);
+        });
+        labelScore[label] = sum / scores.length;
+        if (scores.length > 1)
+            roLabels.add(label);
+    }
 
-  // there now can be duplicates because others can rate labels they didn't
-  // create, so they'll be returned per user. So we'll keep a set of the
-  // labels we've already displayed so we can quickly check.
-  var doneLabels = new Set();
+    // there now can be duplicates because others can rate labels they didn't
+    // create, so they'll be returned per user. So we'll keep a set of the
+    // labels we've already displayed so we can quickly check.
+    var doneLabels = new Set();
 
-  // the only labels we allow you to delete have to be created by you and no one else
-  // has rated them.
-  var userid = getCookie("userid");
+    // the only labels we allow you to delete have to be created by you and no one else
+    // has rated them.
+    var userid = getCookie("userid");
 
     for (var user in result.tags) {
 
         tags = result.tags[user];
         for (tag in tags) {
-            if (doneLabels.has(tag)){
-              continue;
+            if (doneLabels.has(tag)) {
+                continue;
             }
             doneLabels.add(tag);
             // if we have a decmial, only show 2 place
             var score = labelScore[tag];
-            if (score.toString().indexOf(".") != -1){
-              score = score.toFixed(2);
+            if (score.toString().indexOf(".") != -1) {
+                score = score.toFixed(2);
             }
             if (user !== userid || roLabels.has(tag)) {
                 ro_html += '  <li class="tagit-choice-read-only"> ' + formatLabelForDispaly(tag, score) + ' </li> ';
@@ -301,7 +293,7 @@ UI.renderTags = function(result) {
         }
     }
 
-    return '<div><ul rank="' + result.rank + '" id="tags_' + result.name + '">'  + ro_html + my_html+ '</ul>' + '</div>';
+    return '<div><ul rank="' + result.rank + '" id="tags_' + result.name + '">' + ro_html + my_html + '</ul>' + '</div>';
 
 };
 
@@ -346,9 +338,9 @@ UI.createLabelMultiselect = function(userID) {
             });
             lastType = key;
         }
-            childNode.addChildren({
-                title: val, key: key + ":" + val
-            });
+        childNode.addChildren({
+            title: val, key: key + ":" + val
+        });
     }
 
     $("#tree").fancytree("getRootNode").visit(function(node) {

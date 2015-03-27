@@ -3,6 +3,9 @@
 //
 
 var doSearchRequest = function(args) {
+
+    disableAutoRetrieve(); // prevent double requests
+
     var defaultArgs = {
         n: 10,
         skip: 0,
@@ -52,12 +55,16 @@ var doSearchRequest = function(args) {
         return;
     }
 
+    $("#more").html('<img src="/images/more-loader.gif"\>');
+
     Model.request = actualArgs;
     console.log(Model.request);
 
     UI.showProgress("Search Request sent to server!");
     API.action(actualArgs, onSearchSuccess, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
+        // set up the auto retrieve again
+        enableAutoRetrieve();
         throw err;
     });
 
@@ -70,6 +77,7 @@ var doSearchRequest = function(args) {
 var onSearchSuccess = function(data) {
     UI.clearError();
 
+    $("#more").html(""); // clear progress animation
     console.log(data);
 
     // mark up results with rank and kind
@@ -117,7 +125,12 @@ var onSearchSuccess = function(data) {
     for (var i = 0; i < termLen; i++) {
         Model.queryTerms.push(data.queryTerms[i].toLowerCase());
     }
-    UI.appendResults(Model.queryTerms, newResults, usingLabels);
+    UI.appendResults(Model.queryTerms, newResults);
+
+    // if we searched by labels, we returned EVERYTHING so we
+    // don't re-enable the auto-retrieve
+    if (usingLabels === false)
+      enableAutoRetrieve();
 };
 
 var doViewRequest = function(args) {
@@ -131,7 +144,6 @@ var doViewRequest = function(args) {
 /** this gets called with the response from ViewResource */
 var onViewSuccess = function(args) {
     UI.clearError();
-    moreButton.hide();
     resultsDiv.hide();
     var html = '';
     html += '<table>'
