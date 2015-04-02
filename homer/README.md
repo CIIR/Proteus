@@ -6,7 +6,7 @@
 
     java -jar target/homer-*.jar proteus server-conf.json
 
-## Show me an example!
+## Show me an example
 
 Inside of ``src/test/resources/toktei`` we have stashed copies of Romeo and Juliet (1920) and Macbeth (1897) in the TOKTEI format.
 
