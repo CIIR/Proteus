@@ -171,7 +171,7 @@ public class MBTEIPageParserTest {
     {
       Document page = parser.nextDocument();
       Assert.assertNotNull(page);
-      Assert.assertEquals("0", page.metadata.get("pageNumber"));
+      Assert.assertEquals("10", page.metadata.get("pageNumber"));
       Assert.assertEquals("<PERSON>Alice</PERSON> chased the rabbit", page.text.trim());
     }
 
