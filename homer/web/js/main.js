@@ -25,6 +25,13 @@ Model.clearResults = function() {
 var privateURLParams = _(["user", "token"]);
 
 var updateURL = function(request) {
+
+    if (showSideBarFlag){
+        request = _.merge(request, {'showSideBar' : '1'});
+    } else {
+        request = _.merge(request, {'showSideBar' : '0'});
+    }
+
     pushURLParams(_.omit(request, privateURLParams));
 };
 
@@ -282,21 +289,32 @@ var getAllTagsByUser = function() {
 // get all tags grouped by user on start up
 getAllUsers();
 
-var showSideBar = true;
+function hideSideBar(){
+  $('#sidebar-button').html("&gt;&gt;");
+  $("#results-left").hide();
+  $("#results-right").removeClass("col-md-10");
+  $("#results-right").addClass("col-md-12");
+  showSideBarFlag = false;
+  p = getURLParams();
+  p = _.merge(p, {'showSideBar' : '0'});
+  pushURLParams(p);
+}
+function showSideBar(){
+  $('#sidebar-button').html("&lt;&lt;");
+  $("#results-left").show();
+  showSideBarFlag = true;
+  $("#results-right").removeClass("col-md-12");
+  $("#results-right").addClass("col-md-10");
 
+  p = getURLParams();
+  p = _.merge(p, {'showSideBar' : '1'});
+  pushURLParams(p);
+}
 $('#sidebar-button').click(function() {
-    if (showSideBar == true) {
-        $('#sidebar-button').html("&gt;&gt;");
-        $("#results-left").hide();
-        $("#results-right").removeClass("col-md-10");
-        $("#results-right").addClass("col-md-12");
-        showSideBar = false;
-    } else {
-        $('#sidebar-button').html("&lt;&lt;");
-        $("#results-left").show();
-        showSideBar = true;
-        $("#results-right").removeClass("col-md-12");
-        $("#results-right").addClass("col-md-10");
+    if (showSideBarFlag == true) {
+      hideSideBar();
+     } else {
+      showSideBar();
     }
 });
 

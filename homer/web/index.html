@@ -38,9 +38,11 @@
 
 
         <script>
+            var showSideBarFlag = true;
             $(document).ready(function() {
+
                 $("#overlay").hide();
-                $("#ui-search").keyup(function(evt) {
+                $("#ui-search").keyup(function (evt) {
                     if (evt.keyCode == 13) {
                         $(".default-search-button").click();
                     }
@@ -49,7 +51,7 @@
                 $('#rateDialog').hide();
                 // we're using the default validation for the email field,
                 // so if that validation passes, perform the login
-                $('#login-nav').submit(function(event) {
+                $('#login-nav').submit(function (event) {
 
                     event.preventDefault();
                     $("#login-form").removeClass("open"); // close the form
@@ -57,9 +59,16 @@
                     logIn(username);
                 });
 
+                var urlParams = getURLParams();
+                var tmpShowSideBar = urlParams["showSideBar"];
+
                 // if not logged in, hide the user info
-                if (isLoggedIn() == false)
-                    $("#user-info").hide();
+                if (isLoggedIn() == false || (!_.isUndefined(tmpShowSideBar) && tmpShowSideBar === "0")) {
+                  $("#user-info").hide();
+                  hideSideBar();
+                 } else {
+                    showSideBar();
+                 }
 
                 enableAutoRetrieve();
 
