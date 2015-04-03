@@ -13,6 +13,7 @@ import org.lemurproject.galago.utility.StreamUtil;
 import java.io.File;
 import java.lang.reflect.Field;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class MBTEIPageParserTest {
@@ -45,7 +46,7 @@ public class MBTEIPageParserTest {
 
         DocumentSplit split = DocumentSplitFactory.file(tmp, "mbtei");
         MBTEIPageParser parser = new MBTEIPageParser(split, Parameters.create());
-
+        assertTrue(tmp.delete());
         Document page1 = parser.nextDocument();
         Assert.assertNotNull(page1);
         Assert.assertEquals("0", page1.metadata.get("pageNumber"));
@@ -57,7 +58,7 @@ public class MBTEIPageParserTest {
         Assert.assertEquals("second", page2.text.trim());
 
         Assert.assertNull(parser.nextDocument());
-    }
+     }
 
     @Test
     public void testPage2() throws Exception {
@@ -105,6 +106,7 @@ public class MBTEIPageParserTest {
             Assert.assertEquals("page seven", page.text.trim());
         }
         Assert.assertNull(parser.nextDocument());
+      tmp.delete();
     }
 
     @Test
@@ -182,6 +184,7 @@ public class MBTEIPageParserTest {
       Assert.assertEquals("<PERSON>Max</PERSON> is a cat", page.text.trim());
     }
     Assert.assertNull(parser.nextDocument());
+    tmp.delete();
   }
 
 

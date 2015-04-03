@@ -94,6 +94,7 @@ public class MBTEIBookParserTest {
     }
 
     Assert.assertNull(parser.nextDocument());
+    tmp.delete();
   }
 
 }
