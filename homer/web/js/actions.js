@@ -77,6 +77,7 @@ var doSearchRequest = function(args) {
 var onSearchSuccess = function(data) {
     UI.clearError();
 
+    var userID = getCookie("userid");
     $("#more").html(""); // clear progress animation
     console.log(data);
 
@@ -107,9 +108,9 @@ var onSearchSuccess = function(data) {
         usingLabels = true;
 
         // if the labels are on the URL AND they're ours, select them
-        if (!_.isUndefined(data.request.labelOwner) && data.request.labelOwner == getCookie("userid"))
+        if (!_.isUndefined(data.request.labelOwner) && data.request.labelOwner == userID)
             for (var val in data.request.labels) {
-                tree.getNodeByKey(data.request.labels[val]).setSelected(true);
+                tree.getNodeByKey(GLOBAL.users[userID] + TREE_KEY_SEP() + data.request.labels[val]).setSelected(true);
             }
     }
     // lowercase the query terms so when we hilight we match 

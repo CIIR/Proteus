@@ -81,7 +81,7 @@ UI.setQuery = function(q) {
 // added labels to our button bar when they add a new one
 
 function addLabelToButtons(newLabel) {
-    //alert("addLabelToButtons");
+
     // get the two parts of the label, remove the rating
     var tmp = newLabel.split(":");
     var type = tmp[0];
@@ -93,19 +93,34 @@ function addLabelToButtons(newLabel) {
         value = type;
         type = NO_TYPE_CONST();
     }
-
+    var userID = getCookie("userid");
     var tree = $("#tree").fancytree("getTree");
+    var rootNode = $("#tree").fancytree("getRootNode");
 
-    newLabel = type + ":" + value;
+    newLabel = GLOBAL.users[userID] + TREE_KEY_SEP() + type + ":" + value;
     // make sure we don't already have this
     var check = tree.getNodeByKey(newLabel);
     if (check !== null)
         return;
 
-    // new labels:
+    // see if the current user is in the tree
+
+    var userNode = tree.getNodeByKey(GLOBAL.users[userID]);
+    if (userNode == null){
+        rootNode.addChildren({
+            key: GLOBAL.users[userID],
+            title: GLOBAL.users[userID],
+            folder: true
+        });
+        userNode = tree.getNodeByKey(GLOBAL.users[userID]);
+
+    }
+
+     // new labels:
 
     // search for the parent to attach it to
-    var node = tree.getNodeByKey(type);
+    var node = tree.getNodeByKey(GLOBAL.users[userID] + TREE_KEY_SEP() + type);
+
     if (node !== null) {
 
         node.addChildren({
@@ -114,7 +129,7 @@ function addLabelToButtons(newLabel) {
         tree.render();
     } else {
         // get the root node
-        var root = tree.getFirstChild();
+        var root = userNode.getFirstChild();
 
         // special logic for the first label
         if (_.isUndefined(root)) {
@@ -122,12 +137,13 @@ function addLabelToButtons(newLabel) {
             return;
         }
         //add the parent & child
-        var newNode = root.addChildren({
-            title: type, key: type, folder: true
+        var newNode = userNode.addChildren({
+            title: type, key: GLOBAL.users[userID] + TREE_KEY_SEP() + type, folder: true
         });
         newNode.addChildren({
             title: value, key: newLabel
         });
+        userNode.setExpanded(true);
         newNode.setExpanded(true);
         tree.render();
     }
@@ -320,6 +336,7 @@ UI.createLabelMultiselect = function(userID) {
     var node0 = $("#tree").fancytree("getRootNode");
 
     var rootNode = node0.addChildren({
+        key: GLOBAL.users[userID],
         title: GLOBAL.users[userID],
         folder: true
     });
@@ -329,12 +346,12 @@ UI.createLabelMultiselect = function(userID) {
     for (tag in tags) {
         //console.log("Tag: " + tags[tag]);
         var kv = tag.split(":");
-        var key = kv[0];
+        var key = GLOBAL.users[userID] + TREE_KEY_SEP() + kv[0];
         var val = kv[1];
         var childNode;
         if (lastType === null || key != lastType) {
             childNode = rootNode.addChildren({
-                title: key, key: key, folder: true
+                title: kv[0], key: key, folder: true
             });
             lastType = key;
         }

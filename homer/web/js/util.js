@@ -33,6 +33,7 @@ var pushURLParams = function(params) {
         urlParams += "&labelOwner=-1"; //  + getCookie("userid");
     }
     History.pushState(null, null, urlParams);
+
 };
 
 var getURLParams = function() {
@@ -110,8 +111,9 @@ function getSelectedLabels() {
     selNodes.forEach(function(node) {
 
         if (!node.hasChildren()) {// ONLY count leaf nodes
-
-            labels.push(node.key);
+            // strip out the user's email part of the key
+            key = node.key.split(TREE_KEY_SEP())[1];
+            labels.push(key);
         }
     });
 
@@ -127,6 +129,9 @@ function getSelectedLabels() {
 function NO_TYPE_CONST() {
     return "*";
 }
+
+function TREE_KEY_SEP(){ return "\t";}
+
 // users are allowed to enter labels w/o at TYPE, this is troublesome later when
 // we want to allow them to select type/values to filter/search by/etc. So we'll store
 // them with a special "*" type, and as long as we don't display that, all the existing
@@ -180,3 +185,4 @@ function enableAutoRetrieve() {
 function disableAutoRetrieve(){
   $('#results-right').unbind('scroll');
 }
+
