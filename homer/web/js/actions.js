@@ -2,6 +2,19 @@
 // it interacts a lot with Model which is defined in main.js
 //
 
+var perStartRegEx = new RegExp("<PERSON>", 'g')
+var locStartRegEx = new RegExp("<LOCATION>", 'g')
+var orgStartRegEx = new RegExp("<ORGANIZATION>", 'g')
+var endRegEx = new RegExp("<\/PERSON>|<\/LOCATION>|<\/ORGANIZATION>", 'g')
+
+var page = {
+    previous: -1,
+    current: -1,
+    next: -1,
+    max: -1,
+    skips: 0,
+    MAX_SKIPS: 1000
+}
 var doSearchRequest = function(args) {
 
     disableAutoRetrieve(); // prevent double requests
@@ -142,22 +155,157 @@ var doViewRequest = function(args) {
     });
 };
 
-/** this gets called with the response from ViewResource */
-var onViewSuccess = function(args) {
-    UI.clearError();
-    resultsDiv.hide();
-    var html = '';
-    html += '<table>'
-    _(args.metadata).forIn(function(val, key) {
-        html += '<tr>';
-        html += '<td>' + key + '</td>';
-        html += '<td>' + val + '</td>'
-        html += '</tr>';
-    })
-    html += '</table>'
-    console.log(args.metadata);
-    html += '<div>' + _.escape(args.text) + '</div>';
-    viewResourceDiv.html(html);
-    viewResourceDiv.show();
+var viewPrevPageSuccess = function(args) {
+    if (args.found == false){
+        // get the prior page
+        page.previous -= 1;
+        doPrevPageRequest(args.request.page_id, page.previous);
+        return;
+    }
+    if (!_.isUndefined(args.text)) {
+        $("#prevPage").html(processTags(args.text) + "<br>" + $("#prevPage").html());
+    }
+    page.previous -= 1;
+    setPageNavigation(args.request.page_id);
+
+}
+
+var viewNextPageSuccess = function(args) {
+
+    // check if we're going beyond the end. We use the "number of images"
+    // from the metadata, if that's not available, we'll stop after a set
+    // number of skips
+    if ((page.max != -1 && page.next > page.max) ||  page.skips > page.MAX_SKIPS){
+        setPageNavigation(args.request.page_id);
+        UI.showProgress("Reached the end of the book");
+        return;
+    }
+    if (args.found == false){
+        // count the number of pages we skipped
+        page.skips += 1;
+        // get the next page
+        page.next += 1;
+        doNextPageRequest(args.request.page_id, page.next);
+        return;
+    }
+    if (!_.isUndefined(args.text)) {
+        page.skips = 0; // reset
+        $("#nextPage").html( $("#nextPage").html() + "<br>" + processTags(args.text));
+    }
+    page.next += 1;
+    setPageNavigation(args.request.page_id);
+
+}
+
+var doPrevPageRequest = function(pageID) {
+    console.log("id: " + pageID + " current page: " + page.previous);
+    if (page.previous < 0){
+        UI.showProgress("Found start of the book");
+        setPageNavigation(pageID);
+        return;
+    }
+    UI.showProgress("View request sent to server!");
+    // NOTE: some pages may not exist because the original page could have been blank.
+    var id = pageID + '_' + page.previous;
+    var userToken = getCookie("token");
+
+    API.action({kind: "ia-pages", id: id , action: "view", token: userToken, page_id: pageID, page_num: page.previous}, viewPrevPageSuccess, function(req, status, err) {
+        UI.showError("ERROR: ``" + err + "``");
+        throw err;
+    });
+    UI.showProgress("");
+
 };
 
+
+var doNextPageRequest = function(pageID) {
+    console.log("id: " + pageID + " current page: " + page.next);
+    UI.showProgress("View request sent to server!");
+    // NOTE: some pages may not exist because the original page could have been blank.
+    var id = pageID + '_' + page.next;
+    var userToken = getCookie("token");
+    API.action({kind: "ia-pages", id: id , action: "view", token: userToken, page_id: pageID, page_num:  page.next}, viewNextPageSuccess, function(req, status, err) {
+        UI.showError("ERROR: ``" + err + "``");
+        throw err;
+    });
+
+    UI.showProgress("");
+};
+
+/** this gets called with the response from ViewResource */
+var onViewSuccess = function(args) {
+
+    var pageID = "";
+    UI.clearError();
+    resultsDiv.hide();
+    metadataDiv.hide();
+    if (args.request.kind == 'ia-pages'){
+        pos = args.request.id.lastIndexOf('_');
+        page.current = parseInt(args.request.id.substr(pos+1));
+        page.previous = page.current-1;
+        page.next = page.current+1;
+        if (!_.isUndefined(args.metadata) && !_.isUndefined(args.metadata.imagecount)) {
+            page.max = args.metadata.imagecount;
+        }
+        pageID = args.request.id.slice(0, pos);
+
+    }
+    var metaHtml = '';
+    metaHtml += ' <table>'
+    _(args.metadata).forIn(function(val, key) {
+        metaHtml += '<tr>';
+        metaHtml += '<td>' + key + '</td>';
+        metaHtml += '<td>' + val + '</td>'
+        metaHtml += '</tr>';
+    })
+    metaHtml += '</table></div>'
+    metadataDiv.html(metaHtml);
+    var html = '';
+    html += '<a class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>'
+
+    // change any entity tags into HTML tags
+    args.text = processTags(args.text);
+   // console.log("*************************\n" + args.text);
+  //  html += '<div>' + _.escape(args.text) + '</div>';
+    html += '<div>[<span class="per">PERSON</span>]&nbsp;[<span class="loc">LOCATION</span>]&nbsp;[<span class="org">ORGANIZATION</span>]</div>';
+    if (args.request.kind == 'ia-pages'){
+        html += '<div class="pageNavigation"></div>';
+        html += '<div id="prevPage"></div>';
+    }
+
+    html += '<div>' + (args.text) + '</div>';
+    if (args.request.kind == 'ia-pages'){
+        html += '<div id="nextPage"></div>';
+        html += '<div class="pageNavigation"></div>';
+    }
+
+    viewResourceDiv.html(html);
+    setPageNavigation(pageID);
+    viewResourceDiv.show();
+    UI.showProgress("");
+
+};
+
+var setPageNavigation = function(pageID) {
+
+    var prevHTML = '<a onclick="doPrevPageRequest(\'' + pageID + '\',' + (page.previous) + ');">&Lt; Previous</a>&nbsp;';
+    var nextHTML = '<a onclick="doNextPageRequest(\'' + pageID + '\',' + (page.next) + ');">Next &Gt;</a>';
+
+    if ((page.max != -1 && page.next > page.max) || page.skips > page.MAX_SKIPS){
+        nextHTML = '';
+    }
+
+    if (page.previous < 0){
+        prevHTML = '';
+    }
+
+    $(".pageNavigation").html(prevHTML + "<br>" + nextHTML);
+
+}
+ var processTags = function(text){
+     text = text.replace(perStartRegEx, "<span class=\"per\">");
+     text = text.replace(locStartRegEx, "<span class=\"loc\">");
+     text= text.replace(orgStartRegEx, "<span class=\"org\">");
+     text = text.replace(endRegEx, "</span>");
+     return text;
+ }

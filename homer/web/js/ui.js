@@ -7,6 +7,7 @@
 
 var errorDiv = $("#error");
 var resultsDiv = $("#results");
+var metadataDiv = $("#metadata");
 var viewResourceDiv = $("#view-resource");
 var progressDiv = $("#progress");
 var queryBox = $("#ui-search");
@@ -377,3 +378,14 @@ UI.clearSelectedLabels = function() {
         i += 1;
     });
 };
+
+UI.showHideMetadata = function(){
+    if (metadataDiv.is(':visible') == true){
+        metadataDiv.hide();
+        $(".show-hide-metadata").html("Show metadata");
+    } else {
+        metadataDiv.show();
+        $(".show-hide-metadata").html("Hide metadata");
+    }
+
+}

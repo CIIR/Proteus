@@ -42,6 +42,8 @@ var updateURL = function(request) {
  */
 UI.setReadyHandler(function() {
     var params = _.omit(getURLParams(), privateURLParams);
+    var userToken = getCookie("token");
+    params = _.merge(params, {token: userToken});
     console.log(params);
 
     UI.dispalyUserName();
@@ -64,6 +66,7 @@ var doActionRequest = function(args) {
         return doSearchRequest(args);
     }
     if (action == "view") {
+        disableAutoRetrieve();
         return doViewRequest(args);
     }
     if (!action) {

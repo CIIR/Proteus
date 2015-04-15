@@ -178,7 +178,7 @@ img.thumbnail {
 
 #view-resource {
     /* render any HTML with newlines */
-    white-space: pre;
+    /* white-space: pre; */
     text-align: left;
 }
 
@@ -271,3 +271,19 @@ body {
     z-index: 5000
 }
 
+.per {
+    color: white;
+    background-color: orange;
+}
+.org {
+    color: white;
+    background-color: skyblue;
+}
+.loc {
+    color: white;
+    background-color: tan;
+}
+
+.pageNavigation{
+    cursor: pointer; cursor: hand;
+}
