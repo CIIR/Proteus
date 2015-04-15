@@ -1,6 +1,7 @@
 package ciir.proteus.parse;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.parse.DocumentStreamParser;
 import org.lemurproject.galago.core.types.DocumentSplit;
@@ -92,30 +93,76 @@ public class MBTEIPageParser extends DocumentStreamParser {
       return null;
     }
 
-    // local parser state
-    StringBuilder buffer = new StringBuilder();
+    StringBuilder bodyBuffer = new StringBuilder();
+    StringBuilder headerBuffer = new StringBuilder();
+    StringBuilder footerBuffer = new StringBuilder();
+    StringBuilder currentBuffer = bodyBuffer;
+
+    boolean writing = false;
     boolean empty = true;
+    // In the transition from DJVU to TOKTEI, some parts of the page
+    // are given an <fw> tag. Sometimes these end up in the wrong place
+    // in the text so a page's header may show up after a few lines. Same
+    // issue with footers.
+    String pagePart = "body";
 
     while (xml.hasNext()) {
       int event = xml.next();
 
-      // since the books do NOT end with <pb> we need to "fake" that
-      // so the last page number works
       if (event == XMLStreamConstants.END_ELEMENT) {
         String tag = xml.getLocalName();
+
+        if ("w".equals(tag)){
+          writing = false;
+        }
+
+        if ("fw".equals(tag)){
+          currentBuffer = bodyBuffer;
+        }
+
+        if ("lb".equals(tag)){
+          currentBuffer.append("<br>");
+        }
+
+        // since the books do NOT end with <pb> we need to "fake" that
+        // so the last page number works
         if ("text".equals(tag)) {
           pageIndex++;
           break; // we're done
         }
       }
+      if (event == XMLStreamConstants.CHARACTERS && writing) {
+        currentBuffer.append(StringEscapeUtils.escapeHtml4(xml.getText())).append(' ');
+        empty = false;
+      }
       // copy the "form" attribute out of word tags
       if (event == XMLStreamConstants.START_ELEMENT) {
         String tag = xml.getLocalName();
+
+        if ("fw".equals(tag)){
+          pagePart = xml.getAttributeValue (null, "place");
+          if (pagePart.equalsIgnoreCase("top")){
+            currentBuffer = headerBuffer;
+          } else if (pagePart.equalsIgnoreCase("bottom")){
+            currentBuffer= footerBuffer;
+          } else {
+            currentBuffer = bodyBuffer; // safety
+          }
+        }
+
         if ("w".equals(tag)) {
-          String formValue = MBTEI.scrub(xml.getAttributeValue(null, "form"));
-          if (!formValue.isEmpty()) {
-            buffer.append(formValue).append(' ');
-            empty = false;
+          // MCZ: In the process of parsing the DJVU into toktei, words can get "split".
+          // For example "the end!", gets split into three word tokens with the "form"
+          // attributes of "the", "end", and "!". Previous versions of this used the
+          // value in the "form" attribute which causes all sorts of formatting issues
+          // like spaces between words and punctuations. If you try and be clever and
+          // "back up" the StringBuffer you can chop off the end of a "<br>" tag which
+          // messes up all the NER hilighting. So I'm going to just use the "w" value
+          // and ignore any "w" tags that have a "+" in the coords, which indicates that
+          // was something "extra" added in the process of creating the TOKTEI format.
+          // We'll also handle the situation where the "coords" attribute does not exist.
+          if (xml.getAttributeValue(null, "coords") == null || !xml.getAttributeValue(null, "coords").contains("+")){
+            writing = true;
           }
         } else if ("pb".equals(tag)) {
 
@@ -138,15 +185,17 @@ public class MBTEIPageParser extends DocumentStreamParser {
     Document page = new Document();
     String archiveId = MBTEI.getArchiveIdentifier(split, metadata);
 
+    // put together the parts of the page
+    String pageText = headerBuffer.toString() + bodyBuffer.toString() + footerBuffer.toString();
     if (nerClassifier == null) {
-      page.text = buffer.toString();
+      page.text = pageText;
     } else {
       // if there is an error, just use the regular text
       try {
-        page.text = nerClassifier.classifyWithInlineXML(buffer.toString());
+        page.text = nerClassifier.classifyWithInlineXML(pageText);
       } catch (Exception e){
-        log.log(Level.WARNING, "Error running NER on: " + buffer.toString(), e);
-        page.text = buffer.toString();
+        log.log(Level.WARNING, "Error running NER on: " + pageText, e);
+        page.text = pageText;
       }
     }
 

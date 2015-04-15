@@ -37,7 +37,10 @@ var renderResult = function(queryTerms, result, resDiv) {
         name = Render.getDocumentURL(iaURL, name, queryTerms, result.rank);
     }
     var pgImage = iaURL;
+    var kind = 'ia-books'; // default
     if (!_.isUndefined(pageNum)) {
+        kind = 'ia-pages';
+
         // if page result - make the link go to the page
         name = Render.getDocumentURL('https://archive.org/stream/' + identifier + '#page/n' + pageNum + '/mode/2up', result.meta.title || result.name, queryTerms, result.rank);
 
@@ -54,7 +57,7 @@ var renderResult = function(queryTerms, result, resDiv) {
             '<table>' +
             '<tr>' +
             '<td class="preview" rowspan="2">' + previewImage + '</td>' +
-            '<td class="name">' + name + '</td>' +
+            '<td class="name">' + name + '&nbsp;(<a target="_blank" href="?kind=' + kind +'&action=view&id=' + result.name + '">view OCR</a>)</td>' +
             '<td class="score">&nbsp;&nbsp;' + result.score.toFixed(3) + ' r' + result.rank + '</td>' +
             '</tr>';
     if (snippet) {

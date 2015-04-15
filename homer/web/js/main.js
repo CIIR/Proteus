@@ -64,6 +64,7 @@ var doActionRequest = function(args) {
         return doSearchRequest(args);
     }
     if (action == "view") {
+        disableAutoRetrieve();
         return doViewRequest(args);
     }
     if (!action) {
