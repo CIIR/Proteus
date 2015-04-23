@@ -36,10 +36,17 @@
         <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="css/style.css" type="text/css" />
 
+        <!-- Add fancyBox -->
+        <link rel="stylesheet" href="js/fancybox/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+        <script type="text/javascript" src="js/fancybox/jquery.fancybox.pack.js?v=2.1.5"></script>
 
         <script>
             var showSideBarFlag = true;
             $(document).ready(function() {
+
+                $(document).ready(function() {
+                    $(".fancybox").fancybox();
+                });
 
                 $("#overlay").hide();
                 $("#ui-search").keyup(function (evt) {

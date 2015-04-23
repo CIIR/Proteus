@@ -22,8 +22,6 @@ var pageThumbnail = function(archiveId, pageNum) {
     return "http://www.archive.org/download/" + encodeURIComponent(archiveId) + "/page/n" + pageNum + "_thumb.jpg";
 };
 
-
-
 //console.log("Defining table, renderResult=" + renderResult);
 var renderResult = function(queryTerms, result, resDiv) {
 
@@ -38,6 +36,9 @@ var renderResult = function(queryTerms, result, resDiv) {
     }
     var pgImage = iaURL;
     var kind = 'ia-books'; // default
+    var thumbnail = '<img class="thumbnail" " src="' + pageThumbnail(identifier, pageNum) + '"/>';
+    var previewImage = Render.getDocumentURL(pgImage, thumbnail, queryTerms, result.rank);
+    
     if (!_.isUndefined(pageNum)) {
         kind = 'ia-pages';
 
@@ -48,9 +49,8 @@ var renderResult = function(queryTerms, result, resDiv) {
         // the physical page number shown on the page
         //name += ' pp. ' + pageNum;
         pgImage = pageImage(identifier, pageNum);
+        previewImage = Render.getPagePreviewURL(pgImage, thumbnail, queryTerms, result.rank);
     }
-    var thumbnail = '<img class="thumbnail" src="' + pageThumbnail(identifier, pageNum) + '"/>';
-    var previewImage = Render.getDocumentURL(pgImage, thumbnail, queryTerms, result.rank);
 
     var html =
             '<div class="result">' +

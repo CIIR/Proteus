@@ -28,7 +28,10 @@ UI.generateButtons = function() {
         _.forIn(data.kinds, function(spec, kind) {
             spec.kind = kind; // so the onClick knows what kind it was
             if (!spec.button) {
-                UI.showError("You need to specify a \"button\" display attribute for kind \"" + kind + "\"");
+                // UI.showError("You need to specify a \"button\" display attribute for kind \"" + kind + "\"");
+                // the "view" action requires that we have a kind/index specified, but we may not
+                // want search buttons for them so rather than display a warning just write it to the console.
+                console.log("You didn't specify a \"button\" display attribute for kind \"" + kind + "\"");
                 return;
             }
             var button = $('<input type="button" value="' + spec.button + '" />');
