@@ -34,6 +34,9 @@ public class HTTPRouter implements WebHandler {
     private final JSONHandler register;
     private final JSONHandler resourcesforlabels;
     private final JSONHandler getUsers;
+    private final JSONHandler createCorpus;
+    private final JSONHandler updateUserSettings;
+    private final JSONHandler rateResource;
     private final StaticContentHandler staticContent;
 
     public HTTPRouter(ProteusSystem proteus) {
@@ -53,6 +56,9 @@ public class HTTPRouter implements WebHandler {
         register = new RegisterUser(proteus);
         resourcesforlabels = new GetResourcesForLabels(proteus);
         getUsers = new GetUsers(proteus);
+        createCorpus = new CreateCorpus(proteus);
+        updateUserSettings = new UpdateUserSettings(proteus);
+        rateResource = new RateResource(proteus);
     }
 
     // handle http requests
@@ -105,8 +111,14 @@ public class HTTPRouter implements WebHandler {
                 handler = logout;
             } else if (POST && path.equals("/api/register")) {
                 handler = register;
+            } else if (POST && path.equals("/api/newcorpus")) {
+                handler = createCorpus;
+            } else if (POST && path.equals("/api/updatesettings")) {
+                handler = updateUserSettings;
             } else if (POST && path.equals("/api/resourcesforlabels")) {
                 handler = resourcesforlabels;
+            } else if (POST && path.equals("/api/rateresource")) {
+                handler = rateResource;
             } else if (path.equals("/url")) {
                 handleRedirect(reqp, req, resp);
                 return;

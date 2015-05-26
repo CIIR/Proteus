@@ -8,7 +8,14 @@
  */
 
 var GLOBAL = {
-    uniqTypes: [], allTags: [], users: {}, userComments: []
+    uniqTypes: [], allTags: [], users: {}, userComments: [], corpora: [],
+    ratedDocuments: [
+        {"doc" : "westindiesincana1916grea", "aveRating" : 3},
+        {"doc" : "sirfrancisdrakeh04mayn_75", "aveRating" : 1.5},
+        {"doc" : "westindiesincana1916grea_18", "aveRating" : 5},
+        {"doc" : "obeahwitchcraft00bellgoog_197", "aveRating" : 4.5},
+        {"doc" : "obeahwitchcraft00bellgoog", "aveRating" : 3}
+    ]
 };
 
 // the JSON of the application state
@@ -43,6 +50,7 @@ var updateURL = function(request) {
 UI.setReadyHandler(function() {
     var params = _.omit(getURLParams(), privateURLParams);
     var userToken = getCookie("token");
+    setCorpus(getCookie("corpus"));
     params = _.merge(params, {token: userToken});
     console.log(params);
 
@@ -77,11 +85,56 @@ var doActionRequest = function(args) {
 };
 
 /* handlers for search button types */
-UI.onClickSearchButton = function(buttonDesc) {
-    var kind = buttonDesc.kind;
+UI.onClickSearchButton = function(kind) {
+//    var kind = buttonDesc.kind;
+
+    // is this a new search?
+    var terms = _.escape(UI.getQuery().trim()).toLowerCase();
+
+    var tmp = [];
+    if (localStorage["pastSearches"] != null){
+        tmp  = JSON.parse(localStorage["pastSearches"]);
+    }
+    // check if it exists
+    var found = false;
+    _.forEach(tmp, function(rec){
+        if (rec.kind == kind && rec.terms == terms){
+            found = true;
+        }
+    });
+
+    if (found != true){
+        tmp.push({ terms: terms, kind: kind});
+        localStorage["pastSearches"] = JSON.stringify(tmp);
+        $("#pastSearches").prepend( '<div class="query">&#8226;&nbsp;<a onclick="tmpSearch( $(this), \''+kind+'\')">' + terms +  '</a>'+ '&nbsp;(' + kind + ')<div class="xtmp"><img class="delimg" src=\'images/del.png\'/> </div>&nbsp;</div>' );
+    }
     doActionRequest({kind: kind, q: UI.getQuery(), action: "search"});
 };
 
+UI.populateRecentSearches = function(){
+    if (localStorage["pastSearches"] == null){
+        return;
+    }
+    $("#pastSearches").html("");
+    _.forEach( JSON.parse(localStorage["pastSearches"]), function(rec){
+        $("#pastSearches").prepend( '<div class="query">&#8226;&nbsp;<a onclick="tmpSearch( $(this), \''+rec.kind+'\')">' + rec.terms +  '</a>'+ '&nbsp;(' + rec.kind + ')<div class="xtmp"><img class="delimg" src=\'images/del.png\'/> </div>&nbsp;</div>' );
+    });
+}
+
+function tmpSearch(that, kind){
+    var query = that.text();
+    console.log("Query: " + query);
+    $("#ui-search").val(query);
+    // TODO: can have > 1 search button so we need to know which one to trigger
+    doActionRequest({kind: kind, q: query, action: "search"});
+}
+
+function tmpEntSearch(entType, that, kind){
+    var query =  entType  + ':"' + that.text() + '"';
+    console.log("Query: " + query);
+    $("#ui-search").val(query);
+    UI.onClickSearchButton(kind);
+}
 
 var logIn = function(userName) {
     if (!userName)
@@ -98,6 +151,11 @@ var logIn = function(userName) {
             document.cookie = "username=" + userName + ";";
             document.cookie = "userid=" + data.userid + ";";
             document.cookie = "token=" + data.token + ";";
+            var settings = JSON.parse(data.settings);
+            document.cookie = "settings=" + settings.num_entities + ";";
+
+            localStorage["corpora"] = JSON.stringify(data.corpora);
+            UI.updateCorpusListButton();
             UI.dispalyUserName();
             // update the type tags
             getAllTagsByUser();
@@ -123,11 +181,14 @@ var logOut = function() {
         document.cookie = "username=;";
         document.cookie = "token=;";
         document.cookie = "userid=;";
+        document.cookie = "corpus=;";
         // update the type tags
         getAllTagsByUser();
         // quick and dirty, trigger refresh to get rid of
         // all the label stuff.
         location.reload(true);
+
+
     }, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
         throw err;
@@ -288,38 +349,34 @@ var getAllTagsByUser = function() {
     });
 };
 
+var createNewCorpus = function(corpusName){
+
+    if (!isLoggedIn()) {
+        return;
+    }
+
+    var userName = getCookie("username");
+
+    var args = {user: userName, corpus: corpusName};
+
+    API.newCorpus(args, function() {
+                UI.appendToCorpusList(corpusName);
+                // add this to the localStorage
+                var tmp = JSON.parse(localStorage["corpora"]);
+                tmp.push(corpusName);
+                localStorage["corpora"] = JSON.stringify(tmp);
+                // need to re-bind click event...
+                bindCorpusMenuClick();
+
+                // set the corpus selection to the newly created one...
+                setCorpus(corpusName);
+        },
+        function(req, status, err) {
+            console.log("ERROR: ``" + err + "``");
+            UI.showError("ERROR: ``" + err + "``");
+            throw err;
+        });
+}
 
 // get all tags grouped by user on start up
 getAllUsers();
-
-function hideSideBar(){
-  $('#sidebar-button').html("&gt;&gt;");
-  $("#results-left").hide();
-  $("#results-right").removeClass("col-md-10");
-  $("#results-right").addClass("col-md-12");
-  showSideBarFlag = false;
-  p = getURLParams();
-  p = _.merge(p, {'showSideBar' : '0'});
-  pushURLParams(p);
-}
-function showSideBar(){
-  $('#sidebar-button').html("&lt;&lt;");
-  $("#results-left").show();
-  showSideBarFlag = true;
-  $("#results-right").removeClass("col-md-12");
-  $("#results-right").addClass("col-md-10");
-
-  p = getURLParams();
-  p = _.merge(p, {'showSideBar' : '1'});
-  pushURLParams(p);
-}
-$('#sidebar-button').click(function() {
-    if (showSideBarFlag == true) {
-      hideSideBar();
-     } else {
-      showSideBar();
-    }
-});
-
-
-						

@@ -1,6 +1,7 @@
 package ciir.proteus.users;
 
 import ciir.proteus.users.error.DBError;
+import ciir.proteus.users.error.DuplicateCorpus;
 import ciir.proteus.users.error.DuplicateUser;
 import ciir.proteus.users.error.NoTuplesAffected;
 import org.lemurproject.galago.utility.Parameters;
@@ -32,7 +33,7 @@ public interface UserDatabase {
      * updated to return parameters rather than just the session id since the DB
      * structure changed.
      */
-    public Parameters login(String username);
+    public Parameters login(String username) ;
 
     /**
      * Logs out a user/session combo
@@ -77,4 +78,15 @@ public interface UserDatabase {
     public List<String> getResourcesForLabels(Integer userid, List<String> labels, Integer numResults, Integer startIndex) throws DBError;
 
     public Map<String, String> getUsers() throws DBError;
-}
+
+    public void createCorpus(String corpus, String username) throws NoTuplesAffected, DuplicateCorpus;
+
+    public Parameters getAllCorpora() throws DBError;
+
+    public void updateUserSettings(Credentials creds, String settings) throws DBError;
+
+    public Parameters getResourceRatings(String resource);
+
+    public void upsertResourceRating(Credentials creds, String resource, Integer userID, Integer corpusID, Integer rating) throws DBError;
+
+    }

@@ -1,22 +1,21 @@
 package ciir.proteus.users;
 
-import ciir.proteus.users.error.BadSessionException;
-import ciir.proteus.users.error.BadUserException;
-import ciir.proteus.users.error.DBError;
-import ciir.proteus.users.error.DuplicateUser;
+import ciir.proteus.users.error.*;
 import org.junit.*;
 import org.lemurproject.galago.tupleflow.FileUtility;
 import org.lemurproject.galago.utility.FSUtil;
 import org.lemurproject.galago.utility.Parameters;
+import org.lemurproject.galago.utility.json.JSONUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.*;
 
 /**
- * @author jfoley.
+ * @author jfoley, michaelz
  */
 public class UserDatabaseTest {
 
@@ -70,6 +69,9 @@ public class UserDatabaseTest {
     assertNotNull(p.get("token"));
     assertNotNull(p.get("userid"));
     assertEquals("usER1", p.get("user"));
+    List<Parameters> corpora = new ArrayList<Parameters>();
+    corpora = p.getAsList("corpora", Parameters.class);
+    assertEquals(0, corpora.size());
 
     Credentials user1 = new Credentials(p);
     assertTrue(db.validSession(user1));
@@ -108,6 +110,32 @@ public class UserDatabaseTest {
       db.logout(user1);
       assertFalse(db.validSession(user1));
     }
+
+    // add some corpora to make sure they're returned
+    db.createCorpus("a", "user");
+    db.createCorpus("b", "user");
+    db.createCorpus("c", "user");
+    db.createCorpus("a b c", "user");
+    p = db.login("user1");
+    assertNotNull(p.get("token"));
+    assertNotNull(p.get("userid"));
+    assertEquals("user1", p.get("user"));
+
+    corpora = p.getAsList("corpora", Parameters.class);
+    assertEquals("a", corpora.get(0).getString("name"));
+    assertEquals("a b c", corpora.get(1).getString("name"));
+    assertEquals("b", corpora.get(2).getString("name"));
+    assertEquals("c", corpora.get(3).getString("name"));
+
+    assertEquals(p.get("settings", ""), "{ \"num_entities\" : 10 }");
+    Parameters np = Parameters.create();
+    try {
+      np = Parameters.parseString(p.get("settings", ""));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    assertEquals(np.get("num_entities", -1), 10);
+
   }
 
   @Test
@@ -371,4 +399,132 @@ public class UserDatabaseTest {
     assertTrue(results.get("res1").get("*:tag2").contains("1:2:"));
 
   }
+
+  // tests for corpus creation
+  @Test
+  public void testCreateCorpus() throws NoTuplesAffected, DuplicateCorpus {
+
+    db.createCorpus("test corpus 1", "user");
+    // test duplicate
+    try{
+      db.createCorpus("test corpus 1", "user2");
+      fail("Should throw duplicate corpus exception");
+    } catch (DuplicateCorpus e){
+      // OK
+    } catch (Exception e){
+      fail("Should throw duplicate corpus exception");
+    }
+
+    // test case insensitivity
+    try{
+      db.createCorpus("Test Corpus 1", "user2");
+      fail("Should throw duplicate corpus exception");
+    } catch (DuplicateCorpus e){
+      // OK
+    } catch (Exception e){
+      fail("Should throw duplicate corpus exception");
+    }
+
+  }
+
+  @Test
+  public void getAllCorporaTest() throws DBError {
+
+    db.createCorpus("a", "user");
+    db.createCorpus("b", "user");
+    db.createCorpus("c", "user");
+    db.createCorpus("a b c", "user");
+
+    Parameters p = Parameters.create();
+    p = db.getAllCorpora();
+
+    List<Parameters> corpora = new ArrayList<Parameters>();
+
+    corpora = p.getAsList("corpora", Parameters.class);
+
+    assertEquals("a", corpora.get(0).getString("name"));
+    assertEquals("a b c", corpora.get(1).getString("name"));
+    assertEquals("b", corpora.get(2).getString("name"));
+    assertEquals("c", corpora.get(3).getString("name"));
+  }
+
+  @Test
+  public void updateUserSettingsTest() throws DBError {
+
+    String user = "testUser";
+    db.register(user);
+    Parameters p = db.login(user);
+    assertEquals(p.get("settings", ""), "{ \"num_entities\" : 10 }");
+
+    Credentials cred = new Credentials(p);
+
+    db.updateUserSettings(cred, "{ \"test\" : 123 }");
+
+    // re-log in, that returns the settings
+    p = db.login(user);
+
+    Parameters np = Parameters.create();
+    try {
+      np = Parameters.parseString(p.get("settings", ""));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    assertEquals(np.get("test", -1), 123);
+
+  }
+
+  @Test
+  public void resourceRankTest() throws DBError {
+
+    db.register("user1");
+    db.register("user2");
+
+    Parameters p = db.login("user1");
+    Credentials cred = new Credentials(p);
+
+    db.createCorpus("test corpus 1", "user");
+    Integer corpus1 = 1;
+
+    String res1 = "resource1";
+
+    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4);
+
+    Parameters ratings = db.getResourceRatings("resource1");
+    assertEquals(ratings.get("aveRating", -1), 4);
+
+    // test update of rating
+    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 2);
+    ratings = db.getResourceRatings(res1);
+    assertEquals(ratings.get("aveRating", -1), 2);
+    assertEquals(ratings.getAsList("ratings").size(), 1);
+
+    // have a 2nd user rate the resource
+    p = db.login("user2");
+    cred = new Credentials(p);
+
+    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4);
+    ratings = db.getResourceRatings(res1);
+    assertEquals(ratings.get("aveRating", -1), 3);
+    assertEquals(ratings.getAsList("ratings").size(), 2);
+
+    // rate another resource, make sure it doesn't change this rating.
+    db.upsertResourceRating(cred, "different resource", cred.userid, corpus1, 4);
+    ratings = db.getResourceRatings(res1);
+    assertEquals(ratings.get("aveRating", -1), 3);
+    assertEquals(ratings.getAsList("ratings").size(), 2);
+
+    // update user2's rating to be zero - which should be ignored
+    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 0);
+    ratings = db.getResourceRatings(res1);
+    assertEquals(ratings.get("aveRating", -1), 2);
+    assertEquals(ratings.getAsList("ratings").size(), 1);
+
+    // resource with no ratings
+    ratings = db.getResourceRatings("i don't exist");
+    assertEquals(ratings.get("aveRating", -1), 0);
+    assertEquals(ratings.getAsList("ratings").size(), 0);
+
+
+  }
+
 }

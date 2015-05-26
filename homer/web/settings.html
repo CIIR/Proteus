@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css" type="text/css"/>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/API.js"></script>
+    <meta charset="UTF-8">
+    <title>Proteus Settings</title>
+
+    <script>
+
+        $(document).ready(function () {
+
+            // see if we have a value...
+            var num_entities = getCookie("settings");
+
+            if (num_entities.length > 0) {
+                $("#user-num-entities").val(num_entities);
+            } else {
+                // if not, use the default
+                $("#user-num-entities").val(5);
+            }
+         });
+        // TODO: move this to a .js file - should be able to remove most of the script references in <head>
+        function submitSettings(){
+
+            var num = parseInt($("#user-num-entities").val());
+
+            var userName = getCookie("username");
+            var userID = getCookie("userid");
+            var userToken = getCookie("token");
+
+            var args = {user: userName, token: userToken, userid: userID, settings: { num_entities : num }};
+            API.updateUserSettings(args, function() { console.log("success")},  function(req, status, err) { console.log("failure")});
+            // for now, save in a cookie
+            // TODO we want more presistent storage of this value later
+            document.cookie = "settings=" + num + ";";
+            $(".alert-success").html("Settings have been saved.");
+            $(".alert-success").addClass("in")
+
+            setTimeout(function(){
+                $('.alert-success').removeClass("in");
+                $('.alert-success').addClass("out");
+
+            }, 5000);
+
+         }
+
+
+    </script>
+</head>
+
+<div class="container" id="settings-container">
+    <div class="row">
+<form id="settings-form" class="form-horizontal" onsubmit="submitSettings(); return false;">
+    <fieldset>
+
+        <!-- Form Name -->
+        <legend>Proteus Settings</legend>
+        <div class="alert alert-success fade" role="alert"></div>
+
+        <!-- Text input-->
+        <div class="form-group">
+            <label class="col-md-4 control-label" for="user-num-entities">Number of entities</label>
+            <div class="col-md-4">
+                <input id="user-num-entities" name="user-num-entities" placeholder="" class="form-control input-md" required="" type="number" min="0">
+
+            </div>
+        </div>
+
+        <!-- Button -->
+        <div class="form-group">
+            <label class="col-md-4 control-label" for="submit-settings"></label>
+            <div class="col-md-4">
+                <button id="submit-settings" name="submit-settings" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+
+    </fieldset>
+</form>
+</div>
+    </div>
+
+</body>
+</html>

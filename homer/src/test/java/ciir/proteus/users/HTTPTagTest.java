@@ -2,6 +2,7 @@ package ciir.proteus.users;
 
 import ciir.proteus.server.HTTPError;
 import ciir.proteus.server.TestEnvironment;
+import ciir.proteus.users.error.DuplicateCorpus;
 import ciir.proteus.users.error.DuplicateUser;
 import ciir.proteus.users.error.NoTuplesAffected;
 import ciir.proteus.util.HTTPUtil;
@@ -19,7 +20,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 /**
- * @author jfoley.
+ * @author jfoley, michaelz
  */
 public class HTTPTagTest {
 
@@ -197,4 +198,43 @@ public class HTTPTagTest {
     assertEquals(0, json.getAsList("res17", String.class).size());
 
   }
+
+  @Test
+  public void testRateResource() throws NoTuplesAffected, DuplicateCorpus, IOException {
+    Parameters creds = env.creds.toJSON();
+    Parameters put = Parameters.create();
+    put.copyFrom(creds);
+    env.proteus.userdb.createCorpus("test corpus 1", "user");
+
+    String res1 = "document1";
+    put.set("resource", res1);
+    put.set("rating", 2);
+    put.set("corpus", 1);
+
+    assertOK(HTTPUtil.postJSON(env.url, "/api/rateresource", put));
+  }
+
+  @Test
+  public void testUpdateUserSettings() throws NoTuplesAffected, DuplicateCorpus, IOException {
+    Parameters creds = env.creds.toJSON();
+    Parameters put = Parameters.create();
+    put.copyFrom(creds);
+
+    Parameters settings = Parameters.create();
+
+    settings.set("TestInt", 123);
+    settings.set("TestStr", "hello");
+    put.set("settings", settings);
+    assertOK(HTTPUtil.postJSON(env.url, "/api/updatesettings", put));
+  }
+
+  @Test
+  public void testCreateCorpus() throws NoTuplesAffected, DuplicateCorpus, IOException {
+    Parameters creds = env.creds.toJSON();
+    Parameters put = Parameters.create();
+    put.copyFrom(creds);
+    put.set("corpus", "new corpus name");
+    assertOK(HTTPUtil.postJSON(env.url, "/api/newcorpus", put));
+  }
+
 }

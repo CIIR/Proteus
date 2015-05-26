@@ -7,6 +7,11 @@ var locStartRegEx = new RegExp("<LOCATION>", 'g')
 var orgStartRegEx = new RegExp("<ORGANIZATION>", 'g')
 var endRegEx = new RegExp("<\/PERSON>|<\/LOCATION>|<\/ORGANIZATION>", 'g')
 
+var pageHeight = 0;
+var MAX_PAGE_HEIGHT = 2000;
+var MIN_PAGE_HEIGHT = 500;
+
+
 var page = {
     previous: -1,
     current: -1,
@@ -19,11 +24,16 @@ var doSearchRequest = function(args) {
 
     disableAutoRetrieve(); // prevent double requests
 
+    var numEntities = getCookie("settings");
+    if (numEntities.length == 0){
+        numEntities = 5; // default
+    }
     var defaultArgs = {
         n: 10,
         skip: 0,
         snippets: true,
-        metadata: true
+        metadata: true,
+        top_k_entities: parseInt(numEntities)
     };
 
     // we could have args passed in esp if they're reusing an URL
@@ -53,6 +63,10 @@ var doSearchRequest = function(args) {
     if (userName != "") {
         var userToken = getCookie("token");
         var userID = getCookie("userid");
+        var corpus = getCookie("corpus");
+        if (corpus.length == 0){
+            alert("Please select a corpus!")
+        }
         var tagArgs = {
             tags: true,
             user: userName,
@@ -65,6 +79,11 @@ var doSearchRequest = function(args) {
 
     if ((!actualArgs.q || isBlank(actualArgs.q)) && (_.isEmpty(actualArgs.labels))) {
         UI.showProgress("Query is blank!");
+        return;
+    }
+
+    if (args.kind == "rated-only"){
+        UI.showError("ERROR: Not Implemented Yet");
         return;
     }
 
@@ -88,6 +107,7 @@ var doSearchRequest = function(args) {
  * This gets called with the response from JSONSearch
  */
 var onSearchSuccess = function(data) {
+    $("#per-cloud").hide();
     UI.clearError();
 
     var userID = getCookie("userid");
@@ -103,6 +123,17 @@ var onSearchSuccess = function(data) {
         result.viewKind = data.request.viewKind || data.request.kind;
         result.kind = data.request.kind;
         result.rank = rank++;
+
+
+        if (_.isUndefined(ratingsJSON.document[result.name])) {
+            ratingsJSON.document[result.name] = [];
+            // Loop through ratings
+            _.forEach(result.ratings, function(rating){
+                ratingsJSON.document[result.name].push({"user": rating.user, "rating": rating.rating + 2}); // +2 hack to keep it consistent with other ratings
+            })
+
+        }
+
 
         return result;
     }).value();
@@ -145,14 +176,37 @@ var onSearchSuccess = function(data) {
     // don't re-enable the auto-retrieve
     if (usingLabels === false)
       enableAutoRetrieve();
+
+
+    setUpMouseEvents(); // TODO : only want to do this once
+
 };
 
+var getPageHTML = function(text, pageID, pageNum){
+    var pgImage = pageImage(pageID, pageNum);
+    var pgTxt=  processTags(text);
+    return '<div class="book-page row clearfix ">' +
+            '<div  class="book-text col-md-5 column left-align">' + pgTxt + '</div>'+
+            '<div  class="page-image col-md-5 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img src="' + pgImage + '"></a></div>' +
+            '</div>';
+
+}
 var doViewRequest = function(args) {
     UI.showProgress("View request sent to server!");
-    API.action(args, onViewSuccess, function(req, status, err) {
-        UI.showError("ERROR: ``" + err + "``");
-        throw err;
-    });
+
+        API.action(args,
+            function(args){
+                if (args.request.kind == 'ia-pages') {
+                    onViewPageSuccess(args);
+                } else {
+                    onViewBookSuccess(args);
+                }
+            },
+            function(req, status, err) {
+                UI.showError("ERROR: ``" + err + "``");
+                throw err;
+        });
+
 };
 
 var viewPrevPageSuccess = function(args) {
@@ -163,7 +217,16 @@ var viewPrevPageSuccess = function(args) {
         return;
     }
     if (!_.isUndefined(args.text)) {
-        $("#prevPage").html(processTags(args.text) + "<br>" + $("#prevPage").html());
+
+        var html = getPageHTML(args.text, args.request.page_id, args.request.page_num);
+
+        // find the first instance of the "book-page" class and append to that:
+        $(".book-page:first").before(html)
+        if ($(".book-page:first").height() >  pageHeight && $(".book-page:first").height() < MAX_PAGE_HEIGHT){
+            pageHeight = $(".book-page:first").height();
+        }
+        $(".page-image").height( pageHeight);
+
     }
     page.previous -= 1;
     setPageNavigation(args.request.page_id);
@@ -190,8 +253,16 @@ var viewNextPageSuccess = function(args) {
     }
     if (!_.isUndefined(args.text)) {
         page.skips = 0; // reset
-        $("#nextPage").html( $("#nextPage").html() + "<br>" + processTags(args.text));
-    }
+
+        var html = getPageHTML(args.text, args.request.page_id, args.request.page_num);
+
+        // find the last instance of the "book-page" class and append to that:
+        $(".book-page:last").after(html)
+        if ($(".book-page:last").height() >  pageHeight && $(".book-page:last").height() < MAX_PAGE_HEIGHT ){
+            pageHeight = $(".book-page:last").height();
+        }
+        $(".page-image").height( pageHeight);
+   }
     page.next += 1;
     setPageNavigation(args.request.page_id);
 
@@ -233,23 +304,23 @@ var doNextPageRequest = function(pageID) {
 };
 
 /** this gets called with the response from ViewResource */
-var onViewSuccess = function(args) {
+var onViewPageSuccess = function(args) {
 
     var pageID = "";
     UI.clearError();
     resultsDiv.hide();
     metadataDiv.hide();
-    if (args.request.kind == 'ia-pages'){
-        pos = args.request.id.lastIndexOf('_');
-        page.current = parseInt(args.request.id.substr(pos+1));
-        page.previous = page.current-1;
-        page.next = page.current+1;
-        if (!_.isUndefined(args.metadata) && !_.isUndefined(args.metadata.imagecount)) {
-            page.max = args.metadata.imagecount;
-        }
-        pageID = args.request.id.slice(0, pos);
 
+    pos = args.request.id.lastIndexOf('_');
+    page.current = parseInt(args.request.id.substr(pos+1));
+    page.previous = page.current-1;
+    page.next = page.current+1;
+    if (!_.isUndefined(args.metadata) && !_.isUndefined(args.metadata.imagecount)) {
+        page.max = args.metadata.imagecount;
     }
+    pageID = args.request.id.slice(0, pos);
+
+
     var metaHtml = '';
     metaHtml += ' <table>'
     _(args.metadata).forIn(function(val, key) {
@@ -261,26 +332,58 @@ var onViewSuccess = function(args) {
     metaHtml += '</table></div>'
     metadataDiv.html(metaHtml);
     var html = '';
-    html += '<a class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>'
+    //    html += '<a class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>'
+    //
+    //    html += '<div>[<span class="per">PERSON</span>]&nbsp;[<span class="loc">LOCATION</span>]&nbsp;[<span class="org">ORGANIZATION</span>]</div>';
+    //    if (args.request.kind == 'ia-pages'){
+    //        html += '<div class="pageNavigation"></div>';
+    //        html += '<div id="prevPage"></div>';
+    //    }
 
-    // change any entity tags into HTML tags
-    args.text = processTags(args.text);
-   // console.log("*************************\n" + args.text);
-  //  html += '<div>' + _.escape(args.text) + '</div>';
-    html += '<div>[<span class="per">PERSON</span>]&nbsp;[<span class="loc">LOCATION</span>]&nbsp;[<span class="org">ORGANIZATION</span>]</div>';
-    if (args.request.kind == 'ia-pages'){
-        html += '<div class="pageNavigation"></div>';
-        html += '<div id="prevPage"></div>';
-    }
+    var identifier = args.request.id.split('_')[0];
+    var pageNum = args.request.id.split('_')[1];
 
-    html += '<div>' + (args.text) + '</div>';
-    if (args.request.kind == 'ia-pages'){
-        html += '<div id="nextPage"></div>';
-        html += '<div class="pageNavigation"></div>';
-    }
+    var html = getPageHTML(args.text, identifier, pageNum);
+
+    $("#book-pages").html(html);
+    // base the page size on the first page
+    pageHeight = Math.max(MIN_PAGE_HEIGHT, $(".book-text").height());
+    $(".page-image").height( pageHeight);
+
+    //  viewResourceDiv.html(html);
+    setPageNavigation(pageID);
+    viewResourceDiv.show();
+    UI.showProgress("");
+
+};
+
+var onViewBookSuccess = function(args) {
+
+    UI.clearError();
+    resultsDiv.hide();
+    metadataDiv.hide();
+
+    var metaHtml = '';
+    metaHtml += ' <table>'
+    _(args.metadata).forIn(function(val, key) {
+        metaHtml += '<tr>';
+        metaHtml += '<td>' + key + '</td>';
+        metaHtml += '<td>' + val + '</td>'
+        metaHtml += '</tr>';
+    })
+    metaHtml += '</table></div>'
+    metadataDiv.html(metaHtml);
+    var html =  '<a class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>';
+    //
+    //    html += '<div>[<span class="per">PERSON</span>]&nbsp;[<span class="loc">LOCATION</span>]&nbsp;[<span class="org">ORGANIZATION</span>]</div>';
+    //    if (args.request.kind == 'ia-pages'){
+    //        html += '<div class="pageNavigation"></div>';
+    //        html += '<div id="prevPage"></div>';
+    //    }
+
+    html += processTags(args.text);
 
     viewResourceDiv.html(html);
-    setPageNavigation(pageID);
     viewResourceDiv.show();
     UI.showProgress("");
 
@@ -288,8 +391,8 @@ var onViewSuccess = function(args) {
 
 var setPageNavigation = function(pageID) {
 
-    var prevHTML = '<a onclick="doPrevPageRequest(\'' + pageID + '\',' + (page.previous) + ');">&Lt; Previous</a>&nbsp;';
-    var nextHTML = '<a onclick="doNextPageRequest(\'' + pageID + '\',' + (page.next) + ');">Next &Gt;</a>';
+    var prevHTML = '<button style="width: 100%;"  onclick="doPrevPageRequest(\'' + pageID + '\',' + (page.previous) + ');" >&#9650;&nbsp;Previous Page&nbsp;&#9650;</button>';
+    var nextHTML = '<button style="width: 100%;" onclick="doNextPageRequest(\'' + pageID + '\',' + (page.next) + ');">&#9660;&nbsp;Next Page&nbsp;&#9660;</button>';
 
     if ((page.max != -1 && page.next > page.max) || page.skips > page.MAX_SKIPS){
         nextHTML = '';
@@ -299,9 +402,11 @@ var setPageNavigation = function(pageID) {
         prevHTML = '';
     }
 
-    $(".pageNavigation").html(prevHTML + "<br>" + nextHTML);
+    $("#view-nav-top").html(prevHTML)
+    $("#view-nav-bottom").html(nextHTML)
 
 }
+
  var processTags = function(text){
      text = text.replace(perStartRegEx, "<span class=\"per\">");
      text = text.replace(locStartRegEx, "<span class=\"loc\">");
@@ -309,3 +414,30 @@ var setPageNavigation = function(pageID) {
      text = text.replace(endRegEx, "</span>");
      return text;
  }
+
+function submitCorpusDialog() {
+    // make sure we have a name
+    var corpusName = $("#corpus-name").val().trim();
+    if (corpusName.trim() == "") {
+
+        $("#corpusError").addClass("in")
+        $("#corpusError").html("Corpus name cannot be blank.")
+        setTimeout(function(){
+            $('#corpusError').removeClass("in");
+            $('#corpusError').addClass("out");
+
+        }, 10000);
+
+        return;
+    }
+    // TODO: make sure it's unique - don't need to look at the list, these should
+    // all be held in a JSON object
+    //                if ($('#corpus-list li:contains("' + corpusName + '")').length) {
+    //                    alert("non-unique");
+    //                    return;
+    //                }
+
+    createNewCorpus(corpusName);
+
+    $('#newCorpusDialog').modal('hide');
+}

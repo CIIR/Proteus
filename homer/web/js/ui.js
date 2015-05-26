@@ -13,6 +13,10 @@ var progressDiv = $("#progress");
 var queryBox = $("#ui-search");
 var loginInfo = $("#ui-login-info");
 var searchButtons = $("#search-buttons");
+var relevanceLabels = ["terrible", "not relevant", "neutral", "slightly relevant", "highly relevant"];
+var relevanceLabelColorClasses = ["rel-label-terrible", "rel-label-not-relevant", "rel-label-neutral", "rel-label-slightly-relevant", "rel-label-highly-relevant"];
+
+var ratingsJSON = {"document" : []};
 
 // UI object/namespace
 var UI = {};
@@ -34,18 +38,24 @@ UI.generateButtons = function() {
                 console.log("You didn't specify a \"button\" display attribute for kind \"" + kind + "\"");
                 return;
             }
-            var button = $('<input type="button" value="' + spec.button + '" />');
+
+            $("#search-button-choices").append('<li><a href="#" onclick="UI.onClickSearchButton(\'' + spec.kind + '\');">' + spec.button + '</a></li>');
+
             // see if we're the default button
             if (kind === UI.defaultKind) {
-                button.addClass("default-search-button")
+              $("#search-buttons").click(function() {
+                UI.onClickSearchButton(spec.kind);
+              });
             }
-            button.click(function() {
-                UI.onClickSearchButton(spec);
-            });
-            searchButtons.append(button)
+
         });
+        // add an option to search rated documents
+        $("#search-button-choices").append('<li class="divider"></li><li><a href="#" onclick="UI.onClickSearchButton(\'rated-only\');">Rated Documents</a></li>');
+
     });
+
 };
+
 UI.clear = function() {
     UI.clearResults();
     UI.clearError();
@@ -153,6 +163,38 @@ function addLabelToButtons(newLabel) {
     }
 }
 
+function getAve(ave, id){
+    var pct = (ave/4)*100;
+
+   var aveRating = '<span class="ui-state-hover ui-slider-handle ui-slider-ave ui-slider-horizontal proteus-rating " style="left: ' +  pct.toFixed(0) + '%; "><span class=" ui-slider-tip">' + (ave-2).toFixed(2) + '</span></span>';
+   $("#rating-" + id + " span:first").before(aveRating);
+
+}
+
+function setSliderValue(name, init) {
+
+    var tot = 0;
+    var cnt = 0;
+
+    ratingsJSON.document[name].forEach(function (rec) {
+        tot += rec.rating;
+        cnt += 1;
+    })
+
+    if (cnt == 0){
+        return;
+    }
+    var ave = tot / cnt;
+
+    // remove old (if it's there - we use the "proteus-rating" class so we're sure)
+    $("#rating-" + name + "  .proteus-rating ").remove();
+
+    getAve(ave, name);
+
+    return ave-2;
+
+};
+
 /**
  * Renders search results into UI after current results
  */
@@ -170,6 +212,70 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
     } else {
         $(prependTo).after(renderer(queryTerms, result, resDiv));
     }
+
+     $("#rating-" + result.name)
+            .slider({
+                 max: 2,
+                min: -2
+            })
+            .slider("pips", {
+                rest: "label",
+                labels: relevanceLabels
+            })
+            .slider("float").slider({
+
+        change: function( event, ui ) {
+
+            // send this rating to the DB
+
+            // TODO: we do this a lot - should have it's own function
+            var userName = getCookie("username");
+            var userID = parseInt(getCookie("userid"));
+            var userToken = getCookie("token");
+            var corpus = getCookie("corpus");
+            // TODO: has to be a better way to do this - just brute force it for now...
+            var corpora = JSON.parse(localStorage["corpora"]);
+            var corpID = -1;
+            _.forEach(corpora, function(c){
+                if (c.name == corpus)
+                    corpID = parseInt(c.id);
+            });
+
+            var args = { userid:  userID, user: userName, token : userToken, resource: result.name, corpus: corpID, rating: ui.value };
+
+            API.rateResource(args, function(){
+
+                if (_.isUndefined(ratingsJSON.document[result.name])) {
+                    ratingsJSON.document[result.name] = [];
+                    // add our rating
+                    ratingsJSON.document[result.name].push({"user": userName, "rating": ui.value + 2}); // +2 hack to keep it consistent with other ratings
+                }
+                    // see if we have a value
+                    var idx =  _.findIndex(ratingsJSON.document[result.name], function(rec) {
+                        return rec.user == userName;
+                    });
+
+                  // update our rating - or remove it if it's zero
+                    if (idx < 0){
+                        ratingsJSON.document[result.name].push({ "user" : userName, "rating" : ui.value + 2});
+                    }else{
+                        ratingsJSON.document[result.name][idx].rating = ui.value + 2;
+                    }
+
+                setSliderValue(result.name, false);
+
+            }, function(req, status, err) {
+                UI.showError("ERROR: ``" + err + "``");
+                throw err;
+            });
+
+        }
+
+    }) ;
+
+    var myVal = setSliderValue(result.name, true);
+    $("#rating-" + result.name).slider("values", myVal);
+
 
 
     var tagName = "#tags_" + result.name;
@@ -209,7 +315,6 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
         readOnly: true
     });
 
-
 };
 
 UI.appendResults = function(queryTerms, results) {
@@ -235,7 +340,7 @@ UI.dispalyUserName = function() {
 
     if (user) {
         $("#ui-login-form").hide();
-        $("#user-info").html("<span id='login-form-text'> Welcome " + user + "</span> <input id='ui-go-logout' type='button' value='LogOut' />").show();
+        $("#user-info").html("<span class='login-form-text'> Welcome " + user + "</span> <input class='btn btn-sm'  id='ui-go-logout' type='button' value='LogOut' />").show();
 
         $("#ui-go-logout").click(function() {
             $("#user-info").hide();
@@ -390,5 +495,133 @@ UI.showHideMetadata = function(){
         metadataDiv.show();
         $(".show-hide-metadata").html("Hide metadata");
     }
+
+}
+
+var init = true;
+
+function setUpMouseEvents(){
+ 
+        $(".result").mouseenter(function(  event) {
+
+            var html = "<div>";
+            var aveRating = 0;
+            var cnt = 0;
+
+            if (!_.isUndefined( ratingsJSON.document[this.id])) {
+
+                _.forEach(ratingsJSON.document[this.id], function (rec) {
+
+                    cnt += 1;
+                    html += '<span class="rating-user">' + rec.user.split("@")[0] + ':&nbsp;</span><span class="rating-value rel-label ' + relevanceLabelColorClasses[rec.rating] + '">' + relevanceLabels[rec.rating] + ' (' + (rec.rating - 2) + ')</span><br>';
+                    aveRating += rec.rating - 2;
+                })
+            }
+
+            if (cnt == 0){
+                html = '<span >No ratings yet for this document</span><br>' + html;
+            } else {
+                html = '<span class="rating-user">Ave Rating:&nbsp;</span><span class="rating-value">' + (aveRating/cnt).toFixed(2) + '</span><br>' + html;
+            }
+
+            $("#ratings").html(html + "</div>" );
+
+
+            $(this).css("background", "lightyellow");
+
+        });
+
+        $(".result").mouseleave(function(  event) {
+
+        $(this).css("background", "");
+
+        });
+
+}
+
+UI.populateRatedDocuments = function(){
+
+    _.forEach(GLOBAL.ratedDocuments, function(rec){
+        $("#ratedDocuments").prepend( '<div class="query">&#8226;&nbsp;<a  onclick="">'
+            + rec.doc
+            + '</a><div>'
+            + rec.aveRating
+            + '</div>' );
+
+    });
+
+}
+
+
+function bindCorpusMenuClick() {
+
+    $(".dropdown-menu li a").off("click");
+    $(".dropdown-menu li a").on("click", function () {
+
+        console.log("clicked: " + $(this).text())
+        if ($(this).text() == "New...") {
+            // clear out any old value
+            $("#corpus-name").val("");
+            $('#newCorpusDialog .alert-danger').removeClass("in");
+            $('#newCorpusDialog .alert-danger').addClass("out");
+            $("#newCorpusDialog").modal();
+
+            return;
+        }
+
+        setCorpus($(this).text());
+
+    });
+}
+function setCorpus(corpus) {
+    $("#active-corpus").find('.selection').text(corpus);
+    $("#active-corpus").find('.selection').val(corpus);
+    document.cookie = "corpus=" + corpus + ";";
+}
+
+
+function hideSideBar(){
+    $('#sidebar-button').attr("src", "images/sidebar_expand.png");
+    $("#results-left").hide();
+    $("#results-right").removeClass("col-md-10");
+    $("#results-right").addClass("col-md-12");
+    showSideBarFlag = false;
+    p = getURLParams();
+    p = _.merge(p, {'showSideBar' : '0'});
+    pushURLParams(p);
+}
+function showSideBar(){
+    $('#sidebar-button').attr("src", "images/sidebar_shrink.png");
+    $("#results-left").show();
+    showSideBarFlag = true;
+    $("#results-right").removeClass("col-md-12");
+    $("#results-right").addClass("col-md-10");
+
+    p = getURLParams();
+    p = _.merge(p, {'showSideBar' : '1'});
+    pushURLParams(p);
+}
+$('#sidebar-button').click(function() {
+    if (showSideBarFlag == true) {
+        hideSideBar();
+    } else {
+        showSideBar();
+    }
+});
+
+
+UI.appendToCorpusList = function(corpusName){
+    $("#corpus-list-divider").before('<li><a href="#">' + corpusName + '</a></li>');
+}
+
+UI.updateCorpusListButton = function(){
+
+    if (localStorage["corpora"] == null)
+        return;
+
+    var corpora = JSON.parse(localStorage["corpora"]);
+    _.forEach(corpora, function(c){
+        UI.appendToCorpusList(c.name);
+    });
 
 }

@@ -186,3 +186,15 @@ function disableAutoRetrieve(){
   $('#results-right').unbind('scroll');
 }
 
+// mimic Google's URL redirect
+rwt = function (a, rank) {
+    try {
+        var origURL = escape(a.href);
+        var token = "&token=" + getCookie("token");
+        a.href = "/url?url=" + origURL + token + "&rank=" + rank;
+        a.onmousedown = ""
+    } catch (o) {
+    }
+    return 1
+};
+

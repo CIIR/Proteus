@@ -3,11 +3,8 @@ package ciir.proteus.users.impl;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.UserDatabase;
 import ciir.proteus.users.Users;
-import ciir.proteus.users.error.BadSessionException;
-import ciir.proteus.users.error.BadUserException;
-import ciir.proteus.users.error.DBError;
-import ciir.proteus.users.error.DuplicateUser;
-import ciir.proteus.users.error.NoTuplesAffected;
+import ciir.proteus.users.error.*;
+import org.h2.constant.ErrorCode;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.sql.*;
@@ -68,13 +65,19 @@ public class H2Database implements UserDatabase {
     try {
       conn = cpds.getConnection();
       // NOTE: H2 will automatically create an index on any foreign keys.
-      conn.createStatement().executeUpdate("create table IF NOT EXISTS users (ID BIGINT NOT NULL IDENTITY, EMAIL VARCHAR(" + Users.UserEmailMaxLength + ") NOT NULL, PRIMARY KEY (ID))");
+      conn.createStatement().executeUpdate("create table IF NOT EXISTS users (ID BIGINT NOT NULL IDENTITY, EMAIL VARCHAR(" + Users.UserEmailMaxLength + ") NOT NULL, settings VARCHAR(200) NOT NULL DEFAULT '{ \"num_entities\" : 10 }', PRIMARY KEY (ID))");
       conn.createStatement().executeUpdate("create unique index IF NOT EXISTS user_uniq_email_idx on users(email)");
 
       conn.createStatement().executeUpdate("create table IF NOT EXISTS sessions (user_id bigint NOT NULL, session char(" + Users.SessionIdLength + "),foreign key (user_id) references users(id))");
 
       conn.createStatement().executeUpdate("create table IF NOT EXISTS tags (USER_ID BIGINT NOT NULL,  resource varchar(256) NOT NULL, LABEL_TYPE VARCHAR_IGNORECASE(256) NOT NULL, LABEL_VALUE VARCHAR_IGNORECASE(256) NOT NULL, rating int NOT NULL default 0,  comment CLOB,foreign key (user_id) references users(id))");
       conn.createStatement().executeUpdate("create index IF NOT EXISTS label_resource_idx on tags(resource)");
+
+      // Assuming anyone who has access to this DB can see all the corpora
+      conn.createStatement().executeUpdate("create table IF NOT EXISTS corpora (ID BIGINT NOT NULL IDENTITY, corpus VARCHAR(200) NOT NULL, PRIMARY KEY (ID))");
+
+      conn.createStatement().executeUpdate("create table IF NOT EXISTS resource_ratings (USER_ID BIGINT NOT NULL, CORPUS_ID BIGINT NOT NULL, resource varchar(256) NOT NULL, rating int NOT NULL default 0, foreign key (user_id) references users(id), foreign key (corpus_id) references corpora(id))");
+      conn.createStatement().executeUpdate("create unique index IF NOT EXISTS resource_rating_idx on resource_ratings(user_id, corpus_id, resource)");
 
     } catch (SQLException e) {
       e.printStackTrace();
@@ -126,11 +129,13 @@ public class H2Database implements UserDatabase {
     try {
       conn = cpds.getConnection();
       // get the user id
-      ResultSet results = conn.createStatement().executeQuery("select id from users where email=LOWER('" + username + "')");
+      ResultSet results = conn.createStatement().executeQuery("select id, settings from users where email=LOWER('" + username + "')");
 
       if (results.next()) {
         userid = results.getInt(1);
         ret.put("userid", userid);
+        // TODO: JSON parse
+        ret.put("settings", results.getString(2));
       }
 
       results.close();
@@ -143,6 +148,15 @@ public class H2Database implements UserDatabase {
       if (1 == numRows) {
         ret.put("token", session);
       }
+
+      // get all the corpora
+      Parameters corpora = null;
+      try {
+        corpora = getAllCorpora();
+      } catch (DBError dbError) {
+        dbError.printStackTrace();
+      }
+      ret.copyFrom(corpora);
 
     } catch (SQLException e) {
       e.printStackTrace();
@@ -597,6 +611,192 @@ public class H2Database implements UserDatabase {
 
     return results;
   }
+
+  @Override
+  public void createCorpus(String corpus, String username) throws NoTuplesAffected, DuplicateCorpus {
+    Connection conn = null;
+    try {
+      conn = cpds.getConnection();
+
+      // make sure we're not a duplicate
+      ResultSet results = conn.createStatement().executeQuery("select count(*) from corpora where LOWER(corpus)=LOWER('" + corpus + "')");
+
+      if (results.next()) {
+        if (results.getInt(1) != 0){
+          System.err.println("Duplicate corpus: " + corpus);
+          throw new DuplicateCorpus();
+        };
+      }
+
+      int numRows = conn.createStatement().executeUpdate("insert into corpora (corpus) values ('" + corpus + "')");
+
+      if (numRows == 0) {
+        throw new NoTuplesAffected();
+      }
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw new DuplicateCorpus();
+    } finally {
+      attemptClose(conn);
+    }
+  }
+
+  public Parameters getAllCorpora() throws DBError {
+
+    Parameters results = Parameters.create();
+
+    Connection conn = null;
+    try {
+      conn = cpds.getConnection();
+
+      PreparedStatement sql = conn.prepareStatement("select id, corpus from corpora order by corpus");
+    //  List<String> corpora = new ArrayList<>();
+      List<Parameters> corpora = new ArrayList<>();
+      //  Parameters corpora = Parameters.create();
+      ResultSet tuples = sql.executeQuery();
+      while (tuples.next()) {
+        Integer id = tuples.getInt(1);
+        String corpus = tuples.getString(2);
+        //corpora.add(corpus);
+        Parameters p = Parameters.create();
+        p.put("id", id);
+        p.put("name", corpus);
+        corpora.add(p);
+      }
+      tuples.close();
+      results.put("corpora", corpora);
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } finally {
+      attemptClose(conn);
+    }
+
+    return results;
+  }
+
+  // Note: this will overwrite any existing settings.
+  public void updateUserSettings(Credentials creds, String settings) throws DBError {
+    checkSession(creds);
+
+    Connection conn = null;
+    try {
+      conn = cpds.getConnection();
+      PreparedStatement sql = conn.prepareStatement("UPDATE users SET settings = ? WHERE id = ?");
+
+      sql.setString(1, settings);
+      sql.setInt(2, creds.userid);
+
+      int numRows = sql.executeUpdate();
+
+      assert (numRows == 1);
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    } finally {
+      attemptClose(conn);
+    }
+  }
+
+  public Parameters getResourceRatings(String resource){
+
+    Parameters tmp = Parameters.create();
+    Parameters ave = Parameters.create();
+    List<Parameters> userRating = new ArrayList<>(0);
+
+    Integer count = 0;
+    Integer sum = 0;
+
+    Connection conn = null;
+    try {
+      conn = cpds.getConnection();
+
+      PreparedStatement sql = conn.prepareStatement("SELECT user_id, email, rating FROM resource_ratings, users WHERE resource=? AND users.id = resource_ratings.user_id AND rating != 0 ");
+
+      sql.setString(1, resource);
+
+      ResultSet tuples = sql.executeQuery();
+      while (tuples.next()) {
+        count++;
+        Integer userid = tuples.getInt(1);
+        String user = tuples.getString(2);
+        Integer rating = tuples.getInt(3);
+        sum += rating;
+
+        Parameters p = Parameters.create();
+        p.set("userid", userid);
+        p.set("user", user);
+        p.set("rating", rating);
+        userRating.add(p);
+
+//        ave.put("rating", sum / count);
+
+      }
+      tuples.close();
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } finally {
+      attemptClose(conn);
+    }
+
+    Parameters results = Parameters.create();
+    results.put("ratings", userRating);
+    if (count == 0){
+      results.put("aveRating", 0);
+    } else {
+      results.put("aveRating", sum/count);
+    }
+
+    return results;
+
+  }
+
+  public void upsertResourceRating(Credentials creds, String resource, Integer userID, Integer corpusID, Integer rating) throws DBError {
+    checkSession(creds);
+
+    Connection conn = null;
+
+    try {
+      conn = cpds.getConnection();
+      PreparedStatement sql = conn.prepareStatement("INSERT INTO resource_ratings (user_id, corpus_id, resource, rating) VALUES(?, ?, ?, ?)");
+
+      sql.setInt(1, userID);
+      sql.setInt(2, corpusID);
+      sql.setString(3, resource);
+      sql.setInt(4, rating);
+
+      int numRows = sql.executeUpdate();
+
+      assert (numRows == 1);
+    } catch (SQLException e) {
+
+      // IFF duplicate key, try update
+      if (e.getErrorCode() ==  ErrorCode.DUPLICATE_KEY_1) {
+        try {
+          PreparedStatement sql = conn.prepareStatement("UPDATE resource_ratings SET rating = ? WHERE user_id = ? AND corpus_id = ? AND resource = ?");
+
+          sql.setInt(1, rating);
+          sql.setInt(2, userID);
+          sql.setInt(3, corpusID);
+          sql.setString(4, resource);
+
+          int numRows = sql.executeUpdate();
+
+          assert (numRows == 1);
+        } catch (SQLException eu) {
+          eu.printStackTrace();
+          throw new RuntimeException(eu);
+        }
+      } else {
+        e.printStackTrace();
+        throw new RuntimeException(e);
+      }
+    } finally {
+      attemptClose(conn);
+    }
+  }
+
 
   // "borrowed" from the C3P0 examples: http://sourceforge.net/projects/c3p0/files/c3p0-src/c3p0-0.9.2.1/
   static void attemptClose(Connection o) {

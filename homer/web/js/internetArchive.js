@@ -36,9 +36,9 @@ var renderResult = function(queryTerms, result, resDiv) {
     }
     var pgImage = iaURL;
     var kind = 'ia-books'; // default
-    var thumbnail = '<img class="thumbnail" " src="' + pageThumbnail(identifier, pageNum) + '"/>';
+    var thumbnail = '<img class="ia-thumbnail" src="' + pageThumbnail(identifier, pageNum) + '"/>';
     var previewImage = Render.getDocumentURL(pgImage, thumbnail, queryTerms, result.rank);
-    
+
     if (!_.isUndefined(pageNum)) {
         kind = 'ia-pages';
 
@@ -52,24 +52,44 @@ var renderResult = function(queryTerms, result, resDiv) {
         previewImage = Render.getPagePreviewURL(pgImage, thumbnail, queryTerms, result.rank);
     }
 
+  var tmphtml = '';
+
+  if (!_.isUndefined(result.entities)){
+
+    _(result.entities).forEach( function(entKey) {
+      _( entKey ).forIn( function(value, key) {
+        tmphtml += '<div align="left"><b>' + key + ':</b> ';
+        _( value ).forIn( function(rec, key2) {
+          // TODO: whould use default kind not hard code
+          tmphtml +=  '<a onclick="tmpEntSearch(\'' + key + '\', $(this), \'ia-all\')">' + rec.entity +  '</a> (' + rec.count + ')&nbsp;&#8226;&nbsp;';
+        });
+      });
+      tmphtml += '</div>';
+    });
+  } // end if we have entities
+
     var html =
-            '<div class="result">' +
             '<table>' +
             '<tr>' +
             '<td class="preview" rowspan="2">' + previewImage + '</td>' +
             '<td class="name">' + name + '&nbsp;(<a target="_blank" href="?kind=' + kind +'&action=view&id=' + result.name + '">view OCR</a>)</td>' +
-            '<td class="score">&nbsp;&nbsp;' + result.score.toFixed(3) + ' r' + result.rank + '</td>' +
-            '</tr>';
+            '<td class="slider-rating"><div id="rating-' + result.name + '" class="rainbow-slider"></div></td>'+
+            '<td class="score">&nbsp;&nbsp;rank: ' + result.rank + '</td>' +
+            '</tr>' ;
+
     if (snippet) {
-        html += '<tr><td class="snippet" colspan="2"> ...';
+        html += '<tr><td class="snippet" colspan="3"> ...';
         html += highlightText(queryTerms, snippet, '<span class="hili">', '</span>');
         html += '... </td></tr>';
     }
-    html += '</table>';
+
+  html += '</table>';
+  html +=  tmphtml  ;
     if (result.tags) {
         html += UI.renderTags(result);
     }
     resDiv.html(html);
+
     return resDiv;
 
 };
