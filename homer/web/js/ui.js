@@ -263,7 +263,7 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
                     }
 
                 setSliderValue(result.name, false);
-
+                renderRatingsSidebar(result.name);
             }, function(req, status, err) {
                 UI.showError("ERROR: ``" + err + "``");
                 throw err;
@@ -500,33 +500,35 @@ UI.showHideMetadata = function(){
 
 var init = true;
 
+function renderRatingsSidebar(id){
+    var html = "<div>";
+    var aveRating = 0;
+    var cnt = 0;
+
+    if (!_.isUndefined( ratingsJSON.document[id])) {
+
+        _.forEach(ratingsJSON.document[id], function (rec) {
+
+            cnt += 1;
+            html += '<span class="rating-user">' + rec.user.split("@")[0] + ':&nbsp;</span><span class="rating-value rel-label ' + relevanceLabelColorClasses[rec.rating] + '">' + relevanceLabels[rec.rating] + ' (' + (rec.rating - 2) + ')</span><br>';
+            aveRating += rec.rating - 2;
+        })
+    }
+
+    if (cnt == 0){
+        html = '<span >No ratings yet for this document</span><br>' + html;
+    } else {
+        html = '<span class="rating-user">Ave Rating:&nbsp;</span><span class="rating-value">' + (aveRating/cnt).toFixed(2) + '</span><br>' + html;
+    }
+
+    $("#ratings").html(html + "</div>" );
+
+}
 function setUpMouseEvents(){
  
         $(".result").mouseenter(function(  event) {
 
-            var html = "<div>";
-            var aveRating = 0;
-            var cnt = 0;
-
-            if (!_.isUndefined( ratingsJSON.document[this.id])) {
-
-                _.forEach(ratingsJSON.document[this.id], function (rec) {
-
-                    cnt += 1;
-                    html += '<span class="rating-user">' + rec.user.split("@")[0] + ':&nbsp;</span><span class="rating-value rel-label ' + relevanceLabelColorClasses[rec.rating] + '">' + relevanceLabels[rec.rating] + ' (' + (rec.rating - 2) + ')</span><br>';
-                    aveRating += rec.rating - 2;
-                })
-            }
-
-            if (cnt == 0){
-                html = '<span >No ratings yet for this document</span><br>' + html;
-            } else {
-                html = '<span class="rating-user">Ave Rating:&nbsp;</span><span class="rating-value">' + (aveRating/cnt).toFixed(2) + '</span><br>' + html;
-            }
-
-            $("#ratings").html(html + "</div>" );
-
-
+            renderRatingsSidebar(this.id);
             $(this).css("background", "lightyellow");
 
         });
