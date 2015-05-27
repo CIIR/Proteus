@@ -45,10 +45,11 @@ public class RateResourceTest {
         env.proteus.userdb.createCorpus("test corpus 1", "user");
 
         String res1 = "document1";
+        Integer corpus1=1;
         Parameters rating = Parameters.create();
         rating.set("resource", res1);
         rating.set("rating", 2);
-        rating.set("corpus", 1);
+        rating.set("corpus",corpus1);
         Parameters c = cred.toJSON();
         rating.copyFrom(c);
 
@@ -60,7 +61,7 @@ public class RateResourceTest {
             fail(httpError.getMessage());
         }
 
-        results = env.proteus.userdb.getResourceRatings(res1);
+        results = env.proteus.userdb.getResourceRatings(res1,corpus1 );
         assertEquals(results.get("aveRating", -1), 2);
         assertEquals(results.getAsList("ratings").size(), 1);
 

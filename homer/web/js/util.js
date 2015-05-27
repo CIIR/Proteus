@@ -198,3 +198,14 @@ rwt = function (a, rank) {
     return 1
 };
 
+
+function getCorpusID(corpusName){
+    // TODO: has to be a better way to do this - just brute force it for now...
+    var corpora = JSON.parse(localStorage["corpora"]);
+    var corpID = -1;
+    _.forEach(corpora, function(c){
+        if (c.name == corpusName)
+            corpID = parseInt(c.id);
+    });
+    return corpID;
+}

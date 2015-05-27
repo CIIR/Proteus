@@ -64,14 +64,19 @@ var doSearchRequest = function(args) {
         var userToken = getCookie("token");
         var userID = getCookie("userid");
         var corpus = getCookie("corpus");
+        var corpusID = -1
         if (corpus.length == 0){
             alert("Please select a corpus!")
+        } else {
+            corpusID = getCorpusID(corpus);
         }
+        console.log("corpus: " + corpus + " id: " + corpusID)
         var tagArgs = {
             tags: true,
             user: userName,
             userid: userID,
-            token: userToken
+            token: userToken,
+            corpus: parseInt(corpusID)
         };
         args = _.merge(args, tagArgs);
     }
@@ -124,16 +129,11 @@ var onSearchSuccess = function(data) {
         result.kind = data.request.kind;
         result.rank = rank++;
 
-
-        if (_.isUndefined(ratingsJSON.document[result.name])) {
-            ratingsJSON.document[result.name] = [];
-            // Loop through ratings
-            _.forEach(result.ratings, function(rating){
-                ratingsJSON.document[result.name].push({"user": rating.user, "rating": rating.rating + 2}); // +2 hack to keep it consistent with other ratings
-            })
-
-        }
-
+        ratingsJSON.document[result.name] = [];
+        // Loop through ratings
+        _.forEach(result.ratings, function(rating){
+            ratingsJSON.document[result.name].push({"user": rating.user, "rating": rating.rating + 2}); // +2 hack to keep it consistent with other ratings
+        })
 
         return result;
     }).value();

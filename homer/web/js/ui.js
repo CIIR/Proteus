@@ -233,13 +233,7 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
             var userID = parseInt(getCookie("userid"));
             var userToken = getCookie("token");
             var corpus = getCookie("corpus");
-            // TODO: has to be a better way to do this - just brute force it for now...
-            var corpora = JSON.parse(localStorage["corpora"]);
-            var corpID = -1;
-            _.forEach(corpora, function(c){
-                if (c.name == corpus)
-                    corpID = parseInt(c.id);
-            });
+            var corpID = getCorpusID(corpus);
 
             var args = { userid:  userID, user: userName, token : userToken, resource: result.name, corpus: corpID, rating: ui.value };
 
@@ -509,9 +503,12 @@ function renderRatingsSidebar(id){
 
         _.forEach(ratingsJSON.document[id], function (rec) {
 
-            cnt += 1;
-            html += '<span class="rating-user">' + rec.user.split("@")[0] + ':&nbsp;</span><span class="rating-value rel-label ' + relevanceLabelColorClasses[rec.rating] + '">' + relevanceLabels[rec.rating] + ' (' + (rec.rating - 2) + ')</span><br>';
-            aveRating += rec.rating - 2;
+            // ignore any zero ratings
+            if (rec.rating -2 != 0){
+                cnt += 1;
+                html += '<span class="rating-user">' + rec.user.split("@")[0] + ':&nbsp;</span><span class="rating-value rel-label ' + relevanceLabelColorClasses[rec.rating] + '">' + relevanceLabels[rec.rating] + ' (' + (rec.rating - 2) + ')</span><br>';
+                aveRating += rec.rating - 2;
+            }
         })
     }
 
@@ -572,7 +569,7 @@ function bindCorpusMenuClick() {
         }
 
         setCorpus($(this).text());
-
+        UI.clearResults();
     });
 }
 function setCorpus(corpus) {

@@ -5,7 +5,6 @@ import org.junit.*;
 import org.lemurproject.galago.tupleflow.FileUtility;
 import org.lemurproject.galago.utility.FSUtil;
 import org.lemurproject.galago.utility.Parameters;
-import org.lemurproject.galago.utility.json.JSONUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -484,17 +483,23 @@ public class UserDatabaseTest {
 
     db.createCorpus("test corpus 1", "user");
     Integer corpus1 = 1;
+    Integer corpus2 = 2;
 
     String res1 = "resource1";
 
     db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4);
 
-    Parameters ratings = db.getResourceRatings("resource1");
+    Parameters ratings = db.getResourceRatings(res1, corpus1 );
     assertEquals(ratings.get("aveRating", -1), 4);
+
+    // get ratings for that resource in a corpus which it hasn't been rated in
+    ratings = db.getResourceRatings(res1, corpus2 );
+    assertEquals(ratings.get("aveRating", -1), 0);
+    assertEquals(ratings.getAsList("ratings").size(), 0);
 
     // test update of rating
     db.upsertResourceRating(cred, res1, cred.userid, corpus1, 2);
-    ratings = db.getResourceRatings(res1);
+    ratings = db.getResourceRatings(res1, corpus1 );
     assertEquals(ratings.get("aveRating", -1), 2);
     assertEquals(ratings.getAsList("ratings").size(), 1);
 
@@ -503,24 +508,24 @@ public class UserDatabaseTest {
     cred = new Credentials(p);
 
     db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4);
-    ratings = db.getResourceRatings(res1);
+    ratings = db.getResourceRatings(res1,corpus1 );
     assertEquals(ratings.get("aveRating", -1), 3);
     assertEquals(ratings.getAsList("ratings").size(), 2);
 
     // rate another resource, make sure it doesn't change this rating.
     db.upsertResourceRating(cred, "different resource", cred.userid, corpus1, 4);
-    ratings = db.getResourceRatings(res1);
+    ratings = db.getResourceRatings(res1, corpus1);
     assertEquals(ratings.get("aveRating", -1), 3);
     assertEquals(ratings.getAsList("ratings").size(), 2);
 
     // update user2's rating to be zero - which should be ignored
     db.upsertResourceRating(cred, res1, cred.userid, corpus1, 0);
-    ratings = db.getResourceRatings(res1);
+    ratings = db.getResourceRatings(res1, corpus1);
     assertEquals(ratings.get("aveRating", -1), 2);
     assertEquals(ratings.getAsList("ratings").size(), 1);
 
     // resource with no ratings
-    ratings = db.getResourceRatings("i don't exist");
+    ratings = db.getResourceRatings("i don't exist", corpus1);
     assertEquals(ratings.get("aveRating", -1), 0);
     assertEquals(ratings.getAsList("ratings").size(), 0);
 

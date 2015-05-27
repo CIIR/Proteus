@@ -85,7 +85,7 @@ public interface UserDatabase {
 
     public void updateUserSettings(Credentials creds, String settings) throws DBError;
 
-    public Parameters getResourceRatings(String resource);
+    public Parameters getResourceRatings(String resource, Integer corpusID);
 
     public void upsertResourceRating(Credentials creds, String resource, Integer userID, Integer corpusID, Integer rating) throws DBError;
 

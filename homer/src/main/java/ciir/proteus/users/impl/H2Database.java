@@ -698,7 +698,7 @@ public class H2Database implements UserDatabase {
     }
   }
 
-  public Parameters getResourceRatings(String resource){
+  public Parameters getResourceRatings(String resource, Integer corpusID){
 
     Parameters tmp = Parameters.create();
     Parameters ave = Parameters.create();
@@ -711,9 +711,10 @@ public class H2Database implements UserDatabase {
     try {
       conn = cpds.getConnection();
 
-      PreparedStatement sql = conn.prepareStatement("SELECT user_id, email, rating FROM resource_ratings, users WHERE resource=? AND users.id = resource_ratings.user_id AND rating != 0 ");
+      PreparedStatement sql = conn.prepareStatement("SELECT user_id, email, rating FROM resource_ratings, users WHERE resource=? AND users.id = resource_ratings.user_id AND rating != 0 AND corpus_id = ? ");
 
       sql.setString(1, resource);
+      sql.setInt(2, corpusID);
 
       ResultSet tuples = sql.executeQuery();
       while (tuples.next()) {

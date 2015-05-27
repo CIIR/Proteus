@@ -8,11 +8,9 @@ import org.lemurproject.galago.core.parse.Tag;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.core.retrieval.ScoredPassage;
 import org.lemurproject.galago.core.retrieval.query.Node;
-import org.lemurproject.galago.tupleflow.execution.SSHStageExecutor;
 import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
-import java.sql.ParameterMetaData;
 import java.util.*;
 
 /**
@@ -34,6 +32,7 @@ public class DocumentAnnotator {
     boolean metadata = reqp.get("metadata", true);
     boolean tags = reqp.get("tags", reqp.isString("user"));
     int numEntities = (int) reqp.get("top_k_entities", 0);
+    int corpusID = (int) reqp.get("corpus", -1);
 
     List<String> names = RetrievalUtil.names(results);
 
@@ -115,7 +114,7 @@ public class DocumentAnnotator {
       // get any rankings of the document
       // TODO: should have a flag indicating IF we want these
       Parameters ratings = Parameters.create();
-      ratings = system.userdb.getResourceRatings(doc.name);
+      ratings = system.userdb.getResourceRatings(doc.name, corpusID);
       docp.copyFrom(ratings);
 
       resultData.add(docp);
