@@ -27,6 +27,7 @@ public class DocumentAnnotator {
     return annotate(system, kind, fakeDocs, null, reqp);
   }
 
+  // note that they query could be null if we want to get all documents for a label or corpus.
   public static List<Parameters> annotate(ProteusSystem system, String kind, List<ScoredDocument> results, Node query, Parameters reqp) throws DBError {
     boolean snippets = reqp.get("snippets", true);
     boolean metadata = reqp.get("metadata", true);
@@ -36,8 +37,8 @@ public class DocumentAnnotator {
 
     List<String> names = RetrievalUtil.names(results);
 
-    // retrieve snippets if requested
-    if (snippets) {
+    // retrieve snippets if requested AND we have a query
+    if (snippets && query != null) {
       results = system.findPassages(kind, query, names);
     }
 
@@ -80,9 +81,17 @@ public class DocumentAnnotator {
       }
       // snippet annotation
       if (snippets) {
-        ScoredPassage psg = (ScoredPassage) sdoc;
+        // if the query was null, we'll just get the first part of
+        // the document.
+        int begin = 0;
+        int end = 100;
+         if (query != null){
+          ScoredPassage psg = (ScoredPassage) sdoc;
+          begin = psg.begin;
+          end = psg.end;
+        }
         String snippet
-                = (Utility.join(ListUtil.slice(doc.terms, psg.begin, psg.end), " "));
+                = (Utility.join(ListUtil.slice(doc.terms, begin, end), " "));
 
         docp.put("snippet", snippet);
       }
@@ -125,8 +134,12 @@ public class DocumentAnnotator {
   }
 
   private static   ArrayList<Parameters> sortEntities(int numEntities, Document doc) {
+    if (doc.tags == null){
+      return new ArrayList<Parameters>(); // empty list
+    }
     // keep a count of each entity <entity type <name, count>>
     Map<String, Map<String, Integer>> entities = new HashMap<String, Map<String, Integer>>();
+
     for (Tag tag : doc.tags) {
 
       HashMap<String, Long> tmpEnt = new HashMap<String, Long>();

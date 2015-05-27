@@ -86,8 +86,6 @@ public class JSONSearch implements JSONHandler {
             }
             if (!docs.isEmpty()) {
                 log.info(docs.toString());
-                // only retrieve snippits if we have a query
-                reqp.set("snippets", (pquery != null));
                 reqp.set("tags", true);
                 // remove the param that says how many to get
                 reqp.remove("n");
