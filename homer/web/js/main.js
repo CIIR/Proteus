@@ -160,6 +160,7 @@ var logIn = function(userName) {
             // update the type tags
             getAllTagsByUser();
             location.reload(true);
+            showSideBar();
         }, function(req, status, err) {
             UI.showError("ERROR: ``" + err + "``");
             throw err;
