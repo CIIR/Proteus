@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -142,7 +143,7 @@ public class HTTPRouter implements WebHandler {
     }
 
 // forward to JSON handler interface
-    private void handleJSON(JSONHandler which, String method, String path, Parameters reqp, HttpServletResponse resp, HttpServletRequest req) throws IOException {
+    private void handleJSON(JSONHandler which, String method, String path, Parameters reqp, HttpServletResponse resp, HttpServletRequest req) throws IOException, SQLException {
         resp.addHeader("Access-Control-Allow-Origin", "*");
         resp.addHeader("Content-Type", "application/json");
 

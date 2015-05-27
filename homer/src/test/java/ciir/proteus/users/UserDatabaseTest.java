@@ -8,6 +8,7 @@ import org.lemurproject.galago.utility.Parameters;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -46,7 +47,7 @@ public class UserDatabaseTest {
   }
 
   @Test
-  public void loginTest() throws DBError {
+  public void loginTest() throws DBError, SQLException {
     assertNull(db.login("missing-user"));
     db.register("user1");
 
@@ -401,7 +402,7 @@ public class UserDatabaseTest {
 
   // tests for corpus creation
   @Test
-  public void testCreateCorpus() throws NoTuplesAffected, DuplicateCorpus {
+  public void testCreateCorpus() throws NoTuplesAffected, DuplicateCorpus, SQLException {
 
     db.createCorpus("test corpus 1", "user");
     // test duplicate
@@ -427,7 +428,7 @@ public class UserDatabaseTest {
   }
 
   @Test
-  public void getAllCorporaTest() throws DBError {
+  public void getAllCorporaTest() throws DBError, SQLException {
 
     db.createCorpus("a", "user");
     db.createCorpus("b", "user");
@@ -473,7 +474,7 @@ public class UserDatabaseTest {
   }
 
   @Test
-  public void resourceRankTest() throws DBError {
+  public void resourceRankTest() throws DBError, SQLException {
 
     db.register("user1");
     db.register("user2");

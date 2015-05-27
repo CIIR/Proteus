@@ -66,7 +66,8 @@ var doSearchRequest = function(args) {
         var corpus = getCookie("corpus");
         var corpusID = -1
         if (corpus.length == 0){
-            alert("Please select a corpus!")
+            alert("Please select a corpus!");
+            return;
         } else {
             corpusID = getCorpusID(corpus);
         }

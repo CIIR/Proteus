@@ -6,6 +6,7 @@ import ciir.proteus.users.error.DuplicateUser;
 import ciir.proteus.users.error.NoTuplesAffected;
 import org.lemurproject.galago.utility.Parameters;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -79,7 +80,7 @@ public interface UserDatabase {
 
     public Map<String, String> getUsers() throws DBError;
 
-    public void createCorpus(String corpus, String username) throws NoTuplesAffected, DuplicateCorpus;
+    public Integer createCorpus(String corpus, String username) throws NoTuplesAffected, DuplicateCorpus, SQLException;
 
     public Parameters getAllCorpora() throws DBError;
 

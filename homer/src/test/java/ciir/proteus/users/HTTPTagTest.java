@@ -13,6 +13,7 @@ import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.web.WebServerException;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -200,7 +201,7 @@ public class HTTPTagTest {
   }
 
   @Test
-  public void testRateResource() throws NoTuplesAffected, DuplicateCorpus, IOException {
+  public void testRateResource() throws NoTuplesAffected, DuplicateCorpus, IOException, SQLException {
     Parameters creds = env.creds.toJSON();
     Parameters put = Parameters.create();
     put.copyFrom(creds);

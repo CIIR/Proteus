@@ -554,8 +554,8 @@ UI.populateRatedDocuments = function(){
 
 function bindCorpusMenuClick() {
 
-    $(".dropdown-menu li a").off("click");
-    $(".dropdown-menu li a").on("click", function () {
+    $("ul#corpus-list.dropdown-menu li a").off("click");
+    $("ul#corpus-list.dropdown-menu li a").on("click", function () {
 
         console.log("clicked: " + $(this).text())
         if ($(this).text() == "New...") {

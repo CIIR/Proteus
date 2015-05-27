@@ -15,6 +15,7 @@ import ciir.proteus.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class CreateCorpusTest {
     }
 
     @Test
-    public void createCorpusTest() throws DBError {
+    public void createCorpusTest() throws DBError, SQLException {
 
         String user = "maxdcat";
         env.proteus.userdb.register(user);

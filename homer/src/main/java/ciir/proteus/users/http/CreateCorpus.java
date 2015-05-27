@@ -9,6 +9,7 @@ import ciir.proteus.users.error.NoTuplesAffected;
 import org.lemurproject.galago.utility.Parameters;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.SQLException;
 
 /**
  * @author michaelz.
@@ -20,12 +21,13 @@ public class CreateCorpus extends DBAction {
     }
 
     @Override
-    public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DuplicateCorpus {
+    public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DuplicateCorpus, SQLException {
         String userName = reqp.getString("user");
         String corpusName = reqp.getString("corpus");
+        Integer corpusID = -1;
 
         try {
-            userdb.createCorpus(corpusName, userName);
+            corpusID = userdb.createCorpus(corpusName, userName);
             log.info("user " + userName + " created corpus: " + corpusName);
             proteusLog.info("CREATE_CORPUS\t{}\t{}\t{}", req.getRemoteAddr(), corpusName, userName);
 
@@ -33,6 +35,8 @@ public class CreateCorpus extends DBAction {
             throw new HTTPError(ex);
         }
 
-        return Parameters.create();
+        Parameters p = Parameters.create();
+        p.put("id", corpusID);
+        return p;
     }
 }

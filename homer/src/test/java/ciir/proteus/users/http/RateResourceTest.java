@@ -13,6 +13,7 @@ import org.lemurproject.galago.tupleflow.web.WebServerException;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -35,7 +36,7 @@ public class RateResourceTest {
     }
 
     @Test
-    public void rateResourceTest() throws DBError {
+    public void rateResourceTest() throws DBError, SQLException {
 
         String user = "maxdcat";
         env.proteus.userdb.register(user);

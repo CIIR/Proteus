@@ -613,8 +613,9 @@ public class H2Database implements UserDatabase {
   }
 
   @Override
-  public void createCorpus(String corpus, String username) throws NoTuplesAffected, DuplicateCorpus {
+  public Integer createCorpus(String corpus, String username) throws NoTuplesAffected, DuplicateCorpus, SQLException {
     Connection conn = null;
+    Integer id = -1;
     try {
       conn = cpds.getConnection();
 
@@ -634,12 +635,21 @@ public class H2Database implements UserDatabase {
         throw new NoTuplesAffected();
       }
 
+      // send back the new corpus ID
+      PreparedStatement sql = conn.prepareStatement("select id from corpora where corpus = '" + corpus + "'");
+      ResultSet tuples = sql.executeQuery();
+      while (tuples.next()) {
+        id = tuples.getInt(1);
+      }
+
     } catch (SQLException e) {
       e.printStackTrace();
       throw new DuplicateCorpus();
     } finally {
       attemptClose(conn);
     }
+
+    return(id);
   }
 
   public Parameters getAllCorpora() throws DBError {

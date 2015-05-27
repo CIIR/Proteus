@@ -360,11 +360,12 @@ var createNewCorpus = function(corpusName){
 
     var args = {user: userName, corpus: corpusName};
 
-    API.newCorpus(args, function() {
+    API.newCorpus(args, function(data) {
+
                 UI.appendToCorpusList(corpusName);
                 // add this to the localStorage
                 var tmp = JSON.parse(localStorage["corpora"]);
-                tmp.push(corpusName);
+                tmp.push({ name: corpusName, id: data.id });
                 localStorage["corpora"] = JSON.stringify(tmp);
                 // need to re-bind click event...
                 bindCorpusMenuClick();
