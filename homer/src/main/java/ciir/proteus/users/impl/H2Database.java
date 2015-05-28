@@ -808,6 +808,50 @@ public class H2Database implements UserDatabase {
     }
   }
 
+  // TODO what type of functionality do we want? search just for resources I rated? Only average ratings > 0? Any resource with a
+  // positive rating?
+
+  public List<String> getAllResourcesForCorpus(Integer userid, Integer corpusID) throws DBError {
+    return getResourcesForCorpus(userid, corpusID, -1, -1);
+  }
+
+  public List<String> getResourcesForCorpus(Integer userid, Integer corpusID, Integer numResults, Integer startIndex) throws DBError {
+
+    Connection conn = null;
+    try {
+      conn = cpds.getConnection();
+
+      List<String> resources = new ArrayList<>();
+      ResultSet results = null;
+
+      if (numResults == -1) {
+        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM resource_ratings WHERE corpus_id = ? AND rating != 0 ORDER BY resource");
+        sql.setInt(1, corpusID);
+        results = sql.executeQuery();
+      } else {
+        // we need to ORDER BY to ensure the result sets will always be in the same order.
+        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM resource_ratings WHERE corpus_id = ? AND rating != 0 ORDER BY resource LIMIT ? OFFSET ?");
+        sql.setInt(1, corpusID);
+        sql.setInt(2, numResults);
+        sql.setInt(3, startIndex);
+        results = sql.executeQuery();
+      }
+
+      while (results.next()) {
+        String res = results.getString(1);
+        resources.add(res);
+      }
+
+      results.close();
+
+      return resources;
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    } finally {
+      attemptClose(conn);
+    }
+  }
 
   // "borrowed" from the C3P0 examples: http://sourceforge.net/projects/c3p0/files/c3p0-src/c3p0-0.9.2.1/
   static void attemptClose(Connection o) {

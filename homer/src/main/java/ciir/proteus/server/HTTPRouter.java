@@ -84,6 +84,7 @@ public class HTTPRouter implements WebHandler {
                 String action = reqp.getString("action");
                 switch (action) {
                     case "search":
+                    case "search-corpus":
                         handler = search;
                         break;
                     case "view":

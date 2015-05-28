@@ -42,6 +42,8 @@ var updateURL = function(request) {
     pushURLParams(_.omit(request, privateURLParams));
 };
 
+var SEARCH_FOR_EVERYTHING = "*all*";
+
 /**
  * document.ready handler onload
  *
@@ -106,6 +108,9 @@ UI.onClickSearchButton = function(kind) {
     if (found != true){
         tmp.push({ terms: terms, kind: kind});
         localStorage["pastSearches"] = JSON.stringify(tmp);
+        if (terms.length == 0){
+            terms = SEARCH_FOR_EVERYTHING;
+        }
         $("#pastSearches").prepend( '<div class="query">&#8226;&nbsp;<a onclick="tmpSearch( $(this), \''+kind+'\')">' + terms +  '</a>'+ '&nbsp;(' + kind + ')<div class="xtmp"><img class="delimg" src=\'images/del.png\'/> </div>&nbsp;</div>' );
     }
     doActionRequest({kind: kind, q: UI.getQuery(), action: "search"});
@@ -123,6 +128,9 @@ UI.populateRecentSearches = function(){
 
 function tmpSearch(that, kind){
     var query = that.text();
+    if (query == SEARCH_FOR_EVERYTHING){
+        query = "";
+    }
     console.log("Query: " + query);
     $("#ui-search").val(query);
     // TODO: can have > 1 search button so we need to know which one to trigger

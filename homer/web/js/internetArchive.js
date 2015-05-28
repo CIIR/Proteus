@@ -98,4 +98,6 @@ resultRenderers["ia-books"] = renderResult;
 resultRenderers["ia-pages"] = renderResult;
 resultRenderers["ia-all"] = renderResult;
 
+resultRenderers["ia-corpus"] = renderResult;
+
 

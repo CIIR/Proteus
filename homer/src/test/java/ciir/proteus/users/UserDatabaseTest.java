@@ -530,7 +530,65 @@ public class UserDatabaseTest {
     assertEquals(ratings.get("aveRating", -1), 0);
     assertEquals(ratings.getAsList("ratings").size(), 0);
 
+  }
+
+  @Test
+  public void getResourcesForCorpusTest() throws DBError, SQLException {
+
+    db.createCorpus("a", "user");
+    db.createCorpus("b", "user");
+    Integer corpus1 = 1;
+    Integer corpus2 = 2;
+
+    db.register("user1");
+    db.register("user2");
+
+    Parameters p = db.login("user1");
+    Credentials cred = new Credentials(p);
+
+    String res1 = "a_resource";
+    String res2 = "b_resource";
+    String res3 = "c_resource";
+
+    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4);
+    db.upsertResourceRating(cred, res3, cred.userid, corpus1, 4);
+
+    db.upsertResourceRating(cred, res2, cred.userid, corpus2, 4);
+
+    List<String> results = new ArrayList<>();
+
+    results = db.getResourcesForCorpus( cred.userid, corpus1, -1, -1) ;
+    assertArrayEquals(new String[]{res1, res3}, results.toArray());
+
+    results = db.getResourcesForCorpus( cred.userid, corpus1, 2, 1) ;
+    assertArrayEquals(new String[]{res3}, results.toArray());
+
+    results = db.getResourcesForCorpus( cred.userid, corpus1, 20, 10) ;
+    assertEquals(0, results.toArray().length);
+
+    results = db.getResourcesForCorpus( cred.userid, corpus2, -1, -1) ;
+    assertArrayEquals(new String[]{res2}, results.toArray());
+
+    p = db.login("user2");
+    cred = new Credentials(p);
+    // give res2 a zero rating - should not be returned
+    db.upsertResourceRating(cred, res2, cred.userid, corpus1, 0);
+
+    results = db.getResourcesForCorpus(cred.userid, corpus1, -1, -1) ;
+    assertArrayEquals(new String[]{res1,  res3}, results.toArray());
+
+    // now give it a non-zero so it'll be returned
+    db.upsertResourceRating(cred, res2, cred.userid, corpus1, 1);
+
+    results = db.getResourcesForCorpus( cred.userid, corpus1, -1, -1) ;
+    assertArrayEquals(new String[]{res1, res2, res3}, results.toArray());
+
+    // test the wrapper version
+    results = db.getAllResourcesForCorpus(cred.userid, corpus1) ;
+    assertArrayEquals(new String[]{res1, res2, res3}, results.toArray());
 
   }
 
+
 }
+

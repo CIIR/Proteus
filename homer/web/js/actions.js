@@ -77,22 +77,22 @@ var doSearchRequest = function(args) {
             user: userName,
             userid: userID,
             token: userToken,
-            corpus: parseInt(corpusID)
+            corpus: parseInt(corpusID),
+            corpusName: corpus
         };
         args = _.merge(args, tagArgs);
     }
     var actualArgs = _.merge(defaultArgs, args);
 
-    if ((!actualArgs.q || isBlank(actualArgs.q)) && (_.isEmpty(actualArgs.labels))) {
+    if (args.kind.endsWith("corpus")){
+        actualArgs.action = "search-corpus";
+    }
+
+    // only allow blank queries if we're searching a corpus or by label(s)
+    if ((!actualArgs.q || isBlank(actualArgs.q)) && (_.isEmpty(actualArgs.labels)) && ( actualArgs.action != "search-corpus")) {
         UI.showProgress("Query is blank!");
         return;
     }
-
-    if (args.kind == "rated-only"){
-        UI.showError("ERROR: Not Implemented Yet");
-        return;
-    }
-
     $("#more").html('<img src="/images/more-loader.gif"\>');
 
     Model.request = actualArgs;
@@ -173,11 +173,10 @@ var onSearchSuccess = function(data) {
     }
     UI.appendResults(Model.queryTerms, newResults);
 
-    // if we searched by labels, we returned EVERYTHING so we
+    // if we searched by labels or corpus, we returned EVERYTHING so we
     // don't re-enable the auto-retrieve
-    if (usingLabels === false)
-      enableAutoRetrieve();
-
+    if (usingLabels === false && Model.request.action != "search-corpus")
+        enableAutoRetrieve();
 
     setUpMouseEvents(); // TODO : only want to do this once
 

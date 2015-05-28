@@ -317,7 +317,7 @@ body {
     margin-bottom: 1em;
     margin-top: 1em;
     overflow-y: visible;
-    text-align: right;
+ /*   text-align: right; */
 }
 
 .rating-user{
@@ -330,6 +330,7 @@ body {
     width: 60%;
     display:inline-block;
     text-align: left;
+    font-weight: bold;
 }
 #search-help{
     padding-left: 15px;
@@ -394,7 +395,7 @@ body {
 }
 
 
-.rel-label {
+.Xrel-label {
 
     font-weight: bold;
     text-align: center;
@@ -413,7 +414,7 @@ body {
 
 }
 .rel-label-slightly-relevant{
-    background-color: lime;
+    background-color: limegreen ;
 
 }
 .rel-label-highly-relevant{
@@ -450,4 +451,8 @@ body {
     border-radius: 30px;
     border: solid;
     margin-top: 20px;
+}
+
+a {
+    cursor: pointer; cursor: hand;
 }

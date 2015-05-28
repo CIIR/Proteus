@@ -90,4 +90,8 @@ public interface UserDatabase {
 
     public void upsertResourceRating(Credentials creds, String resource, Integer userID, Integer corpusID, Integer rating) throws DBError;
 
-    }
+    public List<String> getResourcesForCorpus(Integer userid, Integer corpusID, Integer numResults, Integer startIndex) throws DBError;
+
+    public List<String> getAllResourcesForCorpus(Integer userid, Integer corpusID) throws DBError;
+
+}

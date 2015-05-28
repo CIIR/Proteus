@@ -50,7 +50,7 @@ UI.generateButtons = function() {
 
         });
         // add an option to search rated documents
-        $("#search-button-choices").append('<li class="divider"></li><li><a href="#" onclick="UI.onClickSearchButton(\'rated-only\');">Rated Documents</a></li>');
+      //  $("#search-button-choices").append('<li class="divider"></li><li><a href="#" onclick="UI.onClickSearchButton(\'rated-only\');">Rated Documents</a></li>');
 
     });
 
@@ -506,8 +506,8 @@ function renderRatingsSidebar(id){
             // ignore any zero ratings
             if (rec.rating -2 != 0){
                 cnt += 1;
-                html += '<span class="rating-user">' + rec.user.split("@")[0] + ':&nbsp;</span><span class="rating-value rel-label ' + relevanceLabelColorClasses[rec.rating] + '">' + relevanceLabels[rec.rating] + ' (' + (rec.rating - 2) + ')</span><br>';
-                aveRating += rec.rating - 2;
+                html += '<span class="rating-user">' + rec.user.split("@")[0] + ':&nbsp;</span>  <span class="badge ' + relevanceLabelColorClasses[rec.rating] + '">' + (rec.rating - 2) + '</span><br>';
+              aveRating += rec.rating - 2;
             }
         })
     }

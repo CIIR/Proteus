@@ -36,10 +36,13 @@ public class JSONSearch implements JSONHandler {
         String kind = reqp.get("kind", system.defaultKind);
         int numResults = (int) reqp.get("n", 10);
         int skipResults = (int) reqp.get("skip", 0);
+        int corpusid = (int) reqp.get("corpus", -1);
         String userid = reqp.get("userid", "-1");
+        String action = reqp.get("action", "search");
+        String corpusName = reqp.get("corpusName", "");
 
         List<String> labels = new ArrayList<>(); // empty list 
-        List<String> resList = null;
+        List<String> resList =  new ArrayList<>(); // empty list
         if (reqp.containsKey("labels")) {
             labels = reqp.getAsList("labels", String.class);
             // we pass in labels on the URL so it's possible that someone could share
@@ -55,6 +58,27 @@ public class JSONSearch implements JSONHandler {
             }
         }
 
+        // TODO 1st pass - overwrie any label stuff, eventually we'll want to merge
+        // label & corpus resources
+
+        if (action.equals("search-corpus") && corpusid > 0) {
+            // if we're not searching by labels, use the existing list
+            if (resList.isEmpty()) {
+                resList = system.userdb.getAllResourcesForCorpus(Integer.parseInt(userid), corpusid);
+            } else {
+                // TODO: may want to use a set for this, but order may be important to the user
+                // a bit more work to do...
+                List<String> tmpResList = new ArrayList<>();
+                tmpResList = system.userdb.getAllResourcesForCorpus(Integer.parseInt(userid), corpusid);
+                for (String s : tmpResList){
+                    if (!resList.contains(s)){
+                        resList.add(s);
+                    }
+                }
+            }
+        }
+
+
         Node pquery = null;
 
         // it's possible for the query to be empty IF we're searching just by labels
@@ -65,7 +89,8 @@ public class JSONSearch implements JSONHandler {
                 pquery = StructuredQuery.parse(query);
             }
         }
-        proteusLog.info("SEARCH\t{}\t{}\t{}\t{}\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), query, (pquery == null ? "" : pquery.toString()), labels.toString(), kind, numResults, skipResults);
+
+        proteusLog.info("SEARCH\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), query, (pquery == null ? "" : pquery.toString()), labels.toString(), corpusName, kind, numResults, skipResults);
 
         Parameters qp = Parameters.create();
         qp.put("requested", numResults + skipResults);
@@ -73,8 +98,8 @@ public class JSONSearch implements JSONHandler {
 
         List<Parameters> results = Collections.emptyList();
         List<ScoredDocument> docs = null;
-        // if we're searching for labels 
-        if (labels.isEmpty()) {
+        // if we're searching using a working set
+        if (resList.isEmpty()) {
             docs = ListUtil.drop(system.search(kind, pquery, qp), skipResults);
             if (!docs.isEmpty()) {
                 results = DocumentAnnotator.annotate(this.system, kind, docs, pquery, reqp);
