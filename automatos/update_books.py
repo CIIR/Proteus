@@ -80,8 +80,8 @@ def create_file_list(mode, djvu_directory_location, primary_work_directory):
     temp_list_writer = open(temp_list_location,'w')
     actual_files = []
     #find all files within the directory hierarchy
-    for cf in candidate_files:
-        print('Candidate Files:')
+    print('Files Discovered:')
+    for cf in candidate_files:   
         print(cf)
         if os.path.isdir(djvu_directory_location + '/' + cf):
             for fn in os.listdir(djvu_directory_location + '/' + cf):
@@ -90,6 +90,7 @@ def create_file_list(mode, djvu_directory_location, primary_work_directory):
                     actual_files.append(cf + '/' + fn)
         else:
             actual_files.append(cf)
+    print('Files to be Indexed:')
     for fn in actual_files:
         if '_djvu.xml.bz2' in fn:
             if (not mode == 'update') or (timestamp < os.stat(djvu_directory_location + '/' + fn).st_mtime):
