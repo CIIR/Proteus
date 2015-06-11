@@ -8,12 +8,18 @@ import subprocess, os, sys, time
 def main():
     #arguments: optional parameter, djvu file location, output directory
     mode = 'update'
+    djvu_list_location = ''
     primary_work_directory = os.getcwd()
 
-    if sys.argv[1] == '-all' or sys.argv[1] == '-list':
+    if sys.argv[1] == '-all':
         mode = sys.argv[1][1:]
         djvu_directory_location = sys.argv[2]
         output_directory = sys.argv[3]
+    elif sys.argv[1] == '-list':
+        mode = sys.argv[1][1:]
+        djvu_list_location = sys.argv[2]
+        djvu_directory_location = sys.argv[3]
+        output_directory = sys.argv[4]
     else:
         djvu_directory_location = sys.argv[1]
         output_directory = sys.argv[2]        
@@ -30,12 +36,15 @@ def main():
         data = create_file_list(mode, djvu_directory_location, primary_work_directory)
         djvu_list_location = data[0]
         djvu_file_paths = data[1]     
-    else:
-        djvu_list_location = djvu_directory_location
+    elif mode == 'list':
         djvu_file_paths = []
         reader = open(djvu_list_location,'r')
         for line in reader:
-            djvu_file_paths.append(line)
+            #check that each file exists
+            if os.path.exists(djvu_directory_location + '/' + line):
+                djvu_file_paths.append(line)
+            else:
+                print ('ERROR: %s does not exist' % (djvu_directory_location + '/' + line))
         reader.close()
 
     writer = open('timestamp.txt','w')
@@ -46,7 +55,7 @@ def main():
     primary_work_directory = os.getcwd()
        
 
-    djvu_to_rawtei(djvu_list_location, output_directory, primary_work_directory)
+    djvu_to_rawtei(djvu_list_location, output_directory, primary_work_directory, djvu_directory_location)
     if mode == 'all' or mode == 'update':
         os.remove(djvu_list_location)
     #convert toktei to mbtei using Phokas
@@ -91,12 +100,12 @@ def create_file_list(mode, djvu_directory_location, primary_work_directory):
     djvu_list_location = temp_list_location
     return [temp_list_location,djvu_file_paths]
 
-def djvu_to_rawtei(djvu_list_location, output_directory, primary_work_directory):
+def djvu_to_rawtei(djvu_list_location, output_directory, primary_work_directory, input_directory):
     #convert djvu to toktei using Pontos
     #proc = subprocess.Popen("pontos-0.1.0-SNAPSHOT [options] <list of djvu or input files>.gz", stdout=subprocess.PIPE)
 
     
-    command = 'cat %s | java -jar ../pontos/pontos-0.1.0-SNAPSHOT-standalone.jar --input /home/wem/book/djvu/ --output %s' % (djvu_list_location,output_directory)
+    command = 'cat %s | java -jar ../pontos/pontos-0.1.0-SNAPSHOT-standalone.jar --input %s --output %s' % (djvu_list_location,input_directory,output_directory)
     print(command)
     #proc = subprocess.Popen('pontos-0.1.0-SNAPSHOT [options] <list of djvu or input files>.gz', stdout=subprocess.PIPE)
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
