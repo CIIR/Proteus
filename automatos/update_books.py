@@ -45,6 +45,7 @@ def main():
     rawtei_to_toktei(djvu_file_paths, output_directory, primary_work_directory)
     toktei_to_mbtei(djvu_file_paths, output_directory, primary_work_directory)
     #index using Homer
+    build_index(djvu_file_paths, output_directory, primary_work_directory)
 
 def create_file_list(mode, djvu_directory_location, primary_work_directory):
     #create temp list file using djvu_file_location
@@ -116,6 +117,28 @@ def toktei_to_mbtei(djvu_file_paths, output_directory, primary_work_directory):
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     for l in proc.stdout:
         print(l.decode().strip())
+    os.remove(temp_list_location)
+
+def build_index(djvu_file_paths, output_directory, primary_work_directory):
+    temp_list_location = primary_work_directory + '/book_list.txt'
+    temp_list_writer = open(temp_list_location,'w')
+    for path in djvu_file_paths:
+        path = path.replace('_djvu.xml.bz2','.toktei.gz')
+        temp_list_writer.write(output_directory + path)
+    temp_list_writer.close()
+    
+    command = 'java -jar ../homer/target/homer-0.4-SNAPSHOT.jar build ../homer/scripts/pages.conf --server=false --indexPath=demo.pages --inputPath=%s' % (temp_list_location)
+    print(command)
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+    for l in proc.stdout:
+        print(l.decode().strip())
+
+    command = 'java -jar ../homer/target/homer-0.4-SNAPSHOT.jar build ../homer/scripts/books.conf --server=false --indexPath=demo.books --inputPath=%s' % (temp_list_location)
+    print(command)
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+    for l in proc.stdout:
+        print(l.decode().strip())
+
     os.remove(temp_list_location)
 
 main()

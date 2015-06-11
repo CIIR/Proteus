@@ -24,6 +24,12 @@ def setup():
     for l in proc.stdout:
         print(l.decode().strip())
 
+    #build homer
+    os.chdir('../homer')
+    proc = subprocess.Popen(['mvn','package'], stdout=subprocess.PIPE)
+    for l in proc.stdout:
+        print(l.decode().strip())
+
     #return to the automatos directory
     os.chdir('../automatos')
     return primary_work_directory
