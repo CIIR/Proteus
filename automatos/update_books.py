@@ -52,7 +52,7 @@ def main():
 def create_file_list(mode, djvu_directory_location, primary_work_directory):
     #create temp list file using djvu_file_location
 
-    djvu_dirs = os.listdir(djvu_directory_location)
+    candidate_files = os.listdir(djvu_directory_location)
     if os.path.exists('timestamp.txt'):
         reader = open('timestamp.txt','r')
         timestamp = float(reader.readline().strip())
@@ -63,12 +63,24 @@ def create_file_list(mode, djvu_directory_location, primary_work_directory):
     temp_list_location = primary_work_directory + '/book_list.txt'
     djvu_file_paths = []
     temp_list_writer = open(temp_list_location,'w')
-    for djvu_dir in djvu_dirs:
-        for f in os.listdir(djvu_directory_location + '/' + djvu_dir):
-            if '_djvu.xml.bz2' in f:
-                if (not mode == 'update') or (timestamp < os.stat(djvu_directory_location + '/' + djvu_dir + '/' + f).st_mtime):
-                    temp_list_writer.write(djvu_dir + '/' + f)
-                    djvu_file_paths.append(djvu_dir + '/' + f)
+    actual_files = []
+    #find all files within the directory hierarchy
+    for cf in candidate_files:
+        print('Candidate Files:')
+        print(cf)
+        if os.path.isdir(djvu_directory_location + '/' + cf):
+            for fn in os.listdir(djvu_directory_location + '/' + cf):
+                print(cf + '/' + fn)
+                if not os.path.isdir(djvu_directory_location + '/' + cf + '/' + fn):
+                    actual_files.append(cf + '/' + fn)
+        else:
+            actual_files.append(cf)
+    for fn in actual_files:
+        if '_djvu.xml.bz2' in fn:
+            if (not mode == 'update') or (timestamp < os.stat(djvu_directory_location + '/' + fn).st_mtime):
+                print(fn)
+                temp_list_writer.write(fn)
+                djvu_file_paths.append(fn)
     temp_list_writer.close()
     djvu_list_location = temp_list_location
     return [temp_list_location,djvu_file_paths]
