@@ -18,6 +18,12 @@ def main():
         djvu_directory_location = sys.argv[1]
         output_directory = sys.argv[2]        
 
+    #clean directory paths
+    if(djvu_directory_location[-1] == '/'):
+        djvu_directory_location = djvu_directory_location[:-1]
+    if(djvu_directory_location[-1] == '/'):
+        djvu_directory_location = output_directory[:-1]
+
     current_time = time.time()
 
     if mode == 'all' or mode == 'update':
@@ -105,7 +111,7 @@ def rawtei_to_toktei(djvu_file_paths, output_directory, primary_work_directory):
     temp_list_writer = open(temp_list_location,'w')
     for path in djvu_file_paths:
         path = path.replace('_djvu.xml.bz2','.toktei.gz')
-        temp_list_writer.write(output_directory + path)
+        temp_list_writer.write(output_directory + '/' + path)
     temp_list_writer.close()
     
     command = 'cat %s | java -jar ../phokas/phokas-1.0.0-SNAPSHOT-standalone.jar' % (temp_list_location)
@@ -123,7 +129,7 @@ def toktei_to_mbtei(djvu_file_paths, output_directory, primary_work_directory):
     temp_list_writer = open(temp_list_location,'w')
     for path in djvu_file_paths:
         path = path.replace('_djvu.xml.bz2','.mbtei.gz')
-        temp_list_writer.write(output_directory + path)
+        temp_list_writer.write(output_directory + '/' + path)
     temp_list_writer.close()
     
     command = 'cat %s | java -jar ../phokas/phokas-1.0.0-SNAPSHOT-standalone.jar' % (temp_list_location)
@@ -138,7 +144,7 @@ def build_index(djvu_file_paths, output_directory, primary_work_directory):
     temp_list_writer = open(temp_list_location,'w')
     for path in djvu_file_paths:
         path = path.replace('_djvu.xml.bz2','.toktei.gz')
-        temp_list_writer.write(output_directory + path)
+        temp_list_writer.write(output_directory + '/' + path)
     temp_list_writer.close()
     
     command = 'java -jar ../homer/target/homer-0.4-SNAPSHOT.jar build ../homer/scripts/pages.conf --server=false --indexPath=demo.pages --inputPath=%s' % (temp_list_location)
