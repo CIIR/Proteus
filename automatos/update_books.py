@@ -12,18 +12,20 @@ def main():
 
     if sys.argv[1] == '-all' or sys.argv[1] == '-list':
         mode = sys.argv[1][1:]
+        djvu_directory_location = sys.argv[2]
+        output_directory = sys.argv[3]
+    else:
+        djvu_directory_location = sys.argv[1]
+        output_directory = sys.argv[2]        
 
     current_time = time.time()
 
     if mode == 'all' or mode == 'update':
-        djvu_directory_location = sys.argv[2]
-        output_directory = sys.argv[3]
         data = create_file_list(mode, djvu_directory_location, primary_work_directory)
         djvu_list_location = data[0]
         djvu_file_paths = data[1]     
     else:
-        djvu_list_location = sys.argv[1]
-        output_directory = sys.argv[2]
+        djvu_list_location = djvu_directory_location
         djvu_file_paths = []
         reader = open(djvu_list_location,'r')
         for line in reader:
@@ -64,7 +66,7 @@ def create_file_list(mode, djvu_directory_location, primary_work_directory):
     for djvu_dir in djvu_dirs:
         for f in os.listdir(djvu_directory_location + '/' + djvu_dir):
             if '_djvu.xml.bz2' in f:
-                if (not mode == 'update') or (timestamp < os.stat(f).st_mtime):
+                if (not mode == 'update') or (timestamp < os.stat(djvu_directory_location + '/' + djvu_dir + '/' + f).st_mtime):
                     temp_list_writer.write(djvu_dir + '/' + f)
                     djvu_file_paths.append(djvu_dir + '/' + f)
     temp_list_writer.close()
