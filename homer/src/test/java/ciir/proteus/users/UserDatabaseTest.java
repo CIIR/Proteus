@@ -549,6 +549,7 @@ public class UserDatabaseTest {
     String res1 = "a_resource";
     String res2 = "b_resource";
     String res3 = "c_resource";
+    String res4 = "d_resource";
 
     db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4);
     db.upsertResourceRating(cred, res3, cred.userid, corpus1, 4);
@@ -557,7 +558,7 @@ public class UserDatabaseTest {
 
     List<String> results = new ArrayList<>();
 
-    results = db.getResourcesForCorpus( cred.userid, corpus1, -1, -1) ;
+    results = db.getResourcesForCorpus(cred.userid, corpus1, -1, -1) ;
     assertArrayEquals(new String[]{res1, res3}, results.toArray());
 
     results = db.getResourcesForCorpus( cred.userid, corpus1, 2, 1) ;
@@ -575,7 +576,7 @@ public class UserDatabaseTest {
     db.upsertResourceRating(cred, res2, cred.userid, corpus1, 0);
 
     results = db.getResourcesForCorpus(cred.userid, corpus1, -1, -1) ;
-    assertArrayEquals(new String[]{res1,  res3}, results.toArray());
+    assertArrayEquals(new String[]{res1, res3}, results.toArray());
 
     // now give it a non-zero so it'll be returned
     db.upsertResourceRating(cred, res2, cred.userid, corpus1, 1);
@@ -587,8 +588,86 @@ public class UserDatabaseTest {
     results = db.getAllResourcesForCorpus(cred.userid, corpus1) ;
     assertArrayEquals(new String[]{res1, res2, res3}, results.toArray());
 
+    // now add some notes so we see if they are returned
+    // add a note to a different corpus - shouldn't change results
+    db.insertNote(cred, corpus2, res4, "{ data: '123' }");
+    results = db.getAllResourcesForCorpus(cred.userid, corpus1) ;
+    assertArrayEquals(new String[]{res1, res2, res3}, results.toArray());
+
+    // now add it to the corpus we're getting the resources for
+    db.insertNote(cred, corpus1, res4, "{ data: '123' }");
+    results = db.getAllResourcesForCorpus(cred.userid, corpus1) ;
+    assertArrayEquals(new String[]{res1, res2, res3, res4}, results.toArray());
+
+    // add resource to notes that already exists in ratings to ensure no duplicates
+    db.insertNote(cred, corpus1, res2, "{ data: '123' }");
+    results = db.getAllResourcesForCorpus(cred.userid, corpus1) ;
+    assertArrayEquals(new String[]{res1, res2, res3, res4}, results.toArray());
   }
 
+
+  @Test
+  public void noteTest() throws DBError, IOException, SQLException {
+    String user = "new-user";
+    db.register(user);
+    Parameters p = db.login(user);
+
+    Credentials cred = new Credentials(p);
+
+    db.createCorpus("a", "user");
+    db.createCorpus("b", "user");
+    Integer corpus1 = 1;
+    Integer corpus2 = 2;
+
+    // no notes for a resource
+    Parameters notes = db.getNotesForResource("i do not exist", corpus1);
+    assertEquals(notes.get("total", -1), 0);
+
+    // add notes for a resource
+    String resource = "res1";
+    Integer id = db.insertNote(cred, corpus1, resource, "{ \"data\": \"123\" }");
+    assertEquals(id.longValue(), 1L);
+    id = db.insertNote(cred, corpus1, resource, "{ \"data\": \"abc\" }");
+
+    // add note for a different resource
+    String resource2 = "res2";
+    id = db.insertNote(cred, corpus1, resource2, "{ \"name\": \"res2\" }");
+
+    notes = db.getNotesForResource( resource, corpus1);
+    assertEquals(notes.get("total", -1), 2);
+    List<Parameters> arr = notes.getAsList("rows");
+
+    // we can't be sure of the order, so check both
+    Parameters data_123 = Parameters.create();
+    data_123.put("data", "123");
+    Parameters data_abc = Parameters.create();
+    data_abc.put("data", "abc");
+
+    assertTrue(arr.contains(data_123));
+    assertTrue(arr.contains(data_abc));
+
+    // test update
+    db.updateNote(cred, corpus1, 1, "{ \"new\" : \"data\" }");
+    notes = db.getNotesForResource(resource, corpus1);
+    assertEquals(notes.get("total", -1), 2);
+    arr = notes.getAsList("rows");
+
+    Parameters new_data = Parameters.create();
+    new_data.put("new", "data");
+
+    assertTrue(arr.contains(new_data));
+    assertTrue(arr.contains(data_abc));
+
+
+    // test delete
+    db.deleteNote(cred, corpus1, 1);
+    notes = db.getNotesForResource( resource, corpus1);
+    assertEquals(notes.get("total", -1), 1);
+    arr = notes.getAsList("rows");
+
+    assertTrue(arr.contains(data_abc));
+
+  }
 
 }
 

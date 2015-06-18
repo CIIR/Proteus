@@ -1,347 +1,362 @@
 ﻿<html>
-<head>
-    <script>
-        // check if the browser supports local storage, we have to do this FIRST
-        // before any other JS stuff which could cause other issues and cause this
-        // to get skipped.
-        // from: http://diveintohtml5.info/detect.html#storage
-        function check(){
-            try {
-                return 'localStorage' in window && window['localStorage'] !== null;
-            } catch(e){
-                return false;
-            }
-        }
-
-        if (check() == false) {
-            alert("You are using an old browser, please upgrade.");
-            document.execCommand("Stop"); // for IE
-            window.stop(); //works in all browsers but IE
-        }
-    </script>
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title id="proteus-title">Proteus: Search</title>
-
-    <!-- Bootstrap -->
-    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/history.js/1.8/native.history.min.js"></script>
-
-    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
-    <script src="js/jquery.cookie.js"></script>
-    <link href="css/fancytree/ui.fancytree.css" rel="stylesheet" type="text/css">
-    <script src="js/jquery.fancytree-all.js" type="text/javascript"></script>
-
-    <!-- scripts included here evaluate before the page loads -->
-    <script src="js/API.js"></script>
-    <script src="js/util.js"></script>
-    <script src="js/render.js"></script>
-    <script src="js/internetArchive.js"></script>
-    <script src="js/acmdl.js"></script>
-    <script src="js/tag-it.js" type="text/javascript" charset="utf-8"></script>
-
-    <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="css/style.css" type="text/css"/>
-
-    <!-- Add fancyBox -->
-    <link rel="stylesheet" href="js/fancybox/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen"/>
-    <script type="text/javascript" src="js/fancybox/jquery.fancybox.pack.js?v=2.1.5"></script>
-
-    <link rel="stylesheet" href="css/jquery-ui-slider-pips.css" type="text/css" media="screen"/>
-    <script type="text/javascript" src="js/jquery-ui-slider-pips.js"></script>
-
-    <script>
-
-        var showSideBarFlag = true;
-
-        $(document).ready(function () {
-
-            UI.populateRecentSearches();
-
-            // !!! HACK to get scrollbars at the bottom working when zooming or resizing browser
-            // TODO: should be able to do this in CSS like I did for the navbar at the top: http://stackoverflow.com/questions/10336194/twitter-bootstrap-top-nav-bar-blocking-top-content-of-the-page
-            // TODO: THIS also messes up the auto-retrieve
-            $(window).resize(function () {
-                $('body').css('padding-bottom', parseInt($('#footer').css("height")) + 10);
-            });
-
-            $(window).load(function () {
-                $('body').css('padding-bottom', parseInt($('#footer').css("height")) + 10);
-            });
-
-            UI.updateCorpusListButton();
-            bindCorpusMenuClick();
-            UI.populateRatedDocuments();
-
-            // put focus on the name field when the modal box is shown
-            $('#newCorpusDialog').on('shown.bs.modal', function () {
-                $('#corpus-name').focus();
-            })
-
-            $('#newCorpusSave').click(function () {
-                submitCorpusDialog();
-            });
-
-
-            $("#accordion").accordion({
-                //       heightStyle: "fill",
-                collapsible: true
-            });
-            $(document).ready(function () {
-                $(".fancybox").fancybox();
-            });
-
-            $("#overlay").hide();
-            $("#ui-search").keyup(function (evt) {
-                if (evt.keyCode == 13) {
-                    $(".default-search-button").click();
+    <head>
+        <script>
+            // check if the browser supports local storage, we have to do this FIRST
+            // before any other JS stuff which could cause other issues and cause this
+            // to get skipped.
+            // from: http://diveintohtml5.info/detect.html#storage
+            function check() {
+                try {
+                    return 'localStorage' in window && window['localStorage'] !== null;
+                } catch (e) {
+                    return false;
                 }
-            });
-
-            $('#rateDialog').hide();
-            // we're using the default validation for the email field,
-            // so if that validation passes, perform the login
-            $('#login-nav').submit(function (event) {
-
-                event.preventDefault();
-                $("#login-form").removeClass("open"); // close the form
-                var username = $("#login-email").val();
-                logIn(username);
-            });
-
-            var urlParams = getURLParams();
-            var tmpShowSideBar = urlParams["showSideBar"];
-
-            // if not logged in, hide the user info
-            if (isLoggedIn() == false){
-                $("#corpus-info").hide();
-                $("#ui-go-settings").hide();
-            }
-            if (isLoggedIn() == false || (!_.isUndefined(tmpShowSideBar) && tmpShowSideBar === "0")) {
-                $("#user-info").hide();
-                hideSideBar();
-            } else {
-                showSideBar();
             }
 
-            enableAutoRetrieve();
+            if (check() == false) {
+                alert("You are using an old browser, please upgrade.");
+                document.execCommand("Stop"); // for IE
+                window.stop(); //works in all browsers but IE
+            }
+        </script>
 
-        });</script>
-    <script type="text/javascript">
-        var treeData = [];
-        $(function () {
-            $("#tree").fancytree({
-                //    extensions: ["persist"],
-                checkbox: true,
-                selectMode: 3,
-                source: treeData,
-                loadChildren: function (event, ctx) {
-                    ctx.node.fixSelection3AfterClick();
-                },
-                select: null,
-                dblclick: function (event, data) {
-                    data.node.toggleSelected();
-                },
-                keydown: function (event, data) {
-                    if (event.which === 32) {
-                        data.node.toggleSelected();
-                        return false;
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title id="proteus-title">Proteus: Search</title>
+
+        <!-- Bootstrap -->
+        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/history.js/1.8/native.history.min.js"></script>
+
+        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+        <script src="js/jquery.cookie.js"></script>
+        <link href="css/fancytree/ui.fancytree.css" rel="stylesheet" type="text/css">
+        <script src="js/jquery.fancytree-all.js" type="text/javascript"></script>
+
+        <!-- scripts included here evaluate before the page loads -->
+        <script src="js/API.js"></script>
+        <script src="js/util.js"></script>
+        <script src="js/render.js"></script>
+        <script src="js/internetArchive.js"></script>
+        <script src="js/acmdl.js"></script>
+        <script src="js/tag-it.js" type="text/javascript" charset="utf-8"></script>
+
+        <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="css/style.css" type="text/css"/>
+
+        <!-- Add fancyBox -->
+        <link rel="stylesheet" href="js/fancybox/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen"/>
+        <script type="text/javascript" src="js/fancybox/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+        <link rel="stylesheet" href="css/jquery-ui-slider-pips.css" type="text/css" media="screen"/>
+        <script type="text/javascript" src="js/jquery-ui-slider-pips.js"></script>
+
+        <link rel="stylesheet" href="annotator-full.1.2.10/annotator.min.css" type="text/css" media="screen"/>
+        <script type="text/javascript" src="annotator-full.1.2.10/annotator-full.min.js"></script>
+
+
+
+        <script>
+
+            var showSideBarFlag = true;
+
+            $(document).ready(function() {
+
+                // initImportantEntities();
+                UI.populateRecentSearches();
+
+                // !!! HACK to get scrollbars at the bottom working when zooming or resizing browser
+                // TODO: should be able to do this in CSS like I did for the navbar at the top: http://stackoverflow.com/questions/10336194/twitter-bootstrap-top-nav-bar-blocking-top-content-of-the-page
+                // TODO: THIS also messes up the auto-retrieve
+                $(window).resize(function() {
+                    //         $('body').css('padding-bottom', parseInt($('#footer').css("height")) + parseInt($('#mz-bottom').css("height")) + 20);
+                    $('body').css('padding-bottom', parseInt($('#footer').css("height")) + 30);
+                    // TODO: 10 works on main search - 30 on page/book view,
+                    // probably time to have 2 different html files.
+                });
+
+                $(window).load(function() {
+                    $('body').css('padding-bottom', parseInt($('#footer').css("height")) + 10);
+                });
+
+                UI.updateCorpusListButton();
+                bindCorpusMenuClick();
+                UI.populateRatedDocuments();
+
+                // put focus on the name field when the modal box is shown
+                $('#newCorpusDialog').on('shown.bs.modal', function() {
+                    $('#corpus-name').focus();
+                })
+
+                $('#newCorpusSave').click(function() {
+                    submitCorpusDialog();
+                });
+
+
+                $("#accordion").accordion({
+                    //       heightStyle: "fill",
+                    collapsible: true
+                });
+                $(document).ready(function() {
+                    $(".fancybox").fancybox();
+                });
+
+                $("#overlay").hide();
+                $("#ui-search").keyup(function(evt) {
+                    if (evt.keyCode == 13) {
+                        $(".default-search-button").click();
                     }
-                },
-                // The following options are only required, if we have more than one tree on one page:
-                //				initId: "treeData",
-                cookieId: "fancytree-Cb3",
-                idPrefix: "fancytree-Cb3-"
+                });
+
+                $('#rateDialog').hide();
+                // we're using the default validation for the email field,
+                // so if that validation passes, perform the login
+                $('#login-nav').submit(function(event) {
+
+                    event.preventDefault();
+                    $("#login-form").removeClass("open"); // close the form
+                    var username = $("#login-email").val();
+                    logIn(username);
+                });
+
+                var urlParams = getURLParams();
+                var tmpShowSideBar = urlParams["showSideBar"];
+
+                // if not logged in, hide the user info
+                if (isLoggedIn() == false) {
+                    $("#corpus-info").hide();
+                    $("#ui-go-settings").hide();
+                }
+                if (isLoggedIn() == false || (!_.isUndefined(tmpShowSideBar) && tmpShowSideBar === "0")) {
+                    $("#user-info").hide();
+                    hideSideBar();
+                } else {
+                    showSideBar();
+                }
+
+                enableAutoRetrieve();
+
+            });</script>
+        <script type="text/javascript">
+            var treeData = [];
+            $(function() {
+                $("#tree").fancytree({
+                    //    extensions: ["persist"],
+                    checkbox: true,
+                    selectMode: 3,
+                    source: treeData,
+                    loadChildren: function(event, ctx) {
+                        ctx.node.fixSelection3AfterClick();
+                    },
+                    select: null,
+                    dblclick: function(event, data) {
+                        data.node.toggleSelected();
+                    },
+                    keydown: function(event, data) {
+                        if (event.which === 32) {
+                            data.node.toggleSelected();
+                            return false;
+                        }
+                    },
+                    // The following options are only required, if we have more than one tree on one page:
+                    //				initId: "treeData",
+                    cookieId: "fancytree-Cb3",
+                    idPrefix: "fancytree-Cb3-"
+                });
+
             });
 
-        });
+        </script>
+    </head>
+    <body>
 
-    </script>
-</head>
-<body>
+        <nav class="navbar navbar-default navbar-static-top">
+            <div class="container-fluid " id="ui">
+                <div class="row clearfix">
+                    <img id="sidebar-button" src="images/sidebar_expand.png"/>
+                    <span class="col-md-4 column col-1-class"> <div id="title">Proteus</div>
+                        <a href="https://github.com/CIIR/Proteus/issues/new">Report an issue or make a suggestion</a></span>
 
-<nav class="navbar navbar-default navbar-static-top">
-    <div class="container-fluid " id="ui">
-        <div class="row clearfix">
-            <img id="sidebar-button" src="images/sidebar_expand.png"/>
-                   <span class="col-md-4 column col-1-class"> <div id="title">Proteus</div>
-                       <a href="https://github.com/CIIR/Proteus/issues/new">Report an issue or make a suggestion</a></span>
+                    <div class="col-md-4 column right-align col-2-class">
 
-            <div class="col-md-4 column right-align col-2-class">
+                        <div class="input-group input-group-sm">
+                            <input id="ui-search" type="text" placeholder="Search..." class="form-control">
 
-                <div class="input-group input-group-sm">
-                    <input id="ui-search" type="text" placeholder="Search..." class="form-control">
+                            <div class="input-group-btn">
+                                <button id="search-buttons" type="button" class="btn btn-default default-search-button"
+                                        tabindex="-1"><span class="glyphicon glyphicon-search"></span> Search
+                                </button>
+                                <button type="button" class="btn btn-default dropdown-toggle"
+                                        data-toggle="dropdown" tabindex="-1">
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <ul id="search-button-choices" class="dropdown-menu pull-right" role="menu">
 
-                    <div class="input-group-btn">
-                        <button id="search-buttons" type="button" class="btn btn-default default-search-button"
-                                tabindex="-1"><span class="glyphicon glyphicon-search"></span> Search
-                        </button>
-                        <button type="button" class="btn btn-default dropdown-toggle"
-                                data-toggle="dropdown" tabindex="-1">
-                            <span class="caret"></span>
-                            <span class="sr-only">Toggle Dropdown</span>
-                        </button>
-                        <ul id="search-button-choices" class="dropdown-menu pull-right" role="menu">
+                                </ul>
+                                <span><a
+                                        href="https://docs.google.com/document/d/1ZtuJf30qVRvfgs5wrdFGdOpp5OXMAOJql4LWhiOqluQ/edit#bookmark=id.lco22umrxc9i"
+                                        target="_blank" id="search-help"><img src="images/help.png"></a></span>
 
-                        </ul>
-                        <span><a
-                                href="https://docs.google.com/document/d/1ZtuJf30qVRvfgs5wrdFGdOpp5OXMAOJql4LWhiOqluQ/edit#bookmark=id.lco22umrxc9i"
-                                target="_blank" id="search-help"><img src="images/help.png"></a></span>
-
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <div id="user-info" class="col-md-2 column col-3-class"></div>
-            <div id="ui-login-form" class="col-md-2 column col-3-class">
+                    <div id="user-info" class="col-md-2 column col-3-class"></div>
+                    <div id="ui-login-form" class="col-md-2 column col-3-class">
 
-                <ul>
-                    <li id="login-form" class="dropdown">
-                        <button class="dropdown-toggle btn btn-sm" data-toggle="dropdown">Sign in <b class="caret"></b>
-                        </button>
-                        <ul class="dropdown-menu" style="padding: 15px;min-width: 250px;">
-                            <li>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <form class="form" role="form" accept-charset="UTF-8" id="login-nav">
-                                            <div class="form-group">
-                                                <label class="sr-only" for="login-email">Email address</label>
-                                                <input type="email" class="form-control" id="login-email"
-                                                       placeholder="Email address" required>
+                        <ul>
+                            <li id="login-form" class="dropdown">
+                                <button class="dropdown-toggle btn btn-sm" data-toggle="dropdown">Sign in <b class="caret"></b>
+                                </button>
+                                <ul class="dropdown-menu" style="padding: 15px;min-width: 250px;">
+                                    <li>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <form class="form" role="form" accept-charset="UTF-8" id="login-nav">
+                                                    <div class="form-group">
+                                                        <label class="sr-only" for="login-email">Email address</label>
+                                                        <input type="email" class="form-control" id="login-email"
+                                                               placeholder="Email address" required>
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <button id="ui-go-loginx" type="submit"
+                                                                class="btn  btn-success  btn-block ">Sign in
+                                                        </button>
+                                                    </div>
+                                                </form>
                                             </div>
-
-                                            <div class="form-group">
-                                                <button id="ui-go-loginx" type="submit"
-                                                        class="btn  btn-success  btn-block ">Sign in
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
+                                        </div>
+                                    </li>
+                                </ul>
                             </li>
                         </ul>
-                    </li>
-                </ul>
-            </div>
-            <!-- login based on code from http://bootsnipp.com/snippets/featured/nav-bar-with-popup-sign-in -->
-
-            <div class="col-md-2 column col-4-class">
-                <span id="corpus-info">
-                <span class="login-form-text">Corpus:&nbsp;</span>
-
-                <div id="active-corpus" class="btn-group">
-                    <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
-                            aria-expanded="false">
-                        <span class="selection">Select a corpus</span>&nbsp;<span class="caret"></span>
-                    </button>
-                    <ul id="corpus-list" class="dropdown-menu" role="menu">
-                        <li id="corpus-list-divider" class="divider"></li>
-                        <li><a href="#">New...</a></li>
-                    </ul>
-                </div>
-                    </span>
-                <span>
-
-                    <a href="settings.html" target="_blank" id="ui-go-settings" class="btn btn-default  ">
-                        <span class="glyphicon glyphicon-cog"></span>
-                    </a>
-                </span>
-
-            </div>
-        </div>
-    </div>
-</nav>
-
-<div id="error"></div>
-<div id="request"></div>
-
-<div id="all-tags"></div>
-
-<div id="results-left" class="col-md-2 column">
-    <div id="accordion">
-        <h3>Recent Searches</h3>
-
-        <div id="pastSearches"></div>
-
-    </div>
-    <div id="ratings">
-        <br><br>
-    </div>
-
-
-    <div id="tree">
-        <div id="empty-tree"></div>
-    </div>
-</div>
-
-
-<div id="results-right" class="col-md-10 column right-align">
-    <div id="per-cloud" hidden="true">
-        <div id="per-cloud-contents"></div>
-    </div>
-    <div id="metadata"></div>
-    <div id="results"></div>
-    <div id="view-resource">
-        <div  class="row clearfix btn" id="view-nav-top"></div>
-        <div id="book-pages"> </div>
-        <div class="row clearfix btn" id="view-nav-bottom"></div>
-    </div>
-    <div class="row clearfix ">
-
-        <div id="more"></div>
-        <div id="footer">
-            <div id="progress"></div>
-        </div>
-    </div>
-</div>
-
-<!-- modal dialog to get a new corpus' name -->
-<div class="modal fade" id="newCorpusDialog" tabindex="-1" role="dialog" aria-labelledby="newCorpusLabel"
-     aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="newCorpusLabel">Enter a corpus name:</h4>
-            </div>
-            <div class="modal-body">
-                <form onsubmit="submitCorpusDialog(); return false;">
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="corpus-name"  min="0">
                     </div>
-                    <div id="corpusError" class="alert alert-danger fade" role="alert"></div>
-                </form>
+                    <!-- login based on code from http://bootsnipp.com/snippets/featured/nav-bar-with-popup-sign-in -->
+
+                    <div class="col-md-2 column col-4-class">
+                        <span id="corpus-info">
+                            <span class="login-form-text">Corpus:&nbsp;</span>
+
+                            <div id="active-corpus" class="btn-group">
+                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
+                                        aria-expanded="false">
+                                    <span class="selection">Select a corpus</span>&nbsp;<span class="caret"></span>
+                                </button>
+                                <ul id="corpus-list" class="dropdown-menu" role="menu">
+                                    <li id="corpus-list-divider" class="divider"></li>
+                                    <li><a href="#">New...</a></li>
+                                </ul>
+                            </div>
+                        </span>
+                        <span>
+
+                            <a href="settings.html" target="_blank" id="ui-go-settings" class="btn btn-default  ">
+                                <span class="glyphicon glyphicon-cog"></span>
+                            </a>
+                        </span>
+
+                    </div>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn" data-dismiss="modal">Cancel</button>
-                <button type="button" id="newCorpusSave" class="btn btn-primary btn-default">Save</button>
+        </nav>
+
+        <div id="error"></div>
+        <div id="request"></div>
+
+        <div id="all-tags"></div>
+
+        <div id="results-left" class="col-md-2 column">
+            <div id="accordion">
+                <h3>Recent Searches</h3>
+
+                <div id="pastSearches"></div>
+
+            </div>
+            <div id="ratings">
+                <br><br>
+            </div>
+
+            <div id="ocr-options">
+                <input checked type="checkbox" id="cb-per" value="per" onclick="handleNERHilightClick(this, 'per');" /><span class="per"> People</span><br />
+                <input checked type="checkbox" id="cb-org" value="org" onclick="handleNERHilightClick(this, 'org');" /><span class="org"> Organizations</span><br />
+                <input checked type="checkbox" id="cb-loc" value="loc" onclick="handleNERHilightClick(this, 'loc');" /><span class="loc"> Places</span><br />
+
+            </div>
+            <div id="tree">
+                <div id="empty-tree"></div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- scripts included here evaluate after the page loads -->
-<!-- Include all compiled plugins (below), or include individual files as needed -->
-<script src="bootstrap/js/bootstrap.min.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/actions.js"></script>
-<script src="js/main.js"></script>
 
-</body>
-<div id='overlay'></div>
+        <div id="results-right" class="col-md-10 column right-align">
+            <div id="per-cloud" hidden="true">
+                <div id="per-cloud-contents"></div>
+            </div>
+            <div id="metadata"></div>
+            <div id="results"></div>
+            <div id="view-resource">
+                <div  class="row clearfix btn" id="view-nav-top"></div>
+                <div id="book-pages"> </div>
+                <div class="row clearfix btn" id="view-nav-bottom"></div>
+            </div>
+            <div class="row clearfix ">
+
+                <div id="more"></div>
+                <div id="footer">
+                    <div id="progress"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- modal dialog to get a new corpus' name -->
+        <div class="modal fade" id="newCorpusDialog" tabindex="-1" role="dialog" aria-labelledby="newCorpusLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="newCorpusLabel">Enter a corpus name:</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form onsubmit="submitCorpusDialog();
+                        return false;">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="corpus-name"  min="0">
+                            </div>
+                            <div id="corpusError" class="alert alert-danger fade" role="alert"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+                        <button type="button" id="newCorpusSave" class="btn btn-primary btn-default">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- scripts included here evaluate after the page loads -->
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="bootstrap/js/bootstrap.min.js"></script>
+        <script src="js/ui.js"></script>
+        <script src="js/actions.js"></script>
+        <script src="js/main.js"></script>
+
+    </body>
+    <div id='overlay'></div>
 
 </html>

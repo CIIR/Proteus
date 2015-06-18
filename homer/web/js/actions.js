@@ -186,7 +186,8 @@ var getPageHTML = function(text, pageID, pageNum){
     var pgImage = pageImage(pageID, pageNum);
     var pgTxt=  processTags(text);
     return '<div class="book-page row clearfix ">' +
-            '<div  class="book-text col-md-5 column left-align">' + pgTxt + '</div>'+
+                    '<a name="page-' + pageID + '-' +  pageNum + '"></a> ' +
+            '<div id="page-' + pageID + '-' +  pageNum + '" class="book-text col-md-5 column left-align">' + pgTxt + '</div>'+
             '<div  class="page-image col-md-5 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img src="' + pgImage + '"></a></div>' +
             '</div>';
 
@@ -217,7 +218,8 @@ var viewPrevPageSuccess = function(args) {
         return;
     }
     if (!_.isUndefined(args.text)) {
-
+    // TODO <div> logic can go in getPageHTML
+  //      var html = '<div class="zitate" id="page-' + args.request.page_id + '-' +  args.request.page_num + '">' + getPageHTML(args.text, args.request.page_id, args.request.page_num) + '</div>';
         var html = getPageHTML(args.text, args.request.page_id, args.request.page_num);
 
         // find the first instance of the "book-page" class and append to that:
@@ -230,9 +232,79 @@ var viewPrevPageSuccess = function(args) {
     }
     page.previous -= 1;
     setPageNavigation(args.request.page_id);
+    initAnnotationLogic(args.request.page_id, args.request.page_num);
 
 }
 
+
+var initAnnotationLogic = function(pageID, pageNum){
+
+    var corpus = getCookie("corpus");
+    if (!isLoggedIn() || corpus == "")
+        return;
+
+    var userName = getCookie("username");
+    var userToken = getCookie("token");
+    var userID = getCookie("userid");
+
+    var corpusID = getCorpusID(corpus);
+    var resource = 'page-' + pageID + '-' +  pageNum;
+    var el = '#' +  resource;
+    $(el).annotator().data('annotator');
+
+        $(el).annotator('addPlugin', 'Store', {
+
+           annotationData: {
+                uri : resource,
+               user: {
+                   id: parseInt(userID),
+                   name:  userName
+               },
+                token: userToken,
+                corpus: parseInt(corpusID)
+            },
+            loadFromSearch: {
+                 'uri': resource,
+                corpus:  parseInt(corpusID)
+            },
+            urls: {
+                // These are the default URLs.
+                create:  '/annotations/ins',
+                update:  '/annotations/upd/:id',
+                destroy: '/annotations/del/:id',
+                search:  '/annotations/search'
+            }
+        });
+
+    $(el).annotator('addPlugin', 'Permissions', {
+        user: {
+            id: parseInt(userID),
+            name:  userName
+        },
+        showViewPermissionsCheckbox: false,
+        showEditPermissionsCheckbox: false,
+        userId: function (user) {
+            if (user && user.id) {
+                return parseInt(user.id);
+            }
+            return user;
+        },
+        userString: function (user) {
+            if (user && user.name) {
+                return user.name;
+            }
+            return user;
+        },
+        userAuthorize: function(action, annotation, user) {
+            // MCZ: for some reason you can delete a post even if you're not
+            // allowed to edit it... doesn't make much sense to me. Making it
+            // (for now) that only creator can edit/delete.
+            return this.userId(user) === this.userId(annotation.user);
+            }
+    });
+
+
+}
 var viewNextPageSuccess = function(args) {
 
     // check if we're going beyond the end. We use the "number of images"
@@ -265,6 +337,8 @@ var viewNextPageSuccess = function(args) {
    }
     page.next += 1;
     setPageNavigation(args.request.page_id);
+
+    initAnnotationLogic(args.request.page_id, args.request.page_num);
 
 }
 
@@ -353,6 +427,7 @@ var onViewPageSuccess = function(args) {
     //  viewResourceDiv.html(html);
     setPageNavigation(pageID);
     viewResourceDiv.show();
+    initAnnotationLogic(identifier, pageNum);
     UI.showProgress("");
 
 };
@@ -373,7 +448,11 @@ var onViewBookSuccess = function(args) {
     })
     metaHtml += '</table></div>'
     metadataDiv.html(metaHtml);
+
+    var pgTxt= processTags(args.text);
+
     var html =  '<a class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>';
+    html +=  '<div id="page-' + args.request.id + '-0" >' + pgTxt + '</div>';
     //
     //    html += '<div>[<span class="per">PERSON</span>]&nbsp;[<span class="loc">LOCATION</span>]&nbsp;[<span class="org">ORGANIZATION</span>]</div>';
     //    if (args.request.kind == 'ia-pages'){
@@ -381,10 +460,9 @@ var onViewBookSuccess = function(args) {
     //        html += '<div id="prevPage"></div>';
     //    }
 
-    html += processTags(args.text);
-
     viewResourceDiv.html(html);
     viewResourceDiv.show();
+    initAnnotationLogic(args.request.id, 0);
     UI.showProgress("");
 
 };
@@ -408,10 +486,23 @@ var setPageNavigation = function(pageID) {
 }
 
  var processTags = function(text){
-     text = text.replace(perStartRegEx, "<span class=\"per\">");
-     text = text.replace(locStartRegEx, "<span class=\"loc\">");
-     text= text.replace(orgStartRegEx, "<span class=\"org\">");
+     if (document.getElementById("cb-per").checked)
+         text = text.replace(perStartRegEx, "<span class=\"per\">");
+     else
+         text = text.replace(perStartRegEx, "<span class=\"per-off\">");
+
+     if (document.getElementById("cb-loc").checked)
+         text = text.replace(locStartRegEx, "<span class=\"loc\">");
+     else
+         text = text.replace(locStartRegEx, "<span class=\"loc-off\">");
+
+     if (document.getElementById("cb-org").checked)
+         text= text.replace(orgStartRegEx, "<span class=\"org\">");
+     else
+         text= text.replace(orgStartRegEx, "<span class=\"org-off\">");
+
      text = text.replace(endRegEx, "</span>");
+
      return text;
  }
 

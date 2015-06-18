@@ -7,6 +7,7 @@ import ciir.proteus.users.error.*;
 import org.h2.constant.ErrorCode;
 import org.lemurproject.galago.utility.Parameters;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
@@ -78,6 +79,11 @@ public class H2Database implements UserDatabase {
 
       conn.createStatement().executeUpdate("create table IF NOT EXISTS resource_ratings (USER_ID BIGINT NOT NULL, CORPUS_ID BIGINT NOT NULL, resource varchar(256) NOT NULL, rating int NOT NULL default 0, foreign key (user_id) references users(id), foreign key (corpus_id) references corpora(id))");
       conn.createStatement().executeUpdate("create unique index IF NOT EXISTS resource_rating_idx on resource_ratings(user_id, corpus_id, resource)");
+
+      conn.createStatement().executeUpdate("create sequence IF NOT EXISTS note_seq");
+      conn.createStatement().executeUpdate("create table IF NOT EXISTS notes (ID BIGINT NOT NULL, CORPUS_ID BIGINT NOT NULL, resource VARCHAR(256) NOT NULL, data VARCHAR(2000) NOT NULL, PRIMARY KEY (ID), foreign key (corpus_id) references corpora(id))");
+      conn.createStatement().executeUpdate("create index IF NOT EXISTS notes_res_idx on notes(resource)");
+
 
     } catch (SQLException e) {
       e.printStackTrace();
@@ -825,15 +831,19 @@ public class H2Database implements UserDatabase {
       ResultSet results = null;
 
       if (numResults == -1) {
-        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM resource_ratings WHERE corpus_id = ? AND rating != 0 ORDER BY resource");
+        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM resource_ratings WHERE corpus_id = ? AND rating != 0 " +
+                " UNION SELECT DISTINCT resource FROM notes WHERE corpus_id = ? ORDER BY resource");
         sql.setInt(1, corpusID);
+        sql.setInt(2, corpusID);
         results = sql.executeQuery();
       } else {
         // we need to ORDER BY to ensure the result sets will always be in the same order.
-        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM resource_ratings WHERE corpus_id = ? AND rating != 0 ORDER BY resource LIMIT ? OFFSET ?");
+        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM resource_ratings WHERE corpus_id = ? AND rating != 0 " +
+                " UNION SELECT DISTINCT resource FROM notes WHERE corpus_id = ? ORDER BY resource LIMIT ? OFFSET ?");
         sql.setInt(1, corpusID);
-        sql.setInt(2, numResults);
-        sql.setInt(3, startIndex);
+        sql.setInt(2, corpusID);
+        sql.setInt(3, numResults);
+        sql.setInt(4, startIndex);
         results = sql.executeQuery();
       }
 
@@ -846,6 +856,129 @@ public class H2Database implements UserDatabase {
 
       return resources;
 
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    } finally {
+      attemptClose(conn);
+    }
+  }
+
+  // notes functions
+  @Override
+  public Integer insertNote(Credentials creds, Integer corpusID, String resource, String data) throws DBError {
+
+    if (data.length() == 0)
+      return -1;
+
+    //checkSession(creds);
+
+    Integer id = -1;
+
+    Connection conn = null;
+    try {
+      conn = cpds.getConnection();
+
+      ResultSet results = conn.createStatement().executeQuery("SELECT note_seq.nextval");
+
+      if (results.next()) {
+        id = results.getInt(1);
+      }
+
+      // add the unique ID to the data
+      String newData = "{ \"id\" : " + id + "," + data.substring(1);
+      PreparedStatement sql = conn.prepareStatement("INSERT INTO notes (id, resource, corpus_id, data) VALUES (?, ?, ?, ?)");
+
+      sql.setInt(1, id);
+      sql.setString(2, resource);
+      sql.setInt(3, corpusID);
+      sql.setString(4, newData);
+
+      int numRows = sql.executeUpdate();
+
+      assert (numRows == 1);
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    } finally {
+      attemptClose(conn);
+    }
+
+    return(id);
+
+  }
+
+  @Override
+  public void updateNote(Credentials creds, Integer id, Integer corpusID, String data) throws DBError {
+    //checkSession(creds);
+
+    Connection conn = null;
+    try {
+      conn = cpds.getConnection();
+      PreparedStatement sql = conn.prepareStatement("UPDATE notes SET data = ? WHERE id = ? AND corpus_id = ?");
+
+      sql.setString(1, data);
+      sql.setInt(2, id);
+      sql.setInt(3, corpusID);
+
+      int numRows = sql.executeUpdate();
+
+      assert (numRows == 1);
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    } finally {
+      attemptClose(conn);
+    }
+  }
+
+  @Override
+  public Parameters getNotesForResource(String resource, Integer corpusID) throws DBError, IOException {
+
+    Integer noteCount = 0;
+    Parameters rows = Parameters.create();
+    List<Parameters> notes = new ArrayList<>();
+
+    Connection conn = null;
+    try {
+      conn = cpds.getConnection();
+
+      PreparedStatement sql = conn.prepareStatement("SELECT data FROM notes WHERE resource=? AND corpus_id = ?");
+
+      sql.setString(1, resource);
+      sql.setInt(2, corpusID);
+
+      ResultSet tuples = sql.executeQuery();
+      while (tuples.next()) {
+        noteCount++;
+        notes.add(Parameters.parseString(tuples.getString(1)));
+      }
+      tuples.close();
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } finally {
+      attemptClose(conn);
+    }
+
+    Parameters results = Parameters.create();
+    results.put("rows", notes);
+    results.put("total", noteCount);
+
+    return results;
+  }
+
+  @Override
+  public void deleteNote(Credentials creds, Integer id, Integer corpusID) throws DBError {
+    //checkSession(creds);
+
+    Connection conn = null;
+    try {
+      conn = cpds.getConnection();
+      PreparedStatement sql = conn.prepareStatement("DELETE FROM notes WHERE id = ? AND corpus_id = ?");
+      sql.setInt(1, id);
+      sql.setInt(2, corpusID);
+      int numRows = sql.executeUpdate();
+
+      assert (numRows == 1);
     } catch (SQLException e) {
       throw new RuntimeException(e);
     } finally {

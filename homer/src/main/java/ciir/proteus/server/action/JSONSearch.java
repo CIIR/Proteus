@@ -58,9 +58,7 @@ public class JSONSearch implements JSONHandler {
             }
         }
 
-        // TODO 1st pass - overwrie any label stuff, eventually we'll want to merge
-        // label & corpus resources
-
+        // corpus resources
         if (action.equals("search-corpus") && corpusid > 0) {
             // if we're not searching by labels, use the existing list
             if (resList.isEmpty()) {
@@ -76,12 +74,14 @@ public class JSONSearch implements JSONHandler {
                     }
                 }
             }
+            if (resList.isEmpty()) {
+                throw new RuntimeException("The corpus is empty.");
+            }
         }
-
 
         Node pquery = null;
 
-        // it's possible for the query to be empty IF we're searching just by labels
+        // it's possible for the query to be empty IF we're searching just by labels or within a corpus
         if (!query.isEmpty()) {
             if (system.getConfig().get("queryType", "simple").equals("simple")) {
                 pquery = SimpleQuery.parseTree(query);

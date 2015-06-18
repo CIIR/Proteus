@@ -38,6 +38,10 @@ public class HTTPRouter implements WebHandler {
     private final JSONHandler createCorpus;
     private final JSONHandler updateUserSettings;
     private final JSONHandler rateResource;
+    private final JSONHandler insertNote;
+    private final JSONHandler updateNote;
+    private final JSONHandler deleteNote;
+    private final JSONHandler getNotesForResource;
     private final StaticContentHandler staticContent;
 
     public HTTPRouter(ProteusSystem proteus) {
@@ -60,6 +64,10 @@ public class HTTPRouter implements WebHandler {
         createCorpus = new CreateCorpus(proteus);
         updateUserSettings = new UpdateUserSettings(proteus);
         rateResource = new RateResource(proteus);
+        insertNote = new InsertNote(proteus);
+        updateNote = new UpdateNote(proteus);
+        deleteNote = new DeleteNote(proteus);
+        getNotesForResource = new GetNotesForResource(proteus);
     }
 
     // handle http requests
@@ -74,6 +82,8 @@ public class HTTPRouter implements WebHandler {
 
             final boolean GET = method.equals("GET");
             final boolean POST = method.equals("POST");
+            final boolean PUT = method.equals("PUT");
+            final boolean DELETE = method.equals("DELETE");
 
             JSONHandler handler;
             if ((GET || POST) && path.equals("/api/action")) {
@@ -121,6 +131,18 @@ public class HTTPRouter implements WebHandler {
                 handler = resourcesforlabels;
             } else if (POST && path.equals("/api/rateresource")) {
                 handler = rateResource;
+            } else if ((PUT) && path.startsWith("/store/annotations/upd")) {
+                handleJSON(updateNote, method, path, reqp, resp, req, 303);
+                return;
+            }  else if ((DELETE) && path.startsWith("/store/annotations/del")) {
+                handleJSON(deleteNote, method, path, reqp, resp, req, 303);
+                return;
+            }  else if ( POST  && path.equals("/store/annotations/ins")) {
+                handleJSON(insertNote, method, path, reqp, resp, req, 303);
+                return;
+            }  else if ((GET || POST) && path.equals("/store/annotations/search")) {
+                handleJSON(getNotesForResource, method, path, reqp, resp, req, 200);
+                return;
             } else if (path.equals("/url")) {
                 handleRedirect(reqp, req, resp);
                 return;
@@ -143,8 +165,14 @@ public class HTTPRouter implements WebHandler {
         }
     }
 
-// forward to JSON handler interface
+    // the notes API requires that different status codes are returned, so we have a method that
+    // accepts the correct code to return.
     private void handleJSON(JSONHandler which, String method, String path, Parameters reqp, HttpServletResponse resp, HttpServletRequest req) throws IOException, SQLException {
+        handleJSON(which, method, path, reqp, resp, req, 200);
+    }
+
+    // forward to JSON handler interface
+    private void handleJSON(JSONHandler which, String method, String path, Parameters reqp, HttpServletResponse resp, HttpServletRequest req, Integer statusCode) throws IOException, SQLException {
         resp.addHeader("Access-Control-Allow-Origin", "*");
         resp.addHeader("Content-Type", "application/json");
 
@@ -154,7 +182,7 @@ public class HTTPRouter implements WebHandler {
             pw.write(response.toString());
             pw.flush();
             pw.close();
-            resp.setStatus(200);
+            resp.setStatus(statusCode);
         } catch (HTTPError httpError) {
             // custom error type carries a HTTP status code
             log.log(Level.INFO, "http-error", httpError);

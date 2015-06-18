@@ -6,6 +6,7 @@ import ciir.proteus.users.error.DuplicateUser;
 import ciir.proteus.users.error.NoTuplesAffected;
 import org.lemurproject.galago.utility.Parameters;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -93,5 +94,13 @@ public interface UserDatabase {
     public List<String> getResourcesForCorpus(Integer userid, Integer corpusID, Integer numResults, Integer startIndex) throws DBError;
 
     public List<String> getAllResourcesForCorpus(Integer userid, Integer corpusID) throws DBError;
+
+    public void updateNote(Credentials creds, Integer id, Integer corpusID, String data) throws DBError;
+
+    public Parameters getNotesForResource(String resource, Integer corpusID) throws DBError, IOException;
+
+    public Integer insertNote(Credentials creds, Integer corpusID, String resource, String data) throws DBError;
+
+    public void deleteNote(Credentials creds, Integer id, Integer corpusID) throws DBError;
 
 }

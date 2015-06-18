@@ -1,8 +1,24 @@
 
 var API = {};
 
+
+var queryWikipedia = function(terms){
+
+    var safeTerms = encodeURI(terms);
+
+  return  method("GET", "http://en.wikipedia.org/w/api.php?action=query&prop=revisions&callback=jsonp_handler&format=json&prop=info&inprop=url&titles=" + terms);
+
+}
+
 // -- factory for generating API calls based on type and url
-var method = function(method, url) {
+var method = function(method, url, terms) {
+
+    if (!_.isUndefined(terms)){
+        url = "http://en.wikipedia.org/w/api.php?action=query&prop=revisions&format=json&prop=info&inprop=url&titles=" + terms;
+        url = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&titles=San_Francisco&prop=images&imlimit=20&format=json';
+    }
+
+
     var ajaxOpts = {
         type: method,
         url: url,
@@ -23,6 +39,8 @@ var method = function(method, url) {
     return function(options, doneCallback, errorCallback) {
 
         ajaxOpts.data = dataFn(options);
+
+        console.log(ajaxOpts);
         $.ajax(ajaxOpts).done(function(data) {
             if (!doneCallback) {
                 return;
@@ -48,3 +66,4 @@ API.getUsers = method("GET", "/api/users");
 API.newCorpus = method("POST", "/api/newcorpus");
 API.updateUserSettings = method("POST", "/api/updatesettings");
 API.rateResource = method("POST", "/api/rateresource");
+API.callWikipedia = method("GET", "http://en.wikipedia.org/w/api.php?action=query&prop=revisions&format=json&prop=info&inprop=url&titles=" );

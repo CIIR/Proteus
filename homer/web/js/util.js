@@ -209,3 +209,80 @@ function getCorpusID(corpusName){
     });
     return corpID;
 }
+
+jsonp_handler = function(data)
+{
+    console.log(data);
+    var html = $("#important-entities").html();
+    var wikipedia = '';
+
+
+    _.forEach(data.query.pages, function(pg){
+        if (!_.isUndefined(pg.pageid)){
+            wikipedia += ' <a target="_blank" href="https://en.wikipedia.org/wiki/' + pg.title + '">' + pg.title + '</a>';
+        }
+
+    });
+
+    if (wikipedia.length > 0)
+        $("#important-entities").html(html + " (" + wikipedia +  ")");
+
+}
+
+function initImportantEntities() {
+    $("#important-entities").droppable({
+        drop: function (event, ui) {
+            $(this).css("background-color", "");
+            var html = $("#important-entities").html();
+            console.log(ui)
+        //    $("#important-entities").html(html + "<br>" + ui.draggable[0].parentElement.nodeName + ": " + ui.draggable[0].textContent);
+            $("#important-entities").html(html + "<br>" + ui.draggable[0].parentElement.nodeName + ": " + ui.draggable[0].outerHTML);
+            // remove any classes
+            $("#important-entities .mz-ner").removeClass();
+//
+//            API.callWikipedia(ui.draggable[0].textContent, function(data){
+//                console.log(JSON.stringify(data));
+//            }, function(){
+//                console.log("Failure");
+//            })
+
+
+            // the text we're taking the NER from is all lower case. The Wikipedia API will only capitalize the first
+            // word so we'll pass the original version and one with the first letter capitalized.
+
+            var query =  encodeURI(ui.draggable[0].textContent) + "|" + encodeURI(ui.draggable[0].textContent.capitalizeEachWord());
+            var script = document.createElement('script');
+            script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&format=json&titles=' + query;
+
+           // script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&prop=images&imlimit=20&format=json&titles=' + encodeURI(ui.draggable[0].textContent);
+            //      script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&list=search&limit=20&format=json&srsearch=' + encodeURI(ui.draggable[0].textContent);
+
+            document.head.appendChild(script);
+
+
+        },
+        over: function () {
+            $(this).css("background-color", "lightgrey");
+        },
+        out: function () {
+            $(this).css("background-color", "");
+        }
+
+    });
+}
+
+//String.prototype.capitalizeFirstLetter = function() {
+//    return this.charAt(0).toUpperCase() + this.slice(1);
+//}
+
+//function capitalizeFirstLetter(string) {
+//    return string.charAt(0).toUpperCase() + string.slice(1);
+//}
+//function capitalizeEachWord(str) {
+//    return string.charAt(0).toUpperCase() + string.slice(1);
+//}
+
+
+String.prototype.capitalizeEachWord = function() {
+    return this.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+};

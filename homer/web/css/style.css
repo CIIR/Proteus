@@ -11,7 +11,9 @@
     bottom: 0;
     left: 0;
     overflow-y: scroll;
-
+    width: 20%;
+    float: left;
+    resize: horizontal;
 }
 
 #results-right {
@@ -21,7 +23,8 @@
     bottom: 0;
     right: 0;
     overflow-y: scroll;
-
+    width: 80%;
+    float: right;
 }
 
 .snippet {
@@ -266,15 +269,20 @@ body {
     color: white;
     background-color: orange;
 }
+.per-off {
+ }
 .org {
     color: white;
     background-color: skyblue;
+}
+.org-off {
 }
 .loc {
     color: white;
     background-color: tan;
 }
-
+.loc-off {
+}
 .pageNavigation{
     cursor: pointer; cursor: hand;
 }
@@ -311,7 +319,7 @@ body {
     cursor: pointer; cursor: hand;
 }
 
-#ratings{
+#ratings {
     border: solid;
     padding: 1em;
     margin-bottom: 1em;
@@ -319,6 +327,16 @@ body {
     overflow-y: visible;
  /*   text-align: right; */
 }
+
+#important-entities{
+    border: solid;
+    padding: 1em;
+    margin-bottom: 1em;
+    margin-top: 1em;
+    overflow-y: visible;
+    /*   text-align: right; */
+}
+
 
 .rating-user{
     width: 40%;
@@ -453,6 +471,24 @@ body {
     margin-top: 20px;
 }
 
-a {
-    cursor: pointer; cursor: hand;
+/*
+.mz-ner{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 1px;
 }
+
+#page-notes{
+    border: solid;
+    border-color: red;
+}
+*/
+
+#ocr-options{
+    border: solid;
+    border-color: purple;
+    padding: 5px;
+    margin-top: 5px;
+}
+
+

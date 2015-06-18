@@ -213,6 +213,15 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
         $(prependTo).after(renderer(queryTerms, result, resDiv));
     }
 
+    /* uncomment this to make entities draggable
+    $(".mz-ner").draggable({
+        appendTo: "body",
+        helper: 'clone',
+        scroll: 'true',
+        refreshPositions: true
+    });
+    */
+
      $("#rating-" + result.name)
             .slider({
                  max: 2,
@@ -582,8 +591,8 @@ function setCorpus(corpus) {
 function hideSideBar(){
     $('#sidebar-button').attr("src", "images/sidebar_expand.png");
     $("#results-left").hide();
-    $("#results-right").removeClass("col-md-10");
-    $("#results-right").addClass("col-md-12");
+//    $("#results-right").removeClass("col-md-10");
+//    $("#results-right").addClass("col-md-12");
     showSideBarFlag = false;
     p = getURLParams();
     p = _.merge(p, {'showSideBar' : '0'});
@@ -593,8 +602,8 @@ function showSideBar(){
     $('#sidebar-button').attr("src", "images/sidebar_shrink.png");
     $("#results-left").show();
     showSideBarFlag = true;
-    $("#results-right").removeClass("col-md-12");
-    $("#results-right").addClass("col-md-10");
+//    $("#results-right").removeClass("col-md-12");
+//    $("#results-right").addClass("col-md-10");
 
     p = getURLParams();
     p = _.merge(p, {'showSideBar' : '1'});
@@ -622,5 +631,26 @@ UI.updateCorpusListButton = function(){
     _.forEach(corpora, function(c){
         UI.appendToCorpusList(c.name);
     });
+
+}
+
+function handleNERHilightClick(that, type){
+
+    // TODO : not sure if it's faster to change CSS or replace the class?
+    if (that.checked == true){
+        console.log(type + " has been checked")
+        $("." + type + "-off").addClass(type)
+        $("." + type ).removeClass(type+ "-off")
+
+       setBob();
+
+    } else {
+        console.log(type + " has been UNchecked")
+        $("." + type ).addClass(type+ "-off")
+        $("." + type + "-off").removeClass(type)
+
+        setAlice();
+
+    }
 
 }

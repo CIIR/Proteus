@@ -56,15 +56,18 @@ var renderResult = function(queryTerms, result, resDiv) {
 
   if (!_.isUndefined(result.entities)){
 
+    var type;
     _(result.entities).forEach( function(entKey) {
       _( entKey ).forIn( function(value, key) {
-        tmphtml += '<div align="left"><b>' + key + ':</b> ';
+        type = key;
+        tmphtml += '<div align="left"><' + type + '><b>' + key + ':</b> ';
         _( value ).forIn( function(rec, key2) {
           // TODO: whould use default kind not hard code
-          tmphtml +=  '<a onclick="tmpEntSearch(\'' + key + '\', $(this), \'ia-all\')">' + rec.entity +  '</a> (' + rec.count + ')&nbsp;&#8226;&nbsp;';
+          // add class="ui-widget-content mz-ner" to <ent> if we want drag-n-drop entities
+          tmphtml +=  '<ent><a  href="#" onclick="tmpEntSearch(\'' + key + '\', $(this), \'ia-all\')">' + rec.entity +  '</a></ent> (' + rec.count + ')&nbsp;&#8226;&nbsp;';
         });
       });
-      tmphtml += '</div>';
+      tmphtml += '</' + type + '></div>';
     });
   } // end if we have entities
 
