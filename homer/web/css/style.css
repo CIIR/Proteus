@@ -11,9 +11,7 @@
     bottom: 0;
     left: 0;
     overflow-y: scroll;
-    width: 20%;
-    float: left;
-    resize: horizontal;
+
 }
 
 #results-right {
@@ -23,8 +21,7 @@
     bottom: 0;
     right: 0;
     overflow-y: scroll;
-    width: 80%;
-    float: right;
+
 }
 
 .snippet {

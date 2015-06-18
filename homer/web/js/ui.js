@@ -591,8 +591,8 @@ function setCorpus(corpus) {
 function hideSideBar(){
     $('#sidebar-button').attr("src", "images/sidebar_expand.png");
     $("#results-left").hide();
-//    $("#results-right").removeClass("col-md-10");
-//    $("#results-right").addClass("col-md-12");
+    $("#results-right").removeClass("col-md-10");
+    $("#results-right").addClass("col-md-12");
     showSideBarFlag = false;
     p = getURLParams();
     p = _.merge(p, {'showSideBar' : '0'});
@@ -602,8 +602,8 @@ function showSideBar(){
     $('#sidebar-button').attr("src", "images/sidebar_shrink.png");
     $("#results-left").show();
     showSideBarFlag = true;
-//    $("#results-right").removeClass("col-md-12");
-//    $("#results-right").addClass("col-md-10");
+    $("#results-right").removeClass("col-md-12");
+    $("#results-right").addClass("col-md-10");
 
     p = getURLParams();
     p = _.merge(p, {'showSideBar' : '1'});
