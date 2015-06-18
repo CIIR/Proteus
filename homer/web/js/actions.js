@@ -182,12 +182,17 @@ var onSearchSuccess = function(data) {
 
 };
 
+function getNotesID(pageid, pagenum){
+    if (parseInt(pagenum) >= 0)
+        return 'notes-' + pageid + '_' +  pagenum;
+    else
+        return 'notes-' + pageid;
+}
 var getPageHTML = function(text, pageID, pageNum){
     var pgImage = pageImage(pageID, pageNum);
     var pgTxt=  processTags(text);
     return '<div class="book-page row clearfix ">' +
-                    '<a name="page-' + pageID + '-' +  pageNum + '"></a> ' +
-            '<div id="page-' + pageID + '-' +  pageNum + '" class="book-text col-md-5 column left-align">' + pgTxt + '</div>'+
+            '<div id="' + getNotesID(pageID, pageNum) + '" class="book-text col-md-5 column left-align">' + pgTxt + '</div>'+
             '<div  class="page-image col-md-5 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img src="' + pgImage + '"></a></div>' +
             '</div>';
 
@@ -248,8 +253,11 @@ var initAnnotationLogic = function(pageID, pageNum){
     var userID = getCookie("userid");
 
     var corpusID = getCorpusID(corpus);
-    var resource = 'page-' + pageID + '-' +  pageNum;
-    var el = '#' +  resource;
+    // resource has to match the Internet Archive format so we are consistent across the system
+    var resource = pageID;
+    if (parseInt(pageNum) >= 0)
+        resource +=  '_' +  pageNum;
+    var el = '#' + getNotesID(pageID, pageNum);
     $(el).annotator().data('annotator');
 
         $(el).annotator('addPlugin', 'Store', {
@@ -452,7 +460,7 @@ var onViewBookSuccess = function(args) {
     var pgTxt= processTags(args.text);
 
     var html =  '<a class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>';
-    html +=  '<div id="page-' + args.request.id + '-0" >' + pgTxt + '</div>';
+    html += '<div id="' + getNotesID(args.request.id, -1) + '" >' + pgTxt + '</div>';
     //
     //    html += '<div>[<span class="per">PERSON</span>]&nbsp;[<span class="loc">LOCATION</span>]&nbsp;[<span class="org">ORGANIZATION</span>]</div>';
     //    if (args.request.kind == 'ia-pages'){
@@ -462,7 +470,7 @@ var onViewBookSuccess = function(args) {
 
     viewResourceDiv.html(html);
     viewResourceDiv.show();
-    initAnnotationLogic(args.request.id, 0);
+    initAnnotationLogic(args.request.id, -1);
     UI.showProgress("");
 
 };
