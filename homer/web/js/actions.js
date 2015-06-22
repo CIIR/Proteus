@@ -264,10 +264,8 @@ var initAnnotationLogic = function(pageID, pageNum){
 
            annotationData: {
                 uri : resource,
-               user: {
-                   id: parseInt(userID),
-                   name:  userName
-               },
+                userid: parseInt(userID),
+                user:  userName,
                 token: userToken,
                 corpus: parseInt(corpusID)
             },

@@ -81,7 +81,9 @@ public class H2Database implements UserDatabase {
       conn.createStatement().executeUpdate("create unique index IF NOT EXISTS resource_rating_idx on resource_ratings(user_id, corpus_id, resource)");
 
       conn.createStatement().executeUpdate("create sequence IF NOT EXISTS note_seq");
-      conn.createStatement().executeUpdate("create table IF NOT EXISTS notes (ID BIGINT NOT NULL, CORPUS_ID BIGINT NOT NULL, resource VARCHAR(256) NOT NULL, data VARCHAR(2000) NOT NULL, PRIMARY KEY (ID), foreign key (corpus_id) references corpora(id))");
+      conn.createStatement().executeUpdate("create table IF NOT EXISTS notes (ID BIGINT NOT NULL, CORPUS_ID BIGINT NOT NULL, resource VARCHAR(256) NOT NULL," +
+              " data VARCHAR(2000) NOT NULL, ins_user BIGINT NOT NULL, ins_dttm DATETIME NOT NULL, upd_user BIGINT, upd_dttm DATETIME, " +
+              " PRIMARY KEY (ID), foreign key (corpus_id) references corpora(id))");
       conn.createStatement().executeUpdate("create index IF NOT EXISTS notes_res_idx on notes(resource)");
 
 
@@ -886,12 +888,13 @@ public class H2Database implements UserDatabase {
 
       // add the unique ID to the data
       String newData = "{ \"id\" : " + id + "," + data.substring(1);
-      PreparedStatement sql = conn.prepareStatement("INSERT INTO notes (id, resource, corpus_id, data) VALUES (?, ?, ?, ?)");
+      PreparedStatement sql = conn.prepareStatement("INSERT INTO notes (id, resource, corpus_id, data, ins_user, ins_dttm) VALUES (?, ?, ?, ?, ?, NOW())");
 
       sql.setInt(1, id);
       sql.setString(2, resource);
       sql.setInt(3, corpusID);
       sql.setString(4, newData);
+      sql.setInt(5, creds.userid);
 
       int numRows = sql.executeUpdate();
 
@@ -914,11 +917,12 @@ public class H2Database implements UserDatabase {
     Connection conn = null;
     try {
       conn = cpds.getConnection();
-      PreparedStatement sql = conn.prepareStatement("UPDATE notes SET data = ? WHERE id = ? AND corpus_id = ?");
+      PreparedStatement sql = conn.prepareStatement("UPDATE notes SET data = ?, upd_user = ?, upd_dttm = NOW() WHERE id = ? AND corpus_id = ?");
 
       sql.setString(1, data);
-      sql.setInt(2, id);
-      sql.setInt(3, corpusID);
+      sql.setInt(2, creds.userid);
+      sql.setInt(3, id);
+      sql.setInt(4, corpusID);
 
       int numRows = sql.executeUpdate();
 

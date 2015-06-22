@@ -22,7 +22,7 @@ public class UpdateNote extends DBAction {
     @Override
     public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DBError {
 
-        Credentials creds = null; // Credentials.fromJSON(reqp);
+        Credentials creds = Credentials.fromJSON(reqp);
         String nullStr = null;
         Integer id =  reqp.get("id", -1);
         String data = reqp.toString();

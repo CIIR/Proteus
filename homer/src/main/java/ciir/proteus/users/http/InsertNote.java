@@ -22,7 +22,8 @@ public class InsertNote extends DBAction {
     @Override
     public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DBError {
         Integer id = -1;
-        Credentials creds = null; //  Credentials.fromJSON(reqp);
+
+        Credentials creds = Credentials.fromJSON(reqp);
         String nullStr = null;
         String res = reqp.get("uri", nullStr);
         String data = reqp.toString();
