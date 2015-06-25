@@ -34,7 +34,7 @@ UI.generateButtons = function() {
             if (!spec.button) {
                 // UI.showError("You need to specify a \"button\" display attribute for kind \"" + kind + "\"");
                 // the "view" action requires that we have a kind/index specified, but we may not
-                // want search buttons for them so rather than display a warning just write it to the console.
+                // want retrieval buttons for them so rather than display a warning just write it to the console.
                 console.log("You didn't specify a \"button\" display attribute for kind \"" + kind + "\"");
                 return;
             }
@@ -49,8 +49,8 @@ UI.generateButtons = function() {
             }
 
         });
-        // add an option to search rated documents
-      //  $("#search-button-choices").append('<li class="divider"></li><li><a href="#" onclick="UI.onClickSearchButton(\'rated-only\');">Rated Documents</a></li>');
+        // add an option to retrieval rated documents
+      //  $("#retrieval-button-choices").append('<li class="divider"></li><li><a href="#" onclick="UI.onClickSearchButton(\'rated-only\');">Rated Documents</a></li>');
 
     });
 
@@ -84,7 +84,7 @@ UI.setQuery = function(q) {
     queryBox.val(q);
 };
 /**
- * Render a single search result.
+ * Render a single retrieval result.
  * @see render.js
  * I'm adding comments now since i regret it
  * when I dont
@@ -132,7 +132,7 @@ function addLabelToButtons(newLabel) {
 
      // new labels:
 
-    // search for the parent to attach it to
+    // retrieval for the parent to attach it to
     var node = tree.getNodeByKey(GLOBAL.users[userID] + TREE_KEY_SEP() + type);
 
     if (node !== null) {
@@ -196,7 +196,7 @@ function setSliderValue(name, init) {
 };
 
 /**
- * Renders search results into UI after current results
+ * Renders retrieval results into UI after current results
  */
 
 UI.renderSingleResult = function(result, queryTerms,  prependTo) {

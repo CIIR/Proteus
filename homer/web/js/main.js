@@ -20,7 +20,7 @@ var GLOBAL = {
 
 // the JSON of the application state
 var Model = {
-    // search result data
+    // retrieval result data
     request: {}, query: "", results: [], queryType: null, queryTerms: []
 };
 
@@ -68,7 +68,7 @@ UI.setReadyHandler(function() {
 });
 
 /**
- * This main "action-request" delegates to other things. Notice how search requests disappear into actions.js early.
+ * This main "action-request" delegates to other things. Notice how retrieval requests disappear into actions.js early.
  */
 var doActionRequest = function(args) {
     var action = args.action;
@@ -86,11 +86,11 @@ var doActionRequest = function(args) {
     UI.showError("Unknown action `" + action + "'");
 };
 
-/* handlers for search button types */
+/* handlers for retrieval button types */
 UI.onClickSearchButton = function(kind) {
 //    var kind = buttonDesc.kind;
 
-    // is this a new search?
+    // is this a new retrieval?
     var terms = _.escape(UI.getQuery().trim()).toLowerCase();
 
     var tmp = [];
@@ -133,7 +133,7 @@ function tmpSearch(that, kind){
     }
     console.log("Query: " + query);
     $("#ui-search").val(query);
-    // TODO: can have > 1 search button so we need to know which one to trigger
+    // TODO: can have > 1 retrieval button so we need to know which one to trigger
     doActionRequest({kind: kind, q: query, action: "search"});
 }
 

@@ -38,7 +38,7 @@ public class JSONSearch implements JSONHandler {
         int skipResults = (int) reqp.get("skip", 0);
         int corpusid = (int) reqp.get("corpus", -1);
         String userid = reqp.get("userid", "-1");
-        String action = reqp.get("action", "search");
+        String action = reqp.get("action", "retrieval");
         String corpusName = reqp.get("corpusName", "");
 
         List<String> labels = new ArrayList<>(); // empty list 
@@ -59,7 +59,7 @@ public class JSONSearch implements JSONHandler {
         }
 
         // corpus resources
-        if (action.equals("search-corpus") && corpusid > 0) {
+        if (action.equals("retrieval-corpus") && corpusid > 0) {
             // if we're not searching by labels, use the existing list
             if (resList.isEmpty()) {
                 resList = system.userdb.getAllResourcesForCorpus(Integer.parseInt(userid), corpusid);

@@ -552,7 +552,7 @@ public class H2Database implements UserDatabase {
       ResultSet results = null;
 
       // we may want to skip the user_id
-      // MCZ 3/15 - allow anyone to search using anyone's labels.
+      // MCZ 3/15 - allow anyone to retrieval using anyone's labels.
       userid = -1;
       String userClause = " AND tags.user_id = ? ";
       if (userid == -1) {
@@ -816,7 +816,7 @@ public class H2Database implements UserDatabase {
     }
   }
 
-  // TODO what type of functionality do we want? search just for resources I rated? Only average ratings > 0? Any resource with a
+  // TODO what type of functionality do we want? retrieval just for resources I rated? Only average ratings > 0? Any resource with a
   // positive rating?
 
   public List<String> getAllResourcesForCorpus(Integer userid, Integer corpusID) throws DBError {
