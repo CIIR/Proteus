@@ -33,7 +33,7 @@ def main():
     current_time = time.time()
 
     if mode == 'all' or mode == 'update':
-        data = create_file_list(mode, djvu_directory_location, primary_work_directory)
+        data = create_djvu_file_list(mode, djvu_directory_location, primary_work_directory)
         djvu_list_location = data[0]
         djvu_file_paths = data[1]     
     elif mode == 'list':
@@ -64,7 +64,7 @@ def main():
     #index using Homer
     build_index(djvu_file_paths, output_directory, primary_work_directory)
 
-def create_file_list(mode, djvu_directory_location, primary_work_directory):
+def create_djvu_file_list(mode, djvu_directory_location, primary_work_directory):
     #create temp list file using djvu_file_location
 
     candidate_files = os.listdir(djvu_directory_location)
@@ -90,16 +90,46 @@ def create_file_list(mode, djvu_directory_location, primary_work_directory):
                     actual_files.append(cf + '/' + fn)
         else:
             actual_files.append(cf)
-    print('Files to be Indexed:')
+    print('Files to be Converted:')
     for fn in actual_files:
         if '_djvu.xml.bz2' in fn:
             if (not mode == 'update') or (timestamp < os.stat(djvu_directory_location + '/' + fn).st_mtime):
                 print(fn)
-                temp_list_writer.write(fn)
+                temp_list_writer.write(fn+'\n')
                 djvu_file_paths.append(fn)
     temp_list_writer.close()
     djvu_list_location = temp_list_location
     return [temp_list_location,djvu_file_paths]
+
+def create_tei_file_list(output_directory_location, primary_work_directory):
+    #create temp list file using output_directory_location
+
+    tei_directory_location = output_directory_location
+    candidate_files = os.listdir(tei_directory_location)
+
+    temp_list_location = primary_work_directory + '/temp_tei_list.list'
+    tei_file_paths = []
+    temp_list_writer = open(temp_list_location,'w')
+    actual_files = []
+    #find all files within the directory hierarchy
+    print('Files Discovered:')
+    for cf in candidate_files:   
+        print(cf)
+        if os.path.isdir(tei_directory_location + '/' + cf):
+            for fn in os.listdir(tei_directory_location + '/' + cf):
+                print(cf + '/' + fn)
+                if not os.path.isdir(tei_directory_location + '/' + cf + '/' + fn):
+                    actual_files.append(cf + '/' + fn)
+        else:
+            actual_files.append(cf)
+    print('Files to be Indexed:')
+    for fn in actual_files:
+        if '.toktei.gz' in fn:
+            print(fn)
+            temp_list_writer.write(output_directory_location + '/' + fn+'\n')
+            tei_file_paths.append(fn)
+    temp_list_writer.close()
+    return temp_list_location
 
 def djvu_to_rawtei(djvu_list_location, output_directory, primary_work_directory, input_directory):
     #convert djvu to toktei using Pontos
@@ -121,7 +151,7 @@ def rawtei_to_toktei(djvu_file_paths, output_directory, primary_work_directory):
     temp_list_writer = open(temp_list_location,'w')
     for path in djvu_file_paths:
         path = path.replace('_djvu.xml.bz2','.toktei.gz')
-        temp_list_writer.write(output_directory + '/' + path)
+        temp_list_writer.write(output_directory + '/' + path +'\n')
     temp_list_writer.close()
     
     command = 'cat %s | java -jar ../phokas/phokas-1.0.0-SNAPSHOT-standalone.jar' % (temp_list_location)
@@ -139,7 +169,7 @@ def toktei_to_mbtei(djvu_file_paths, output_directory, primary_work_directory):
     temp_list_writer = open(temp_list_location,'w')
     for path in djvu_file_paths:
         path = path.replace('_djvu.xml.bz2','.mbtei.gz')
-        temp_list_writer.write(output_directory + '/' + path)
+        temp_list_writer.write(output_directory + '/' + path +'\n')
     temp_list_writer.close()
     
     command = 'cat %s | java -jar ../phokas/phokas-1.0.0-SNAPSHOT-standalone.jar' % (temp_list_location)
@@ -149,26 +179,43 @@ def toktei_to_mbtei(djvu_file_paths, output_directory, primary_work_directory):
         print(l.decode().strip())
     os.remove(temp_list_location)
 
-def build_index(djvu_file_paths, output_directory, primary_work_directory):
-    temp_list_location = primary_work_directory + '/book_list.txt'
+def build_index(djvu_file_paths, output_directory_location, primary_work_directory):
+    temp_list_location = primary_work_directory + '/book_list.list'
     temp_list_writer = open(temp_list_location,'w')
     for path in djvu_file_paths:
         path = path.replace('_djvu.xml.bz2','.toktei.gz')
-        temp_list_writer.write(output_directory + '/' + path)
+        temp_list_writer.write(output_directory_location + '/' + path +'\n')
     temp_list_writer.close()
     
-    command = 'java -jar ../homer/target/homer-0.4-SNAPSHOT.jar build ../homer/scripts/pages.conf --server=false --indexPath=demo.pages --inputPath=%s' % (temp_list_location)
+    if not os.path.exists("entity-docs"):
+       os.mkdir("entity-docs")
+
+    #build list of all tei books
+    temp_list_tei_location = create_tei_file_list(output_directory_location, primary_work_directory)
+    
+
+    command = 'java -jar ../homer/target/homer-0.4-SNAPSHOT.jar build ../homer/scripts/pages.conf --server=false --indexPath=demo.pages --inputPath=%s' % (temp_list_tei_location)
     print(command)
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     for l in proc.stdout:
         print(l.decode().strip())
 
-    command = 'java -jar ../homer/target/homer-0.4-SNAPSHOT.jar build ../homer/scripts/books.conf --server=false --indexPath=demo.books --inputPath=%s' % (temp_list_location)
+    command = 'java -Xmx9g -Xms9g -jar ../homer/target/homer-0.4-SNAPSHOT.jar build ../homer/scripts/books_ner.conf --server=false --indexPath=demo.books --inputPath=%s' % (temp_list_tei_location)
+    print(command)
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+    #msg_writer = open('books_indexing.out','w')
+    for l in proc.stdout:
+        print(l.decode().strip())
+        #msg_writer.write(l.decode())
+    #msg_writer.close()
+
+    command = 'java -jar ../homer/target/homer-0.4-SNAPSHOT.jar build --server=false --indexPath=person.index --inputPath=entity-docs'
     print(command)
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     for l in proc.stdout:
         print(l.decode().strip())
 
     os.remove(temp_list_location)
+    os.remove(temp_list_tei_location)
 
 main()

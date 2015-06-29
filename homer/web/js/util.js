@@ -29,7 +29,7 @@ var pushURLParams = function(params) {
 
     // if there are labels AND we don't have a "labelOwner" param, add the user that owns them
     if (!_.isUndefined(params.labels) && urlParams.indexOf("labelOwner") == -1) {
-        // MCZ 3/2015 - quick hack so we can search by ANYONE'S labels
+        // MCZ 3/2015 - quick hack so we can retrieval by ANYONE'S labels
         urlParams += "&labelOwner=-1"; //  + getCookie("userid");
     }
     History.pushState(null, null, urlParams);
@@ -144,7 +144,7 @@ function NO_TYPE_CONST() {
 function TREE_KEY_SEP(){ return "\t";}
 
 // users are allowed to enter labels w/o at TYPE, this is troublesome later when
-// we want to allow them to select type/values to filter/search by/etc. So we'll store
+// we want to allow them to select type/values to filter/retrieval by/etc. So we'll store
 // them with a special "*" type, and as long as we don't display that, all the existing
 // code works nicely.
 // Also remove the rating
@@ -266,7 +266,7 @@ function initImportantEntities() {
             script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&format=json&titles=' + query;
 
            // script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&prop=images&imlimit=20&format=json&titles=' + encodeURI(ui.draggable[0].textContent);
-            //      script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&list=search&limit=20&format=json&srsearch=' + encodeURI(ui.draggable[0].textContent);
+            //      script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&list=retrieval&limit=20&format=json&srsearch=' + encodeURI(ui.draggable[0].textContent);
 
             document.head.appendChild(script);
 

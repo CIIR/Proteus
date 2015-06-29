@@ -59,7 +59,7 @@ public class GetResourcesForLabelsTest {
     List<String> resources = env.proteus.userdb.getResourcesForLabels(userid, labels, 10, 0);
     assertArrayEquals(new String[]{"res1"}, resources.toArray());
 
-    // add new label to search for - but doesn't have a resource associated
+    // add new label to retrieval for - but doesn't have a resource associated
     // (should never happen, but just for fun)
     labels.add("type1:value2");
     resources = env.proteus.userdb.getResourcesForLabels(userid, labels, 10, 0);
@@ -81,7 +81,7 @@ public class GetResourcesForLabelsTest {
     // check that a 2nd user will not get our resources
     /*
      * MCZ 3/15 - now that others can rate/comment on another person's
-     * label, we allow them to search by their tags so this test WILL
+     * label, we allow them to retrieval by their tags so this test WILL
      * return the other users resource.
      */
     String user2 = "new_user";
