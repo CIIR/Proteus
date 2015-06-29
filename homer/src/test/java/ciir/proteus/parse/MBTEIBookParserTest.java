@@ -39,24 +39,25 @@ public class MBTEIBookParserTest {
 
     @Test
     public void testNER() throws Exception {
-        String data = "<TEI>"
-                + "<metadata>"
-                + "	<identifier>test</identifier>"
-                + "	<title>test title</title>"
-                + "</metadata>"
-                + "<text lang=\"eng\">"
-                + "	<pb n=\"1\"/>"
-                + "	<w form=\"Alice\" >Alice</w>"
-                + "	<w form=\"chased\" >chased</w>"
-                + "	<w form=\"the\" >the</w>"
-                + "	<w form=\"rabbit\" >rabbit</w>"
-                + "	<pb n=\"2\"/>" // empty page
-                + "	<pb n=\"3\"/>"
-                + "	<w  form=\"Max\" >Max</w>"
-                + "	<w  form=\"is\" >is</w>"
-                + "	<w  form=\"a\" >a</w>"
-                + "	<w  form=\"cat\" >cat</w>"
-                + "</text>"
+      String data = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+              + "<TEI>\n"
+              + "	<metadata>\n"
+              + "		<title>Test Document</title>\n"
+              + "		<identifier>mcztest</identifier>\n"
+              + "	</metadata>\n"
+                + "<text lang=\"eng\">\n"
+                + "	<pb n=\"1\"/>\n"
+                + "	<w form=\"Alice\" >Alice</w>\n"
+                + "	<w form=\"chased\" >chased</w>\n"
+                + "	<w form=\"the\" >the</w>\n"
+                + "	<w form=\"rabbit\" >rabbit</w>\n"
+                + "	<pb n=\"2\"/>\n" // empty page
+                + "	<pb n=\"3\"/>\n"
+                + "	<w  form=\"Max\" >Max</w>\n"
+                + "	<w  form=\"is\" >is</w>\n"
+                + "	<w  form=\"a\" >a</w>\n"
+                + "	<w  form=\"cat\" >cat</w>\n"
+                + "</text>\n"
                 + "</TEI>";
 
         MBTEIBookParser parser;
@@ -80,7 +81,7 @@ public class MBTEIBookParserTest {
         {
             Document doc = parser.nextDocument();
             Assert.assertNotNull(doc);
-            Assert.assertEquals("Alice chased the rabbit <br>Max is a cat", doc.text.trim());
+            Assert.assertEquals("<pb page=\"0\">Alice chased the rabbit <br></pb><pb page=\"2\">Max is a cat <br></pb>", doc.text.trim());
         }
 
         // test with NER
@@ -90,7 +91,7 @@ public class MBTEIBookParserTest {
         {
             Document doc = parser.nextDocument();
             Assert.assertNotNull(doc);
-            Assert.assertEquals("<PERSON>Alice</PERSON> chased the rabbit <br><PERSON>Max</PERSON> is a cat", doc.text.trim());
+            Assert.assertEquals("<pb page=\"0\"><PERSON>Alice</PERSON> chased the rabbit <br></pb><pb page=\"2\"><PERSON>Max</PERSON> is a cat <br></pb>", doc.text.trim());
         }
 
         Assert.assertNull(parser.nextDocument());
@@ -130,7 +131,7 @@ public class MBTEIBookParserTest {
         {
             Document doc = parser.nextDocument();
             Assert.assertNotNull(doc);
-            Assert.assertEquals("EDITED, <br>", doc.text.trim());
+            Assert.assertEquals("<pb page=\"0\">EDITED, <br><br></pb>", doc.text.trim());
         }
     }
 
@@ -179,7 +180,7 @@ public class MBTEIBookParserTest {
         {
             Document doc = parser.nextDocument();
             Assert.assertNotNull(doc);
-            Assert.assertEquals("header <br>firstLine <br>secondLine <br>footer", doc.text.trim());
+            Assert.assertEquals("<pb page=\"0\">header <br>firstLine <br>secondLine <br>footer <br></pb>", doc.text.trim());
         }
     }
 }

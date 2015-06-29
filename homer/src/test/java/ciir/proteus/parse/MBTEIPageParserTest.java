@@ -50,12 +50,12 @@ public class MBTEIPageParserTest {
         Document page1 = parser.nextDocument();
         Assert.assertNotNull(page1);
         Assert.assertEquals("0", page1.metadata.get("pageNumber"));
-        Assert.assertEquals("firstWord", page1.text.trim());
+        Assert.assertEquals("firstWord <br>", page1.text.trim());
 
         Document page2 = parser.nextDocument();
         Assert.assertNotNull(page2);
         Assert.assertEquals("1", page2.metadata.get("pageNumber"));
-        Assert.assertEquals("huh", page2.text.trim());
+        Assert.assertEquals("huh <br>", page2.text.trim());
 
         Assert.assertNull(parser.nextDocument());
         tmp.delete();
@@ -91,20 +91,20 @@ public class MBTEIPageParserTest {
             Document page = parser.nextDocument();
             Assert.assertNotNull(page);
             Assert.assertEquals("0", page.metadata.get("pageNumber"));
-            Assert.assertEquals("page one", page.text.trim());
+            Assert.assertEquals("page one <br>", page.text.trim());
         }
         {
             Document page = parser.nextDocument();
             Assert.assertNotNull(page);
             Assert.assertEquals("1", page.metadata.get("pageNumber"));
-            Assert.assertEquals("page two", page.text.trim());
+            Assert.assertEquals("page two <br>", page.text.trim());
         }
 
         {
             Document page = parser.nextDocument();
             Assert.assertNotNull(page);
             Assert.assertEquals("6", page.metadata.get("pageNumber"));
-            Assert.assertEquals("page seven", page.text.trim());
+            Assert.assertEquals("page seven <br>", page.text.trim());
         }
         Assert.assertNull(parser.nextDocument());
         tmp.delete();
@@ -175,14 +175,14 @@ public class MBTEIPageParserTest {
             Document page = parser.nextDocument();
             Assert.assertNotNull(page);
             Assert.assertEquals("0", page.metadata.get("pageNumber"));
-            Assert.assertEquals("<PERSON>Alice</PERSON> chased the rabbit", page.text.trim());
+            Assert.assertEquals("<PERSON>Alice</PERSON> chased the rabbit <br>", page.text.trim());
         }
 
         {
             Document page = parser.nextDocument();
             Assert.assertNotNull(page);
             Assert.assertEquals("2", page.metadata.get("pageNumber"));
-            Assert.assertEquals("<PERSON>Max</PERSON> is a cat", page.text.trim());
+            Assert.assertEquals("<PERSON>Max</PERSON> is a cat <br>", page.text.trim());
         }
         Assert.assertNull(parser.nextDocument());
         tmp.delete();
@@ -221,7 +221,7 @@ public class MBTEIPageParserTest {
         {
             Document doc = parser.nextDocument();
             Assert.assertNotNull(doc);
-            Assert.assertEquals("EDITED, <br>", doc.text.trim());
+            Assert.assertEquals("EDITED, <br><br>", doc.text.trim());
         }
     }
 
@@ -270,7 +270,7 @@ public class MBTEIPageParserTest {
         {
             Document doc = parser.nextDocument();
             Assert.assertNotNull(doc);
-            Assert.assertEquals("header <br>firstLine <br>secondLine <br>footer", doc.text.trim());
+            Assert.assertEquals("header <br>firstLine <br>secondLine <br>footer <br>", doc.text.trim());
         }
 
     }

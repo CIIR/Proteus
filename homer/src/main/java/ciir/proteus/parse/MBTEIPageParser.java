@@ -1,207 +1,57 @@
 package ciir.proteus.parse;
 
-import edu.stanford.nlp.ie.AbstractSequenceClassifier;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.lemurproject.galago.core.parse.Document;
-import org.lemurproject.galago.core.parse.DocumentStreamParser;
 import org.lemurproject.galago.core.types.DocumentSplit;
 import org.lemurproject.galago.utility.Parameters;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import java.io.IOException;
-import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author jfoley, michaelz
  */
-public class MBTEIPageParser extends DocumentStreamParser {
-
-  public static final Logger log = Logger.getLogger(MBTEIPageParser.class.getName());
-  public static final XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
-  private final AbstractSequenceClassifier nerClassifier;
-
-  static {
-    xmlFactory.setProperty(XMLInputFactory.IS_COALESCING, true);
-  }
-
-  private XMLStreamReader xml;
-  private final DocumentSplit split;
-  private Map<String, String> metadata;
-  public int pageIndex = -1;
+public class MBTEIPageParser extends MBTEIParser {
 
   public MBTEIPageParser(DocumentSplit split, Parameters p) throws Exception {
     super(split, p);
-
-    this.split = split;
-    metadata = null;
-    this.xml = null;
-    try {
-      this.xml = xmlFactory.createXMLStreamReader(getBufferedInputStream(split));
-    } catch (XMLStreamException | IOException e) {
-      log.log(Level.WARNING, "Failed to create page parser for split=" + split.fileName + " ", e);
-    }
-    String nullString = null;
-    String serializedClassifier = p.get("ner-model", nullString);
-    if (serializedClassifier != null && NamedEntityRecognizer.getClassifier() == null) {
-      try {
-        NamedEntityRecognizer.initClassifier(serializedClassifier);
-      } catch (Exception e) {
-        log.log(Level.WARNING, "Failed to load NER model: " + serializedClassifier + " ", e);
-        throw new RuntimeException("Error loading NER model: " + serializedClassifier + ": " + e.toString());
-      }
-    }
-
-    nerClassifier = NamedEntityRecognizer.getClassifier();
-
   }
 
   @Override
-  public void close() throws IOException {
-    if (xml == null) {
-      return;
-    }
+  public Document nextDocument() throws IOException {
     try {
-      xml.close();
-    } catch (XMLStreamException xml) {
-      throw new IOException(xml);
-    }
-  }
 
-  @Override
-  public Document nextDocument() {
-    if (xml == null) {
-      return null;
-    }
-    try {
-      if (metadata == null) {
-        metadata = MBTEI.parseMetadata(xml);
+      if (xml == null || !xml.hasNext()) {
+        return null;
       }
-      return nextPage();
+
+      // only get the metadata the first time, otherwise we read real text
+      if (metadata == null){
+        metadata = parseMetadata(xml);
+      }
+
+      String pageText = nextPageText();
+      if (pageText == null)
+        return null;
+
+
+      final String pageNumber = Integer.toString(getPageIndex());
+      String archiveId = getArchiveIdentifier(split, metadata);
+      Document page = new Document();
+      // Note we do NOT want the archive ID to be parsed, we've seen some
+      // that contain ":", ".", and lots of other characters that could be
+      // interpreted as "word breaks"
+//      pageText += "<archiveid tokenizetagcontent=\"false\">" + archiveId + "</archiveid>";
+      page.text = pageText;
+      page.name = archiveId + "_" + pageNumber;
+      page.metadata = metadata;
+      page.metadata.put("pageNumber", pageNumber);
+      return page;
+
     } catch (XMLStreamException e) {
       log.log(Level.WARNING, "XML Exception", e);
       return null;
     }
   }
 
-  private Document nextPage() throws XMLStreamException {
-    if (!xml.hasNext()) {
-      return null;
-    }
-
-    StringBuilder bodyBuffer = new StringBuilder();
-    StringBuilder headerBuffer = new StringBuilder();
-    StringBuilder footerBuffer = new StringBuilder();
-    StringBuilder currentBuffer = bodyBuffer;
-
-    boolean writing = false;
-    boolean empty = true;
-    // In the transition from DJVU to TOKTEI, some parts of the page
-    // are given an <fw> tag. Sometimes these end up in the wrong place
-    // in the text so a page's header may show up after a few lines. Same
-    // issue with footers.
-    String pagePart = "body";
-
-    while (xml.hasNext()) {
-      int event = xml.next();
-
-      if (event == XMLStreamConstants.END_ELEMENT) {
-        String tag = xml.getLocalName();
-
-        if ("w".equals(tag)){
-          writing = false;
-        }
-
-        if ("fw".equals(tag)){
-          currentBuffer = bodyBuffer;
-        }
-
-        if ("lb".equals(tag)){
-          currentBuffer.append("<br>");
-        }
-
-        // since the books do NOT end with <pb> we need to "fake" that
-        // so the last page number works
-        if ("text".equals(tag)) {
-          pageIndex++;
-          break; // we're done
-        }
-      }
-      if (event == XMLStreamConstants.CHARACTERS && writing) {
-        currentBuffer.append(StringEscapeUtils.escapeHtml4(xml.getText())).append(' ');
-        empty = false;
-      }
-      // copy the "form" attribute out of word tags
-      if (event == XMLStreamConstants.START_ELEMENT) {
-        String tag = xml.getLocalName();
-
-        if ("fw".equals(tag)){
-          pagePart = xml.getAttributeValue (null, "place");
-          if (pagePart.equalsIgnoreCase("top")){
-            currentBuffer = headerBuffer;
-          } else if (pagePart.equalsIgnoreCase("bottom")){
-            currentBuffer= footerBuffer;
-          } else {
-            currentBuffer = bodyBuffer; // safety
-          }
-        }
-
-        if ("w".equals(tag)) {
-          // MCZ: In the process of parsing the DJVU into toktei, words can get "split".
-          // For example "the end!", gets split into three word tokens with the "form"
-          // attributes of "the", "end", and "!". Previous versions of this used the
-          // value in the "form" attribute which causes all sorts of formatting issues
-          // like spaces between words and punctuations. If you try and be clever and
-          // "back up" the StringBuffer you can chop off the end of a "<br>" tag which
-          // messes up all the NER hilighting. So I'm going to just use the "w" value
-          // and ignore any "w" tags that have a "+" in the coords, which indicates that
-          // was something "extra" added in the process of creating the TOKTEI format.
-          // We'll also handle the situation where the "coords" attribute does not exist.
-          if (xml.getAttributeValue(null, "coords") == null || !xml.getAttributeValue(null, "coords").contains("+")){
-            writing = true;
-          }
-        } else if ("pb".equals(tag)) {
-
-          pageIndex++;
-          if (!empty) {
-            break;
-          }
-        }
-      }
-    }
-
-    if (empty) {
-      return null;
-    }
-
-    // NOTE - we subtract 1 from th page number. the <pb> tags START
-    // a page, but with the logic above, we hit the <pb> that starts the
-    // NEXT page so we're one too many.
-    final String pageNumber = Integer.toString(pageIndex - 1);
-    Document page = new Document();
-    String archiveId = MBTEI.getArchiveIdentifier(split, metadata);
-
-    // put together the parts of the page
-    String pageText = headerBuffer.toString() + bodyBuffer.toString() + footerBuffer.toString();
-    if (nerClassifier == null) {
-      page.text = pageText;
-    } else {
-      // if there is an error, just use the regular text
-      try {
-        page.text = nerClassifier.classifyWithInlineXML(pageText);
-      } catch (Exception e){
-        log.log(Level.WARNING, "Error running NER on: " + pageText, e);
-        page.text = pageText;
-      }
-    }
-
-    page.name = archiveId + "_" + pageNumber;
-    page.metadata = metadata;
-    page.metadata.put("pageNumber", pageNumber);
-    return page;
-  }
 }

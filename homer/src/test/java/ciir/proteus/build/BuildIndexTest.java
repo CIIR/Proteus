@@ -16,6 +16,7 @@ import org.lemurproject.galago.utility.FSUtil;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,7 +41,9 @@ public class BuildIndexTest {
     buildP.set("indexPath", tmpIndex.getAbsolutePath());
     buildP.set("inputPath", "src/test/resources/toktei/");
     buildP.set("filetype", MBTEIPageParser.class.getCanonicalName());
-
+    buildP.set("tokenizer", Parameters.create());
+    buildP.getMap("tokenizer").set("fields", new ArrayList());
+    buildP.getMap("tokenizer").getList("fields", String.class).add("archiveid");
     BuildIndex buildFn = new BuildIndex();
     buildFn.run(buildP, System.out);
 
@@ -72,6 +75,12 @@ public class BuildIndexTest {
     Assert.assertNotNull(Integer.parseInt(parts[1]));
     Assert.assertEquals(bookName, doc.metadata.get("identifier"));
 
+    // test that we have can retrieve by archiveid
+//    results = runQuery(ret, "#combine( #inside( #text:macbeth01shakgoog() #field:archiveid() ) )");
+//    Assert.assertEquals(235, results.size());
+//
+//    results = runQuery(ret, "#combine( #inside( #text:idonotexist() #field:archiveid() ) )");
+//    Assert.assertEquals(0, results.size());
 
     FSUtil.deleteDirectory(tmpIndex);
   }
@@ -86,6 +95,9 @@ public class BuildIndexTest {
     buildP.set("indexPath", tmpIndex.getAbsolutePath());
     buildP.set("inputPath", "src/test/resources/toktei/");
     buildP.set("filetype", MBTEIBookParser.class.getCanonicalName());
+    buildP.set("tokenizer", Parameters.create());
+    buildP.getMap("tokenizer").set("fields", new ArrayList());
+    buildP.getMap("tokenizer").getList("fields", String.class).add("archiveid");
 
     BuildIndex buildFn = new BuildIndex();
     buildFn.run(buildP, System.out);
@@ -98,6 +110,13 @@ public class BuildIndexTest {
     List<ScoredDocument> results = runQuery(ret, "romeo");
 
     Assert.assertFalse(results.isEmpty());
+
+    // test that we have can retrieve by archiveid
+//    results = runQuery(ret, "#combine( #inside( #text:macbeth01shakgoog() #field:archiveid() ) )");
+//    Assert.assertEquals(1, results.size());
+//
+//    results = runQuery(ret, "#combine( #inside( #text:idonotexist() #field:archiveid() ) )");
+//    Assert.assertEquals(0, results.size());
 
     FSUtil.deleteDirectory(tmpIndex);
   }
