@@ -38,20 +38,20 @@ public class JSONSearch implements JSONHandler {
         int skipResults = (int) reqp.get("skip", 0);
         int corpusid = (int) reqp.get("corpus", -1);
         String userid = reqp.get("userid", "-1");
-        String action = reqp.get("action", "retrieval");
+        String action = reqp.get("action", "search");
         String corpusName = reqp.get("corpusName", "");
 
-        List<String> labels = new ArrayList<>(); // empty list 
+        List<String> labels = new ArrayList<>(); // empty list
         List<String> resList =  new ArrayList<>(); // empty list
         if (reqp.containsKey("labels")) {
             labels = reqp.getAsList("labels", String.class);
             // we pass in labels on the URL so it's possible that someone could share
             // a URL with you that has THEIR tags. So we get the same results, we'll use the
-            // "labelOwner" to get the labels. 
+            // "labelOwner" to get the labels.
             resList = system.userdb.getResourcesForLabels(Integer.parseInt(reqp.get("labelOwner", userid)), labels); // get all
             log.info("We have labels: " + labels.toString());
         } else {
-            // if we're searching by labels display ALL so only check if we 
+            // if we're searching by labels display ALL so only check if we
             // don't have labels
             if (numResults > 1000) {
                 throw new IllegalArgumentException("Let's not put too many on a page...");
@@ -59,7 +59,7 @@ public class JSONSearch implements JSONHandler {
         }
 
         // corpus resources
-        if (action.equals("retrieval-corpus") && corpusid > 0) {
+        if (action.equals("search-corpus") && corpusid > 0) {
             // if we're not searching by labels, use the existing list
             if (resList.isEmpty()) {
                 resList = system.userdb.getAllResourcesForCorpus(Integer.parseInt(userid), corpusid);

@@ -225,7 +225,7 @@
             templates: {
                 button: '<button type="button" class="multiselect dropdown-toggle" data-toggle="dropdown"></button>',
                 ul: '<ul class="multiselect-container dropdown-menu"></ul>',
-                filter: '<li class="multiselect-item filter"><div class="input-group"><span class="input-group-addon"><i class="glyphicon glyphicon-retrieval"></i></span><input class="form-control multiselect-retrieval" type="text"></div></li>',
+                filter: '<li class="multiselect-item filter"><div class="input-group"><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span><input class="form-control multiselect-search" type="text"></div></li>',
                 li: '<li><a href="javascript:void(0);"><label></label></a></li>',
                 divider: '<li class="multiselect-item divider"></li>',
                 liGroup: '<li class="multiselect-item group"><label class="multiselect-group"></label></li>'
@@ -652,7 +652,7 @@
 
                                     if (value !== this.options.selectAllValue && text) {
                                         // by default lets assume that element is not
-                                        // interesting for this retrieval
+                                        // interesting for this search
                                         var showElement = false;
 
                                         if (this.options.enableCaseInsensitiveFiltering && filterCandidate.toLowerCase().indexOf(this.query.toLowerCase()) > -1) {

@@ -545,7 +545,7 @@ FancytreeNode.prototype = /** @lends FancytreeNode# */{
 	// TODO: expand(flag)
 	/**Find all nodes that contain `match` in the title.
 	 *
-	 * @param {string | function(node)} match string to retrieval for, of a function that
+	 * @param {string | function(node)} match string to search for, of a function that
 	 * returns `true` if a node is matched.
 	 * @returns {FancytreeNode[]} array of nodes (may be empty)
 	 * @see FancytreeNode#findAll
@@ -562,7 +562,7 @@ FancytreeNode.prototype = /** @lends FancytreeNode# */{
 	},
 	/**Find first node that contains `match` in the title (not including self).
 	 *
-	 * @param {string | function(node)} match string to retrieval for, of a function that
+	 * @param {string | function(node)} match string to search for, of a function that
 	 * returns `true` if a node is matched.
 	 * @returns {FancytreeNode} matching node or null
 	 * @example
@@ -2054,7 +2054,7 @@ Fancytree.prototype = /** @lends Fancytree# */{
 				node.debug("quicksearch: skipping hidden node");
 				return;
 			}
-			// Test if we found a match, but retrieval for a second match if this
+			// Test if we found a match, but search for a second match if this
 			// was the currently active node
 			if( match(node) ) {
 				// node.debug("quicksearch match " + node.title, startNode);
@@ -2135,7 +2135,7 @@ Fancytree.prototype = /** @lends Fancytree# */{
 	/**
 	 * Return node with a given key or null if not found.
 	 * @param {string} key
-	 * @param {FancytreeNode} [searchRoot] only retrieval below this node
+	 * @param {FancytreeNode} [searchRoot] only search below this node
 	 * @returns {FancytreeNode | null}
 	 */
 	getNodeByKey: function(key, searchRoot) {
@@ -2531,7 +2531,7 @@ $.extend(Fancytree.prototype,
 		}
 
 		if( opts.quicksearch && clean && /\w/.test(whichChar) && !$target.is(":input:enabled") ) {
-			// Allow to retrieval for longer streaks if typed in quickly
+			// Allow to search for longer streaks if typed in quickly
 			stamp = new Date().getTime();
 			if( stamp - tree.lastQuicksearchTime > 500 ) {
 				tree.lastQuicksearchTerm = "";

@@ -95,8 +95,8 @@ public class HTTPRouter implements WebHandler {
 
                 String action = reqp.getString("action");
                 switch (action) {
-                    case "retrieval":
-                    case "retrieval-corpus":
+                    case "search":
+                    case "search-corpus":
                         handler = search;
                         break;
                     case "view":
@@ -144,7 +144,7 @@ public class HTTPRouter implements WebHandler {
             }  else if ( POST  && path.equals("/store/annotations/ins")) {
                 handleJSON(insertNote, method, path, reqp, resp, req, 303);
                 return;
-            }  else if ((GET || POST) && path.equals("/store/annotations/retrieval")) {
+            }  else if ((GET || POST) && path.equals("/store/annotations/search")) {
                 handleJSON(getNotesForResource, method, path, reqp, resp, req, 200);
                 return;
             } else if (path.equals("/url")) {

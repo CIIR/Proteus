@@ -85,11 +85,11 @@ var doSearchRequest = function(args) {
     var actualArgs = _.merge(defaultArgs, args);
 
     if (args.kind.endsWith("corpus")){
-        actualArgs.action = "retrieval-corpus";
+        actualArgs.action = "search-corpus";
     }
 
     // only allow blank queries if we're searching a corpus or by label(s)
-    if ((!actualArgs.q || isBlank(actualArgs.q)) && (_.isEmpty(actualArgs.labels)) && ( actualArgs.action != "retrieval-corpus")) {
+    if ((!actualArgs.q || isBlank(actualArgs.q)) && (_.isEmpty(actualArgs.labels)) && ( actualArgs.action != "search-corpus")) {
         UI.showProgress("Query is blank!");
         return;
     }
@@ -175,7 +175,7 @@ var onSearchSuccess = function(data) {
 
     // if we searched by labels or corpus, we returned EVERYTHING so we
     // don't re-enable the auto-retrieve
-    if (usingLabels === false && Model.request.action != "retrieval-corpus")
+    if (usingLabels === false && Model.request.action != "search-corpus")
         enableAutoRetrieve();
 
     setUpMouseEvents(); // TODO : only want to do this once
@@ -305,7 +305,7 @@ var initAnnotationLogic = function(pageID, pageNum){
                 create:  '/annotations/ins',
                 update:  '/annotations/upd/:id',
                 destroy: '/annotations/del/:id',
-                search:  '/annotations/retrieval'
+                search:  '/annotations/search'
             }
         });
 
