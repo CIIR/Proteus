@@ -103,4 +103,5 @@ public interface UserDatabase {
 
     public void deleteNote(Credentials creds, Integer id, Integer corpusID) throws DBError;
 
+    public Parameters getNotesForCorpus(Integer corpusID) throws DBError, IOException;
 }

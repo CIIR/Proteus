@@ -42,6 +42,7 @@ public class HTTPRouter implements WebHandler {
     private final JSONHandler updateNote;
     private final JSONHandler deleteNote;
     private final JSONHandler getNotesForResource;
+    private final JSONHandler getNotesHistory;
     private final StaticContentHandler staticContent;
 
     public HTTPRouter(ProteusSystem proteus) {
@@ -68,6 +69,7 @@ public class HTTPRouter implements WebHandler {
         updateNote = new UpdateNote(proteus);
         deleteNote = new DeleteNote(proteus);
         getNotesForResource = new GetNotesForResource(proteus);
+        getNotesHistory = new GetNotesHistory(proteus);
     }
 
     // handle http requests
@@ -131,6 +133,8 @@ public class HTTPRouter implements WebHandler {
                 handler = resourcesforlabels;
             } else if (POST && path.equals("/api/rateresource")) {
                 handler = rateResource;
+            } else if (POST && path.equals("/api/notehistory")) {
+                handler = getNotesHistory;
             } else if ((PUT) && path.startsWith("/store/annotations/upd")) {
                 handleJSON(updateNote, method, path, reqp, resp, req, 303);
                 return;

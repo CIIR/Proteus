@@ -67,6 +67,17 @@ var getURLParams = function() {
     return urlParams;
 };
 
+var removeURLParam = function(param){
+
+    var p =  getURLParams();
+
+    if (!_.isUndefined(p[param])){
+        delete p[param]
+        pushURLParams(p);
+    }
+
+}
+
 // from: http://www.w3schools.com/js/js_cookies.asp
 var getCookie = function(cname) {
     var name = cname + "=";

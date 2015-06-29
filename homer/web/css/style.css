@@ -488,4 +488,10 @@ body {
     margin-top: 5px;
 }
 
+.notes {
+    font-style: italic;
+}
 
+.note {
+    text-align: left;
+}

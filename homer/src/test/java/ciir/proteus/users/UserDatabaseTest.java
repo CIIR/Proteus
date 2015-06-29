@@ -9,6 +9,8 @@ import org.lemurproject.galago.utility.Parameters;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -633,7 +635,7 @@ public class UserDatabaseTest {
     String resource2 = "res2";
     id = db.insertNote(cred, corpus1, resource2, "{ \"name\": \"res2\" }");
 
-    notes = db.getNotesForResource( resource, corpus1);
+    notes = db.getNotesForResource(resource, corpus1);
     assertEquals(notes.get("total", -1), 2);
     List<Parameters> arr = notes.getAsList("rows");
 
@@ -669,5 +671,62 @@ public class UserDatabaseTest {
 
   }
 
+  @Test
+  public void noteHistoryTest() throws DBError, IOException, SQLException, InterruptedException, ParseException {
+    String user = "new-user";
+    db.register(user);
+    Parameters p = db.login(user);
+
+    Credentials cred = new Credentials(p);
+
+    db.createCorpus("a", "user");
+    db.createCorpus("b", "user");
+    Integer corpus1 = 1;
+    Integer corpus2 = 2;
+
+    Parameters notes = Parameters.create();
+
+    // add notes for a resource
+    String resource = "res1";
+    Integer id = db.insertNote(cred, corpus1, resource, "{ \"" + resource + "\": \"1\" }");
+    // wait a bit so we have different time stamps
+    Thread.sleep(200);
+
+    id = db.insertNote(cred, corpus1, resource, "{ \"" + resource + "\": \"2\" }");
+
+    Thread.sleep(200);
+
+    // add note for a different resource
+    String resource2 = "res2";
+    id = db.insertNote(cred, corpus1, resource2, "{ \"" + resource2 + "\": \"1\" }");
+
+    // add note for different corpus - this will not get returned
+    id = db.insertNote(cred, corpus2, resource2, "{ \"" + resource2 + "\": \"2\" }");
+
+    // update the first note
+    db.updateNote(cred, corpus1, 1, "{ \"" + resource + "\": \"1\" }");
+
+    notes = db.getNotesForCorpus(corpus1);
+    List<Parameters> arr = notes.getAsList("rows");
+
+    assertEquals(3, arr.size());
+
+    // check that they're in the correct order
+    assertEquals("1", arr.get(0).get(resource, "?"));
+    assertEquals("1", arr.get(1).get(resource2, "?"));
+    assertEquals("2", arr.get(2).get(resource, "?"));
+
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSSSSSSSS");
+    Date date = (Date)formatter.parse(arr.get(0).get("dttm", "?"));
+    long time1 = date.getTime();
+    date = (Date)formatter.parse(arr.get(1).get("dttm", "?"));
+    long time2 = date.getTime();
+    date = (Date)formatter.parse(arr.get(2).get("dttm", "?"));
+    long time3 = date.getTime();
+
+    assertTrue(time1 > time2);
+    assertTrue(time2 > time3);
+
+  }
 }
 

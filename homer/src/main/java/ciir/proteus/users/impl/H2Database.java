@@ -990,6 +990,44 @@ public class H2Database implements UserDatabase {
     }
   }
 
+  // get all notes for a corpus ordered by most recent.
+  // TODO: in the future we may want to limit the results to a certain number or only
+  // go back a certain number of days.
+  @Override
+  public Parameters getNotesForCorpus(Integer corpusID) throws DBError, IOException {
+
+    Parameters rows = Parameters.create();
+    List<Parameters> notes = new ArrayList<>();
+
+    Connection conn = null;
+    try {
+      conn = cpds.getConnection();
+
+      PreparedStatement sql = conn.prepareStatement("SELECT GREATEST(upd_dttm, ins_dttm) as dttm, data FROM notes WHERE corpus_id = ? ORDER BY dttm  DESC");
+
+      sql.setInt(1, corpusID);
+
+      ResultSet tuples = sql.executeQuery();
+      while (tuples.next()) {
+        Parameters p = Parameters.parseString(tuples.getString(2));
+        p.put("dttm", tuples.getString(1));
+        notes.add(p);
+      }
+      tuples.close();
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } finally {
+      attemptClose(conn);
+    }
+
+    Parameters results = Parameters.create();
+    results.put("rows", notes);
+
+    return results;
+  }
+
+
   // "borrowed" from the C3P0 examples: http://sourceforge.net/projects/c3p0/files/c3p0-src/c3p0-0.9.2.1/
   static void attemptClose(Connection o) {
     try {

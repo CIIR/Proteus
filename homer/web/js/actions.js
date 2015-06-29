@@ -214,7 +214,7 @@ var doViewRequest = function(args) {
         });
 
 };
-
+// TODO : should be in arcive js file
 var viewPrevPageSuccess = function(args) {
     if (args.found == false){
         // get the prior page
@@ -252,12 +252,38 @@ var initAnnotationLogic = function(pageID, pageNum){
     var userToken = getCookie("token");
     var userID = getCookie("userid");
 
+
     var corpusID = getCorpusID(corpus);
     // resource has to match the Internet Archive format so we are consistent across the system
     var resource = pageID;
-    if (parseInt(pageNum) >= 0)
+    if (parseInt(pageNum) >= 0){
+
         resource +=  '_' +  pageNum;
+    }
+
     var el = '#' + getNotesID(pageID, pageNum);
+
+    // ??? only do this IFF we have a noteid?
+    // ??? this is nice for a book, but what about if it's for a page?
+    $(el).bind("annotationsLoaded", function(){
+        var urlParams = getURLParams();
+        // check if we are passed a note id
+        if (!_.isUndefined(urlParams["noteid"])){
+
+            var el =  '.annotator-hl[data-annotation-id="' + urlParams["noteid"] + '"]'
+
+            $('#results-right').animate({
+                scrollTop: $(el).offset().top - 60
+            }, 2000);
+
+            // remove the notid from the URL so we don't re-trigger
+           removeURLParam("noteid");
+
+            // unbind once we're done
+            $(el).unbind("annotationsLoaded");
+        }
+    });
+
     $(el).annotator().data('annotator');
 
         $(el).annotator('addPlugin', 'Store', {
@@ -272,6 +298,7 @@ var initAnnotationLogic = function(pageID, pageNum){
             loadFromSearch: {
                  'uri': resource,
                 corpus:  parseInt(corpusID)
+
             },
             urls: {
                 // These are the default URLs.
@@ -305,9 +332,20 @@ var initAnnotationLogic = function(pageID, pageNum){
             // MCZ: for some reason you can delete a post even if you're not
             // allowed to edit it... doesn't make much sense to me. Making it
             // (for now) that only creator can edit/delete.
-            return this.userId(user) === this.userId(annotation.user);
+            return this.userId(user) === this.userId(annotation.userid);
             }
     });
+
+    // this can only be done AFTER all the notes are highlighted
+//    var urlParams = getURLParams();
+//    // check if we are passed a note id
+//    if (!_.isUndefined(urlParams["noteid"])){
+//
+//        var el =  '.annotator-hl[data-annotation-id="' + urlParams["noteid"] + '"]'
+//        $('#results-right').animate({
+//            scrollTop: $(el).offset().top
+//        }, 2000);
+//    }
 
 
 }
@@ -458,8 +496,8 @@ var onViewBookSuccess = function(args) {
     var pgTxt= processTags(args.text);
 
     var html =  '<a class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>';
-    html += '<div id="' + getNotesID(args.request.id, -1) + '" >' + pgTxt + '</div>';
-    //
+    html +=  pgTxt ;
+
     //    html += '<div>[<span class="per">PERSON</span>]&nbsp;[<span class="loc">LOCATION</span>]&nbsp;[<span class="org">ORGANIZATION</span>]</div>';
     //    if (args.request.kind == 'ia-pages'){
     //        html += '<div class="pageNavigation"></div>';
@@ -468,7 +506,20 @@ var onViewBookSuccess = function(args) {
 
     viewResourceDiv.html(html);
     viewResourceDiv.show();
-    initAnnotationLogic(args.request.id, -1);
+
+    // go through the book and insert an ID attribute so we can share the notes across
+    // both books and pages.
+    var pageBreaks = $("pb");
+    var el = "";
+    var id = args.request.id;
+
+    _.forEach(pageBreaks, function(pb){
+        console.log(pb);
+        el =  getNotesID(id, $(pb).attr("page"));
+        $(pb).attr("id", el);
+        initAnnotationLogic(id, $(pb).attr("page"));
+    });
+
     UI.showProgress("");
 
 };

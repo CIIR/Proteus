@@ -199,6 +199,24 @@ function setSliderValue(name, init) {
  * Renders search results into UI after current results
  */
 
+UI.renderSingleResult_notes = function(result, queryTerms,  prependTo) {
+    //console.debug("result name: " + result.name);
+    var renderer = getResultRenderer('ia-pages'); //added this line and 5 below make adding/subt elements in future easier
+    var resDiv = $('<div>');
+    resDiv.attr('class', 'result');
+    resDiv.attr('id', result.uri);
+
+    // put it at the end unless we pass in where we want it to go
+    if (_.isUndefined(prependTo)) {
+        resultsDiv.append(renderer(queryTerms, result, resDiv)); //* 6/26/2014
+    } else {
+        $(prependTo).after(renderer(queryTerms, result, resDiv));
+    }
+
+
+};
+
+
 UI.renderSingleResult = function(result, queryTerms,  prependTo) {
     //console.debug("result name: " + result.name);
     var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
@@ -214,17 +232,17 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
     }
 
     /* uncomment this to make entities draggable
-    $(".mz-ner").draggable({
-        appendTo: "body",
-        helper: 'clone',
-        scroll: 'true',
-        refreshPositions: true
-    });
-    */
+     $(".mz-ner").draggable({
+     appendTo: "body",
+     helper: 'clone',
+     scroll: 'true',
+     refreshPositions: true
+     });
+     */
 
-     $("#rating-" + result.name)
+    $("#rating-" + result.name)
             .slider({
-                 max: 2,
+                max: 2,
                 min: -2
             })
             .slider("pips", {
@@ -233,48 +251,48 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
             })
             .slider("float").slider({
 
-        change: function( event, ui ) {
+                change: function( event, ui ) {
 
-            // send this rating to the DB
+                    // send this rating to the DB
 
-            // TODO: we do this a lot - should have it's own function
-            var userName = getCookie("username");
-            var userID = parseInt(getCookie("userid"));
-            var userToken = getCookie("token");
-            var corpus = getCookie("corpus");
-            var corpID = getCorpusID(corpus);
+                    // TODO: we do this a lot - should have it's own function
+                    var userName = getCookie("username");
+                    var userID = parseInt(getCookie("userid"));
+                    var userToken = getCookie("token");
+                    var corpus = getCookie("corpus");
+                    var corpID = getCorpusID(corpus);
 
-            var args = { userid:  userID, user: userName, token : userToken, resource: result.name, corpus: corpID, rating: ui.value };
+                    var args = { userid:  userID, user: userName, token : userToken, resource: result.name, corpus: corpID, rating: ui.value };
 
-            API.rateResource(args, function(){
+                    API.rateResource(args, function(){
 
-                if (_.isUndefined(ratingsJSON.document[result.name])) {
-                    ratingsJSON.document[result.name] = [];
-                    // add our rating
-                    ratingsJSON.document[result.name].push({"user": userName, "rating": ui.value + 2}); // +2 hack to keep it consistent with other ratings
-                }
-                    // see if we have a value
-                    var idx =  _.findIndex(ratingsJSON.document[result.name], function(rec) {
-                        return rec.user == userName;
+                        if (_.isUndefined(ratingsJSON.document[result.name])) {
+                            ratingsJSON.document[result.name] = [];
+                            // add our rating
+                            ratingsJSON.document[result.name].push({"user": userName, "rating": ui.value + 2}); // +2 hack to keep it consistent with other ratings
+                        }
+                        // see if we have a value
+                        var idx =  _.findIndex(ratingsJSON.document[result.name], function(rec) {
+                            return rec.user == userName;
+                        });
+
+                        // update our rating - or remove it if it's zero
+                        if (idx < 0){
+                            ratingsJSON.document[result.name].push({ "user" : userName, "rating" : ui.value + 2});
+                        }else{
+                            ratingsJSON.document[result.name][idx].rating = ui.value + 2;
+                        }
+
+                        setSliderValue(result.name, false);
+                        renderRatingsSidebar(result.name);
+                    }, function(req, status, err) {
+                        UI.showError("ERROR: ``" + err + "``");
+                        throw err;
                     });
 
-                  // update our rating - or remove it if it's zero
-                    if (idx < 0){
-                        ratingsJSON.document[result.name].push({ "user" : userName, "rating" : ui.value + 2});
-                    }else{
-                        ratingsJSON.document[result.name][idx].rating = ui.value + 2;
-                    }
+                }
 
-                setSliderValue(result.name, false);
-                renderRatingsSidebar(result.name);
-            }, function(req, status, err) {
-                UI.showError("ERROR: ``" + err + "``");
-                throw err;
-            });
-
-        }
-
-    }) ;
+            }) ;
 
     var myVal = setSliderValue(result.name, true);
     $("#rating-" + result.name).slider("values", myVal);
@@ -317,6 +335,30 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
     $(".read-only-tags").tagit({
         readOnly: true
     });
+//
+//    var corpus = getCookie("corpus");
+//    var corpusID = getCorpusID(corpus);
+//
+//    var args = {corpus: corpusID};
+//
+//    API.getNoteHistory(args,
+//            function(results) {
+//
+//                var html = '';
+//                for (i in results.rows){
+//                    rec = results.rows[i];
+//                    // strip the seconds/milliseconds from the date
+//                    var dt = rec.dttm.substring(0, rec.dttm.lastIndexOf(":"));
+//                    var name = rec.user.split("@")[0];
+//                  //  html += rec.user + ' (' + dt + ') : ' + rec.text + '<br>';
+//                  html += ' <a target="_blank" href="?kind=' + kind +'&action=view&id=' + rec.uri + '&noteid=' + rec.id + '">' +
+//                    dt + ' ' + name + ': <i>' +
+//                  rec.text + '</i></a>';
+//                    $('#notes-' + rec.name).html(html);
+//                }
+//            },
+//            function() {alert("error getting notes!")});
+
 
 };
 
@@ -326,6 +368,31 @@ UI.appendResults = function(queryTerms, results) {
     _(results).forEach(function(result) {
         UI.renderSingleResult(result, queryTerms);
     });
+
+    // ???? tmp to test showing notes
+//    var corpus = getCookie("corpus");
+//    var corpusID = getCorpusID(corpus);
+//
+//    var args = {corpus: corpusID};
+//
+//    API.getNoteHistory(args,
+//            function(results) {
+//                _(results.rows).forEach(function(result) {
+//                    UI.renderSingleResult_notes(result, queryTerms);
+//                });
+////                var html = '';
+////                for (i in results.rows){
+////                    rec = results.rows[i];
+////                    // strip the seconds/milliseconds from the date
+////                    var dt = rec.dttm.substring(0, rec.dttm.lastIndexOf(":"));
+////                    html += rec.user + ' (' + dt + ') : ' + rec.text + '<br>';
+////                }
+////                $('#notes-' + result.name).html(html);
+//            },
+//            function() {alert("error getting notes!")});
+
+
+
 };
 /**
  * A set of functions for reacting to events in other, more general code.

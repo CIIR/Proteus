@@ -117,6 +117,39 @@ UI.onClickSearchButton = function(kind) {
 };
 
 UI.populateRecentSearches = function(){
+
+    // TODO should be it's own function
+    var corpus = getCookie("corpus");
+    var corpusID = getCorpusID(corpus);
+    var args = {corpus: corpusID};
+
+    API.getNoteHistory(args,
+            function(results) {
+
+                var html = '';
+                for (i in results.rows){
+                    rec = results.rows[i];
+                    var kind = 'ia-books';
+                    var identifier = rec.uri.split('_')[0];
+                    var pageNum = rec.uri.split('_')[1];
+                    if (!_.isUndefined(pageNum))
+                        kind = 'ia-pages'
+
+                    // strip the seconds/milliseconds from the date
+                    var dt = rec.dttm.substring(0, rec.dttm.lastIndexOf(":"));
+                    var name = rec.user.toString();
+                        name = name.split("@")[0];
+                    //  html += rec.user + ' (' + dt + ') : ' + rec.text + '<br>';
+                    html += ' <a target="_blank" href="?kind=' + kind +'&action=view&id=' + rec.uri + '&noteid=' + rec.id + '">' +
+                    '&#8226;&nbsp;' + dt + ' ' + name + ': <i>' +
+                    rec.text + '</i></a><br>';
+
+                }
+                $('#note-list').html(html);
+            },
+            function() {alert("error getting notes!")});
+
+
     if (localStorage["pastSearches"] == null){
         return;
     }
