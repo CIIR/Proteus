@@ -495,17 +495,10 @@ var onViewBookSuccess = function(args) {
 
     var pgTxt= processTags(args.text);
 
-    var html =  '<a class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>';
+    var html =  '<a href="#" class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>';
     html +=  pgTxt ;
 
-    //    html += '<div>[<span class="per">PERSON</span>]&nbsp;[<span class="loc">LOCATION</span>]&nbsp;[<span class="org">ORGANIZATION</span>]</div>';
-    //    if (args.request.kind == 'ia-pages'){
-    //        html += '<div class="pageNavigation"></div>';
-    //        html += '<div id="prevPage"></div>';
-    //    }
-
     viewResourceDiv.html(html);
-    viewResourceDiv.show();
 
     // go through the book and insert an ID attribute so we can share the notes across
     // both books and pages.
@@ -514,15 +507,29 @@ var onViewBookSuccess = function(args) {
     var id = args.request.id;
 
     _.forEach(pageBreaks, function(pb){
-        console.log(pb);
+        //console.log(pb);
+        var pgImage = pageImage(id, $(pb).attr("page"));
+
         el =  getNotesID(id, $(pb).attr("page"));
         $(pb).attr("id", el);
+        $(pb).addClass("book-page row clearfix ");
+
+        var pghtml =  '<div class="book-text col-md-5 column left-align">' + $(pb).html() + '</div>'+
+                '<div id="' + el + '-page-image" class="page-image col-md-5 column left-align"><br><a href="#" onclick="getPageImage(\'' + el + '-page-image\',\'' +  pgImage + '\');" >View the actual page</a></div>';
+        $(pb).html(pghtml);
         initAnnotationLogic(id, $(pb).attr("page"));
     });
 
+    viewResourceDiv.show();
     UI.showProgress("");
 
 };
+
+var getPageImage = function(id, imgURL){
+
+    $('#' + id).html('<br><a class="fancybox" href="' + imgURL + '" ><img src="' + imgURL + '"></a>')
+
+}
 
 var setPageNavigation = function(pageID) {
 
