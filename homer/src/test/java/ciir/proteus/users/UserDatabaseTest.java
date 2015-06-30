@@ -690,11 +690,11 @@ public class UserDatabaseTest {
     String resource = "res1";
     Integer id = db.insertNote(cred, corpus1, resource, "{ \"" + resource + "\": \"1\" }");
     // wait a bit so we have different time stamps
-    Thread.sleep(200);
+    Thread.sleep(2000);
 
     id = db.insertNote(cred, corpus1, resource, "{ \"" + resource + "\": \"2\" }");
 
-    Thread.sleep(200);
+    Thread.sleep(2000);
 
     // add note for a different resource
     String resource2 = "res2";
@@ -702,6 +702,8 @@ public class UserDatabaseTest {
 
     // add note for different corpus - this will not get returned
     id = db.insertNote(cred, corpus2, resource2, "{ \"" + resource2 + "\": \"2\" }");
+
+    Thread.sleep(2000);
 
     // update the first note
     db.updateNote(cred, corpus1, 1, "{ \"" + resource + "\": \"1\" }");
