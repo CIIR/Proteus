@@ -129,20 +129,17 @@ UI.populateRecentSearches = function(){
                 var html = '';
                 for (i in results.rows){
                     rec = results.rows[i];
-                    var kind = 'ia-books';
                     var identifier = rec.uri.split('_')[0];
                     var pageNum = rec.uri.split('_')[1];
-                    if (!_.isUndefined(pageNum))
-                        kind = 'ia-pages'
 
                     // strip the seconds/milliseconds from the date
                     var dt = rec.dttm.substring(0, rec.dttm.lastIndexOf(":"));
                     var name = rec.user.toString();
                         name = name.split("@")[0];
-                    //  html += rec.user + ' (' + dt + ') : ' + rec.text + '<br>';
-                    html += ' <a target="_blank" href="?kind=' + kind +'&action=view&id=' + rec.uri + '&noteid=' + rec.id + '">' +
-                    '&#8226;&nbsp;' + dt + ' ' + name + ': <i>' +
-                    rec.text + '</i></a><br>';
+
+                    html += '&#8226;&nbsp;' + dt + ' ' + name + ': <i>' + rec.text
+                        + '</i> view: <a target="_blank" href="?kind=ia-pages&action=view&id=' + identifier + '_' + pageNum + '&noteid=' + rec.id + '">Page, </a>'
+                        + '<a target="_blank" href="?kind=ia-books&action=view&id=' + identifier + '&noteid=' + rec.id + '">Book</a><br>';
 
                 }
                 $('#note-list').html(html);
