@@ -502,19 +502,16 @@ var onViewBookSuccess = function(args) {
 
     // go through the book and insert an ID attribute so we can share the notes across
     // both books and pages.
-    var pageBreaks = $("pb");
-    var el = "";
+    var pageBreaks = $(".page-break");
     var id = args.request.id;
 
     _.forEach(pageBreaks, function(pb){
-        //console.log(pb);
-        var pgImage = pageImage(id, $(pb).attr("page"));
 
-        el =  getNotesID(id, $(pb).attr("page"));
-        $(pb).attr("id", el);
+        var pgImage = pageImage(id, $(pb).attr("page"));
+        var el =  getNotesID(id, $(pb).attr("page"));
         $(pb).addClass("book-page row clearfix ");
 
-        var pghtml =  '<div class="book-text col-md-5 column left-align">' + $(pb).html() + '</div>'+
+        var pghtml =  '<div id="' + el + '" class="book-text col-md-5 column left-align">' + $(pb).html() + '</div>'+
                 '<div id="' + el + '-page-image" class="page-image col-md-5 column left-align"><br><a href="#" onclick="getPageImage(\'' + el + '-page-image\',\'' +  pgImage + '\');" >View the actual page</a></div>';
         $(pb).html(pghtml);
         initAnnotationLogic(id, $(pb).attr("page"));

@@ -31,16 +31,14 @@ public class MBTEIBookParser extends MBTEIParser {
       String pg;
       while ((pg = nextPageText()) != null) {
         // indicate the page
-        String pageTag = "<pb page=\"" + getPageIndex() + "\">";
-        wholeDocBuffer.append(pageTag);
+        wholeDocBuffer.append("<div class=\"page-break\" page=\"" + getPageIndex() + "\">");
         wholeDocBuffer.append(pg);
-        wholeDocBuffer.append("</pb>");
+        wholeDocBuffer.append("</div>");
       }
 
       if (wholeDocBuffer.length() == 0){
         return null;
       }
-      // TODO add page number
 
       Document doc = new Document();
 
@@ -55,6 +53,7 @@ public class MBTEIBookParser extends MBTEIParser {
       doc.text = wholeDocBuffer.toString();
       doc.metadata = metadata;
       doc.name = archiveID;
+
       return doc;
 
     } catch (XMLStreamException e) {
