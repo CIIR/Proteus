@@ -190,9 +190,28 @@ var logIn = function(userName) {
             document.cookie = "userid=" + data.userid + ";";
             document.cookie = "token=" + data.token + ";";
             var settings = JSON.parse(data.settings);
-            document.cookie = "settings=" + settings.num_entities + ";";
 
             localStorage["corpora"] = JSON.stringify(data.corpora);
+
+            if (!_.isUndefined(data.broadcast)){
+
+                // set all the messages we can receive and if we want to see them.
+                localStorage["messages"] = JSON.stringify(data.broadcast.messages);
+                if (_.isUndefined(settings.broadcast)){
+                    settings.broadcast = {};
+                }
+                // if there are any new broadcast messages, default them to "Yes, I want to see them"
+                // until the user explicitly disables them on the setting page.
+                for (msg in data.broadcast.messages){
+
+                    if (!settings.broadcast.hasOwnProperty(data.broadcast.messages[msg])){
+                        settings.broadcast[data.broadcast.messages[msg]] = "Y";
+                    }
+                }
+            }
+            document.cookie = "settings=" + JSON.stringify(settings) + ";";
+            // TODO ??? should we save these if they changed?
+
             UI.updateCorpusListButton();
             UI.dispalyUserName();
             // update the type tags
