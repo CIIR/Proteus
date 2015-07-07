@@ -101,7 +101,7 @@ public class MBTEIBookParserNER extends DocumentStreamParser {
             Map<String, String> metadata = MBTEI.parseMetadata(xml);
             boolean documentEmpty = true;
 
-            NamedEntityDocumentGenerator nedg = new NamedEntityDocumentGenerator("person", "entity-docs/");
+            NamedEntityDocumentGenerator nedg = new NamedEntityDocumentGenerator("person", "raw-entity-docs/");
 
             while (xml.hasNext()) {
                 int event = xml.next();
@@ -164,7 +164,7 @@ public class MBTEIBookParserNER extends DocumentStreamParser {
 
                         wholeDocBuffer.append(doNER(pageText));
                         Document doc = MBTEI.makeDocument(split, metadata, wholeDocBuffer.toString());
-                        nedg.generateDocs(doc);
+                        nedg.generateRawDocs(doc);
                         return doc;
                     }
                 }
@@ -181,7 +181,7 @@ public class MBTEIBookParserNER extends DocumentStreamParser {
 
                 wholeDocBuffer.append(doNER(pageText));
                 Document doc = MBTEI.makeDocument(split, metadata, wholeDocBuffer.toString());
-                nedg.generateDocs(doc);
+                nedg.generateRawDocs(doc);
                 return doc;
             }
 
