@@ -248,7 +248,7 @@ public class NamedEntityDocumentGenerator{
             if (Files.isRegularFile(filePath)) {
                 System.out.println("File Name: " + filePath.getFileName());
                 String[] segments = filePath.getFileName().toString().split("\\.");
-                String rawName = segments[0];
+                String rawName = segments[0].replace('_',' ');
                 String bookIndentifier = segments[1];
                 List<String> lines = null;
                 try {
@@ -261,9 +261,10 @@ public class NamedEntityDocumentGenerator{
                 Entity bestMatch = null;
                 System.out.println("New Name: " + rawName);
                 for(Entity e: entities){
-                    int newScore = e.compareAliases(rawName);
+                    System.out.println(" Comparing to: " + e.getName());
+                    int newScore = e.compareAliasesBySegment(rawName);
                     if(newScore < bestScore){
-                        System.out.println("Score of " + newScore + " Acknowledged");
+                        System.out.println("  Distance of " + newScore + " Acknowledged");
                         bestScore = newScore;
                         bestMatch = e;
                     }
@@ -271,14 +272,14 @@ public class NamedEntityDocumentGenerator{
                 //if the best match is sufficiently close to the new entity
                 //merge the new entity into the best match
                 if(bestScore <= maxAllowedDistance && bestMatch != null){
-                    System.out.println("Appending to " + bestMatch.getName());
+                    System.out.println(" Appending to " + bestMatch.getName());
                     bestMatch.addAlias(rawName);
                     bestMatch.addLocation(bookIndentifier);
                     bestMatch.extendLanguageModel(languageModel);
                 }
                 //otherwise create a new entity and add it to the set
                 else{
-                    System.out.println("Creating New Entity");
+                    System.out.println(" Creating New Entity");
                     Entity e = new Entity(rawName);
                     e.addAlias(rawName);
                     e.addLocation(bookIndentifier);
@@ -289,7 +290,7 @@ public class NamedEntityDocumentGenerator{
         });
         //now write out each entity to file
         for(Entity e: entities){
-            String outputName = writeOutLocation + e.getName() + ".trectext";
+            String outputName = writeOutLocation + e.getName().replace(' ','_') + ".trectext";
             BufferedWriter bw = new BufferedWriter(new FileWriter(outputName));
             bw.write("<DOC>\n<DOCNO>"
                     + e.getName()

@@ -73,10 +73,18 @@ public class Entity {
     // minDistance returned is for the min distance between to segments
     // thus "David Johnson" and "David Jonson" would have a distance of 0
     public int compareAliasesBySegment(String s) {
+        String[] sComponents = s.split(" ");
         int minDistance = Integer.MAX_VALUE;
         for(String alias: aliases){
-            int newDistance = StringUtils.getLevenshteinDistance(name, s);
-            minDistance = (newDistance < minDistance) ? newDistance : minDistance;
+            for(String aliasComponent: alias.split(" ")){
+                for(String sComponent: sComponents) {
+                    System.out.println("  Comparing " + aliasComponent + " against " + sComponent);
+                    int newDistance = StringUtils.getLevenshteinDistance(aliasComponent, sComponent);
+                    minDistance = (newDistance < minDistance) ? newDistance : minDistance;
+                    System.out.println("   Distance = " + newDistance);
+                }
+            }
+
         }
         return minDistance;
     }
