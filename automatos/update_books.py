@@ -187,6 +187,8 @@ def build_index(djvu_file_paths, output_directory_location, primary_work_directo
         temp_list_writer.write(output_directory_location + '/' + path +'\n')
     temp_list_writer.close()
     
+    if not os.path.exists("raw-entity-docs"):
+       os.mkdir("raw-entity-docs")
     if not os.path.exists("entity-docs"):
        os.mkdir("entity-docs")
 
@@ -202,14 +204,22 @@ def build_index(djvu_file_paths, output_directory_location, primary_work_directo
 
     command = 'java -Xmx9g -Xms9g -jar ../homer/target/homer-0.4-SNAPSHOT.jar build ../homer/scripts/books_ner.conf --server=false --indexPath=demo.books --inputPath=%s' % (temp_list_tei_location)
     print(command)
-    proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     #msg_writer = open('books_indexing.out','w')
     for l in proc.stdout:
+        print(l.decode().strip())
+    for l in proc.stderr:
         print(l.decode().strip())
         #msg_writer.write(l.decode())
     #msg_writer.close()
 
-    command = 'java -jar ../homer/target/homer-0.4-SNAPSHOT.jar build --server=false --indexPath=person.index --inputPath=entity-docs'
+    command = 'java -cp ../homer/target/homer-0.4-SNAPSHOT.jar ciir.proteus.parse.NamedEntityDocumentGenerator raw-entity-docs'
+    print(command)
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+    for l in proc.stdout:
+        print(l.decode().strip())
+
+    command = 'java -jar ../homer/target/homer-0.4-SNAPSHOT.jar build --server=false --indexPath=person.index --inputPath=entity-docs --tokenizer/fields+"location" --tokenizer/fields+"alias"'
     print(command)
     proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     for l in proc.stdout:
