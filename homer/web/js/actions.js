@@ -24,10 +24,15 @@ var doSearchRequest = function(args) {
 
     disableAutoRetrieve(); // prevent double requests
 
-    var settings = JSON.parse(getCookie("settings"));
+    var tmpSettings = getCookie("settings");
+    var settings;
     var numEntities = 5; // default
-    if (!_.isUndefined(settings.num_entities)){
-        numEntities = settings.num_entities;
+    if (tmpSettings != "") { // first time we don't have cookies
+        settings = JSON.parse();
+
+        if (!_.isUndefined(settings.num_entities)) {
+            numEntities = settings.num_entities;
+        }
     }
     var defaultArgs = {
         n: 10,
