@@ -120,6 +120,8 @@ UI.populateRecentSearches = function(){
 
     // TODO should be it's own function
     var corpus = getCookie("corpus");
+    if (corpus == "")
+        return;
     var corpusID = getCorpusID(corpus);
     var args = {corpus: corpusID};
 
@@ -192,9 +194,10 @@ var logIn = function(userName) {
             var settings = JSON.parse(data.settings);
 
             localStorage["corpora"] = JSON.stringify(data.corpora);
-
+            document.cookie = "broadcast=;";
             if (!_.isUndefined(data.broadcast)){
-
+                // TODO: duplicate info in the cookie and local storage
+                document.cookie = "broadcast=" + JSON.stringify(data.broadcast) + ";";
                 // set all the messages we can receive and if we want to see them.
                 localStorage["messages"] = JSON.stringify(data.broadcast.messages);
                 if (_.isUndefined(settings.broadcast)){
