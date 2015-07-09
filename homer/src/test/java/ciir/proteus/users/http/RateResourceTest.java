@@ -51,6 +51,7 @@ public class RateResourceTest {
         rating.set("resource", res1);
         rating.set("rating", 2);
         rating.set("corpus",corpus1);
+        rating.set("corpusName","test corpus 1");
         Parameters c = cred.toJSON();
         rating.copyFrom(c);
 

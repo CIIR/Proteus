@@ -6,6 +6,10 @@ import ciir.proteus.users.Users;
 import ciir.proteus.users.error.DuplicateUser;
 import ciir.proteus.users.error.NoTuplesAffected;
 import javax.servlet.http.HttpServletRequest;
+
+import ciir.proteus.util.logging.LogHelper;
+import ciir.proteus.util.logging.LoginLogData;
+import ciir.proteus.util.logging.RegisterLogData;
 import org.lemurproject.galago.utility.Parameters;
 
 /**
@@ -27,8 +31,8 @@ public class RegisterUser extends DBAction {
         try {
             userdb.register(username);
             log.info("RegisterUser user=" + username);
-            proteusLog.info("REGISTER\t{}\t{}", req.getRemoteAddr(), username);
-
+            RegisterLogData logData = new RegisterLogData(req.getRemoteAddr(), username);
+            LogHelper.log(logData);
         } catch (NoTuplesAffected ex) {
             throw new HTTPError(ex);
         }

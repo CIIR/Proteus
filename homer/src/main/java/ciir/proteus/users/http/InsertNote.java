@@ -4,11 +4,12 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
-import ciir.proteus.util.ClickLogHelper;
+import ciir.proteus.util.logging.ClickLogHelper;
+import ciir.proteus.util.logging.AddNoteLogData;
+import ciir.proteus.util.logging.LogHelper;
 import org.lemurproject.galago.utility.Parameters;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
  * @author michaelz.
@@ -29,7 +30,14 @@ public class InsertNote extends DBAction {
         String data = reqp.toString();
         Integer corpusid = reqp.get("corpus", -1);
         id = userdb.insertNote(creds, corpusid, res, data);
-        proteusLog.info("ADD-NOTE\t{}\t{}\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), id, corpusid, res, data);
+
+        AddNoteLogData logData = new AddNoteLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
+        logData.setCorpus(corpusid);
+        logData.setId(id);
+        logData.setData(data);
+        logData.setResource(res);
+        logData.setCorpusName(reqp.getAsString("corpusName"));
+        LogHelper.log(logData);
 
         Parameters ret = Parameters.create();
         ret.put("id", id);

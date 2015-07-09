@@ -4,10 +4,13 @@ import ciir.proteus.server.action.*;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.users.http.*;
-import ciir.proteus.util.ClickLogHelper;
+import ciir.proteus.util.logging.ClickLogHelper;
 import ciir.proteus.util.HTTPUtil;
-import org.lemurproject.galago.utility.Parameters;
+import ciir.proteus.util.logging.ClickLogData;
+import ciir.proteus.util.logging.LogHelper;
+import org.apache.logging.log4j.LogManager;
 import org.lemurproject.galago.tupleflow.web.WebHandler;
+import org.lemurproject.galago.utility.Parameters;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,7 +19,6 @@ import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.logging.log4j.LogManager;
 
 public class HTTPRouter implements WebHandler {
 
@@ -70,6 +72,7 @@ public class HTTPRouter implements WebHandler {
         deleteNote = new DeleteNote(proteus);
         getNotesForResource = new GetNotesForResource(proteus);
         getNotesHistory = new GetNotesHistory(proteus);
+
     }
 
     // handle http requests
@@ -205,7 +208,11 @@ public class HTTPRouter implements WebHandler {
     private void handleRedirect(Parameters reqp, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.sendRedirect(reqp.getString("url"));
 
-        proteusLog.info("CLICK\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), reqp.get("rank").toString(), reqp.getString("url"));
+        // currently (7/2015) "user" isn't available for this action
+        ClickLogData logData = new ClickLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
+        logData.setRank(reqp.getInt("rank"));
+        logData.setUrl(reqp.getString("url"));
+        LogHelper.log(logData);
 
     }
 

@@ -4,7 +4,9 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
-import ciir.proteus.util.ClickLogHelper;
+import ciir.proteus.util.logging.ClickLogHelper;
+import ciir.proteus.util.logging.AddTagLogData;
+import ciir.proteus.util.logging.LogHelper;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.util.List;
@@ -30,7 +32,13 @@ public class PutTags extends DBAction {
             List<String> resources = tags.getAsList(tag, String.class);
             for (String resource : resources) {
                 userdb.addTag(creds, resource, tag, rating, comment);
-                proteusLog.info("ADD-TAG\t{}\t{}\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), resource, tag, rating, comment);
+
+                AddTagLogData logData = new AddTagLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
+                logData.setComment(comment);
+                logData.setRating(rating);
+                logData.setTag(tag);
+                logData.setResource(resource);
+                LogHelper.log(logData);
 
             }
         }

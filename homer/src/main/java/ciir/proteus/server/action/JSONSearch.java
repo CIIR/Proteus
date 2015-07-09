@@ -3,10 +3,14 @@ package ciir.proteus.server.action;
 import ciir.proteus.system.DocumentAnnotator;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
-import ciir.proteus.util.ClickLogHelper;
+import ciir.proteus.util.logging.ClickLogHelper;
 import ciir.proteus.util.ListUtil;
 import ciir.proteus.util.QueryUtil;
 import java.io.IOException;
+
+import ciir.proteus.util.logging.LogHelper;
+import ciir.proteus.util.logging.ResultLogData;
+import ciir.proteus.util.logging.SearchLogData;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
@@ -32,6 +36,7 @@ public class JSONSearch implements JSONHandler {
 
     @Override
     public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws DBError, IOException {
+
         String query = reqp.getAsString("q");
         String kind = reqp.get("kind", system.defaultKind);
         int numResults = (int) reqp.get("n", 10);
@@ -90,7 +95,16 @@ public class JSONSearch implements JSONHandler {
             }
         }
 
-        proteusLog.info("SEARCH\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), query, (pquery == null ? "" : pquery.toString()), labels.toString(), corpusName, kind, numResults, skipResults);
+        SearchLogData searchData = new SearchLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", "* not logged in *"));
+        searchData.setEnteredQuery(query);
+        searchData.setExpandedQuery((pquery == null ? "" : pquery.toString()));
+        searchData.setKind(kind);
+        searchData.setCorpus(corpusName);
+        searchData.setLabels(labels.toString());
+        searchData.setStartAt(skipResults);
+        searchData.setNumResults(numResults);
+        LogHelper.log(searchData);
+
 
         Parameters qp = Parameters.create();
         qp.put("requested", numResults + skipResults);
@@ -117,7 +131,10 @@ public class JSONSearch implements JSONHandler {
                 results = DocumentAnnotator.annotate(this.system, kind, docs, pquery, reqp);
             }
         }
-        proteusLog.info("RESULTS\t{}\t{}", ClickLogHelper.getID(reqp, req), ClickLogHelper.extractDocID(results).toString());
+
+        ResultLogData logData = new ResultLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", "* not logged in *"));
+        logData.setDocIDs(ClickLogHelper.extractDocID(results).toString());
+        LogHelper.log(logData);
 
         response.set("results", results);
         if (pquery != null) {

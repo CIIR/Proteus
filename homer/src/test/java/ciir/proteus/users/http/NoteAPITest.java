@@ -56,6 +56,7 @@ public class NoteAPITest {
         np.set("uri", resource);
         np.set("data", "{ data : 123 }");
         np.set("corpus", corpus1);
+        np.set("corpusName", "a");
         Parameters creds = cred.toJSON();
         np.copyFrom(creds);
 
@@ -81,6 +82,7 @@ public class NoteAPITest {
         np.set("data", "{ new : data }");
         np.set("id", id);
         np.set("corpus", corpus1);
+        np.set("corpusName", "a");
         np.copyFrom(creds);
 
         try {

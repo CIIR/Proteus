@@ -16,8 +16,10 @@ public abstract class DBAction implements JSONHandler {
     protected static final org.apache.logging.log4j.Logger proteusLog = LogManager.getLogger("Proteus");
 
     public final UserDatabase userdb;
+    public final ProteusSystem system;
 
     public DBAction(ProteusSystem proteus) {
+        system = proteus;
         this.userdb = proteus.userdb;
     }
 }
