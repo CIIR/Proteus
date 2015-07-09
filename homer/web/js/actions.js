@@ -28,7 +28,7 @@ var doSearchRequest = function(args) {
     var settings;
     var numEntities = 5; // default
     if (tmpSettings != "") { // first time we don't have cookies
-        settings = JSON.parse();
+        settings = JSON.parse(tmpSettings);
 
         if (!_.isUndefined(settings.num_entities)) {
             numEntities = settings.num_entities;
