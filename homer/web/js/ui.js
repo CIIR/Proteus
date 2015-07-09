@@ -262,7 +262,7 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
                     var corpus = getCookie("corpus");
                     var corpID = getCorpusID(corpus);
 
-                    var args = { userid:  userID, user: userName, token : userToken, resource: result.name, corpus: corpID, rating: ui.value };
+                    var args = { userid:  userID, user: userName, token : userToken, resource: result.name, corpus: corpID, corpusName: corpus, rating: ui.value };
 
                     API.rateResource(args, function(){
 

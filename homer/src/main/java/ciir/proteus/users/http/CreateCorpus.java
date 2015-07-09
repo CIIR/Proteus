@@ -2,10 +2,11 @@ package ciir.proteus.users.http;
 
 import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
-import ciir.proteus.users.Users;
 import ciir.proteus.users.error.DuplicateCorpus;
-import ciir.proteus.users.error.DuplicateUser;
 import ciir.proteus.users.error.NoTuplesAffected;
+import ciir.proteus.util.logging.ClickLogHelper;
+import ciir.proteus.util.logging.CreateCorpusLogData;
+import ciir.proteus.util.logging.LogHelper;
 import org.lemurproject.galago.utility.Parameters;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +30,10 @@ public class CreateCorpus extends DBAction {
         try {
             corpusID = userdb.createCorpus(corpusName, userName);
             log.info("user " + userName + " created corpus: " + corpusName);
-            proteusLog.info("CREATE_CORPUS\t{}\t{}\t{}", req.getRemoteAddr(), corpusName, userName);
+            CreateCorpusLogData logData = new CreateCorpusLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
+            logData.setCorpusID(corpusID);
+            logData.setCorpusName(corpusName);
+            LogHelper.log(logData);
 
         } catch (NoTuplesAffected ex) {
             throw new HTTPError(ex);

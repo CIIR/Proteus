@@ -3,7 +3,9 @@ package ciir.proteus.server.action;
 import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
-import ciir.proteus.util.ClickLogHelper;
+import ciir.proteus.util.logging.ClickLogHelper;
+import ciir.proteus.util.logging.LogHelper;
+import ciir.proteus.util.logging.ViewResourceLogData;
 import org.apache.logging.log4j.LogManager;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.utility.Parameters;
@@ -49,7 +51,10 @@ public class ViewResource implements JSONHandler {
     }
     response.put("found", true);
 
-    proteusLog.info("VIEW-RES\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), docId, kind);
+    ViewResourceLogData logData = new ViewResourceLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
+    logData.setDocIDs(docId);
+    logData.setKind(kind);
+    LogHelper.log(logData);
 
     Parameters metadata = Parameters.create();
     for(Map.Entry<String,String> kv : doc.metadata.entrySet()) {

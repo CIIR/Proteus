@@ -3,6 +3,10 @@ package ciir.proteus.users.http;
 import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import javax.servlet.http.HttpServletRequest;
+
+import ciir.proteus.util.logging.ClickLogData;
+import ciir.proteus.util.logging.LogHelper;
+import ciir.proteus.util.logging.LoginLogData;
 import org.lemurproject.galago.utility.Parameters;
 
 /**
@@ -25,7 +29,16 @@ public class LoginUser extends DBAction {
         }
 
         log.info("LoginUser SUCCESS user=" + user + " token=" + loginCreds.get("token").toString() + " ID=" + loginCreds.get("userid").toString());
-        proteusLog.info("LOGIN\t{}\t{}\t{}\t{}", req.getRemoteAddr(), loginCreds.get("token").toString(), user, loginCreds.get("userid").toString());
+
+        LoginLogData logData = new LoginLogData(loginCreds.get("token").toString(), user);
+        logData.setIp(req.getRemoteAddr());
+        logData.setUserid(loginCreds.getInt("userid"));
+        LogHelper.log(logData);
+
+        // return the broadcast info
+        if (system.getConfig().containsKey("broadcast")) {
+            loginCreds.put("broadcast", system.getConfig().getMap("broadcast"));
+        }
         return loginCreds;
     }
 }

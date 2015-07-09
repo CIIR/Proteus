@@ -4,7 +4,9 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
-import ciir.proteus.util.ClickLogHelper;
+import ciir.proteus.util.logging.ClickLogHelper;
+import ciir.proteus.util.logging.DeleteTagLogData;
+import ciir.proteus.util.logging.LogHelper;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.util.List;
@@ -28,7 +30,11 @@ public class DeleteTags extends DBAction {
             List<String> resources = tags.getAsList(tag, String.class);
             for (String resource : resources) {
                 userdb.deleteTag(creds, resource, tag);
-                proteusLog.info("DEL-TAG\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), resource, tag);
+
+                DeleteTagLogData logData = new DeleteTagLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
+                logData.setTag(tag);
+                logData.setResource(resource);
+                LogHelper.log(logData);
             }
         }
 

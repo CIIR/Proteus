@@ -24,9 +24,10 @@ var doSearchRequest = function(args) {
 
     disableAutoRetrieve(); // prevent double requests
 
-    var numEntities = getCookie("settings");
-    if (numEntities.length == 0){
-        numEntities = 5; // default
+    var settings = JSON.parse(getCookie("settings"));
+    var numEntities = 5; // default
+    if (!_.isUndefined(settings.num_entities)){
+        numEntities = settings.num_entities;
     }
     var defaultArgs = {
         n: 10,
@@ -252,7 +253,6 @@ var initAnnotationLogic = function(pageID, pageNum){
     var userToken = getCookie("token");
     var userID = getCookie("userid");
 
-
     var corpusID = getCorpusID(corpus);
     // resource has to match the Internet Archive format so we are consistent across the system
     var resource = pageID;
@@ -293,7 +293,8 @@ var initAnnotationLogic = function(pageID, pageNum){
                 userid: parseInt(userID),
                 user:  userName,
                 token: userToken,
-                corpus: parseInt(corpusID)
+                corpus: parseInt(corpusID),
+                corpusName: corpus
             },
             loadFromSearch: {
                  'uri': resource,

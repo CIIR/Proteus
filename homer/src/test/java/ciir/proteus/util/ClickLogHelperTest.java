@@ -7,6 +7,7 @@ package ciir.proteus.util;
 
 import java.util.*;
 
+import ciir.proteus.util.logging.ClickLogHelper;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

@@ -4,7 +4,9 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
-import ciir.proteus.util.ClickLogHelper;
+import ciir.proteus.util.logging.ClickLogHelper;
+import ciir.proteus.util.logging.LogHelper;
+import ciir.proteus.util.logging.UpdateTagLogData;
 import org.lemurproject.galago.utility.Parameters;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +32,13 @@ public class UpdateTags extends DBAction {
             List<String> resources = tags.getAsList(tag, String.class);
             for (String resource : resources) {
                 userdb.updateTag(creds, resource, tag, rating, comment);
-                proteusLog.info("UPD-TAG\t{}\t{}\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), resource, tag, rating, comment);
+
+                UpdateTagLogData logData = new UpdateTagLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
+                logData.setComment(comment);
+                logData.setRating(rating);
+                logData.setTag(tag);
+                logData.setResource(resource);
+                LogHelper.log(logData);
 
             }
         }

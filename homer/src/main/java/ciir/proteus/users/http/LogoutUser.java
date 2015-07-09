@@ -5,6 +5,10 @@ import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.NoTuplesAffected;
 import javax.servlet.http.HttpServletRequest;
+
+import ciir.proteus.util.logging.LogHelper;
+import ciir.proteus.util.logging.LoginLogData;
+import ciir.proteus.util.logging.LogoutLogData;
 import org.lemurproject.galago.utility.Parameters;
 
 /**
@@ -22,8 +26,9 @@ public class LogoutUser extends DBAction {
 
         try {
             userdb.logout(creds);
-            proteusLog.info("LOGOUT\t{}\t{}", reqp.get("token").toString(), reqp.getString("user"));
-        } catch (NoTuplesAffected noTuplesAffected) {
+            LogoutLogData logData = new LogoutLogData(reqp.get("token").toString(), reqp.getString("user"));
+            LogHelper.log(logData);
+         } catch (NoTuplesAffected noTuplesAffected) {
             throw new HTTPError(HTTPError.BadRequest, "No such user/session.");
         }
 

@@ -4,11 +4,12 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
-import ciir.proteus.util.ClickLogHelper;
+import ciir.proteus.util.logging.ClickLogHelper;
+import ciir.proteus.util.logging.DeleteNoteLogData;
+import ciir.proteus.util.logging.LogHelper;
 import org.lemurproject.galago.utility.Parameters;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
  * @author michaelz.
@@ -28,7 +29,14 @@ public class DeleteNote extends DBAction {
         String data = reqp.get("data", nullStr);
         Integer corpusid = reqp.get("corpus", -1);
         userdb.deleteNote(creds, id, corpusid);
-        proteusLog.info("DEL-NOTE\t{}\t{}\t{}\t{}\t{}", ClickLogHelper.getID(reqp, req), id, corpusid, res, data);
+
+        DeleteNoteLogData logData = new DeleteNoteLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
+        logData.setCorpus(corpusid);
+        logData.setId(id);
+        logData.setData(data);
+        logData.setResource(res);
+        logData.setCorpusName(reqp.getAsString("corpusName"));
+        LogHelper.log(logData);
 
         return Parameters.create();
     }
