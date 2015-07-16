@@ -54,7 +54,7 @@ public class NoteAPITest {
         String resource = "res1";
         Parameters np = Parameters.create();
         np.set("uri", resource);
-        np.set("data", "{ data : 123 }");
+        np.set("data", "{ \"data\" : 123 }");
         np.set("corpus", corpus1);
         np.set("corpusName", "a");
         Parameters creds = cred.toJSON();
@@ -75,11 +75,11 @@ public class NoteAPITest {
         Parameters notes = env.proteus.userdb.getNotesForResource(resource, corpus1);
         assertEquals(notes.get("total", -1), 1);
         List<Parameters> arr = notes.getAsList("rows");
-        assertTrue(arr.get(0).get("data", "?").equals("{ data : 123 }"));
+        assertTrue(arr.get(0).get("data", "?").equals("{ \"data\" : 123 }"));
 
         np = Parameters.create();
         np.set("uri", resource);
-        np.set("data", "{ new : data }");
+        np.set("data", "{ \"new\" : \"data\" }");
         np.set("id", id);
         np.set("corpus", corpus1);
         np.set("corpusName", "a");
@@ -95,7 +95,7 @@ public class NoteAPITest {
         notes = env.proteus.userdb.getNotesForResource(resource, corpus1);
         assertEquals(notes.get("total", -1), 1);
         arr = notes.getAsList("rows");
-        assertTrue(arr.get(0).get("data", "?").equals("{ new : data }"));
+        assertTrue(arr.get(0).get("data", "?").equals("{ \"new\" : \"data\" }"));
 
         try {
             GetNotesForResource cc = new GetNotesForResource(env.proteus);
@@ -106,7 +106,7 @@ public class NoteAPITest {
 
         assertEquals(results.get("total", -1), 1L);
         arr = notes.getAsList("rows");
-        assertTrue(arr.get(0).get("data", "?").equals("{ new : data }"));
+        assertTrue(arr.get(0).get("data", "?").equals("{ \"new\" : \"data\" }"));
 
         try {
             DeleteNote cc = new DeleteNote(env.proteus);
