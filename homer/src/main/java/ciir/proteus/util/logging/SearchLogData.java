@@ -14,18 +14,13 @@ public class SearchLogData extends LogData {
   private Integer startAt; // what result to start at
 
   public SearchLogData(String id, String user) {
-    super(id, user);
-  }
-
-  @Override
-  String getAction() {
-    return "SEARCH";
+    super(id, user,"SEARCH");
   }
 
   @Override
   public String toTSV() {
 
-      return getCommon() + "\t"
+    return getCommonTSV() + "\t"
             + enteredQuery + "\t"
             + expandedQuery + "\t"
             + labels + "\t"
@@ -35,10 +30,6 @@ public class SearchLogData extends LogData {
             + startAt;
   }
 
-  @Override
-  public String toHTML() {
-    return null;
-  }
 
   public void setEnteredQuery(String enteredQuery) {
     this.enteredQuery = enteredQuery;

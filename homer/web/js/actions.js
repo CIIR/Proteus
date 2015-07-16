@@ -2,10 +2,46 @@
 // it interacts a lot with Model which is defined in main.js
 //
 
-var perStartRegEx = new RegExp("<PERSON>", 'g')
-var locStartRegEx = new RegExp("<LOCATION>", 'g')
-var orgStartRegEx = new RegExp("<ORGANIZATION>", 'g')
-var endRegEx = new RegExp("<\/PERSON>|<\/LOCATION>|<\/ORGANIZATION>", 'g')
+// A queue to prevent the UI from locking up when doing things like loading
+// all the notes for a book. Original code from:
+// http://debuggable.com/posts/run-intense-js-without-freezing-the-browser:480f4dd6-f864-4f72-ae16-41cccbdd56cb
+$.timeoutQueue = {
+    _timer: null,
+    _queue: [],
+    add: function(fn, context, time) {
+        var setTimer = function(time) {
+            $.timeoutQueue._timer = setTimeout(function() {
+                time = $.timeoutQueue.add();
+                if ($.timeoutQueue._queue.length) {
+                    setTimer(time);
+                }
+            }, time || 2);
+        };
+
+        if (fn) {
+            $.timeoutQueue._queue.push([fn, context, time]);
+            if ($.timeoutQueue._queue.length == 1) {
+                setTimer(time);
+            }
+            return;
+        }
+
+        var next = $.timeoutQueue._queue.shift();
+        if (!next) {
+            return 0;
+        }
+        next[0].call(next[1] || window);
+        return next[2];
+    },
+    clear: function() {
+        clearTimeout($.queue._timer);
+        $.timeoutQueue._queue = [];
+    }
+};
+var perStartRegEx = new RegExp("<PERSON>", 'g');
+var locStartRegEx = new RegExp("<LOCATION>", 'g');
+var orgStartRegEx = new RegExp("<ORGANIZATION>", 'g');
+var endRegEx = new RegExp("<\/PERSON>|<\/LOCATION>|<\/ORGANIZATION>", 'g');
 
 var pageHeight = 0;
 var MAX_PAGE_HEIGHT = 2000;
@@ -19,7 +55,7 @@ var page = {
     max: -1,
     skips: 0,
     MAX_SKIPS: 1000
-}
+};
 var doSearchRequest = function(args) {
 
     disableAutoRetrieve(); // prevent double requests
@@ -70,14 +106,14 @@ var doSearchRequest = function(args) {
         var userToken = getCookie("token");
         var userID = getCookie("userid");
         var corpus = getCookie("corpus");
-        var corpusID = -1
+        var corpusID = -1;
         if (corpus.length == 0){
             alert("Please select a corpus!");
             return;
         } else {
             corpusID = getCorpusID(corpus);
         }
-        console.log("corpus: " + corpus + " id: " + corpusID)
+        console.log("corpus: " + corpus + " id: " + corpusID);
         var tagArgs = {
             tags: true,
             user: userName,
@@ -140,7 +176,7 @@ var onSearchSuccess = function(data) {
         // Loop through ratings
         _.forEach(result.ratings, function(rating){
             ratingsJSON.document[result.name].push({"user": rating.user, "rating": rating.rating + 2}); // +2 hack to keep it consistent with other ratings
-        })
+        });
 
         return result;
     }).value();
@@ -202,7 +238,7 @@ var getPageHTML = function(text, pageID, pageNum){
             '<div  class="page-image col-md-5 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img src="' + pgImage + '"></a></div>' +
             '</div>';
 
-}
+};
 var doViewRequest = function(args) {
     UI.showProgress("View request sent to server!");
 
@@ -234,7 +270,7 @@ var viewPrevPageSuccess = function(args) {
         var html = getPageHTML(args.text, args.request.page_id, args.request.page_num);
 
         // find the first instance of the "book-page" class and append to that:
-        $(".book-page:first").before(html)
+        $(".book-page:first").before(html);
         if ($(".book-page:first").height() >  pageHeight && $(".book-page:first").height() < MAX_PAGE_HEIGHT){
             pageHeight = $(".book-page:first").height();
         }
@@ -243,23 +279,26 @@ var viewPrevPageSuccess = function(args) {
     }
     page.previous -= 1;
     setPageNavigation(args.request.page_id);
-    initAnnotationLogic(args.request.page_id, args.request.page_num);
-
-}
-
-
-var initAnnotationLogic = function(pageID, pageNum){
 
     var corpus = getCookie("corpus");
     if (!isLoggedIn() || corpus == "")
         return;
 
+    var corpus = getCookie("corpus");
     var userName = getCookie("username");
     var userToken = getCookie("token");
     var userID = getCookie("userid");
-
     var corpusID = getCorpusID(corpus);
-    // resource has to match the Internet Archive format so we are consistent across the system
+    var cookieData = { "userID" : userID, "userName" : userName, "userToken" : userToken, "corpus" : corpus, "corpusID" : corpusID}
+
+    initAnnotationLogic(args.request.page_id, args.request.page_num, cookieData);
+
+};
+
+
+var initAnnotationLogic = function(pageID, pageNum, cookieData){
+
+     // resource has to match the Internet Archive format so we are consistent across the system
     var resource = pageID;
     if (parseInt(pageNum) >= 0){
 
@@ -268,57 +307,36 @@ var initAnnotationLogic = function(pageID, pageNum){
 
     var el = '#' + getNotesID(pageID, pageNum);
 
-    // ??? only do this IFF we have a noteid?
-    // ??? this is nice for a book, but what about if it's for a page?
-    $(el).bind("annotationsLoaded", function(){
-        var urlParams = getURLParams();
-        // check if we are passed a note id
-        if (!_.isUndefined(urlParams["noteid"])){
+    $(el).annotator().data('annotator');
 
-            var el =  '.annotator-hl[data-annotation-id="' + urlParams["noteid"] + '"]'
+    $(el).annotator('addPlugin', 'Store', {
 
-            $('#results-right').animate({
-                scrollTop: $(el).offset().top - 60
-            }, 2000);
+        annotationData: {
+            uri : resource,
+            userid: parseInt(cookieData.userID),
+            user:  cookieData.userName,
+            token: cookieData.userToken,
+            corpus: parseInt(cookieData.corpusID),
+            corpusName: cookieData.corpus
+        },
+        loadFromSearch: {
+            'uri': resource,
+            corpus:  parseInt(cookieData.corpusID)
 
-            // remove the notid from the URL so we don't re-trigger
-           removeURLParam("noteid");
-
-            // unbind once we're done
-            $(el).unbind("annotationsLoaded");
+        },
+        urls: {
+            // These are the default URLs.
+            create:  '/annotations/ins',
+            update:  '/annotations/upd/:id',
+            destroy: '/annotations/del/:id',
+            search:  '/annotations/search'
         }
     });
 
-    $(el).annotator().data('annotator');
-
-        $(el).annotator('addPlugin', 'Store', {
-
-           annotationData: {
-                uri : resource,
-                userid: parseInt(userID),
-                user:  userName,
-                token: userToken,
-                corpus: parseInt(corpusID),
-                corpusName: corpus
-            },
-            loadFromSearch: {
-                 'uri': resource,
-                corpus:  parseInt(corpusID)
-
-            },
-            urls: {
-                // These are the default URLs.
-                create:  '/annotations/ins',
-                update:  '/annotations/upd/:id',
-                destroy: '/annotations/del/:id',
-                search:  '/annotations/search'
-            }
-        });
-
     $(el).annotator('addPlugin', 'Permissions', {
         user: {
-            id: parseInt(userID),
-            name:  userName
+            id: parseInt(cookieData.userID),
+            name:  cookieData.userName
         },
         showViewPermissionsCheckbox: false,
         showEditPermissionsCheckbox: false,
@@ -339,22 +357,11 @@ var initAnnotationLogic = function(pageID, pageNum){
             // allowed to edit it... doesn't make much sense to me. Making it
             // (for now) that only creator can edit/delete.
             return this.userId(user) === this.userId(annotation.userid);
-            }
+        }
     });
 
-    // this can only be done AFTER all the notes are highlighted
-//    var urlParams = getURLParams();
-//    // check if we are passed a note id
-//    if (!_.isUndefined(urlParams["noteid"])){
-//
-//        var el =  '.annotator-hl[data-annotation-id="' + urlParams["noteid"] + '"]'
-//        $('#results-right').animate({
-//            scrollTop: $(el).offset().top
-//        }, 2000);
-//    }
 
-
-}
+};
 var viewNextPageSuccess = function(args) {
 
     // check if we're going beyond the end. We use the "number of images"
@@ -379,7 +386,7 @@ var viewNextPageSuccess = function(args) {
         var html = getPageHTML(args.text, args.request.page_id, args.request.page_num);
 
         // find the last instance of the "book-page" class and append to that:
-        $(".book-page:last").after(html)
+        $(".book-page:last").after(html);
         if ($(".book-page:last").height() >  pageHeight && $(".book-page:last").height() < MAX_PAGE_HEIGHT ){
             pageHeight = $(".book-page:last").height();
         }
@@ -388,9 +395,20 @@ var viewNextPageSuccess = function(args) {
     page.next += 1;
     setPageNavigation(args.request.page_id);
 
-    initAnnotationLogic(args.request.page_id, args.request.page_num);
+    var corpus = getCookie("corpus");
+    if (!isLoggedIn() || corpus == "")
+        return;
 
-}
+    var corpus = getCookie("corpus");
+    var userName = getCookie("username");
+    var userToken = getCookie("token");
+    var userID = getCookie("userid");
+    var corpusID = getCorpusID(corpus);
+    var cookieData = { "userID" : userID, "userName" : userName, "userToken" : userToken, "corpus" : corpus, "corpusID" : corpusID}
+
+    initAnnotationLogic(args.request.page_id, args.request.page_num, cookieData);
+
+};
 
 var doPrevPageRequest = function(pageID) {
     console.log("id: " + pageID + " current page: " + page.previous);
@@ -446,14 +464,14 @@ var onViewPageSuccess = function(args) {
 
 
     var metaHtml = '';
-    metaHtml += ' <table>'
+    metaHtml += ' <table>';
     _(args.metadata).forIn(function(val, key) {
         metaHtml += '<tr>';
         metaHtml += '<td>' + key + '</td>';
-        metaHtml += '<td>' + val + '</td>'
+        metaHtml += '<td>' + val + '</td>';
         metaHtml += '</tr>';
-    })
-    metaHtml += '</table></div>'
+    });
+    metaHtml += '</table></div>';
     metadataDiv.html(metaHtml);
     var html = '';
     //    html += '<a class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>'
@@ -477,7 +495,19 @@ var onViewPageSuccess = function(args) {
     //  viewResourceDiv.html(html);
     setPageNavigation(pageID);
     viewResourceDiv.show();
-    initAnnotationLogic(identifier, pageNum);
+    var corpus = getCookie("corpus");
+    if (!isLoggedIn() || corpus == "")
+        return;
+
+    var corpus = getCookie("corpus");
+    var userName = getCookie("username");
+    var userToken = getCookie("token");
+    var userID = getCookie("userid");
+    var corpusID = getCorpusID(corpus);
+    var cookieData = { "userID" : userID, "userName" : userName, "userToken" : userToken, "corpus" : corpus, "corpusID" : corpusID}
+
+
+    initAnnotationLogic(identifier, pageNum, cookieData);
     UI.showProgress("");
 
 };
@@ -489,50 +519,121 @@ var onViewBookSuccess = function(args) {
     metadataDiv.hide();
 
     var metaHtml = '';
-    metaHtml += ' <table>'
+    metaHtml += ' <table>';
     _(args.metadata).forIn(function(val, key) {
         metaHtml += '<tr>';
         metaHtml += '<td>' + key + '</td>';
-        metaHtml += '<td>' + val + '</td>'
+        metaHtml += '<td>' + val + '</td>';
         metaHtml += '</tr>';
-    })
-    metaHtml += '</table></div>'
+    });
+    metaHtml += '</table></div>';
     metadataDiv.html(metaHtml);
 
-    var pgTxt= processTags(args.text);
-
     var html =  '<a href="#" class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>';
-    html +=  pgTxt ;
+
+    html += processTags(args.text);
 
     viewResourceDiv.html(html);
+    viewResourceDiv.show();
+
+    var corpus = getCookie("corpus");
+    if (!isLoggedIn() || corpus == "")
+        return;
+
+    var corpus = getCookie("corpus");
+    var userName = getCookie("username");
+    var userToken = getCookie("token");
+    var userID = getCookie("userid");
+    var corpusID = getCorpusID(corpus);
+    var cookieData = { "userID" : userID, "userName" : userName, "userToken" : userToken, "corpus" : corpus, "corpusID" : corpusID}
 
     // go through the book and insert an ID attribute so we can share the notes across
     // both books and pages.
     var pageBreaks = $(".page-break");
+    $(".page-break").addClass("book-page row clearfix ");
+
     var id = args.request.id;
 
+    // if we have a "noteid" parameter, load that note first and
+    // scroll to it. All the other notes will load in the background
+    // via timeouts so the UI doesn't lock up when loading large books.
+    var urlParams = getURLParams();
+    var pgNum = urlParams["pgno"];
+    if (_.isUndefined(pgNum))
+        pgNum = -1;
+
+    if (!_.isUndefined(urlParams["noteid"])) {
+
+        // add the annotation widget to the page with the note
+        updateNoteDiv(id, pgNum);
+        initAnnotationLogic(id, pgNum, cookieData);
+        el = "#" +  getNotesID(id, pgNum);
+
+        // scroll to the note once all notes for that page are loaded.
+        $(el).bind("annotationsLoaded", function () {
+
+                var note = '.annotator-hl[data-annotation-id="' + urlParams["noteid"] + '"]';
+
+                $('#results-right').animate({
+                    scrollTop: $(note).offset().top - 60
+                }, 2000);
+
+                // remove the notid from the URL so we don't re-trigger
+                removeURLParam("noteid");
+
+                 // unbind once we're done
+                 $(el).unbind("annotationsLoaded");
+         });
+
+    } // end if we have a noteid
+
+    // create a place were we can display the status
+    $(".navbar").append('<div id="loading-msg"></div>');
+
+    // now get any notes for all other pages
     _.forEach(pageBreaks, function(pb){
 
-        var pgImage = pageImage(id, $(pb).attr("page"));
-        var el =  getNotesID(id, $(pb).attr("page"));
-        $(pb).addClass("book-page row clearfix ");
+        var currentPg = $(pb).attr("page");
 
-        var pghtml =  '<div id="' + el + '" class="book-text col-md-5 column left-align">' + $(pb).html() + '</div>'+
-                '<div id="' + el + '-page-image" class="page-image col-md-5 column left-align"><br><a href="#" onclick="getPageImage(\'' + el + '-page-image\',\'' +  pgImage + '\');" >View the actual page</a></div>';
-        $(pb).html(pghtml);
-        initAnnotationLogic(id, $(pb).attr("page"));
+        // don't re-do the page we may have done above
+        if ( currentPg == pgNum) {
+            return;
+        }
+
+        updateNoteDiv(id, currentPg);
+
+        $.timeoutQueue.add(function() {
+            $("#loading-msg").html("loading notes for page " + currentPg);
+            initAnnotationLogic(id, currentPg, cookieData)
+        }, this);
+
     });
 
-    viewResourceDiv.show();
+    // lastly... hide the progress message
+    $.timeoutQueue.add(function(){ $("#loading-msg").hide();}, this);
+
     UI.showProgress("");
 
+};
+
+var updateNoteDiv = function(bookid, pgnum){
+
+    var pgImage = pageImage(bookid, pgnum);
+    var noteid =    getNotesID(bookid, pgnum);
+
+    var pb = '.page-break[page=' + pgnum + ']';
+
+    var pghtml =  '<div id="' + noteid + '" class="book-text col-md-5 column left-align">' + $(pb).html() + '</div>'+
+            '<div id="' + noteid + '-page-image" class="page-image col-md-5 column left-align"><br><a href="#" onclick="getPageImage(\'' +
+            noteid + '-page-image\',\'' +  pgImage + '\');" >View the actual page</a></div>';
+    $(pb).html(pghtml);
 };
 
 var getPageImage = function(id, imgURL){
 
     $('#' + id).html('<br><a class="fancybox" href="' + imgURL + '" ><img src="' + imgURL + '"></a>')
 
-}
+};
 
 var setPageNavigation = function(pageID) {
 
@@ -547,10 +648,10 @@ var setPageNavigation = function(pageID) {
         prevHTML = '';
     }
 
-    $("#view-nav-top").html(prevHTML)
+    $("#view-nav-top").html(prevHTML);
     $("#view-nav-bottom").html(nextHTML)
 
-}
+};
 
  var processTags = function(text){
      if (document.getElementById("cb-per").checked)
@@ -571,15 +672,15 @@ var setPageNavigation = function(pageID) {
      text = text.replace(endRegEx, "</span>");
 
      return text;
- }
+ };
 
 function submitCorpusDialog() {
     // make sure we have a name
     var corpusName = $("#corpus-name").val().trim();
     if (corpusName.trim() == "") {
 
-        $("#corpusError").addClass("in")
-        $("#corpusError").html("Corpus name cannot be blank.")
+        $("#corpusError").addClass("in");
+        $("#corpusError").html("Corpus name cannot be blank.");
         setTimeout(function(){
             $('#corpusError').removeClass("in");
             $('#corpusError').addClass("out");

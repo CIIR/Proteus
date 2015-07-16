@@ -46,8 +46,11 @@ public class HTTPRouter implements WebHandler {
     private final JSONHandler getNotesForResource;
     private final JSONHandler getNotesHistory;
     private final StaticContentHandler staticContent;
+    private final JSONHandler getActivityLog;
+    private final ProteusSystem proteus;
 
     public HTTPRouter(ProteusSystem proteus) {
+        this.proteus = proteus;
         debug = new DebugHandler();
 
         staticContent = new StaticContentHandler(proteus.getConfig());
@@ -72,6 +75,7 @@ public class HTTPRouter implements WebHandler {
         deleteNote = new DeleteNote(proteus);
         getNotesForResource = new GetNotesForResource(proteus);
         getNotesHistory = new GetNotesHistory(proteus);
+        getActivityLog = new GetActivityLog(proteus);
 
     }
 
@@ -155,6 +159,8 @@ public class HTTPRouter implements WebHandler {
                 return;
             } else if (path.equals("/api/debug")) {
                 handler = debug;
+            }  else if ( POST  && path.equals("/api/activitylog")) {
+                handler = getActivityLog;
             } else if (GET && !path.startsWith("/api/")) {
                 staticContent.handle(path, reqp, resp);
                 return;
@@ -212,7 +218,7 @@ public class HTTPRouter implements WebHandler {
         ClickLogData logData = new ClickLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
         logData.setRank(reqp.getInt("rank"));
         logData.setUrl(reqp.getString("url"));
-        LogHelper.log(logData);
+        LogHelper.log(logData, proteus);
 
     }
 

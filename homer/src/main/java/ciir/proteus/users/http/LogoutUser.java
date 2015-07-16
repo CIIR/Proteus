@@ -27,7 +27,7 @@ public class LogoutUser extends DBAction {
         try {
             userdb.logout(creds);
             LogoutLogData logData = new LogoutLogData(reqp.get("token").toString(), reqp.getString("user"));
-            LogHelper.log(logData);
+            LogHelper.log(logData, system);
          } catch (NoTuplesAffected noTuplesAffected) {
             throw new HTTPError(HTTPError.BadRequest, "No such user/session.");
         }

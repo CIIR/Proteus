@@ -54,7 +54,7 @@ public class ViewResource implements JSONHandler {
     ViewResourceLogData logData = new ViewResourceLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
     logData.setDocIDs(docId);
     logData.setKind(kind);
-    LogHelper.log(logData);
+    LogHelper.log(logData, system);
 
     Parameters metadata = Parameters.create();
     for(Map.Entry<String,String> kv : doc.metadata.entrySet()) {

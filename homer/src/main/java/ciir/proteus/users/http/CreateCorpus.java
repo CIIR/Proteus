@@ -33,7 +33,7 @@ public class CreateCorpus extends DBAction {
             CreateCorpusLogData logData = new CreateCorpusLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
             logData.setCorpusID(corpusID);
             logData.setCorpusName(corpusName);
-            LogHelper.log(logData);
+            LogHelper.log(logData, system);
 
         } catch (NoTuplesAffected ex) {
             throw new HTTPError(ex);

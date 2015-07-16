@@ -6,12 +6,7 @@ package ciir.proteus.util.logging;
 public class UpdateTagLogData extends AddTagLogData {
 
   public UpdateTagLogData(String id, String user) {
-    super(id, user);
-  }
-
-  @Override
-  String getAction() {
-    return "UPD-TAG";
+    super(id, user, "UPD-TAG");
   }
 
 }

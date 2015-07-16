@@ -38,7 +38,7 @@ public class PutTags extends DBAction {
                 logData.setRating(rating);
                 logData.setTag(tag);
                 logData.setResource(resource);
-                LogHelper.log(logData);
+                LogHelper.log(logData, system);
 
             }
         }

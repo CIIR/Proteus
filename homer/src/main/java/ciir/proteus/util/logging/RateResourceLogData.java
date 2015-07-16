@@ -12,7 +12,7 @@ public class RateResourceLogData extends LogData {
   private String corpusName;
 
   public RateResourceLogData(String id, String user) {
-    super(id, user);
+    super(id, user, "RATE-RES");
   }
 
   public void setResource(String resource) {
@@ -32,24 +32,15 @@ public class RateResourceLogData extends LogData {
   }
 
   @Override
-  String getAction() {
-    return "ADD-TAG";
-  }
-
-  @Override
   public String toTSV() {
 
-      return getCommon() + "\t"
+    return getCommonTSV() + "\t"
             + resource + "\t"
-              + corpus + "\t"
-              + corpusName + "\t"
+            + corpus + "\t"
+            + corpusName + "\t"
             + rating;
   }
 
-  @Override
-  public String toHTML() {
-    return null;
-  }
 
 
 }

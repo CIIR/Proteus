@@ -1,5 +1,7 @@
 package ciir.proteus.util.logging;
 
+import com.cedarsoftware.util.io.JsonReader;
+
 /**
  * Created by michaelz on 7/8/2015.
  */
@@ -7,12 +9,16 @@ public class AddNoteLogData extends LogData {
 
   private String resource;
   private Integer corpus;
-  private String data;
+  private Object data;
   private String corpusName;
-  private Integer id;  // PK for this note in our database
+  private Integer notePK;  // PK for this note in our database
 
   public AddNoteLogData(String id, String user) {
-    super(id, user);
+    super(id, user, "ADD-NOTE");
+  }
+
+  public AddNoteLogData(String id, String user, String action) {
+    super(id, user, action);
   }
 
   public void setResource(String resource) {
@@ -28,32 +34,28 @@ public class AddNoteLogData extends LogData {
   }
 
   public void setData(String data) {
-    this.data = data;
+    Object obj = null;
+    // we have to treat "data" special as it's a JSON object. If we just stored it
+    // as a String any client side calls to JSON.parse() would fail.
+    if (data != null) {
+      obj = JsonReader.jsonToJava(data);
+    }
+    this.data = obj;
   }
 
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  @Override
-  String getAction() {
-    return "ADD-NOTE";
+  public void setId(Integer notePK) {
+    this.notePK = notePK;
   }
 
   @Override
   public String toTSV() {
 
-      return getCommon() + "\t"
-            + id + "\t"
+    return getCommonTSV() + "\t"
+            + notePK + "\t"
             + corpus + "\t"
             + corpusName + "\t"
             + resource + "\t"
             + data;
-  }
-
-  @Override
-  public String toHTML() {
-    return null;
   }
 
 

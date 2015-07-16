@@ -1,5 +1,7 @@
 package ciir.proteus.util.logging;
 
+import com.cedarsoftware.util.io.JsonWriter;
+
 /**
  * Created by michaelz on 7/8/2015.
  */
@@ -9,7 +11,7 @@ public class ClickLogData extends LogData {
   private Integer rank; // rank of the result clicked
 
   public ClickLogData(String id, String user) {
-    super(id, user);
+    super(id, user, "CLICK");
   }
 
   public void setUrl(String url) {
@@ -21,20 +23,11 @@ public class ClickLogData extends LogData {
   }
 
   @Override
-  String getAction() {
-    return "CLICK";
-  }
-
-  @Override
   public String toTSV() {
 
-      return getCommon() + "\t"
+    return getCommonTSV() + "\t"
             + rank + "\t"
             + url;
   }
 
-  @Override
-  public String toHTML() {
-    return null;
-  }
 }

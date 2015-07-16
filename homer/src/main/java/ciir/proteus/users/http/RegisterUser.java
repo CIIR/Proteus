@@ -32,7 +32,7 @@ public class RegisterUser extends DBAction {
             userdb.register(username);
             log.info("RegisterUser user=" + username);
             RegisterLogData logData = new RegisterLogData(req.getRemoteAddr(), username);
-            LogHelper.log(logData);
+            LogHelper.log(logData, system);
         } catch (NoTuplesAffected ex) {
             throw new HTTPError(ex);
         }

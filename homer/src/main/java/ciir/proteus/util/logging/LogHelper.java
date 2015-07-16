@@ -1,5 +1,7 @@
 package ciir.proteus.util.logging;
 
+import ciir.proteus.system.BroadcastMsg;
+import ciir.proteus.system.ProteusSystem;
 import org.apache.logging.log4j.LogManager;
 
 /**
@@ -7,19 +9,22 @@ import org.apache.logging.log4j.LogManager;
  */
 public class LogHelper {
 
+
   private static final org.apache.logging.log4j.Logger proteusLog = LogManager.getLogger("Proteus");
   private static final org.apache.logging.log4j.Logger activityLog = LogManager.getLogger("ProteusActvity");
 
-  public static void log(LogData info){
+//  public static void setProteus(ProteusSystem proteus){
+//    system = proteus;
+//  }
+  public static void log(LogData info, ProteusSystem proteus) {
     proteusLog.info(info.toTSV());
+    String json = info.toJSON();
+    if (json != null) {
+      activityLog.info(json);
+      BroadcastMsg msg = new BroadcastMsg(info.getAction(), "dummy-time-stamp\t" +  json);
+      proteus.broadcastMsg(msg);
+    }
   }
-  public static void log(String action, String str) { // TODO should be variable params
 
-    proteusLog.info("INFO level log");
-    activityLog.info("ACTIVITY log");
-//    ChatObject msg = new ChatObject("", query);
-//    system.broadcastMsg("SEARCH", msg);
-
-  }
 }
 

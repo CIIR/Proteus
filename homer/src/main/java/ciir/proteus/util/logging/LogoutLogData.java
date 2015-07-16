@@ -6,22 +6,13 @@ package ciir.proteus.util.logging;
 public class LogoutLogData extends LogData {
 
   public LogoutLogData(String id, String user) {
-    super(id, user);
-  }
-
-  @Override
-  String getAction() {
-    return "LOGOUT";
+    super(id, user, "LOGOUT");
   }
 
   @Override
   public String toTSV() {
 
-      return getCommon() ;
+    return getCommonTSV();
   }
 
-  @Override
-  public String toHTML() {
-    return null;
-  }
 }

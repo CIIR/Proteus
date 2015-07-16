@@ -2,6 +2,8 @@ package ciir.proteus.system;
 
 import ciir.proteus.users.UserDatabase;
 import ciir.proteus.users.UserDatabaseFactory;
+import com.corundumstudio.socketio.Configuration;
+import com.corundumstudio.socketio.SocketIOServer;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.Retrieval;
 import org.lemurproject.galago.core.retrieval.RetrievalFactory;
@@ -21,7 +23,7 @@ public class ProteusSystem {
     private final Parameters config;
     public Map<String, Retrieval> kinds;
     public UserDatabase userdb;
-
+    final private SocketIOServer broadcastServer;
     public ProteusSystem(Parameters argp) throws Exception {
         this.config = argp;
         this.defaultKind = argp.getString("defaultKind");
@@ -37,6 +39,19 @@ public class ProteusSystem {
         }
 
         this.userdb = UserDatabaseFactory.instance(argp.getMap("userdb"));
+
+        // only configure if we need to
+        if (argp.containsKey("broadcast")){
+            Parameters broadcastParams = argp.getMap("broadcast");
+            Configuration config = new Configuration();
+            config.setHostname(broadcastParams.get("url", "localhost"));
+            config.setPort(broadcastParams.getInt("port"));
+            broadcastServer = new SocketIOServer(config);
+            broadcastServer.start();
+        } else {
+            broadcastServer = null;
+        }
+
     }
 
     public Retrieval getRetrieval(String kind) {
@@ -76,6 +91,8 @@ public class ProteusSystem {
             ret.close();
         }
         userdb.close();
+        if (broadcastServer != null)
+            broadcastServer.stop();
     }
 
     public Map<String, Document> getDocs(String kind, List<String> names, boolean metadata, boolean text) {
@@ -92,5 +109,14 @@ public class ProteusSystem {
 
     public Parameters getConfig() {
         return config;
+    }
+
+    public void broadcastMsg(BroadcastMsg msg) {
+
+        if (broadcastServer == null)
+            return;
+
+        broadcastServer.getBroadcastOperations().sendEvent("ProteusEvent", msg);
+
     }
 }

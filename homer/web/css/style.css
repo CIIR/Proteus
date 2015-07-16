@@ -495,3 +495,78 @@ body {
 .note {
     text-align: left;
 }
+
+
+#activity {
+    margin: 50px;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+
+}
+
+#activity-body {
+
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    overflow-y: scroll;
+}
+
+#activity-header {
+    background-color: blue;
+    color: white;
+    padding: 10px;
+}
+
+.activity-row{
+    margin : 5px;
+}
+
+.activity-login {
+    background-color: greenyellow;
+}
+
+.activity-login-off {
+}
+
+.activity-logout {
+    background-color: indianred;
+}
+.activity-logout-off {
+ }
+
+.activity-search {
+    background-color: yellow;
+    visibility: visible;
+}
+
+.activity-search-off {
+
+    visibility: hidden;
+}
+
+.activity-results{
+    background-color: powderblue;
+}
+.activity-results-off{
+
+}
+
+.disconnect-msg {
+    background-color: red;
+    color: white;
+}
+
+
+.connect-msg {
+    background-color: green;
+    color: white;
+}
+
+#loading-msg{
+    background-color: yellow;
+    text-align: center;
+}

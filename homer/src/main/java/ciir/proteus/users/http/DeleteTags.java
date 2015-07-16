@@ -34,7 +34,7 @@ public class DeleteTags extends DBAction {
                 DeleteTagLogData logData = new DeleteTagLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
                 logData.setTag(tag);
                 logData.setResource(resource);
-                LogHelper.log(logData);
+                LogHelper.log(logData, system);
             }
         }
 

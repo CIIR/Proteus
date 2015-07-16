@@ -11,29 +11,22 @@ public class ViewResourceLogData extends LogData {
   public void setDocIDs(String docIDs) {
     this.docIDs = docIDs;
   }
+
   public void setKind(String kind) {
     this.kind = kind;
   }
 
   public ViewResourceLogData(String id, String user) {
-    super(id, user);
+    super(id, user, "VIEW-RES");
   }
 
-  @Override
-  String getAction() {
-    return "VIEW-RES";
-  }
 
   @Override
   public String toTSV() {
 
-      return getCommon() + "\t"
+    return getCommonTSV() + "\t"
             + docIDs + "\t"
-            + kind  ;
+            + kind;
   }
 
-  @Override
-  public String toHTML() {
-    return null;
-  }
 }

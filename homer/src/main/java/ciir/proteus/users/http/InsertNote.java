@@ -37,7 +37,7 @@ public class InsertNote extends DBAction {
         logData.setData(data);
         logData.setResource(res);
         logData.setCorpusName(reqp.getAsString("corpusName"));
-        LogHelper.log(logData);
+        LogHelper.log(logData, system);
 
         Parameters ret = Parameters.create();
         ret.put("id", id);

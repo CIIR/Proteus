@@ -1,5 +1,7 @@
 package ciir.proteus.util.logging;
 
+import com.cedarsoftware.util.io.JsonWriter;
+
 /**
  * Created by michaelz on 7/8/2015.
  */
@@ -12,7 +14,11 @@ public class AddTagLogData extends LogData {
   private Integer rating;
 
   public AddTagLogData(String id, String user) {
-    super(id, user);
+    super(id, user, "ADD-TAG");
+  }
+
+  public AddTagLogData(String id, String user, String action) {
+    super(id, user, action);
   }
 
 
@@ -33,23 +39,13 @@ public class AddTagLogData extends LogData {
   }
 
   @Override
-  String getAction() {
-    return "ADD-TAG";
-  }
-
-  @Override
   public String toTSV() {
 
-      return getCommon() + "\t"
+    return getCommonTSV() + "\t"
             + resource + "\t"
             + tag + "\t"
             + rating + "\t"
             + comment;
-  }
-
-  @Override
-  public String toHTML() {
-    return null;
   }
 
 

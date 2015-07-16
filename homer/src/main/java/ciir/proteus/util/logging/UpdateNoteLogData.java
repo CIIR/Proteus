@@ -6,12 +6,7 @@ package ciir.proteus.util.logging;
 public class UpdateNoteLogData extends AddNoteLogData {
 
   public UpdateNoteLogData(String id, String user) {
-    super(id, user);
-  }
-
-  @Override
-  String getAction() {
-    return "UPD-NOTE";
+    super(id, user, "UPD-NOTE");
   }
 
 }

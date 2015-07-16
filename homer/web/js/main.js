@@ -120,8 +120,12 @@ UI.populateRecentSearches = function(){
 
     // TODO should be it's own function
     var corpus = getCookie("corpus");
-    if (corpus == "")
+    if (corpus == ""){
+        $("#pastSearches").html("");
+        $('#note-list').html("");
         return;
+    }
+
     var corpusID = getCorpusID(corpus);
     var args = {corpus: corpusID};
 
@@ -140,8 +144,8 @@ UI.populateRecentSearches = function(){
                         name = name.split("@")[0];
 
                     html += '&#8226;&nbsp;' + dt + ' ' + name + ': <i>' + rec.text
-                        + '</i> view: <a target="_blank" href="?kind=ia-pages&action=view&id=' + identifier + '_' + pageNum + '&noteid=' + rec.id + '">Page, </a>'
-                        + '<a target="_blank" href="?kind=ia-books&action=view&id=' + identifier + '&noteid=' + rec.id + '">Book</a><br>';
+                        + '</i> view: <a target="_blank" href="?kind=ia-pages&action=view&id=' + identifier + '&pgno=' + pageNum + '&noteid=' + rec.id + '">Page, </a>'
+                        + '<a target="_blank" href="?kind=ia-books&action=view&id=' + identifier + '_' + pageNum +'&noteid=' + rec.id + '">Book</a><br>';
 
                 }
                 $('#note-list').html(html);

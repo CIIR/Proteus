@@ -6,12 +6,7 @@ package ciir.proteus.util.logging;
 public class DeleteNoteLogData extends AddNoteLogData {
 
   public DeleteNoteLogData(String id, String user) {
-    super(id, user);
+    super(id, user, "DEL-NOTE");
   }
 
-  @Override
-  String getAction() {
-    return "DEL-NOTE";
-  }
- 
 }

@@ -34,7 +34,7 @@ public class RateResource extends DBAction {
         logData.setRating(rating);
         logData.setResource(res);
         logData.setCorpusName(reqp.getAsString("corpusName"));
-        LogHelper.log(logData);
+        LogHelper.log(logData, system);
 
         return Parameters.create();
     }

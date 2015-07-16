@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8"/>
+
+    <title>Proteus Activity</title>
+
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+    <script src="js/socket.io.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/logging.js"></script>
+    <script src="js/API.js"></script>
+    <link rel="stylesheet" href="css/style.css" type="text/css"/>
+
+    <script>
+        function showHideActivity(that, type) {
+
+            if (that.checked == true) {
+                showMsg(type)
+            } else {
+                hideMsg(type)
+            }
+
+        }
+
+        function hideMsg(type) {
+            $(".activity-" + type).addClass("collapse")
+            $(".activity-" + type + "-off").removeClass("activity-" + type)
+        }
+
+        function showMsg(type) {
+            $(".activity-" + type + "-off").addClass("activity-" + type)
+            $(".activity-" + type).removeClass("collapse")
+        }
+
+        $(document).ready(function () {
+
+            // make sure we're logged in
+            if (isLoggedIn() == false) {
+                document.write('<a href="index.html">Please log in first</a>');
+                return;
+            }
+
+            var args = {file: "logs/proteus-activity.log" };
+            API.getActivityLog(args,
+                    function(args){
+                      //console.log(args)
+                      args.events.split(/\r\n|\r|\n/).forEach(function(line){
+                          if (!_.isUndefined(line) && line.trim().length > 0)
+                            output(convertJSONtoHTML(line));
+
+                      })
+                    },
+                    function(req, status, err) {
+                        alert("ERROR: ``" + err + "``");
+                        throw err;
+                    });
+
+
+            if (!_.isUndefined(localStorage["messages"])) {
+                var html = '';
+
+                var msgs = JSON.parse(localStorage["messages"]);
+                for (msg in msgs) {
+
+                    html += '<input onclick="showHideActivity(this, \'' + msgs[msg] + '\');" class="broadcast-msg-' + msgs[msg] + '" ' +
+                    'type="checkbox" name="messages" value="' + msgs[msg] + '" checked /> ' + msgs[msg] + '&nbsp;';
+                }
+
+                $("#broadcast-chioces").html(html);
+            }
+
+            var data = getCookie("broadcast");
+            if (_.isUndefined(data)) {
+                document.write('missing connection information.');
+                return;
+            }
+            var jsonData = JSON.parse(data);
+
+            var port = jsonData.port;
+            var host = jsonData.url;
+
+            var socket = io.connect(host + ':' + port);
+
+            socket.on('connect', function () {
+                output('<span class="connect-msg">Client has connected to the server!</span>');
+            });
+
+            socket.on('ProteusEvent', function (data) {
+
+                var msg = convertJSONtoHTML(data.message)
+                output(msg);
+                // check if we're displaying this type of message
+                var el = $('input:checkbox.broadcast-msg-' + data.action.toLowerCase())[0]
+                if (!_.isUndefined(el)){
+                    var checked = el.checked
+                    if (!checked) {
+                        hideMsg(data.action.toLowerCase())
+                    }
+                }
+            });
+
+            socket.on('disconnect', function () {
+                output('<span class="disconnect-msg">The client has disconnected!</span>');
+            });
+
+            function sendDisconnect() {
+                socket.disconnect();
+            }
+
+            function output(message) {
+                var element = $("<div>" + message + "</div>");
+                $('#activity').prepend(element);
+            }
+
+        });
+    </script>
+</head>
+
+<body id="activity-body">
+<nav id="activity-header" class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid ">
+        <div id="broadcast-chioces" class="row clearfix">
+
+        </div>
+    </div>
+</nav>
+
+<div id="activity" class="row clearfix">
+
+</div>
+
+</body>
+
+</html>

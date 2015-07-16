@@ -103,7 +103,7 @@ public class JSONSearch implements JSONHandler {
         searchData.setLabels(labels.toString());
         searchData.setStartAt(skipResults);
         searchData.setNumResults(numResults);
-        LogHelper.log(searchData);
+        LogHelper.log(searchData, system);
 
 
         Parameters qp = Parameters.create();
@@ -134,7 +134,7 @@ public class JSONSearch implements JSONHandler {
 
         ResultLogData logData = new ResultLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", "* not logged in *"));
         logData.setDocIDs(ClickLogHelper.extractDocID(results).toString());
-        LogHelper.log(logData);
+        LogHelper.log(logData, system);
 
         response.set("results", results);
         if (pquery != null) {

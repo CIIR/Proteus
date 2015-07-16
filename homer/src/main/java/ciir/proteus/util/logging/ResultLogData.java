@@ -12,23 +12,15 @@ public class ResultLogData extends LogData {
   }
 
   public ResultLogData(String id, String user) {
-    super(id, user);
-  }
-
-  @Override
-  String getAction() {
-    return "RESULTS";
+    super(id, user, "RESULTS");
   }
 
   @Override
   public String toTSV() {
 
-      return getCommon() + "\t"
+    return getCommonTSV() + "\t"
             + docIDs;
   }
 
-  @Override
-  public String toHTML() {
-    return null;
-  }
+
 }

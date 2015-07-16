@@ -10,7 +10,7 @@ public class CreateCorpusLogData extends LogData {
   private Integer corpusID;
 
   public CreateCorpusLogData(String id, String user) {
-    super(id, user);
+    super(id, user, "CREATE-CORPUS");
   }
 
   public void setCorpusName(String corpusName) {
@@ -22,20 +22,11 @@ public class CreateCorpusLogData extends LogData {
   }
 
   @Override
-  String getAction() {
-    return "CREATE-CORPUS";
-  }
-
-  @Override
   public String toTSV() {
 
-      return getCommon() + "\t"
+    return getCommonTSV() + "\t"
             + corpusName + "\t"
             + corpusID;
   }
 
-  @Override
-  public String toHTML() {
-    return null;
-  }
 }

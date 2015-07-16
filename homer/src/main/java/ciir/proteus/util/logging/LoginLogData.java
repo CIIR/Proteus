@@ -1,5 +1,7 @@
 package ciir.proteus.util.logging;
 
+import com.cedarsoftware.util.io.JsonWriter;
+
 /**
  * Created by michaelz on 7/8/2015.
  */
@@ -9,7 +11,7 @@ public class LoginLogData extends LogData {
   private String ip;
 
   public LoginLogData(String id, String user) {
-    super(id, user);
+    super(id, user, "LOGIN");
   }
 
   public void setUserid(Integer userid) {
@@ -21,20 +23,11 @@ public class LoginLogData extends LogData {
   }
 
   @Override
-  String getAction() {
-    return "LOGIN";
-  }
-
-  @Override
   public String toTSV() {
 
-      return getCommon() + "\t"
+    return getCommonTSV() + "\t"
             + ip + "\t"
             + userid;
   }
 
-  @Override
-  public String toHTML() {
-    return null;
-  }
 }

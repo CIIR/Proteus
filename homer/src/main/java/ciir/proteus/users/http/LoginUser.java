@@ -33,7 +33,7 @@ public class LoginUser extends DBAction {
         LoginLogData logData = new LoginLogData(loginCreds.get("token").toString(), user);
         logData.setIp(req.getRemoteAddr());
         logData.setUserid(loginCreds.getInt("userid"));
-        LogHelper.log(logData);
+        LogHelper.log(logData, system);
 
         // return the broadcast info
         if (system.getConfig().containsKey("broadcast")) {

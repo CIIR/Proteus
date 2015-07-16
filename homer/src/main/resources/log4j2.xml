@@ -4,7 +4,7 @@
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
 		</Console>
-		<RollingFile name="RollingFile" fileName="proteus-activity.log" filePattern="$${date:yyyy-MM}/proteus-activity-%d{yyy-MM-dd}.log" immediateFlush="true" append="true">
+		<RollingFile name="RollingFile" fileName="logs/proteus-activity.log" filePattern="logs/$${date:yyyy-MM}/proteus-activity-%d{yyy-MM-dd}.log" immediateFlush="true" append="true">
 			<PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS}\t%msg%n"/>
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1"/>

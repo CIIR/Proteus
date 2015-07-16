@@ -9,7 +9,7 @@ public class DeleteTagLogData extends LogData {
   private String tag;
 
   public DeleteTagLogData(String id, String user) {
-    super(id, user);
+    super(id, user, "DEL-TAG");
   }
 
 
@@ -21,22 +21,13 @@ public class DeleteTagLogData extends LogData {
     this.tag = tag;
   }
 
-  @Override
-  String getAction() {
-    return "DEL-TAG";
-  }
 
   @Override
   public String toTSV() {
 
-      return getCommon() + "\t"
+    return getCommonTSV() + "\t"
             + resource + "\t"
-            + tag ;
-  }
-
-  @Override
-  public String toHTML() {
-    return null;
+            + tag;
   }
 
 

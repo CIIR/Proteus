@@ -17,7 +17,7 @@
 
             // make sure we're logged in
             if (isLoggedIn() == false) {
-                document.write('<a href="../index.html">Please log in first</a>');
+                document.write('<a href="index.html">Please log in first</a>');
                 return;
             }
 
@@ -29,30 +29,30 @@
             } else {
                 $("#user-num-entities").val(num_entities);
             }
-
-            if (!_.isUndefined(localStorage["messages"])){
-                // when we log in, we make sure we have a value for ALL the messages
-
-                var html = '';
-
-                var msgs = JSON.parse(localStorage["messages"]);
-                for (msg in msgs){
-                    var checkedStr = "";
-                    if (settings.broadcast[msgs[msg]] == "Y"){
-                        checkedStr = "checked"
-                    }
-                    html += '<input class="broadcast-msg" type="checkbox" name="messages" value="' + msgs[msg] + '"' + checkedStr + '/> ' + msgs[msg] + ' <br> ';
-                }
-
-                $("#broadcast-chioces").html(html);
-            }
+//
+//            if (!_.isUndefined(localStorage["messages"])){
+//                // when we log in, we make sure we have a value for ALL the messages
+//
+//                var html = '';
+//
+//                var msgs = JSON.parse(localStorage["messages"]);
+//                for (msg in msgs){
+//                    var checkedStr = "";
+//                    if (settings.broadcast[msgs[msg]] == "Y"){
+//                        checkedStr = "checked"
+//                    }
+//                    html += '<input class="broadcast-msg" type="checkbox" name="messages" value="' + msgs[msg] + '"' + checkedStr + '/> ' + msgs[msg] + ' <br> ';
+//                }
+//
+//                $("#broadcast-chioces").html(html);
+//            }
          });
         // TODO: move this to a .js file - should be able to remove most of the script references in <head>
         function submitSettings(){
 
             var num = parseInt($("#user-num-entities").val());
 
-            var userName = getCookie("username");
+            var action = getCookie("username");
             var userID = getCookie("userid");
             var userToken = getCookie("token");
             var broadcastValues = {};
@@ -66,7 +66,7 @@
             });
 
             var settings = { num_entities : num, broadcast: broadcastValues };
-            var args = {user: userName, token: userToken, userid: userID, settings: { num_entities : num, broadcast: broadcastValues }};
+            var args = {user: action, token: userToken, userid: userID, settings: { num_entities : num, broadcast: broadcastValues }};
             API.updateUserSettings(args, function() { console.log("success")},  function(req, status, err) { console.log("failure")});
 
             document.cookie = "settings=" + JSON.stringify(settings) + ";";
@@ -101,14 +101,16 @@
                 <input id="user-num-entities" name="user-num-entities" placeholder="" class="form-control input-md" required="" type="number" min="0">
             </div>
             </div>
-            <div class="form-group">
-            <label class="col-md-4 control-label" for="messages">What broadcast messages to you want to see?</label>
-            <div class="col-md-4">
-                <div id="broadcast-chioces"></div>
-            </div>
-        </div>
+        <!--
+           <div class="form-group">
+           <label class="col-md-4 control-label" for="messages">What broadcast messages to you want to see?</label>
+           <div class="col-md-4">
+               <div id="broadcast-chioces"></div>
+           </div>
+           -->
+       </div>
 
-        <!-- Button -->
+       <!-- Button -->
         <div class="form-group">
             <label class="col-md-4 control-label" for="submit-settings"></label>
             <div class="col-md-4">
