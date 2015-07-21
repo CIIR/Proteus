@@ -62,7 +62,6 @@ UI.clear = function() {
     viewResourceDiv.html('');
 };
 UI.clearResults = function() {
-    viewResourceDiv.hide();
     resultsDiv.html('');
     resultsDiv.show();
 };
@@ -708,16 +707,10 @@ function handleNERHilightClick(that, type){
         console.log(type + " has been checked")
         $("." + type + "-off").addClass(type)
         $("." + type ).removeClass(type+ "-off")
-
-       setBob();
-
     } else {
         console.log(type + " has been UNchecked")
         $("." + type ).addClass(type+ "-off")
         $("." + type + "-off").removeClass(type)
-
-        setAlice();
-
     }
 
 }

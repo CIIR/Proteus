@@ -63,8 +63,6 @@
         <link rel="stylesheet" href="css/jquery-ui-slider-pips.css" type="text/css" media="screen"/>
         <script type="text/javascript" src="js/jquery-ui-slider-pips.js"></script>
 
-        <link rel="stylesheet" href="annotator-full.1.2.10/annotator.min.css" type="text/css" media="screen"/>
-        <script type="text/javascript" src="annotator-full.1.2.10/annotator-full.min.js"></script>
 
         <script>
 
@@ -79,10 +77,7 @@
                 // TODO: should be able to do this in CSS like I did for the navbar at the top: http://stackoverflow.com/questions/10336194/twitter-bootstrap-top-nav-bar-blocking-top-content-of-the-page
                 // TODO: THIS also messes up the auto-retrieve
                 $(window).resize(function() {
-                    //         $('body').css('padding-bottom', parseInt($('#footer').css("height")) + parseInt($('#mz-bottom').css("height")) + 20);
-                    $('body').css('padding-bottom', parseInt($('#footer').css("height")) + 30);
-                    // TODO: 10 works on main retrieval - 30 on page/book view,
-                    // probably time to have 2 different html files.
+                    $('body').css('padding-bottom', parseInt($('#footer').css("height")) + 10);
                 });
 
                 $(window).load(function() {
@@ -107,9 +102,9 @@
                     //       heightStyle: "fill",
                     collapsible: true
                 });
-                $(document).ready(function() {
-                    $(".fancybox").fancybox();
-                });
+
+                $(".fancybox").fancybox();
+
 
                 $("#overlay").hide();
                 $("#ui-search").keyup(function(evt) {
@@ -292,25 +287,15 @@
                 <br><br>
             </div>
 
-            <div id="ocr-options">
-                <input checked type="checkbox" id="cb-per" value="per" onclick="handleNERHilightClick(this, 'per');" /><span class="per"> People</span><br />
-                <input checked type="checkbox" id="cb-org" value="org" onclick="handleNERHilightClick(this, 'org');" /><span class="org"> Organizations</span><br />
-                <input checked type="checkbox" id="cb-loc" value="loc" onclick="handleNERHilightClick(this, 'loc');" /><span class="loc"> Places</span><br />
-
-            </div>
             <div id="tree">
                 <div id="empty-tree"></div>
             </div>
         </div>
 
         <div id="results-right" class="col-md-10 column right-align">
-            <div id="metadata"></div>
+
             <div id="results"></div>
-            <div id="view-resource">
-                <div  class="row clearfix btn" id="view-nav-top"></div>
-                <div id="book-pages"> </div>
-                <div class="row clearfix btn" id="view-nav-bottom"></div>
-            </div>
+
             <div class="row clearfix ">
 
                 <div id="more"></div>

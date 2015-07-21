@@ -144,8 +144,8 @@ UI.populateRecentSearches = function(){
                         name = name.split("@")[0];
 
                     html += '&#8226;&nbsp;' + dt + ' ' + name + ': <i>' + rec.text
-                        + '</i> view: <a target="_blank" href="?kind=ia-pages&action=view&id=' + identifier + '&pgno=' + pageNum + '&noteid=' + rec.id + '">Page, </a>'
-                        + '<a target="_blank" href="?kind=ia-books&action=view&id=' + identifier + '_' + pageNum +'&noteid=' + rec.id + '">Book</a><br>';
+                        + '</i> view: <a target="_blank" href="view.html?kind=ia-pages&action=view&id=' + identifier + '&pgno=' + pageNum + '&noteid=' + rec.id + '">Page, </a>'
+                        + '<a target="_blank" href="view.html?kind=ia-books&action=view&id=' + identifier + '_' + pageNum +'&noteid=' + rec.id + '">Book</a><br>';
 
                 }
                 $('#note-list').html(html);

@@ -75,7 +75,7 @@ var renderResult = function(queryTerms, result, resDiv) {
             '<table>' +
             '<tr>' +
             '<td class="preview" rowspan="2">' + previewImage + '</td>' +
-            '<td class="name">' + name + '&nbsp;(<a target="_blank" href="?kind=' + kind + '&action=view&id=' + result.name + '">view OCR</a>)</td>' +
+            '<td class="name">' + name + '&nbsp;(<a target="_blank" href="view.html?kind=' + kind + '&action=view&id=' + result.name + '">view OCR</a>)</td>' +
             '<td class="slider-rating"><div id="rating-' + result.name + '" class="rainbow-slider"></div></td>' +
             '<td class="score">&nbsp;&nbsp;rank: ' + result.rank + '</td>' +
             '</tr>';
@@ -166,7 +166,7 @@ var renderResult_notes = function(queryTerms, result, resDiv) {
             dt + ' ' +
             result.user + ' added the note: "<i>' +
             result.text + '</i>" to the text "<b>' + snippet + '</b>"' +
-            ' for resource: <a target="_blank" href="?kind=' + kind + '&action=view&id=' + result.uri + '&noteid=' + result.id + '">view</a>'
+            ' for resource: <a target="_blank" href="view.html?kind=' + kind + '&action=view&id=' + result.uri + '&noteid=' + result.id + '">view</a>'
 
     html += '</div><br>';
 

@@ -1,0 +1,140 @@
+﻿<html>
+    <head>
+        <script>
+            // check if the browser supports local storage, we have to do this FIRST
+            // before any other JS stuff which could cause other issues and cause this
+            // to get skipped.
+            // from: http://diveintohtml5.info/detect.html#storage
+            function check() {
+                try {
+                    return 'localStorage' in window && window['localStorage'] !== null;
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            if (check() == false) {
+                alert("You are using an old browser, please upgrade.");
+                document.execCommand("Stop"); // for IE
+                window.stop(); //works in all browsers but IE
+            }
+        </script>
+
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title id="proteus-title">Proteus: Document View</title>
+
+        <!-- Bootstrap -->
+        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/history.js/1.8/native.history.min.js"></script>
+
+        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+        <script src="js/jquery.cookie.js"></script>
+          <!-- scripts included here evaluate before the page loads -->
+        <script src="js/API.js"></script>
+        <script src="js/util.js"></script>
+        <script src="js/render.js"></script>
+        <script src="js/internetArchive.js"></script>
+        <script src="js/acmdl.js"></script>
+        <script src="js/tag-it.js" type="text/javascript" charset="utf-8"></script>
+
+        <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="css/style.css" type="text/css"/>
+
+        <!-- Add fancyBox -->
+        <link rel="stylesheet" href="js/fancybox/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen"/>
+        <script type="text/javascript" src="js/fancybox/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+        <link rel="stylesheet" href="annotator-full.1.2.10/annotator.min.css" type="text/css" media="screen"/>
+        <script type="text/javascript" src="annotator-full.1.2.10/annotator-full.min.js"></script>
+
+        <script src="js/ProteusAnnotationFilter.js"></script>
+
+        <script>
+
+            var showSideBarFlag = true;
+
+            $(document).ready(function() {
+
+                var urlParams = getURLParams();
+                var tmpShowSideBar = urlParams["showSideBar"];
+
+                // if not logged in, hide the user info
+                if (isLoggedIn() == false) {
+                    document.write('<a href="index.html">Please log in first</a>');
+                    return;
+                }
+
+                $(".fancybox").fancybox();
+
+            });
+
+        </script>
+
+    </head>
+    <body id="body-view">
+
+        <nav class="navbar navbar-default navbar-static-top">
+            <div class="container-fluid " id="ui">
+                <div class="row clearfix">
+                    <img id="sidebar-button" src="images/sidebar_expand.png"/>
+                    <span class="col-md-4 column col-1-class"> <div id="title"><a href="index.html" target="_blank">Proteus</a></div>
+                        <a href="https://github.com/CIIR/Proteus/issues/new">Report an issue or make a suggestion</a></span>
+
+                    <div class="col-md-8 column right-align col-9-class">
+                    </div>
+
+                </div>
+            </div>
+        </nav>
+
+        <div id="error"></div>
+        <div id="request"></div>
+
+        <div id="all-tags"></div>
+
+        <div id="results-left" class="col-md-2 column">
+
+
+            <div id="ocr-options">
+                <input checked type="checkbox" id="cb-per" value="per" onclick="handleNERHilightClick(this, 'per');" /><span class="per"> People</span><br />
+                <input checked type="checkbox" id="cb-org" value="org" onclick="handleNERHilightClick(this, 'org');" /><span class="org"> Organizations</span><br />
+                <input checked type="checkbox" id="cb-loc" value="loc" onclick="handleNERHilightClick(this, 'loc');" /><span class="loc"> Places</span><br />
+            </div>
+
+            <div id="sidebar-notes"></div>
+        </div>
+
+        <div id="results-right" class="col-md-10 column right-align">
+            <div id="metadata"></div>
+            <div id="view-resource">
+                <div  class="row clearfix btn" id="view-nav-top"></div>
+                <div id="book-pages"> </div>
+                <div class="row clearfix btn" id="view-nav-bottom"></div>
+            </div>
+
+        </div>
+
+
+        <!-- scripts included here evaluate after the page loads -->
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="bootstrap/js/bootstrap.min.js"></script>
+        <script src="js/ui.js"></script>
+        <script src="js/actions.js"></script>
+        <script src="js/main.js"></script>
+
+
+    </body>
+</html>

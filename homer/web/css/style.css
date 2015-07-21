@@ -86,7 +86,7 @@
     width: 70%;
 }
 
-#title {
+#title a, #title {
     float: left;
     margin: 0;
     vertical-align: middle;
@@ -94,8 +94,10 @@
     font-size: 20pt;
     font-weight: bold;
     height: 20pt;
-    color: #fff;
+    color: white;
+    text-decoration: none;
 }
+
 
 #user-info, #ui-login-form {
     text-align: right;
@@ -225,11 +227,14 @@ td.metakey {
 
 body {
     margin: 0;
-   /* padding-top: 55px;*/
     overflow-y: hidden;
-    padding-bottom: 50px;
 }
 
+#body-view{
+    margin: 0;
+    overflow-y: hidden;
+    padding-bottom: 55px;
+}
 .label-details {
     background-color: #dedede;
     border: solid;
