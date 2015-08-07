@@ -49,8 +49,9 @@ var MIN_PAGE_HEIGHT = 500;
 
 // this is the div we'll attach the annotation filter to.
 var noteFilterDiv = $("#metadata");
-// this is the name of the event that triggers the filer to refresh
-var noteEventName = "noteUpdate";
+// div for the annotation side bar
+var noteSideBarDiv = $("#note-side-bar");
+
 
 var page = {
   previous: -1,
@@ -305,23 +306,49 @@ var viewPrevPageSuccess = function (args) {
 
 };
 
-// since we have an annotator for each page, when we want to search through
-// a book's notes, we need to let the book level filter (ProteusAnnotationFilter) know
-// when something changed.
+// We have an annotator for each page, and the filter (ProteusAnnotationFilter)
+// and the note side bar annotators apply to the whole book, we need to foward
+// events that happen on the page to the filter and sidebar and anything that
+// happens in the sidebar has to be forwarded to the page annotator.
+
 Annotator.Plugin.NoteEvent = function () {
 
   return {
     pluginInit: function () {
+      var that = this;
       this.annotator
+              .subscribe("afterAnnotationCreated", function (annotation) {
+                noteSideBarDiv.trigger("noteViewerCreateEventName", annotation);
+              })
               .subscribe("annotationCreated", function (annotation) {
-                noteFilterDiv.trigger(noteEventName);
+                noteFilterDiv.trigger("noteUpdate");
+              })
+              .subscribe("annotationUpdated", function (annotation) {
+                noteSideBarDiv.trigger("noteViewerUpdateEventName", annotation);
+              })
+              .subscribe("annotationsLoaded", function (annotation) {
+                if (!_.isUndefined(annotation) && annotation.length > 0) {
+                  noteFilterDiv.trigger("noteUpdate");
+                  noteSideBarDiv.trigger("myannotationsLoaded", [{length: annotation.length, notes: annotation}]);
+                }
               })
               .subscribe("annotationDeleted", function (annotation) {
-                noteFilterDiv.trigger(noteEventName);
+                noteFilterDiv.trigger("noteUpdate");
+                noteSideBarDiv.trigger("noteViewerDeleteteEventName", annotation);
+              })
+              // these events are triggered from the note side bar and
+              // are forwarded to the page.
+              .subscribe("myannotationUpdated", function (annotation) {
+                that.annotator.updateAnnotation(annotation);
+              })
+              .subscribe("myannotationDeleted", function (annotation) {
+                that.annotator.deleteAnnotation(annotation);
               });
     }
   }
 };
+
+var firstTime = true;
 
 var initAnnotationLogic = function (pageID, pageNum, cookieData) {
 
@@ -390,6 +417,12 @@ var initAnnotationLogic = function (pageID, pageNum, cookieData) {
       return this.userId(user) === this.userId(annotation.userid);
     }
   });
+
+  if (firstTime) {
+    firstTime = false;
+    noteSideBarDiv.annotator().annotator('addPlugin', 'AnnotatorViewer');
+  }
+
 
 };
 var viewNextPageSuccess = function (args) {
@@ -561,8 +594,20 @@ var onViewPageSuccess = function (args) {
     "corpusID": corpusID
   }
 
+  // the stock Filter only searches within the HTML element
+  // it's attached to. Since we split books into pages and each
+  // page has its own annotator that won't work for us. So I
+  // extended the stock Filter and have it search for all
+  // annotations within the "searchArea" we pass in. Note that
+  // it's attached to an element that is NOT the searchArea, if was
+  // it would render the entire area read-only.
+  noteFilterDiv.annotator({
+    readOnly: true
+  });
+  noteFilterDiv.annotator('addPlugin', 'ProteusAnnotationFilter');
 
   initAnnotationLogic(identifier, pageNum, cookieData);
+
   UI.showProgress("");
 
 };
@@ -619,24 +664,30 @@ var onViewBookSuccess = function (args) {
   // via timeouts so the UI doesn't lock up when loading large books.
   var urlParams = getURLParams();
   var pgNum = urlParams["pgno"];
-  if (_.isUndefined(pgNum))
+  if (_.isUndefined(pgNum)) {
     pgNum = -1;
+  }
+
+  // add the annotation widget to the page with the note
+  updateNoteDiv(id, pgNum);
+  initAnnotationLogic(id, pgNum, cookieData);
+  el = "#" + getNotesID(id, pgNum);
 
   if (!_.isUndefined(urlParams["noteid"])) {
-
-    // add the annotation widget to the page with the note
-    updateNoteDiv(id, pgNum);
-    initAnnotationLogic(id, pgNum, cookieData);
-    el = "#" + getNotesID(id, pgNum);
-
     // scroll to the note once all notes for that page are loaded.
     $(el).bind("annotationsLoaded", function () {
 
       var note = '.annotator-hl[data-annotation-id="' + urlParams["noteid"] + '"]';
 
-      $('#results-right').animate({
-        scrollTop: $(note).offset().top - 60
-      }, 2000);
+      if ($(note).length){
+
+        $('#results-right').animate({
+          scrollTop: $(note).offset().top - 80
+        }, 2000);
+
+      } else {
+        alert("Couldn't find that note, perhaps it was deleted?")
+      }
 
       // remove the notid from the URL so we don't re-trigger
       removeURLParam("noteid");
@@ -646,8 +697,6 @@ var onViewBookSuccess = function (args) {
     });
 
   } // end if we have a noteid
-  // ???? TMP - create this firxt
-
 
   // create a place were we can display the status
   $(".navbar").append('<div id="loading-msg"></div>');
@@ -685,10 +734,7 @@ var onViewBookSuccess = function (args) {
     noteFilterDiv.annotator({
       readOnly: true
     });
-    noteFilterDiv.annotator('addPlugin', 'ProteusAnnotationFilter', {
-      searchArea: '#results-right',
-      noteEventName: noteEventName
-    })
+    noteFilterDiv.annotator('addPlugin', 'ProteusAnnotationFilter');
 
   }, this);
 

@@ -52,15 +52,24 @@
 
         <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="css/annotation_viewer.css" type="text/css"/>
 
         <!-- Add fancyBox -->
         <link rel="stylesheet" href="js/fancybox/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen"/>
         <script type="text/javascript" src="js/fancybox/jquery.fancybox.pack.js?v=2.1.5"></script>
 
         <link rel="stylesheet" href="annotator-full.1.2.10/annotator.min.css" type="text/css" media="screen"/>
-        <script type="text/javascript" src="annotator-full.1.2.10/annotator-full.min.js"></script>
 
+        <script type="text/javascript" src="js/annotator.js"></script>
+        <script type="text/javascript" src="js/annotator.permissions.js"></script>
+        <script type="text/javascript" src="js/annotator.auth.js"></script>
+        <script type="text/javascript" src="js/annotator.store.js"></script>
+        <script type="text/javascript" src="js/annotator.filter.js"></script>
+
+
+        <script src="js/jquery.slimscroll.js"></script>
         <script src="js/ProteusAnnotationFilter.js"></script>
+        <script src="js/annotator_viewer.js"></script>
 
         <script>
 
@@ -119,6 +128,7 @@
 
         <div id="results-right" class="col-md-10 column right-align">
             <div id="metadata"></div>
+            <div id="note-side-bar"></div>
             <div id="view-resource">
                 <div  class="row clearfix btn" id="view-nav-top"></div>
                 <div id="book-pages"> </div>

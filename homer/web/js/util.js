@@ -91,6 +91,9 @@ var getCookie = function(cname) {
     return "";
 };
 
+var getUser = function(){
+    return getCookie("username")
+}
 var highlightText = function(queryTerms, text, beforeTag, afterTag) {
 
     // there are situations where the "text" is actually an image such

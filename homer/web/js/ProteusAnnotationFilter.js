@@ -18,13 +18,14 @@ var bind = function (fn, me) {
         },
         hasProp = {}.hasOwnProperty;
 
+// custom plug-in that extends the regular Filter plug-in
 Annotator.Plugin.ProteusAnnotationFilter = (function (superClass) {
   extend(ProteusAnnotationFilter, Annotator.Plugin.Filter);
 
   ProteusAnnotationFilter.prototype.options = {
 
     noteEventName : "noteUpdate",
-    searchArea: 'body',
+    searchArea: '#results-right',
     appendTo: 'body',
     filters: [],
     addAnnotationFilter: true,
@@ -57,7 +58,6 @@ Annotator.Plugin.ProteusAnnotationFilter = (function (superClass) {
     // the stock events like annotationCreated are only subscribed to within the
     // individual annotator which we do per page.
     this.annotator.subscribe(this.options.noteEventName, this.updateHighlights);
-
     return this;
   };
 

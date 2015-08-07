@@ -62,7 +62,11 @@ Annotator.Plugin.Store = (function(superClass) {
           if (data.id == null) {
             console.warn(Annotator._t("Warning: No ID returned from server for annotation "), annotation);
           }
-          return _this.updateAnnotation(annotation, data);
+           var ret =  _this.updateAnnotation(annotation, data);
+          // MCZ - added this event because the "annotationCreated" is fired BEFORE
+          // we get the annotation id back.
+          _this.annotator.publish('afterAnnotationCreated', annotation);
+          return ret;
         };
       })(this));
     } else {
