@@ -74,7 +74,7 @@ public class GetActivityLog extends DBAction {
                     sb.append(System.lineSeparator());
                     line = br.readLine();
                 }
-                
+
             } finally {
                 br.close();
             }

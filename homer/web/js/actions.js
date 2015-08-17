@@ -229,12 +229,7 @@ var onSearchSuccess = function (data) {
 
 };
 
-function getNotesID(pageid, pagenum) {
-  if (parseInt(pagenum) >= 0)
-    return 'notes-' + pageid + '_' + pagenum;
-  else
-    return 'notes-' + pageid;
-}
+
 var getPageHTML = function (text, pageID, pageNum) {
   var pgImage = pageImage(pageID, pageNum);
   var pgTxt = processTags(text);
@@ -249,8 +244,10 @@ var doViewRequest = function (args) {
 
   API.action(args,
           function (args) {
-            if (args.request.kind == 'ia-pages') {
-              onViewPageSuccess(args);
+            if (args.request.kind == 'article') {
+              onViewArticleSuccess(args);
+            } else if (args.request.kind == 'ia-pages') {
+                onViewPageSuccess(args);
             } else {
               onViewBookSuccess(args);
             }
@@ -302,7 +299,7 @@ var viewPrevPageSuccess = function (args) {
     "corpusID": corpusID
   }
 
-  initAnnotationLogic(args.request.page_id, args.request.page_num, cookieData);
+  initBookAnnotationLogic(args.request.page_id, args.request.page_num, cookieData);
 
 };
 
@@ -329,7 +326,9 @@ Annotator.Plugin.NoteEvent = function () {
               .subscribe("annotationsLoaded", function (annotation) {
                 if (!_.isUndefined(annotation) && annotation.length > 0) {
                   noteFilterDiv.trigger("noteUpdate");
-                  noteSideBarDiv.trigger("myannotationsLoaded", [{length: annotation.length, notes: annotation}]);
+                  // pass the element that the annotator is attached to so we
+                  // can operate on the smallest
+                  noteSideBarDiv.trigger("myannotationsLoaded", annotation[0].uri);
                 }
               })
               .subscribe("annotationDeleted", function (annotation) {
@@ -350,18 +349,17 @@ Annotator.Plugin.NoteEvent = function () {
 
 var firstTime = true;
 
-var initAnnotationLogic = function (pageID, pageNum, cookieData) {
-
-  // resource has to match the Internet Archive format so we are consistent across the system
-  var resource = pageID;
-  if (parseInt(pageNum) >= 0) {
-
-    resource += '_' + pageNum;
-  }
+var initBookAnnotationLogic = function (pageID, pageNum, cookieData) {
 
   var el = '#' + getNotesID(pageID, pageNum);
+  initAnnotationLogic(el, cookieData);
 
-  var ann = $(el).annotator();
+};
+
+var initAnnotationLogic = function (element, cookieData) {
+
+  var ann = $(element).annotator();
+  var resource = element.substring(7).toString(); // strip off "[#|.]notes-"
 
   // set up a plugin that will notify the filter when a note
   // was created or deleted.
@@ -421,10 +419,22 @@ var initAnnotationLogic = function (pageID, pageNum, cookieData) {
   if (firstTime) {
     firstTime = false;
     noteSideBarDiv.annotator().annotator('addPlugin', 'AnnotatorViewer');
+    // the stock Filter only searches within the HTML element
+    // it's attached to. Since we split books into pages and each
+    // page has its own annotator that won't work for us. So I
+    // extended the stock Filter and have it search for all
+    // annotations within the "searchArea" we pass in. Note that
+    // it's attached to an element that is NOT the searchArea, if was
+    // it would render the entire area read-only.
+    noteFilterDiv.annotator({
+      readOnly: true
+    });
+    noteFilterDiv.annotator('addPlugin', 'ProteusAnnotationFilter');
   }
 
 
 };
+
 var viewNextPageSuccess = function (args) {
 
   // check if we're going beyond the end. We use the "number of images"
@@ -475,7 +485,7 @@ var viewNextPageSuccess = function (args) {
     "corpusID": corpusID
   }
 
-  initAnnotationLogic(args.request.page_id, args.request.page_num, cookieData);
+  initBookAnnotationLogic(args.request.page_id, args.request.page_num, cookieData);
 
 };
 
@@ -594,19 +604,7 @@ var onViewPageSuccess = function (args) {
     "corpusID": corpusID
   }
 
-  // the stock Filter only searches within the HTML element
-  // it's attached to. Since we split books into pages and each
-  // page has its own annotator that won't work for us. So I
-  // extended the stock Filter and have it search for all
-  // annotations within the "searchArea" we pass in. Note that
-  // it's attached to an element that is NOT the searchArea, if was
-  // it would render the entire area read-only.
-  noteFilterDiv.annotator({
-    readOnly: true
-  });
-  noteFilterDiv.annotator('addPlugin', 'ProteusAnnotationFilter');
-
-  initAnnotationLogic(identifier, pageNum, cookieData);
+  initBookAnnotationLogic(identifier, pageNum, cookieData);
 
   UI.showProgress("");
 
@@ -670,7 +668,7 @@ var onViewBookSuccess = function (args) {
 
   // add the annotation widget to the page with the note
   updateNoteDiv(id, pgNum);
-  initAnnotationLogic(id, pgNum, cookieData);
+  initBookAnnotationLogic(id, pgNum, cookieData);
   el = "#" + getNotesID(id, pgNum);
 
   if (!_.isUndefined(urlParams["noteid"])) {
@@ -715,7 +713,7 @@ var onViewBookSuccess = function (args) {
 
     $.timeoutQueue.add(function () {
       $("#loading-msg").html("loading notes for page " + currentPg);
-      initAnnotationLogic(id, currentPg, cookieData)
+      initBookAnnotationLogic(id, currentPg, cookieData)
     }, this);
 
   });

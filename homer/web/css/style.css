@@ -576,3 +576,16 @@ body {
     text-align: center;
 }
 
+.acm-text {
+
+    white-space: pre-wrap;
+    /*font-family:  "Helvetica Neue",Helvetica,Arial,sans-serif;*/
+}
+/* we need to override the "pre-wrap" for acm-text */
+.annotator-editor, .annotator-viewer{
+    white-space: normal;
+}
+
+.hide-me{
+    dispaly: none;
+}

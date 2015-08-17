@@ -88,23 +88,43 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
 
   };
 
+
+
   AnnotatorViewer.prototype.pluginInit = function () {
+
     if (!Annotator.supported()) {
       return;
     }
 
     var that = this
-    this.annotator.subscribe("myannotationsLoaded", function (annotation) {
-      if (_.isUndefined(annotation))
-        return;
 
-      var annotation;
+    this.annotator.subscribe("myannotationsLoaded", function (annotationElement) {
 
-      _.forEach(annotation.notes, function (a) {
+      // MCZ - since they can put a note anywhere, re-load them so they
+      // are in order for this annotation object.
+
+      $("#anotacions-uoc-panel li").remove(".notes-" + annotationElement);
+
+      // MCZ - get them in order
+      var highlights =  $('#notes-' + annotationElement + ' .annotator-hl');
+      var annotations = highlights.map(function() {
+        return $(this).data('annotation');
+      });
+
+      // if a highlight crosses HTML tags, there can be
+      // multiple annotator-hl classes for a single highlight
+      // so get the unique ones
+
+      annotations = _.uniq(annotations, function(a) { return a.id; });
+
+      console.log("number of annotations: " + annotations.length)
+      _.forEach(annotations, function (a) {
         that.createReferenceAnnotation(a);
       })
+
       $('#count-anotations').text($(".container-anotacions").find('.annotator-marginviewer-element').length);
-    })
+
+   })
 
   };
 
@@ -194,7 +214,9 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
 
     // MCZ - we need to use the annotator specific for that note
     var parts = current_annotation.uri.split("_")
-    var el = "#" + getNotesID(parts[0], parts[1]);
+
+    var el = "#" +  getNotesID(parts[0], parts[1]);
+
     $(el).trigger("myannotationUpdated", current_annotation)
 
   };
@@ -233,27 +255,52 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
   AnnotatorViewer.prototype.onAnnotationCreated = function (annotation) {
 
     this.createReferenceAnnotation(annotation);
+    reOrderNotes();
 
   };
+
+  function reOrderNotes(){
+    // MCZ - since they can put a note anywhere, re-load them so they
+    // are in order.
+    $("li").remove(".annotator-marginviewer-element");
+    //noteSideBarDiv.trigger("myannotationsLoaded");
+    // MCZ - get them in order
+    var highlights =  $('.annotator-hl');
+    var annotations = highlights.map(function() {
+      return $(this).data('annotation');
+    });
+
+    // if a highlight crosses HTML tags, there can be
+    // multiple annotator-hl classes for a single highlight
+    // so get the unique ones
+
+    annotations = _.uniq(annotations, function(a) { return a.id; });
+
+    _.forEach(annotations, function (a) {
+      that.createReferenceAnnotation(a);
+    })
+    $('#count-anotations').text($(".container-anotacions").find('.annotator-marginviewer-element').length);
+
+  }
 
   AnnotatorViewer.prototype.onAnnotationUpdated = function (annotation) {
 
     $("#annotation-" + annotation.id).html(this.mascaraAnnotation(annotation));
   };
 
-  AnnotatorViewer.prototype.onAnnotationsLoaded = function (annotations) {
-
-    var annotation;
-     if (annotations.length > 0) {
-      for (i = 0, len = annotations.length; i < len; i++) {
-        annotation = annotations[i];
-        this.createReferenceAnnotation(annotation);
-      }
-
-    }
-    $('#count-anotations').text($(".container-anotacions").find('.annotator-marginviewer-element').length);
-
-  };
+//  AnnotatorViewer.prototype.onAnnotationsLoaded = function (annotations) {
+//
+//    var annotation;
+//     if (annotations.length > 0) {
+//      for (i = 0, len = annotations.length; i < len; i++) {
+//        annotation = annotations[i];
+//        this.createReferenceAnnotation(annotation);
+//      }
+//
+//    }
+//    $('#count-anotations').text($(".container-anotacions").find('.annotator-marginviewer-element').length);
+//
+//  };
 
   AnnotatorViewer.prototype.onAnnotationDeleted = function (annotation) {
 
@@ -322,7 +369,6 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
     var data_type = "";
     var myAnnotation = false;
 
-
     anotation_reference = "annotation-" + annotation.id;
     //We need to add this id to the text annotation
     $element = $('span.annotator-hl:not([data-annotation-id])');
@@ -340,7 +386,9 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
       myAnnotation = true;
     }
 
-    var annotation_layer = '<li class="annotator-marginviewer-element ' + data_type + ' ' + data_owner + '" id="' + anotation_reference + '">' + this.mascaraAnnotation(annotation) + '</li>';
+    // MCZ - Add a class that indicates what element this is associated with. This allows
+    // us to remove and re-order the notes in the sidebar on "page" at a time.
+    var annotation_layer = '<li class="annotator-marginviewer-element notes-' + annotation.uri + ' ' + data_type + ' ' + data_owner + '" id="' + anotation_reference + '">' + this.mascaraAnnotation(annotation) + '</li>';
     //   var malert = i18n_dict.anotacio_lost
 
     anotacioObject = $(annotation_layer).appendTo('.container-anotacions').click(function (event) {

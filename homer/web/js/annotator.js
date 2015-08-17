@@ -1453,7 +1453,8 @@ Annotator.Widget = (function(superClass) {
       top: offset.top,
       right: offset.left + widget.width()
     };
-    if ((current.top - viewport.top) < 0) {
+    // MCZ : Modified to account for the nav bar
+    if ((current.top - viewport.top) < $("nav.navbar.navbar-default.navbar-static-top").height() + $("div.annotator-filter").height()) {
       this.invertY();
     }
     if ((current.right - viewport.right) > 0) {

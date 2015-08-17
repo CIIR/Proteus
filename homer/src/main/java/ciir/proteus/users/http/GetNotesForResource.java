@@ -24,8 +24,10 @@ public class GetNotesForResource extends DBAction {
     @Override
     public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DBError, IOException {
 
-        String nullStr = null;
-        String resource = reqp.get("uri", nullStr);
+        // it's possible that a resource could be a number and JavaScript will insist on
+        // putting in the JSON as a numeric type.
+        Object o = reqp.get("uri");
+        String resource = o.toString();
         Integer corpusid = reqp.get("corpus", -1);
         Parameters notes = Parameters.create();
 

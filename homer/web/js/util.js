@@ -285,18 +285,14 @@ function initImportantEntities() {
     });
 }
 
-//String.prototype.capitalizeFirstLetter = function() {
-//    return this.charAt(0).toUpperCase() + this.slice(1);
-//}
-
-//function capitalizeFirstLetter(string) {
-//    return string.charAt(0).toUpperCase() + string.slice(1);
-//}
-//function capitalizeEachWord(str) {
-//    return string.charAt(0).toUpperCase() + string.slice(1);
-//}
-
-
 String.prototype.capitalizeEachWord = function() {
     return this.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
 };
+
+function getNotesID(pageid, pagenum) {
+    if (!_.isUndefined(pagenum) && parseInt(pagenum) >= 0)
+        return 'notes-' + pageid + '_' + pagenum;
+    else
+        return 'notes-' + pageid;
+}
+

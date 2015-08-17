@@ -80,6 +80,10 @@
                 var urlParams = getURLParams();
                 var tmpShowSideBar = urlParams["showSideBar"];
 
+                if (urlParams["kind"] == 'article'){
+                    $("#ocr-options").hide(); // we currently don't do NER or papers
+                }
+
                 // if not logged in, hide the user info
                 if (isLoggedIn() == false) {
                     document.write('<a href="index.html">Please log in first</a>');
