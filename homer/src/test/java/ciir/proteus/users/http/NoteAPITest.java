@@ -105,7 +105,7 @@ public class NoteAPITest {
         }
 
         assertEquals(results.get("total", -1), 1L);
-        arr = notes.getAsList("rows");
+        arr = results.getAsList("rows");
         assertTrue(arr.get(0).get("data", "?").equals("{ \"new\" : \"data\" }"));
 
         try {
@@ -119,6 +119,60 @@ public class NoteAPITest {
         assertEquals(notes.get("total", -1), 0);
         arr = notes.getAsList("rows");
         assertTrue(arr.size() == 0);
+
+        // test that notes are retrieved if the resource is a number or string type
+        resource = "123";
+        np = Parameters.create();
+        np.set("uri", resource);
+        np.set("data", "abc");
+        np.set("corpus", corpus1);
+        np.set("corpusName", "a");
+        creds = cred.toJSON();
+        np.copyFrom(creds);
+
+        results = Parameters.create();
+        try {
+            InsertNote cc = new InsertNote(env.proteus);
+            results = cc.handle(null, null, np, req);
+        } catch (HTTPError httpError) {
+            fail(httpError.getMessage());
+        }
+
+        // resource as a string
+        np = Parameters.create();
+        np.set("uri", resource);
+        np.set("corpus", corpus1);
+        assertTrue(np.get("uri") instanceof String);
+
+        try {
+            GetNotesForResource cc = new GetNotesForResource(env.proteus);
+            results = cc.handle(null, null, np, req);
+        } catch (HTTPError httpError) {
+            fail(httpError.getMessage());
+        }
+
+        assertEquals(results.get("total", -1), 1L);
+        arr = results.getAsList("rows");
+        assertTrue(arr.get(0).get("data", "?").equals("abc"));
+
+        // resource as an integer - sometimes when passing JSON, the javascript
+        // inisits on turning a string like "123" into an integer parameter.
+        np = Parameters.create();
+        np.set("uri", 123);
+        np.set("corpus", corpus1);
+        assertTrue(np.get("uri") instanceof Long);
+
+        try {
+            GetNotesForResource cc = new GetNotesForResource(env.proteus);
+            results = cc.handle(null, null, np, req);
+        } catch (HTTPError httpError) {
+            fail(httpError.getMessage());
+        }
+
+        assertEquals(results.get("total", -1), 1L);
+        arr = results.getAsList("rows");
+        assertTrue(arr.get(0).get("data", "?").equals("abc"));
+
 
     }
 
