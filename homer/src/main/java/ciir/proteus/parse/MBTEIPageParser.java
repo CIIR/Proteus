@@ -41,7 +41,7 @@ public class MBTEIPageParser extends MBTEIParser {
       // Note we do NOT want the archive ID to be parsed, we've seen some
       // that contain ":", ".", and lots of other characters that could be
       // interpreted as "word breaks"
-//      pageText += "<archiveid tokenizetagcontent=\"false\">" + archiveId + "</archiveid>";
+      pageText += "<archiveid tokenizetagcontent=\"false\">" + archiveId + "</archiveid>";
       page.text = pageText;
       page.name = archiveId + "_" + pageNumber;
       page.metadata = metadata;

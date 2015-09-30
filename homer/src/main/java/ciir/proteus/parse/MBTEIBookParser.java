@@ -45,9 +45,9 @@ public class MBTEIBookParser extends MBTEIParser {
       // Note we do NOT want the archive ID to be parsed, we've seen some
       // that contain ":", ".", and lots of other characters that could be
       // interpreted as "word breaks"
-//      wholeDocBuffer.append("<archiveid tokenizetagcontent=\"false\">");
-//      wholeDocBuffer.append(archiveID);
-//      wholeDocBuffer.append("</archiveid>");
+      wholeDocBuffer.append("<archiveid tokenizetagcontent=\"false\">");
+      wholeDocBuffer.append(archiveID);
+      wholeDocBuffer.append("</archiveid>");
 
 
       doc.text = wholeDocBuffer.toString();
