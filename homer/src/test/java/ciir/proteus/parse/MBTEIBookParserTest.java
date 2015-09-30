@@ -81,7 +81,7 @@ public class MBTEIBookParserTest {
         {
             Document doc = parser.nextDocument();
             Assert.assertNotNull(doc);
-            Assert.assertEquals("<div class=\"page-break\" page=\"0\">Alice chased the rabbit <br></div><div class=\"page-break\" page=\"2\">Max is a cat <br></div>", doc.text.trim());
+            Assert.assertEquals("<div class=\"page-break\" page=\"0\">Alice chased the rabbit <br></div><div class=\"page-break\" page=\"2\">Max is a cat <br></div><archiveid tokenizetagcontent=\"false\">mcztest</archiveid>", doc.text.trim());
         }
 
         // test with NER
@@ -91,7 +91,7 @@ public class MBTEIBookParserTest {
         {
             Document doc = parser.nextDocument();
             Assert.assertNotNull(doc);
-            Assert.assertEquals("<div class=\"page-break\" page=\"0\"><PERSON>Alice</PERSON> chased the rabbit <br></div><div class=\"page-break\" page=\"2\"><PERSON>Max</PERSON> is a cat <br></div>", doc.text.trim());
+            Assert.assertEquals("<div class=\"page-break\" page=\"0\"><PERSON>Alice</PERSON> chased the rabbit <br></div><div class=\"page-break\" page=\"2\"><PERSON>Max</PERSON> is a cat <br></div><archiveid tokenizetagcontent=\"false\">mcztest</archiveid>", doc.text.trim());
         }
 
         Assert.assertNull(parser.nextDocument());
@@ -131,7 +131,7 @@ public class MBTEIBookParserTest {
         {
             Document doc = parser.nextDocument();
             Assert.assertNotNull(doc);
-            Assert.assertEquals("<div class=\"page-break\" page=\"0\">EDITED, <br><br></div>", doc.text.trim());
+            Assert.assertEquals("<div class=\"page-break\" page=\"0\">EDITED, <br><br></div><archiveid tokenizetagcontent=\"false\">mcztest</archiveid>", doc.text.trim());
         }
     }
 
@@ -180,7 +180,7 @@ public class MBTEIBookParserTest {
         {
             Document doc = parser.nextDocument();
             Assert.assertNotNull(doc);
-            Assert.assertEquals("<div class=\"page-break\" page=\"0\">header <br>firstLine <br>secondLine <br>footer <br></div>", doc.text.trim());
+            Assert.assertEquals("<div class=\"page-break\" page=\"0\">header <br>firstLine <br>secondLine <br>footer <br></div><archiveid tokenizetagcontent=\"false\">mcztest</archiveid>", doc.text.trim());
         }
     }
 }
