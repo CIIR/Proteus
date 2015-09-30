@@ -69,4 +69,5 @@ API.rateResource = method("POST", "/api/rateresource");
 API.callWikipedia = method("GET", "http://en.wikipedia.org/w/api.php?action=query&prop=revisions&format=json&prop=info&inprop=url&titles=" );
 API.getNotes = method("POST", "/store/annotations/search");
 API.getNoteHistory = method("POST", "/api/notehistory");
-API.getActivityLog = method("POST", "/api/activitylog")
+API.getActivityLog = method("POST", "/api/activitylog");
+API.getResourcesInCorpus = method("POST", "/api/resourcesincorpus");

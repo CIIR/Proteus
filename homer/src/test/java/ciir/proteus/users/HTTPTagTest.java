@@ -211,6 +211,7 @@ public class HTTPTagTest {
     put.set("resource", res1);
     put.set("rating", 2);
     put.set("corpus", 1);
+    put.set("queryid", 1);
     put.set("corpusName", "test corpus 1");
 
     assertOK(HTTPUtil.postJSON(env.url, "/api/rateresource", put));

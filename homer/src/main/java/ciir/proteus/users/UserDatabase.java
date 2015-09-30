@@ -7,6 +7,7 @@ import ciir.proteus.users.error.NoTuplesAffected;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,8 @@ public interface UserDatabase {
      */
     public boolean validSession(Credentials creds);
 
+    public Connection getConnection();
+
     public void checkSession(Credentials creds) throws DBError;
 
     public List<String> getTags(Credentials creds, String resource) throws DBError;
@@ -89,9 +92,11 @@ public interface UserDatabase {
 
     public Parameters getResourceRatings(String resource, Integer corpusID);
 
-    public void upsertResourceRating(Credentials creds, String resource, Integer userID, Integer corpusID, Integer rating) throws DBError;
+    public void upsertResourceRating(Credentials creds, String resource, Integer userID, Integer corpusID, Integer rating, Integer queryid) throws DBError;
 
     public List<String> getResourcesForCorpus(Integer userid, Integer corpusID, Integer numResults, Integer startIndex) throws DBError;
+
+    public Parameters getResourcesForCorpusByQuery(Integer corpusID) throws DBError;
 
     public List<String> getAllResourcesForCorpus(Integer userid, Integer corpusID) throws DBError;
 
@@ -104,4 +109,10 @@ public interface UserDatabase {
     public void deleteNote(Credentials creds, Integer id, Integer corpusID) throws DBError;
 
     public Parameters getNotesForCorpus(Integer corpusID) throws DBError, IOException;
+
+    public Integer insertQuery(Credentials creds, Integer corpusID, String query, String kind) throws DBError;
+
+    public void insertQueryResourceXref(Credentials creds, String resource, Integer corpusID, Integer queryid) throws DBError;
+
+
 }

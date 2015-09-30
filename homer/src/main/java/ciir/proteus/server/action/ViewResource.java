@@ -1,16 +1,22 @@
 package ciir.proteus.server.action;
 
 import ciir.proteus.server.HTTPError;
+import ciir.proteus.system.DocumentAnnotator;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
+import ciir.proteus.util.ListUtil;
 import ciir.proteus.util.logging.ClickLogHelper;
 import ciir.proteus.util.logging.LogHelper;
 import ciir.proteus.util.logging.ViewResourceLogData;
 import org.apache.logging.log4j.LogManager;
 import org.lemurproject.galago.core.parse.Document;
+import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,6 +68,11 @@ public class ViewResource implements JSONHandler {
     }
     response.put("metadata", metadata);
     response.put("text", doc.text);
+
+    // get ratings
+    Parameters ratings = Parameters.create();
+    ratings = system.userdb.getResourceRatings(doc.name, reqp.getInt("corpusID"));
+    response.copyFrom(ratings);
 
     return response;
   }

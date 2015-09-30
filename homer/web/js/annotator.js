@@ -828,6 +828,7 @@ Annotator = (function(superClass) {
   extend(Annotator, superClass);
 
   Annotator.prototype.events = {
+    ".annotator-mzsearch button click": "onMZSearchClick",
     ".annotator-adder button click": "onAdderClick",
     ".annotator-adder button mousedown": "onAdderMousedown",
     ".annotator-hl mouseover": "onHighlightMouseover",
@@ -835,7 +836,8 @@ Annotator = (function(superClass) {
   };
 
   Annotator.prototype.html = {
-    adder: '<div class="annotator-adder"><button>' + _t('Annotate') + '</button></div>',
+    adder: '<div class="annotator-adder"><button>' + _t('Annotate') + '</button></div>' +
+      '<div  class=" annotator-mzsearch"><button>Search</button></div>',
     wrapper: '<div class="annotator-wrapper"></div>'
   };
 
@@ -861,6 +863,7 @@ Annotator = (function(superClass) {
     this.onDeleteAnnotation = bind(this.onDeleteAnnotation, this);
     this.onEditAnnotation = bind(this.onEditAnnotation, this);
     this.onAdderClick = bind(this.onAdderClick, this);
+    this.onMZSearchClick = bind(this.onMZSearchClick, this);
     this.onAdderMousedown = bind(this.onAdderMousedown, this);
     this.onHighlightMouseover = bind(this.onHighlightMouseover, this);
     this.checkForEndSelection = bind(this.checkForEndSelection, this);
@@ -962,6 +965,7 @@ Annotator = (function(superClass) {
   };
 
   Annotator.prototype.destroy = function() {
+
     var base, idx, name, plugin, ref1;
     Annotator.__super__.destroy.apply(this, arguments);
     $(document).unbind({
@@ -1236,6 +1240,7 @@ Annotator = (function(superClass) {
       }
     }
     if (event && this.selectedRanges.length) {
+
       return this.adder.css(Util.mousePosition(event, this.wrapper[0])).show();
     } else {
       return this.adder.hide();
@@ -1262,13 +1267,36 @@ Annotator = (function(superClass) {
   };
 
   Annotator.prototype.onAdderMousedown = function(event) {
+
     if (event != null) {
       event.preventDefault();
     }
     return this.ignoreMouseup = true;
   };
 
-  Annotator.prototype.onAdderClick = function(event) {
+
+  Annotator.prototype.onMZSearchClick = function(event) {
+
+  //  console.log(event)
+ //   this.checkForStartSelection(event)
+    var text = "";
+    if (window.getSelection) {
+      text = window.getSelection().toString();
+    } else if (document.selection && document.selection.type != "Control") {
+      text = document.selection.createRange().text;
+    }
+    console.log(text);
+
+    this.adder.hide();
+
+ //   alert("Search for: '" + text + "'")
+    // TODO need to test cross browser
+    // assume they're searching for a phrase
+  window.open("index.html?action=search&kind=ia-books&q=\"" + text.trim() + "\"")
+  };
+
+    Annotator.prototype.onAdderClick = function(event) {
+
     var annotation, cancel, cleanup, position, save;
     if (event != null) {
       event.preventDefault();

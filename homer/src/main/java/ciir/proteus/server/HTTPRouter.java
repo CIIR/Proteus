@@ -48,6 +48,7 @@ public class HTTPRouter implements WebHandler {
     private final StaticContentHandler staticContent;
     private final JSONHandler getActivityLog;
     private final ProteusSystem proteus;
+    private final JSONHandler getResourcesInCorpus;
 
     public HTTPRouter(ProteusSystem proteus) {
         this.proteus = proteus;
@@ -76,7 +77,7 @@ public class HTTPRouter implements WebHandler {
         getNotesForResource = new GetNotesForResource(proteus);
         getNotesHistory = new GetNotesHistory(proteus);
         getActivityLog = new GetActivityLog(proteus);
-
+        getResourcesInCorpus = new GetResourcesInCorpus(proteus);
     }
 
     // handle http requests
@@ -138,6 +139,8 @@ public class HTTPRouter implements WebHandler {
                 handler = updateUserSettings;
             } else if (POST && path.equals("/api/resourcesforlabels")) {
                 handler = resourcesforlabels;
+            } else if (POST && path.equals("/api/resourcesincorpus")) {
+                handler = getResourcesInCorpus;
             } else if (POST && path.equals("/api/rateresource")) {
                 handler = rateResource;
             } else if (POST && path.equals("/api/notehistory")) {

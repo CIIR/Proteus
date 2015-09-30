@@ -61,10 +61,24 @@ public class H2Database implements UserDatabase {
     }
   }
 
-  private void initDB() {
+  // this is public so we can use it when testing.
+  // NOTE the caller is responsible for closing the connection.
+  public Connection getConnection(){
     Connection conn = null;
     try {
       conn = cpds.getConnection();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+
+    return conn;
+  }
+
+  private void initDB() {
+    Connection conn = null;
+    try {
+      conn = getConnection();
       // NOTE: H2 will automatically create an index on any foreign keys.
       conn.createStatement().executeUpdate("create table IF NOT EXISTS users (ID BIGINT NOT NULL IDENTITY, EMAIL VARCHAR(" + Users.UserEmailMaxLength + ") NOT NULL, settings VARCHAR(200) NOT NULL DEFAULT '{ \"num_entities\" : 10 }', PRIMARY KEY (ID))");
       conn.createStatement().executeUpdate("create unique index IF NOT EXISTS user_uniq_email_idx on users(email)");
@@ -85,7 +99,12 @@ public class H2Database implements UserDatabase {
               " data VARCHAR(2000) NOT NULL, ins_user BIGINT NOT NULL, ins_dttm DATETIME NOT NULL, upd_user BIGINT, upd_dttm DATETIME, " +
               " PRIMARY KEY (ID), foreign key (corpus_id) references corpora(id))");
       conn.createStatement().executeUpdate("create index IF NOT EXISTS notes_res_idx on notes(resource)");
-
+      conn.createStatement().executeUpdate("create sequence IF NOT EXISTS query_seq");
+      conn.createStatement().executeUpdate("create table IF NOT EXISTS queries (ID BIGINT NOT NULL, CORPUS_ID BIGINT NOT NULL, query VARCHAR(500) NOT NULL, kind VARCHAR(10) NOT NULL, PRIMARY KEY(ID))");
+      conn.createStatement().executeUpdate("create unique index IF NOT EXISTS query_idx on queries(corpus_id, query, kind)");
+      conn.createStatement().executeUpdate("create table IF NOT EXISTS query_res_xref (query_id BIGINT NOT NULL, CORPUS_ID BIGINT NOT NULL, resource VARCHAR(256) NOT NULL)");
+  // TODO ??? use FKs for ^^^ this?
+      conn.createStatement().executeUpdate("create unique index IF NOT EXISTS query_res_xref_idx on query_res_xref(query_id, corpus_id, resource)");
 
     } catch (SQLException e) {
       e.printStackTrace();
@@ -108,7 +127,7 @@ public class H2Database implements UserDatabase {
   public void register(String username) throws NoTuplesAffected, DuplicateUser {
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
       int numRows = conn.createStatement().executeUpdate("insert into users (email) values (LOWER('" + username + "'))");
 
       if (numRows == 0) {
@@ -135,7 +154,7 @@ public class H2Database implements UserDatabase {
     Integer userid = -1;
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
       // get the user id
       ResultSet results = conn.createStatement().executeQuery("select id, settings from users where email=LOWER('" + username + "')");
 
@@ -182,7 +201,7 @@ public class H2Database implements UserDatabase {
     }
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
       int numRows = conn.createStatement().executeUpdate("delete from sessions where user_id=" + creds.userid + " and session='" + creds.token + "'");
 
       if (numRows == 0) {
@@ -208,7 +227,7 @@ public class H2Database implements UserDatabase {
     boolean found = false;
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
       ResultSet results = conn.createStatement().executeQuery("select count(*) from users where email=LOWER('" + username + "')");
 
       if (results.next()) {
@@ -229,7 +248,7 @@ public class H2Database implements UserDatabase {
     boolean found = false;
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
       ResultSet results = conn.createStatement().executeQuery("select (user_id,session) from sessions where user_id=" + creds.userid + " and session='" + creds.token + "'");
 
       if (results.next()) {
@@ -268,7 +287,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
 
       PreparedStatement sql = conn.prepareStatement("select label_type || ':' || label_value from tags where user_id=? and resource=?");
 
@@ -313,7 +332,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
 
       PreparedStatement sql = conn.prepareStatement("SELECT label_type || ':' || label_value AS tag, user_id || ':' || rating  || ':' || NVL(comment, '') AS user_rating FROM tags WHERE resource = ? ORDER by resource, tag");
       for (String resource : resources) {
@@ -377,7 +396,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
 
       PreparedStatement sql = conn.prepareStatement("SELECT user_id, label_type || ':' || label_value AS label, rating || ':' || NVL(comment, '') AS user_data FROM tags WHERE resource LIKE ? GROUP BY user_id, label, user_data ORDER BY user_id, label");
       for (String resource : resources) {
@@ -447,7 +466,7 @@ public class H2Database implements UserDatabase {
     }
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
       int numRows = conn.createStatement().executeUpdate("delete from tags where user_id= " + creds.userid + " and resource='" + resource + "' and label_type='" + labelType + "' and label_value='" + labelValue + "'");
 
       if (numRows == 0) {
@@ -470,7 +489,7 @@ public class H2Database implements UserDatabase {
     String labelParts[] = tag.split(":");
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
       PreparedStatement sql = conn.prepareStatement("insert into tags (user_id,resource,label_type, label_value, rating, comment) values (?,?,?,?,?,?)");
 
       sql.setInt(1, creds.userid);
@@ -504,7 +523,7 @@ public class H2Database implements UserDatabase {
     String labelParts[] = tag.split(":");
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
       PreparedStatement sql = conn.prepareStatement("UPDATE tags SET rating = ?, comment = ? WHERE user_id = ? AND resource = ? AND label_type = ? AND label_value = ?");
 
       sql.setInt(1, rating);
@@ -541,7 +560,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
 
       List<String> resources = new ArrayList<>();
       Object[] objLabels = new Object[labels.size()];
@@ -601,7 +620,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
 
       PreparedStatement sql = conn.prepareStatement("select id, email from users");
 
@@ -625,7 +644,7 @@ public class H2Database implements UserDatabase {
     Connection conn = null;
     Integer id = -1;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
 
       // make sure we're not a duplicate
       ResultSet results = conn.createStatement().executeQuery("select count(*) from corpora where LOWER(corpus)=LOWER('" + corpus + "')");
@@ -666,7 +685,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
 
       PreparedStatement sql = conn.prepareStatement("select id, corpus from corpora order by corpus");
     //  List<String> corpora = new ArrayList<>();
@@ -700,7 +719,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
       PreparedStatement sql = conn.prepareStatement("UPDATE users SET settings = ? WHERE id = ?");
 
       sql.setString(1, settings);
@@ -727,7 +746,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
 
       PreparedStatement sql = conn.prepareStatement("SELECT user_id, email, rating FROM resource_ratings, users WHERE resource=? AND users.id = resource_ratings.user_id AND rating != 0 AND corpus_id = ? ");
 
@@ -771,13 +790,13 @@ public class H2Database implements UserDatabase {
 
   }
 
-  public void upsertResourceRating(Credentials creds, String resource, Integer userID, Integer corpusID, Integer rating) throws DBError {
+  public void upsertResourceRating(Credentials creds, String resource, Integer userID, Integer corpusID, Integer rating, Integer queryid) throws DBError {
     checkSession(creds);
 
     Connection conn = null;
 
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
       PreparedStatement sql = conn.prepareStatement("INSERT INTO resource_ratings (user_id, corpus_id, resource, rating) VALUES(?, ?, ?, ?)");
 
       sql.setInt(1, userID);
@@ -812,9 +831,102 @@ public class H2Database implements UserDatabase {
         throw new RuntimeException(e);
       }
     } finally {
+      // tie the resource the the query
+      insertQueryResourceXref(creds, resource, corpusID, queryid );
       attemptClose(conn);
     }
   }
+
+
+// ??? want to include the query id in this - should probably drive the select from the query/resource xref.
+  // ?? eihter way, think we're going to  have to return Parameters
+public Parameters getResourcesForCorpusByQuery(Integer corpusID ) throws DBError {
+
+  Connection conn = null;
+  try {
+    conn = getConnection();
+
+    Parameters ret = Parameters.create();
+    ResultSet results = null;
+
+      PreparedStatement sql = conn.prepareStatement("SELECT LOWER(query) AS q, r.resource AS res, u.email " +
+              "FROM queries q, " +
+              "QUERY_RES_XREF x, " +
+              "resource_ratings r, " +
+              "users u " +
+              "WHERE " +
+              "rating > 0 " +
+              "AND x.query_id = q.id " +
+              "AND x.resource = r.resource " +
+              "AND r.corpus_id = q.corpus_id " +
+              "AND r.corpus_id = x.corpus_id " +
+              "AND r.corpus_id = ? " +
+              "AND r.user_id = u.id " +
+              "UNION " +
+              "SELECT  'none - added via a note', resource, u.email " +
+              "FROM notes n, " +
+              "users u " +
+              "WHERE n.corpus_id = ? " +
+              "AND n.ins_user = u.id " +
+              "ORDER BY q, res");
+
+    sql.setInt(1, corpusID);
+    sql.setInt(2, corpusID);
+
+    results = sql.executeQuery();
+
+    List<String> resources = new ArrayList<String>();
+    List<Parameters> queryList = new ArrayList<Parameters>();
+    List<String> users = new ArrayList<String>();
+
+    String currentQuery = "";
+    // GROUP them by query
+
+    // get the first record
+    if (results.next()){
+      currentQuery = results.getString(1) ;
+      resources.add(results.getString(2));
+    }
+
+    while (results.next()) {
+      String q = results.getString(1);
+
+      if (!q.equals(currentQuery)){
+        Parameters tmp = Parameters.create();
+        tmp.put("query", currentQuery);
+        tmp.put("resources", resources);
+        queryList.add(tmp);
+        currentQuery = q;
+        resources = new ArrayList<String>();
+        resources.add(results.getString(2));
+      } else {
+        resources.add(results.getString(2));
+      }
+
+    } // end loop through results
+
+    // save the last set
+    if (currentQuery.length() > 0){
+      Parameters tmp = Parameters.create();
+      tmp.put("query", currentQuery);
+      tmp.put("resources", resources);
+      queryList.add(tmp);
+    }
+
+    if (queryList.size() > 0){
+      ret.set("queries", queryList);
+    }
+    results.close();
+
+    return ret;
+
+  } catch (SQLException e) {
+    throw new RuntimeException(e);
+  } finally {
+    attemptClose(conn);
+  }
+}
+
 
   // TODO what type of functionality do we want? retrieval just for resources I rated? Only average ratings > 0? Any resource with a
   // positive rating?
@@ -823,24 +935,25 @@ public class H2Database implements UserDatabase {
     return getResourcesForCorpus(userid, corpusID, -1, -1);
   }
 
-  public List<String> getResourcesForCorpus(Integer userid, Integer corpusID, Integer numResults, Integer startIndex) throws DBError {
+ public List<String> getResourcesForCorpus(Integer userid, Integer corpusID, Integer numResults, Integer startIndex) throws DBError {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
 
       List<String> resources = new ArrayList<>();
       ResultSet results = null;
 
+      // NOTE: we ignore any resources that have ONLY -1 ratings. If ANYONE said it belongs (+1) we'll include it.
       if (numResults == -1) {
-        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM resource_ratings WHERE corpus_id = ? AND rating != 0 " +
+        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM resource_ratings WHERE corpus_id = ? AND rating > 0 " +
                 " UNION SELECT DISTINCT resource FROM notes WHERE corpus_id = ? ORDER BY resource");
         sql.setInt(1, corpusID);
         sql.setInt(2, corpusID);
         results = sql.executeQuery();
       } else {
         // we need to ORDER BY to ensure the result sets will always be in the same order.
-        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM resource_ratings WHERE corpus_id = ? AND rating != 0 " +
+        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM resource_ratings WHERE corpus_id = ? AND rating > 0 " +
                 " UNION SELECT DISTINCT resource FROM notes WHERE corpus_id = ? ORDER BY resource LIMIT ? OFFSET ?");
         sql.setInt(1, corpusID);
         sql.setInt(2, corpusID);
@@ -878,7 +991,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
 
       ResultSet results = conn.createStatement().executeQuery("SELECT note_seq.nextval");
 
@@ -916,7 +1029,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
       PreparedStatement sql = conn.prepareStatement("UPDATE notes SET data = ?, upd_user = ?, upd_dttm = NOW() WHERE id = ? AND corpus_id = ?");
 
       sql.setString(1, data);
@@ -943,7 +1056,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
 
       PreparedStatement sql = conn.prepareStatement("SELECT data FROM notes WHERE resource=? AND corpus_id = ?");
 
@@ -976,7 +1089,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
       PreparedStatement sql = conn.prepareStatement("DELETE FROM notes WHERE id = ? AND corpus_id = ?");
       sql.setInt(1, id);
       sql.setInt(2, corpusID);
@@ -1001,7 +1114,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
 
       PreparedStatement sql = conn.prepareStatement("SELECT GREATEST(upd_dttm, ins_dttm) as dttm, data FROM notes WHERE corpus_id = ? ORDER BY dttm  DESC");
 
@@ -1027,6 +1140,98 @@ public class H2Database implements UserDatabase {
     return results;
   }
 
+  public Integer insertQuery(Credentials creds, Integer corpusID, String query, String kind) throws DBError {
+
+    if (query.length() == 0)
+      return -1;
+
+    query = query.toLowerCase().trim();
+
+    //checkSession(creds);
+
+    Integer id = -1;
+
+    Connection conn = null;
+    try {
+      conn = getConnection();
+
+      // have we already seen this query?
+      try{
+        PreparedStatement sql = conn.prepareStatement("select id from queries where corpus_id = ? AND query = ? AND kind = ?");
+        sql.setInt(1, corpusID);
+        sql.setString(2, query);
+        sql.setString(3, kind);
+
+        ResultSet tuples = sql.executeQuery();
+        while (tuples.next()) {
+          id = tuples.getInt(1);
+        }
+        tuples.close();
+
+      } catch (SQLException e1){
+        throw new RuntimeException(e1);
+      }
+
+      // if we found an id, we're done
+      if (id > 0){
+        return id;
+      }
+
+      // else we'll insert it
+      ResultSet results = conn.createStatement().executeQuery("SELECT query_seq.nextval");
+
+      if (results.next()) {
+        id = results.getInt(1);
+      }
+      results.close();
+
+      PreparedStatement sql = conn.prepareStatement("INSERT INTO queries (id, corpus_id, query, kind) VALUES (?, ?, ?, ?)");
+
+      sql.setInt(1, id);
+      sql.setInt(2, corpusID);
+      sql.setString(3, query);
+      sql.setString(4, kind);
+
+      int numRows = sql.executeUpdate();
+
+      assert (numRows == 1);
+
+    } catch (SQLException e) {
+        throw new RuntimeException(e);
+     } finally {
+      attemptClose(conn);
+    }
+
+    return(id);
+
+  }
+
+  public void insertQueryResourceXref(Credentials creds, String resource, Integer corpusID, Integer queryid) throws DBError{
+
+    Connection conn = null;
+
+    try {
+      conn = getConnection();
+      PreparedStatement sql = conn.prepareStatement("INSERT INTO query_res_xref (query_id, corpus_id, resource) VALUES(?, ?, ?)");
+
+      sql.setInt(1, queryid);
+      sql.setInt(2, corpusID);
+      sql.setString(3, resource);
+
+      int numRows = sql.executeUpdate();
+
+      assert (numRows == 1);
+    } catch (SQLException e) {
+
+      // duplicates are OK
+      if (e.getErrorCode() !=  ErrorCode.DUPLICATE_KEY_1) {
+        e.printStackTrace();
+        throw new RuntimeException(e);
+      }
+    } finally {
+      attemptClose(conn);
+    }
+  }
 
   // "borrowed" from the C3P0 examples: http://sourceforge.net/projects/c3p0/files/c3p0-src/c3p0-0.9.2.1/
   static void attemptClose(Connection o) {

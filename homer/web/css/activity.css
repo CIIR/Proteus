@@ -1,0 +1,66 @@
+
+#filter-user{
+    color: black;
+}
+#activity {
+    margin: 50px;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+
+}
+
+#activity-body {
+
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    overflow-y: scroll;
+}
+
+#activity-header {
+    background-color: blue;
+    color: white;
+    padding: 10px;
+}
+
+.activity-row{
+    margin : 5px;
+}
+
+.activity-login {
+    background-color: greenyellow;
+}
+
+.activity-logout {
+    background-color: indianred;
+}
+
+.activity-search {
+    background-color: yellow;
+}
+
+.activity-results{
+    background-color: powderblue;
+}
+
+.disconnect-msg {
+    background-color: red;
+    color: white;
+}
+
+.activity-rate-res {
+    background-color: mintcream;
+}
+
+
+.connect-msg {
+    background-color: green;
+    color: white;
+}
+
+.activity-add-note, .activity-del-note, .activity-upd-note{
+    background-color: blanchedalmond ;
+}

@@ -70,6 +70,46 @@
 
             $(document).ready(function() {
 
+//                $(".droppable").droppable({
+//                    tolerance: "touch",
+//                    over: function (event, ui) {
+//                        // $(this).css('background-color', 'yellow');
+//                        $(this).css('visibility', 'visible');
+//                        $("#accept-dropzone").css('visibility', 'visible');
+//                        $("#reject-dropzone").css('visibility', 'visible');
+//                    },
+//                    out: function (event, ui) {
+//                        //    $(this).css('background-color', '');
+//                        $(this).css('visibility', 'hidden');
+//                        $("#accept-dropzone").css('visibility', 'hidden');
+//                        $("#reject-dropzone").css('visibility', 'hidden');
+//                    },
+//                    drop: function (event, ui) {
+//
+//                 //       ui.draggable.fadeOut();
+//
+//                        // ??? has to be a better way
+//                        var res = ui.draggable[0].id
+//                        console.log(res);
+//
+//                        $(".droppable").css('visibility', 'hidden');
+//                        if ($(this).hasClass("reject")){
+//                            console.log("Rejected!!!")
+//                            $("#rejeted-docs").html($("#rejeted-docs").html() + '* ' +res  + '<br>')
+//                            recordSwipe(res, $("#" + res).data("metadata"),$("#" + res).data("kind"), -1);
+//                        }
+//                        if ($(this).hasClass("accept")){
+//                            console.log("Accepted!!!")
+//                            $("#accpeted-docs").html($("#accpeted-docs").html() + '* ' + res + '<br>')
+//                            recordSwipe(res, $("#" + res).data("metadata"), $("#" + res).data("kind"),1);
+//                        }
+//                        // get the next result...
+//                        var prev = Model.request;
+//                        prev.skip = Model.results.length;
+//                        doSearchRequest(prev);
+//                    }
+//                });
+
                 // initImportantEntities();
                 UI.populateRecentSearches();
 
@@ -182,8 +222,10 @@
             <div class="container-fluid " id="ui">
                 <div class="row clearfix">
                     <img id="sidebar-button" src="images/sidebar_expand.png"/>
-                    <span class="col-md-4 column col-1-class"> <div id="title">Proteus</div>
-                        <a href="https://github.com/CIIR/Proteus/issues/new">Report an issue or make a suggestion</a></span>
+                    <span class="col-md-4 column col-1-class header-link"> <div id="title">Proteus</div>
+                        <a href="https://github.com/CIIR/Proteus/issues/new" target="_blank">Report an issue or make a suggestion</a>&nbsp;|&nbsp;
+                        <a href="activity.html" target="_blank">View Activity</a></span>
+
 
                     <div class="col-md-4 column right-align col-2-class">
 
@@ -192,7 +234,7 @@
 
                             <div class="input-group-btn">
                                 <button id="search-buttons" type="button" class="btn btn-default default-search-button"
-                                        tabindex="-1"><span class="glyphicon glyphicon-search"></span> Search
+                                        tabindex="-1"><span class="glyphicon glyphicon-search"></span>&nbsp;<span id="search-button-text">Search</span>
                                 </button>
                                 <button type="button" class="btn btn-default dropdown-toggle"
                                         data-toggle="dropdown" tabindex="-1">
@@ -203,7 +245,7 @@
 
                                 </ul>
                                 <span><a
-                                        href="https://docs.google.com/document/d/1ZtuJf30qVRvfgs5wrdFGdOpp5OXMAOJql4LWhiOqluQ/edit#bookmark=id.lco22umrxc9i"
+                                        href="https://docs.google.com/document/d/1sdr9nJoeo-V360IWf8nOUJ1VnomI1uxrOKHX5PzYahM/edit#heading=h.bqb6wxplsnzv"
                                         target="_blank" id="search-help"><img src="images/help.png"></a></span>
 
                             </div>
@@ -276,6 +318,7 @@
         <div id="all-tags"></div>
 
         <div id="results-left" class="col-md-2 column">
+           <!--
             <div id="accordion">
                 <h3>Recent Searches</h3>
                 <div id="pastSearches"></div>
@@ -283,29 +326,59 @@
                 <div id="note-list"></div>
 
             </div>
+            -->
             <div id="ratings">
-                <br><br>
+
             </div>
+            <!--
+                     <div id="accpeted-docs" class="doc-list">Accepted<br></div>
+                     <div id="rejeted-docs" class="doc-list">Rejected<br></div>
+                 -->
+                     <div id="tree">
+                         <div id="empty-tree"></div>
+                     </div>
+                 </div>
+                 <!--
+                 <div id="results-right" class="col-md-10 column right-align">
+                     <div id="metadata"></div>
+                     <div id="results"></div>
+                     <div id="view-resource">
+                         <div  class="row clearfix btn" id="view-nav-top"></div>
+                         <div id="book-pages"> </div>
+                         <div class="row clearfix btn" id="view-nav-bottom"></div>
+                     </div>
+                     <div class="row clearfix ">
 
-            <div id="tree">
-                <div id="empty-tree"></div>
-            </div>
-        </div>
+                         <div id="more"></div>
+                         <div id="footer">
+                             <div id="progress"></div>
+                         </div>
+                     </div>
+                 </div>
+         -->
 
-        <div id="results-right" class="col-md-10 column right-align">
 
-            <div id="results"></div>
+              <div  id="results-right" class="col-md-10 column  ">
 
-            <div class="row clearfix ">
+                <div id="metadata"></div>
+                <div id="results">
 
-                <div id="more"></div>
-                <div id="footer">
-                    <div id="progress"></div>
+
+
                 </div>
-            </div>
-        </div>
 
-        <!-- modal dialog to get a new corpus' name -->
+                <div id="view-resource"></div>
+                <div class="row clearfix ">
+
+                    <div id="more"> </div>
+                    <div id="footer">
+                        <div id="progress"></div>
+                    </div>
+                </div>
+
+            </div>
+
+               <!-- modal dialog to get a new corpus' name -->
         <div class="modal fade" id="newCorpusDialog" tabindex="-1" role="dialog" aria-labelledby="newCorpusLabel"
              aria-hidden="true">
             <div class="modal-dialog">

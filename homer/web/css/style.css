@@ -82,11 +82,7 @@
 
 }
 
-#Xui-search {
-    width: 70%;
-}
-
-#title a, #title {
+.header-font, #title a, #title {
     float: left;
     margin: 0;
     vertical-align: middle;
@@ -121,8 +117,7 @@
 
 .result {
     /*border-bottom: 1px solid grey;*/
-    padding-left: 20pt;
-    padding-right: 20pt;
+    padding : 20pt;
 }
 
 .result .preview {
@@ -271,9 +266,18 @@ body {
     color: white;
     background-color: orange;
 }
+
+#cb-per-label{
+    color: white;
+    background-color: orange;
+}
 .per-off {
  }
 .org {
+    color: white;
+    background-color: skyblue;
+}
+#cb-org-label {
     color: white;
     background-color: skyblue;
 }
@@ -283,6 +287,11 @@ body {
     color: white;
     background-color: tan;
 }
+#cb-loc-label {
+    color: white;
+    background-color: tan;
+}
+
 .loc-off {
 }
 .pageNavigation{
@@ -297,9 +306,16 @@ body {
     float: right;
 }
 
-.result:hover{
-    background: lightyellow;
+.book-result:hover{
+    background-color: lightyellow !important;
 }
+.page-result:hover{
+    background-color: aliceblue !important;
+}
+.page-result{
+    margin-left: 50px;
+}
+
 /* enable scrollbars */
 #pastSearches{
     height:30%;
@@ -501,80 +517,11 @@ body {
     text-align: left;
 }
 
-
-#activity {
-    margin: 50px;
-    height: 100%;
-    top: 0;
-    bottom: 0;
-    right: 0;
-
-}
-
-#activity-body {
-
-    height: 100%;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    overflow-y: scroll;
-}
-
-#activity-header {
-    background-color: blue;
-    color: white;
-    padding: 10px;
-}
-
-.activity-row{
-    margin : 5px;
-}
-
-.activity-login {
-    background-color: greenyellow;
-}
-
-.activity-login-off {
-}
-
-.activity-logout {
-    background-color: indianred;
-}
-.activity-logout-off {
- }
-
-.activity-search {
-    background-color: yellow;
-    visibility: visible;
-}
-
-.activity-search-off {
-
-    visibility: hidden;
-}
-
-.activity-results{
-    background-color: powderblue;
-}
-.activity-results-off{
-
-}
-
-.disconnect-msg {
-    background-color: red;
-    color: white;
-}
-
-
-.connect-msg {
-    background-color: green;
-    color: white;
-}
-
 #loading-msg{
     background-color: yellow;
     text-align: center;
 }
+
 
 .acm-text {
 
@@ -589,3 +536,104 @@ body {
 .hide-me{
     dispaly: none;
 }
+
+
+.droppable {
+    z-index: 999;
+}
+.accept {
+    /*
+    width: 100px;
+    height: 100px;
+*/
+
+    color: green;
+    margin: 10px auto;
+    /*  float: right;
+    text-align: left;
+     visibility: hidden;
+       background: grey;  visibility: hidden; */
+}
+
+.grey {
+    color: grey !important;
+}
+
+.reject {
+    /*
+    width: 100px;
+    height: 100px;
+*/
+    color: red;
+    margin: 10px auto;
+    /*  float: left;
+    /*  background: grey;  visibility: hidden;
+      visibility: hidden;*/
+}
+
+.glyphicon.glyphicon-ok-circle {
+    font-size: 55px;
+}
+.glyphicon.glyphicon-ok-circle:hover {
+    font-size: 75px;
+    color: green !important;
+    cursor: hand;
+}
+
+.glyphicon.glyphicon-remove-circle {
+    font-size: 55px;
+
+}
+
+.glyphicon.glyphicon-remove-circle:hover {
+    font-size: 75px;
+    color: red !important;
+    cursor: hand;
+}
+
+
+.glyphicon.glyphicon-ok {
+    color: green;
+}
+
+.glyphicon.glyphicon-remove {
+    color: red;
+}
+
+.doc-list{
+    border: solid;
+    border-color: #0000ee;
+    margin: 10px;
+}
+
+#tree {
+    visibility: hidden;
+}
+
+.left-align{
+    text-align: left;
+}
+
+.search-pages-link {
+    text-align: left;
+    font-size: large;
+}
+
+#accept-dropzone-col, #reject-dropzone-col{
+    height: 100%;
+}
+#corpus-docs ul {
+    padding-left: 0px !important;
+    margin-left: 5px !important;
+}
+#corpus-docs li {
+    padding-left: 0px !important;
+    margin-left: 20px !important;
+}
+
+.header-link a, .header-link a:visited {
+    color: royalblue;
+}
+.header-link a:hover{
+     color: white;
+ }

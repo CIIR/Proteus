@@ -63,6 +63,20 @@ var page = {
 };
 var doSearchRequest = function (args) {
 
+  if (_.isUndefined(Model[args.kind])){
+    Model[args.kind] = {};
+  }
+
+  // TODO - big hack, if we have a workingSetQuery we know we're searching for pages
+  // belonging to a book so we want the results to go under that book
+  if (_.isUndefined(args.workingSetQuery)){
+    resultsDiv = $("#results");
+  } else {
+    // workingSetQuery is the is the archiveid field followed by the book, we just want the book id
+    resultsDiv = $("#page-results-" + args.workingSetQuery.split('archiveid:')[1]);
+  }
+
+
   disableAutoRetrieve(); // prevent double requests
 
   var tmpSettings = getCookie("settings");
@@ -100,9 +114,13 @@ var doSearchRequest = function (args) {
 
   // if we didn't ask for more
   if (!args.skip || args.skip === 0) {
-    Model.clearResults();
+    //Model.clearResults();
+    clearModelResults(Model[args.kind])
     UI.clearResults();
-    updateURL(args); // modify URL if possible
+    // don't update the URL if we're getting pages for a book
+    if (_.isUndefined(args.workingSetQuery)) {
+      updateURL(args); // modify URL if possible
+    }
   }
 
   var userName = getCookie("username");
@@ -142,8 +160,8 @@ var doSearchRequest = function (args) {
   }
   $("#more").html('<img src="/images/more-loader.gif"\>');
 
-  Model.request = actualArgs;
-  console.log(Model.request);
+  Model[args.kind].request = actualArgs;
+  console.log(Model[args.kind].request);
 
   UI.showProgress("Search Request sent to server!");
   API.action(actualArgs, onSearchSuccess, function (req, status, err) {
@@ -160,38 +178,56 @@ var doSearchRequest = function (args) {
  * This gets called with the response from JSONSearch
  */
 var onSearchSuccess = function (data) {
+
   $("#per-cloud").hide();
   UI.clearError();
 
-  var userID = getCookie("userid");
+   var userID = getCookie("userid");
   $("#more").html(""); // clear progress animation
   console.log(data);
 
   // mark up results with rank and kind
-  Model.query = data.request.q;
-  Model.queryType = data.queryType;
+  Model[data.request.kind].query = data.request.q;
+  Model[data.request.kind].queryType = data.queryType;
+  Model[data.request.kind].queryid = data.queryid;
 
-  var rank = Model.results.length + 1;
+  var rank = Model[data.request.kind].results.length + 1;
   var newResults = _(data.results).map(function (result) {
     result.viewKind = data.request.viewKind || data.request.kind;
     result.kind = data.request.kind;
     result.rank = rank++;
 
-    ratingsJSON.document[result.name] = [];
+    ratingsJSON.document[result.name] = {};
     // Loop through ratings
     _.forEach(result.ratings, function (rating) {
-      ratingsJSON.document[result.name].push({"user": rating.user, "rating": rating.rating + 2}); // +2 hack to keep it consistent with other ratings
+      ratingsJSON.document[result.name][rating.user] = rating.rating;
     });
+
+
+    // see if we're getting pages for a book
+    // TODO ??? kind specific logic
+    if (!_.isUndefined(data.request.workingSetQuery)){
+      // extract the book id
+      var bookid = result.name.split('_')[0];
+      var html = '<a href="#" onclick="UI.hidePages(\'' + bookid + '\');">';
+      html += '<span class="glyphicon glyphicon-collapse-up"></span>&nbsp;Hide pages (' + data.results.length + ')</a>'
+      $("#search-pages-link-" +bookid).html(html)
+      $("#search-pages-link-" +bookid).data("num_results", data.results.length);
+    }
 
     return result;
   }).value();
 
   // update the model
-  Model.results = _(Model.results).concat(data.results).value();
+  Model[data.request.kind].results = _(Model[data.request.kind].results).concat(data.results).value();
 
   // don't show results if empty
   if (_.isEmpty(data.results)) {
-    UI.showProgress("No results found for '" + data.request.q + "'");
+    if (data.request.skip > 0){
+      UI.showProgress("No more results for '" + data.request.q + "'");
+    } else {
+      UI.showProgress("No results found for '" + data.request.q + "'");
+    }
     return;
   }
   var usingLabels = false;
@@ -214,36 +250,48 @@ var onSearchSuccess = function (data) {
     termLen = data.queryTerms.length;
 
   // clear out previous query terms
-  Model.queryTerms = [];
+  Model[data.request.kind].queryTerms = [];
   for (var i = 0; i < termLen; i++) {
-    Model.queryTerms.push(data.queryTerms[i].toLowerCase());
+    Model[data.request.kind].queryTerms.push(data.queryTerms[i].toLowerCase());
   }
-  UI.appendResults(Model.queryTerms, newResults);
+  UI.appendResults(Model[data.request.kind].queryTerms, newResults);
 
   // if we searched by labels or corpus, we returned EVERYTHING so we
   // don't re-enable the auto-retrieve
-  if (usingLabels === false && Model.request.action != "search-corpus")
+  if (usingLabels === false && Model[data.request.kind].request.action != "search-corpus") {
+    // ??? if we're expanding pages for a book, this happens TOO SOON, the pages haven't rendered
+    // yet so the scroll bar size is wrong
     enableAutoRetrieve();
+  }
 
   setUpMouseEvents(); // TODO : only want to do this once
 
 };
 
 
-var getPageHTML = function (text, pageID, pageNum) {
+var renderBookPageHTML = function (text, pageID, pageNum, el) {
   var pgImage = pageImage(pageID, pageNum);
   var pgTxt = processTags(text);
-  return '<div class="book-page row clearfix ">' +
-          '<div id="' + getNotesID(pageID, pageNum) + '" class="book-text col-md-5 column left-align">' + pgTxt + '</div>' +
-          '<div  class="page-image col-md-5 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img src="' + pgImage + '"></a></div>' +
-          '</div>';
+  var id = getBookID(pageID, pageNum);
 
+  el.html('<div class="book-page row clearfix ">' +
+          '<div class="col-md-2 column left-align" ><span id="' + id  + '-voting-buttons"></span><span id="' + id + '-user-ratings-w-names"></span></div>' +
+          '<div id="' +  getNotesID(pageID, pageNum)  + '" class="book-text col-md-4 column left-align">' + pgTxt + '</div>' +
+          '<div  class="page-image col-md-4 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img src="' + pgImage + '"></a></div>' +
+          '</div>');
+
+
+    setUserRatingsHTML(id);
+    setVoteHTML(id);
 };
+
+
 var doViewRequest = function (args) {
   UI.showProgress("View request sent to server!");
 
   API.action(args,
           function (args) {
+            updateRatings(args);
             if (args.request.kind == 'article') {
               onViewArticleSuccess(args);
             } else if (args.request.kind == 'ia-pages') {
@@ -260,6 +308,9 @@ var doViewRequest = function (args) {
 };
 // TODO : should be in arcive js file
 var viewPrevPageSuccess = function (args) {
+
+  updateRatings(args);
+
   if (args.found == false) {
     // get the prior page
     page.previous -= 1;
@@ -267,12 +318,18 @@ var viewPrevPageSuccess = function (args) {
     return;
   }
   if (!_.isUndefined(args.text)) {
-    // TODO <div> logic can go in getPageHTML
-    //      var html = '<div class="zitate" id="page-' + args.request.page_id + '-' +  args.request.page_num + '">' + getPageHTML(args.text, args.request.page_id, args.request.page_num) + '</div>';
-    var html = getPageHTML(args.text, args.request.page_id, args.request.page_num);
 
     // find the first instance of the "book-page" class and append to that:
-    $(".book-page:first").before(html);
+    var elid = "page-" + args.request.page_id + "_" +  args.request.page_num;
+    $(".book-page:first").before('<div id="' + elid+ '"></div>');
+
+    renderBookPageHTML(args.text, args.request.page_id, args.request.page_num, $("#" + elid));
+
+    // ??? whole issue with this is that we don't know where to render the page in the
+    // DOM, why not put in a placeholder THEN renderBookPageHTML can  do the substitution?????
+
+
+
     if ($(".book-page:first").height() > pageHeight && $(".book-page:first").height() < MAX_PAGE_HEIGHT) {
       pageHeight = $(".book-page:first").height();
     }
@@ -286,32 +343,20 @@ var viewPrevPageSuccess = function (args) {
   if (!isLoggedIn() || corpus == "")
     return;
 
-  var corpus = getCookie("corpus");
-  var userName = getCookie("username");
-  var userToken = getCookie("token");
-  var userID = getCookie("userid");
-  var corpusID = getCorpusID(corpus);
-  var cookieData = {
-    "userID": userID,
-    "userName": userName,
-    "userToken": userToken,
-    "corpus": corpus,
-    "corpusID": corpusID
-  }
-
-  initBookAnnotationLogic(args.request.page_id, args.request.page_num, cookieData);
-
+  initBookAnnotationLogic(args.request.page_id, args.request.page_num, true);
+  addEntitySearchLinks();
 };
 
 // We have an annotator for each page, and the filter (ProteusAnnotationFilter)
-// and the note side bar annotators apply to the whole book, we need to foward
+// and the note side bar annotators apply to the whole book, we need to forward
 // events that happen on the page to the filter and sidebar and anything that
 // happens in the sidebar has to be forwarded to the page annotator.
 
-Annotator.Plugin.NoteEvent = function () {
+Annotator.Plugin.NoteEvent = function (element, reorderAll) {
+  var plugin = {};
 
-  return {
-    pluginInit: function () {
+    plugin.pluginInit = function (){
+
       var that = this;
       this.annotator
               .subscribe("afterAnnotationCreated", function (annotation) {
@@ -326,9 +371,22 @@ Annotator.Plugin.NoteEvent = function () {
               .subscribe("annotationsLoaded", function (annotation) {
                 if (!_.isUndefined(annotation) && annotation.length > 0) {
                   noteFilterDiv.trigger("noteUpdate");
-                  // pass the element that the annotator is attached to so we
-                  // can operate on the smallest
-                  noteSideBarDiv.trigger("myannotationsLoaded", annotation[0].uri);
+                  // on the *initial* load, we can't rely on the notes coming in order. This means
+                  // that the notes in the side bar may be out of order. To fix this, as we load each
+                  // page, we'll reorder *just* that page's notes which are the last ones in the
+                  // side bar. This is a slight optimization over reordering *all* notes on each
+                  // "annotationsLoaded" message. If a book had 10 pages with 5 notes on each page,
+                  // we'll only have to reorder 50 notes as opposed to 275:
+                  // 5 + 10 + 15 + 20 + 25 + 30 + 35 + 40 + 45 + 50 = 275
+                  // In the case that we want to reorder all, we set the reordeAll flag to true. We
+                  // would want to do this in cases such as if you're in the page OCR view and you
+                  // hit the "previous page" button. That would load the notes at the bottom of the list
+                  // so we have to reorder the entire note list to get them in the correct order.
+                  if (_.isUndefined(reorderAll) || reorderAll == false){
+                    noteSideBarDiv.trigger("myannotationsLoaded", annotation[0].uri);
+                  } else {
+                    noteSideBarDiv.trigger("myannotationsLoaded", "*");
+                  }
                 }
               })
               .subscribe("annotationDeleted", function (annotation) {
@@ -343,41 +401,51 @@ Annotator.Plugin.NoteEvent = function () {
               .subscribe("myannotationDeleted", function (annotation) {
                 that.annotator.deleteAnnotation(annotation);
               });
-    }
-  }
+    };
+  return plugin;
+
 };
 
 var firstTime = true;
 
-var initBookAnnotationLogic = function (pageID, pageNum, cookieData) {
+var initBookAnnotationLogic = function (pageID, pageNum, reorder) {
 
   var el = '#' + getNotesID(pageID, pageNum);
-  initAnnotationLogic(el, cookieData);
+  initAnnotationLogic(el, reorder);
 
 };
 
-var initAnnotationLogic = function (element, cookieData) {
+var initAnnotationLogic = function (element, reorder) {
+
+  var corpus = getCookie("corpus");
+  var userName = getCookie("username");
+  var userToken = getCookie("token");
+  var userID = getCookie("userid");
+  var corpusID = getCorpusID(corpus);
 
   var ann = $(element).annotator();
   var resource = element.substring(7).toString(); // strip off "[#|.]notes-"
 
   // set up a plugin that will notify the filter when a note
   // was created or deleted.
-  ann.annotator('addPlugin', 'NoteEvent');
+  if (_.isUndefined(reorder) || reorder == false)
+    ann.annotator('addPlugin', 'NoteEvent', false);
+  else
+    ann.annotator('addPlugin', 'NoteEvent', true);
 
   ann.annotator('addPlugin', 'Store', {
 
     annotationData: {
       uri: resource,
-      userid: parseInt(cookieData.userID),
-      user: cookieData.userName,
-      token: cookieData.userToken,
-      corpus: parseInt(cookieData.corpusID),
-      corpusName: cookieData.corpus
+      userid: parseInt(userID),
+      user: userName,
+      token: userToken,
+      corpus: parseInt(corpusID),
+      corpusName: corpus
     },
     loadFromSearch: {
       'uri': resource,
-      corpus: parseInt(cookieData.corpusID)
+      corpus: parseInt(corpusID)
 
     },
     urls: {
@@ -391,8 +459,8 @@ var initAnnotationLogic = function (element, cookieData) {
 
   ann.annotator('addPlugin', 'Permissions', {
     user: {
-      id: parseInt(cookieData.userID),
-      name: cookieData.userName
+      id: parseInt(userID),
+      name: userName
     },
     showViewPermissionsCheckbox: false,
     showEditPermissionsCheckbox: false,
@@ -419,6 +487,7 @@ var initAnnotationLogic = function (element, cookieData) {
   if (firstTime) {
     firstTime = false;
     noteSideBarDiv.annotator().annotator('addPlugin', 'AnnotatorViewer');
+
     // the stock Filter only searches within the HTML element
     // it's attached to. Since we split books into pages and each
     // page has its own annotator that won't work for us. So I
@@ -433,9 +502,41 @@ var initAnnotationLogic = function (element, cookieData) {
   }
 
 
+  // TODO temp - need a better place for this (if we use it)
+  /*
+  // should be just one class
+  $(".org").draggable({
+    appendTo: "body",
+    helper: 'clone',
+    scroll: 'true',
+    refreshPositions: true
+  });
+  $(".per").draggable({
+    appendTo: "body",
+    helper: 'clone',
+    scroll: 'true',
+    refreshPositions: true
+  });
+
+  $(".loc").draggable({
+    appendTo: "body",
+    helper: 'clone',
+    scroll: 'true',
+    refreshPositions: true
+  });
+*/
+  $(".annotator-hl-test").draggable({
+    appendTo: "body",
+    helper: 'clone',
+    scroll: 'true',
+    refreshPositions: true
+  });
+
 };
 
 var viewNextPageSuccess = function (args) {
+
+  updateRatings(args);
 
   // check if we're going beyond the end. We use the "number of images"
   // from the metadata, if that's not available, we'll stop after a set
@@ -456,10 +557,12 @@ var viewNextPageSuccess = function (args) {
   if (!_.isUndefined(args.text)) {
     page.skips = 0; // reset
 
-    var html = getPageHTML(args.text, args.request.page_id, args.request.page_num);
+    var elid = "page-" + args.request.page_id + "_" +  args.request.page_num;
 
     // find the last instance of the "book-page" class and append to that:
-    $(".book-page:last").after(html);
+    $(".book-page:last").after('<div id="' + elid+ '"></div>');
+    var html = renderBookPageHTML(args.text, args.request.page_id, args.request.page_num, $("#" + elid));
+
     if ($(".book-page:last").height() > pageHeight && $(".book-page:last").height() < MAX_PAGE_HEIGHT) {
       pageHeight = $(".book-page:last").height();
     }
@@ -472,21 +575,8 @@ var viewNextPageSuccess = function (args) {
   if (!isLoggedIn() || corpus == "")
     return;
 
-  var corpus = getCookie("corpus");
-  var userName = getCookie("username");
-  var userToken = getCookie("token");
-  var userID = getCookie("userid");
-  var corpusID = getCorpusID(corpus);
-  var cookieData = {
-    "userID": userID,
-    "userName": userName,
-    "userToken": userToken,
-    "corpus": corpus,
-    "corpusID": corpusID
-  }
-
-  initBookAnnotationLogic(args.request.page_id, args.request.page_num, cookieData);
-
+  initBookAnnotationLogic(args.request.page_id, args.request.page_num);
+  addEntitySearchLinks();
 };
 
 var doPrevPageRequest = function (pageID) {
@@ -500,14 +590,16 @@ var doPrevPageRequest = function (pageID) {
   // NOTE: some pages may not exist because the original page could have been blank.
   var id = pageID + '_' + page.previous;
   var userToken = getCookie("token");
-
+  var corpus = getCookie("corpus");
+  var corpusID = getCorpusID(corpus);
   API.action({
     kind: "ia-pages",
     id: id,
     action: "view",
     token: userToken,
     page_id: pageID,
-    page_num: page.previous
+    page_num: page.previous,
+    corpusID: corpusID
   }, viewPrevPageSuccess, function (req, status, err) {
     UI.showError("ERROR: ``" + err + "``");
     throw err;
@@ -523,13 +615,16 @@ var doNextPageRequest = function (pageID) {
   // NOTE: some pages may not exist because the original page could have been blank.
   var id = pageID + '_' + page.next;
   var userToken = getCookie("token");
+  var corpus = getCookie("corpus");
+  var corpusID = getCorpusID(corpus);
   API.action({
     kind: "ia-pages",
     id: id,
     action: "view",
     token: userToken,
     page_id: pageID,
-    page_num: page.next
+    page_num: page.next,
+    corpusID: corpusID
   }, viewNextPageSuccess, function (req, status, err) {
     UI.showError("ERROR: ``" + err + "``");
     throw err;
@@ -566,7 +661,7 @@ var onViewPageSuccess = function (args) {
   metaHtml += '</table></div>';
   metadataDiv.html(metaHtml);
   var html = '';
-  //    html += '<a class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>'
+    html += '<a class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>'
   //
   //    html += '<div>[<span class="per">PERSON</span>]&nbsp;[<span class="loc">LOCATION</span>]&nbsp;[<span class="org">ORGANIZATION</span>]</div>';
   //    if (args.request.kind == 'ia-pages'){
@@ -577,9 +672,12 @@ var onViewPageSuccess = function (args) {
   var identifier = args.request.id.split('_')[0];
   var pageNum = args.request.id.split('_')[1];
 
-  var html = getPageHTML(args.text, identifier, pageNum);
+  var elid = "page-" + args.request.id;
+  $("#book-pages").html('<div id="' + elid+ '"></div>');
 
-  $("#book-pages").html(html);
+   html += renderBookPageHTML(args.text, identifier, pageNum, $("#" + elid));
+
+
   // base the page size on the first page
   pageHeight = Math.max(MIN_PAGE_HEIGHT, $(".book-text").height());
   $(".page-image").height(pageHeight);
@@ -591,20 +689,9 @@ var onViewPageSuccess = function (args) {
   if (!isLoggedIn() || corpus == "")
     return;
 
-  var corpus = getCookie("corpus");
-  var userName = getCookie("username");
-  var userToken = getCookie("token");
-  var userID = getCookie("userid");
-  var corpusID = getCorpusID(corpus);
-  var cookieData = {
-    "userID": userID,
-    "userName": userName,
-    "userToken": userToken,
-    "corpus": corpus,
-    "corpusID": corpusID
-  }
+  initBookAnnotationLogic(identifier, pageNum);
 
-  initBookAnnotationLogic(identifier, pageNum, cookieData);
+  addEntitySearchLinks();
 
   UI.showProgress("");
 
@@ -632,23 +719,11 @@ var onViewBookSuccess = function (args) {
 
   viewResourceDiv.html(html);
   viewResourceDiv.show();
+  addEntitySearchLinks();
 
   var corpus = getCookie("corpus");
   if (!isLoggedIn() || corpus == "")
     return;
-
-  var corpus = getCookie("corpus");
-  var userName = getCookie("username");
-  var userToken = getCookie("token");
-  var userID = getCookie("userid");
-  var corpusID = getCorpusID(corpus);
-  var cookieData = {
-    "userID": userID,
-    "userName": userName,
-    "userToken": userToken,
-    "corpus": corpus,
-    "corpusID": corpusID
-  }
 
   // go through the book and insert an ID attribute so we can share the notes across
   // both books and pages.
@@ -668,7 +743,7 @@ var onViewBookSuccess = function (args) {
 
   // add the annotation widget to the page with the note
   updateNoteDiv(id, pgNum);
-  initBookAnnotationLogic(id, pgNum, cookieData);
+  initBookAnnotationLogic(id, pgNum);
   el = "#" + getNotesID(id, pgNum);
 
   if (!_.isUndefined(urlParams["noteid"])) {
@@ -713,7 +788,7 @@ var onViewBookSuccess = function (args) {
 
     $.timeoutQueue.add(function () {
       $("#loading-msg").html("loading notes for page " + currentPg);
-      initBookAnnotationLogic(id, currentPg, cookieData)
+      initBookAnnotationLogic(id, currentPg)
     }, this);
 
   });
@@ -779,19 +854,19 @@ var setPageNavigation = function (pageID) {
 
 var processTags = function (text) {
   if (document.getElementById("cb-per").checked)
-    text = text.replace(perStartRegEx, "<span class=\"per\">");
+    text = text.replace(perStartRegEx, "<span class=\"per-ent per\">");
   else
-    text = text.replace(perStartRegEx, "<span class=\"per-off\">");
+    text = text.replace(perStartRegEx, "<span class=\"per-ent per-off\">");
 
   if (document.getElementById("cb-loc").checked)
-    text = text.replace(locStartRegEx, "<span class=\"loc\">");
+    text = text.replace(locStartRegEx, "<span class=\"loc-ent loc\">");
   else
-    text = text.replace(locStartRegEx, "<span class=\"loc-off\">");
+    text = text.replace(locStartRegEx, "<span class=\"loc-ent loc-off\">");
 
   if (document.getElementById("cb-org").checked)
-    text = text.replace(orgStartRegEx, "<span class=\"org\">");
+    text = text.replace(orgStartRegEx, "<span class=\"org-ent org\">");
   else
-    text = text.replace(orgStartRegEx, "<span class=\"org-off\">");
+    text = text.replace(orgStartRegEx, "<span class=\"org-ent org-off\">");
 
   text = text.replace(endRegEx, "</span>");
 

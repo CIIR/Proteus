@@ -24,7 +24,6 @@ Annotator.Plugin.ProteusAnnotationFilter = (function (superClass) {
 
   ProteusAnnotationFilter.prototype.options = {
 
-    noteEventName : "noteUpdate",
     searchArea: '#results-right',
     appendTo: 'body',
     filters: [],
@@ -57,7 +56,7 @@ Annotator.Plugin.ProteusAnnotationFilter = (function (superClass) {
     // know we need to update the list of highlights. This is needed because
     // the stock events like annotationCreated are only subscribed to within the
     // individual annotator which we do per page.
-    this.annotator.subscribe(this.options.noteEventName, this.updateHighlights);
+    this.annotator.subscribe("noteUpdate", this.updateHighlights);
     return this;
   };
 

@@ -35,7 +35,8 @@ public class DocumentAnnotator {
     int numEntities = (int) reqp.get("top_k_entities", 0);
     int corpusID = (int) reqp.get("corpus", -1);
 
-    List<String> names = RetrievalUtil.names(results);
+    List<String> names =   RetrievalUtil.names(results);
+
 
     // retrieve snippets if requested AND we have a query
     if (snippets && query != null) {

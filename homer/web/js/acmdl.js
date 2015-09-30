@@ -25,11 +25,18 @@ resultRenderers["article"] = function(queryTerms, result, resDiv) {
         url_proc = url_proc + "citation.cfm?id=" + encodeURIComponent(procid);
     }
 
-    var html = '<div class="result"><table>';
+    var html = '<table>';
 
     html += '<tr>' +
-            '<td class="title">' + Render.getDocumentURL(url_art, title, queryTerms, result.rank) + '&nbsp;(<a target="_blank" href="view.html?kind=article&action=view&id=' + result.name + '">view OCR</a>)</td>' +
-            '<td class="citation">Citation: ' + highlightText(queryTerms, citation, '<span class="hili">', '</span>') + '</td>' +
+            '<td class="title">' + Render.getDocumentURL(url_art, title, queryTerms, result.rank) + '&nbsp;(<a target="_blank" href="view.html?kind=article&action=view&id=' + result.name + '">view OCR</a>)&nbsp;';
+    for (r in result.ratings){
+        if (result.ratings[r].rating == 1){
+            html += '<span class="glyphicon glyphicon-ok"></span>'
+        } else {
+            html += '<span class="glyphicon glyphicon-remove"></span>'
+        }
+    }
+            '</td><td class="citation">Citation: ' + highlightText(queryTerms, citation, '<span class="hili">', '</span>') + '</td>' +
             '<td class="score">' + result.score.toFixed(3) + ' r' + result.rank + '</td>' +
             '</tr>';
 
@@ -58,7 +65,7 @@ resultRenderers["article"] = function(queryTerms, result, resDiv) {
         html += '... </td></tr>';
     }
 
-    html = html + '</table></div>';
+    html = html + '</table>';
     if (result.tags) {
         html += UI.renderTags(result);
     } // end if display tags

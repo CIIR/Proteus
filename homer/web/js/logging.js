@@ -26,31 +26,31 @@ function convertJSONtoHTML(jsonStr) {
 var JSONtoHTMLFunctions = {};
 
 var logStart = function (data) {
-  return '<div class="activity-row activity-' + data.action.toLowerCase() + '">' + data.timestamp + ' ';
+  return '<div class="activity-row activity-' + data.action.toLowerCase() + ' user-' + data.user + '">' + data.timestamp + ' ' + data.user + ' ';
 }
 
 JSONtoHTMLFunctions["LOGIN"] = function (data) {
-  return logStart(data) + data.user + ' logged in.</div>';
+  return logStart(data)  + ' logged in.</div>';
 }
 
 JSONtoHTMLFunctions["LOGOUT"] = function (data) {
-  return logStart(data) + data.user + ' logged out.</div>'
+  return logStart(data) + ' logged out.</div>'
 }
 
 JSONtoHTMLFunctions["SEARCH"] = function (data) {
-  return logStart(data) + data.user + ' searched: ' + data.enteredQuery + '</div>'
+  return logStart(data)  + ' searched: ' + data.enteredQuery + '</div>'
   // TODO add labels
 }
 
 JSONtoHTMLFunctions["RESULTS"] = function (data) {
-  return logStart(data) + data.user + ' search results: ' + data.docIDs + '</div>'
+  return logStart(data)  + ' search results: ' + data.docIDs + '</div>'
 }
 
 var noteHTML = function(data, action){
   var id = data.resource.split("_")
   // if there's only one part of the resource, assume it's a paper - because we currently only have one annotation
   // object per paper whild books have one per page.
-  var html = logStart(data) + data.user + ' ' + action + ' a note to document: ' + data.resource + ' note: "' + data.data.text + '"';
+  var html = logStart(data)  + ' ' + action + ' a note to document: ' + data.resource + ' note: "' + data.data.text + '"';
   if (_.isUndefined(id[1])){
     return html
             + ' view: <a target="_blank" href="../view.html?kind=article&action=view&id=' +  data.resource + '&noteid=' + data.notePK + '">Article</a></div>'
@@ -70,23 +70,23 @@ JSONtoHTMLFunctions["UPD-NOTE"] = function (data) {
 }
 
 JSONtoHTMLFunctions["DEL-NOTE"] = function (data) {
-  return logStart(data) + data.user + ' deleted a note from document: ' + data.resource + '</div>'
+  return logStart(data)  + ' deleted a note from document: ' + data.resource + '</div>'
 }
 
 JSONtoHTMLFunctions["ADD-TAG"] = function (data) {
-  return logStart(data) + data.user + ' added a tag to document: ' + data.resource + ' tag: ' + data.tag + '</div>'
+  return logStart(data) + ' added a tag to document: ' + data.resource + ' tag: ' + data.tag + '</div>'
 }
 
 JSONtoHTMLFunctions["UPD-TAG"] = function (data) {
-  return logStart(data) + data.user + ' updated a tag to document: ' + data.resource + ' tag: ' + data.tag + '</div>'
+  return logStart(data)  + ' updated a tag to document: ' + data.resource + ' tag: ' + data.tag + '</div>'
 }
 
 JSONtoHTMLFunctions["DEL-TAG"] = function (data) {
-  return logStart(data) + data.user + ' deleted a tag from document: ' + data.resource + '</div>'
+  return logStart(data)  + ' deleted a tag from document: ' + data.resource + '</div>'
 }
 
 JSONtoHTMLFunctions["RATE-RES"] = function (data) {
-  return logStart(data) + data.user + ' rated the document: ' + data.resource + ' a ' + data.rating + '</div>'
+  return logStart(data)  + ' rated the document: ' + data.resource + ' a ' + data.rating + '</div>'
 }
 
 JSONtoHTMLFunctions["VIEW-RES"] = function (data) {

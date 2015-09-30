@@ -8,6 +8,9 @@ import org.lemurproject.galago.utility.Parameters;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -45,7 +48,7 @@ public class UserDatabaseTest {
   @After
   public void tearDown() throws Exception {
     db.close();
-    FSUtil.deleteDirectory(folder);
+ //   FSUtil.deleteDirectory(folder);
   }
 
   @Test
@@ -487,10 +490,11 @@ public class UserDatabaseTest {
     db.createCorpus("test corpus 1", "user");
     Integer corpus1 = 1;
     Integer corpus2 = 2;
+    Integer queryid1 = 1;
 
     String res1 = "resource1";
 
-    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4);
+    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4, queryid1);
 
     Parameters ratings = db.getResourceRatings(res1, corpus1 );
     assertEquals(ratings.get("aveRating", -1), 4);
@@ -501,7 +505,7 @@ public class UserDatabaseTest {
     assertEquals(ratings.getAsList("ratings").size(), 0);
 
     // test update of rating
-    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 2);
+    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 2, queryid1);
     ratings = db.getResourceRatings(res1, corpus1 );
     assertEquals(ratings.get("aveRating", -1), 2);
     assertEquals(ratings.getAsList("ratings").size(), 1);
@@ -510,19 +514,19 @@ public class UserDatabaseTest {
     p = db.login("user2");
     cred = new Credentials(p);
 
-    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4);
+    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4, queryid1);
     ratings = db.getResourceRatings(res1,corpus1 );
     assertEquals(ratings.get("aveRating", -1), 3);
     assertEquals(ratings.getAsList("ratings").size(), 2);
 
     // rate another resource, make sure it doesn't change this rating.
-    db.upsertResourceRating(cred, "different resource", cred.userid, corpus1, 4);
+    db.upsertResourceRating(cred, "different resource", cred.userid, corpus1, 4, queryid1);
     ratings = db.getResourceRatings(res1, corpus1);
     assertEquals(ratings.get("aveRating", -1), 3);
     assertEquals(ratings.getAsList("ratings").size(), 2);
 
     // update user2's rating to be zero - which should be ignored
-    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 0);
+    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 0, queryid1);
     ratings = db.getResourceRatings(res1, corpus1);
     assertEquals(ratings.get("aveRating", -1), 2);
     assertEquals(ratings.getAsList("ratings").size(), 1);
@@ -541,6 +545,7 @@ public class UserDatabaseTest {
     db.createCorpus("b", "user");
     Integer corpus1 = 1;
     Integer corpus2 = 2;
+    Integer queryid1 = 1;
 
     db.register("user1");
     db.register("user2");
@@ -553,10 +558,10 @@ public class UserDatabaseTest {
     String res3 = "c_resource";
     String res4 = "d_resource";
 
-    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4);
-    db.upsertResourceRating(cred, res3, cred.userid, corpus1, 4);
+    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4, queryid1);
+    db.upsertResourceRating(cred, res3, cred.userid, corpus1, 4, queryid1);
 
-    db.upsertResourceRating(cred, res2, cred.userid, corpus2, 4);
+    db.upsertResourceRating(cred, res2, cred.userid, corpus2, 4, queryid1);
 
     List<String> results = new ArrayList<>();
 
@@ -575,13 +580,13 @@ public class UserDatabaseTest {
     p = db.login("user2");
     cred = new Credentials(p);
     // give res2 a zero rating - should not be returned
-    db.upsertResourceRating(cred, res2, cred.userid, corpus1, 0);
+    db.upsertResourceRating(cred, res2, cred.userid, corpus1, 0, queryid1);
 
     results = db.getResourcesForCorpus(cred.userid, corpus1, -1, -1) ;
     assertArrayEquals(new String[]{res1, res3}, results.toArray());
 
     // now give it a non-zero so it'll be returned
-    db.upsertResourceRating(cred, res2, cred.userid, corpus1, 1);
+    db.upsertResourceRating(cred, res2, cred.userid, corpus1, 1, queryid1);
 
     results = db.getResourcesForCorpus( cred.userid, corpus1, -1, -1) ;
     assertArrayEquals(new String[]{res1, res2, res3}, results.toArray());
@@ -607,6 +612,77 @@ public class UserDatabaseTest {
     assertArrayEquals(new String[]{res1, res2, res3, res4}, results.toArray());
   }
 
+  @Test
+  public void getResourcesForCorpusByQueryTest() throws DBError, SQLException {
+
+    db.createCorpus("a", "user");
+    db.createCorpus("b", "user");
+    Integer corpus1 = 1;
+    Integer corpus2 = 2;
+    Integer corpus3 = 3;
+
+    db.register("user1");
+    db.register("user2");
+
+    Parameters p = db.login("user1");
+    Credentials cred = new Credentials(p);
+
+    String res1 = "a_resource";
+    String res2 = "b_resource";
+    String res3 = "c_resource";
+    String res4 = "d_resource";
+
+    String query_1 = "query one";
+    String kind_1 = "kind1";
+
+    Integer query_1_id = db.insertQuery(null, corpus1, query_1, kind_1);
+
+    //db.insertQueryResourceXref(null, res1, corpus1, query_1_id);
+    // TODO ^^^ should be private it's called inside upsertResourceRating - but that makes testing it stand alone kinda hard.
+
+    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 1, query_1_id);
+    db.upsertResourceRating(cred, res2, cred.userid, corpus1, -1, query_1_id);
+    db.upsertResourceRating(cred, res3, cred.userid, corpus1, 1, query_1_id);
+    // rate resource for another corpus
+    db.upsertResourceRating(cred, res4, cred.userid, corpus2, 4, query_1_id);
+
+    Parameters results = db.getResourcesForCorpusByQuery(corpus1);
+
+    assertEquals(results.size(), 1);
+    List<Parameters> queryList = results.getAsList("queries");
+    assertEquals(1, queryList.size());
+    Parameters query = queryList.get(0);
+    List<String> res = query.getAsList("resources");
+    assertEquals(2, res.size());
+    assertEquals(res1, res.get(0));
+    assertEquals(res3, res.get(1));
+
+    // add resources for a 2nd query
+    String query_2 = "query two";
+    Integer query_2_id = db.insertQuery(null, corpus1, query_2, kind_1);
+    db.upsertResourceRating(cred, res4, cred.userid, corpus1, 1, query_2_id);
+
+    results = db.getResourcesForCorpusByQuery(corpus1);
+
+    assertEquals(results.size(), 1);
+    queryList = results.getAsList("queries");
+    assertEquals(2, queryList.size());
+
+    query = queryList.get(0);
+    res = query.getAsList("resources");
+    assertEquals(2, res.size());
+    assertEquals(res1, res.get(0));
+    assertEquals(res3, res.get(1));
+
+    query = queryList.get(1);
+    res = query.getAsList("resources");
+    assertEquals(1, res.size());
+    assertEquals(res4, res.get(0));
+
+    // no results
+    results = db.getResourcesForCorpusByQuery(corpus3);
+    assertEquals(0, results.size());
+  }
 
   @Test
   public void noteTest() throws DBError, IOException, SQLException {
@@ -730,5 +806,89 @@ public class UserDatabaseTest {
     assertTrue(time2 > time3);
 
   }
+
+  @Test
+  public void testInsertQuery() throws DBError {
+
+    Integer corpus_id_1 = 1;
+    String kind_1 = "kind1";
+    String query_1 = "query1";
+
+    Integer id = db.insertQuery(null, corpus_id_1, query_1, kind_1);
+    assertTrue(id == 1);
+
+    // test that queries are trimmed
+
+    id = db.insertQuery(null, corpus_id_1, " " + query_1 + " ", kind_1);
+    assertTrue(id == 1);
+
+    // test case sensitivity
+    id = db.insertQuery(null, corpus_id_1, query_1.toLowerCase(), kind_1);
+    assertTrue(id == 1);
+    id = db.insertQuery(null, corpus_id_1, query_1.toUpperCase(), kind_1);
+    assertTrue(id == 1);
+
+    // same query, diff corpus
+    Integer corpus_id_2 = 2;
+    id = db.insertQuery(null, corpus_id_2, query_1.toUpperCase(), kind_1);
+    assertTrue(id == 2);
+
+    // new query
+    String query_2 = "query2";
+    id = db.insertQuery(null, corpus_id_1, query_2, kind_1);
+    assertTrue(id == 3);
+
+    // diff kind
+    String kind_2 = "kind2";
+    id = db.insertQuery(null, corpus_id_1, query_1, kind_2);
+    assertTrue(id == 4);
+
+  }
+
+  @Test
+  public void testQueryResourceXref() throws DBError, SQLException {
+
+    String res1 = "res1";
+    Integer corpus1 = 1;
+    Integer query1 = 1;
+
+    db.insertQueryResourceXref(null, res1, corpus1, query1);
+
+    Connection conn = db.getConnection();
+    ResultSet results = conn.createStatement().executeQuery("SELECT * FROM query_res_xref");
+
+    int count = 0;
+    while (results.next()) {
+      count++;
+    }
+    assert (count == 1);
+
+    // test we didn't insert a dup.
+    db.insertQueryResourceXref(null, res1, corpus1, query1);
+
+    results = conn.createStatement().executeQuery("SELECT * FROM query_res_xref");
+
+    count = 0;
+    while (results.next()) {
+      count++;
+    }
+    assert (count == 1);
+
+    // add a new row
+    Integer query2 = 2;
+    db.insertQueryResourceXref(null, res1, corpus1, query2);
+
+    results = conn.createStatement().executeQuery("SELECT * FROM query_res_xref");
+
+    count = 0;
+    while (results.next()) {
+      count++;
+    }
+    assert (count == 2);
+
+    conn.close();
+
+  }
+
 }
 

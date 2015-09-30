@@ -86,6 +86,11 @@ public class JSONSearch implements JSONHandler {
 
         Node pquery = null;
 
+        // save the query
+        // TODO: right now we just saave the query, ignoring labels, etc.
+        // TODO : ??? return query id?
+        Integer queryid = system.userdb.insertQuery(null, corpusid, query, kind);
+
         // it's possible for the query to be empty IF we're searching just by labels or within a corpus
         if (!query.isEmpty()) {
             if (system.getConfig().get("queryType", "simple").equals("simple")) {
@@ -105,9 +110,31 @@ public class JSONSearch implements JSONHandler {
         searchData.setNumResults(numResults);
         LogHelper.log(searchData, system);
 
-
         Parameters qp = Parameters.create();
         qp.put("requested", numResults + skipResults);
+
+        // give them the ability to restrict the results to a working set
+        // specified by a query passed in - most likely an archive id
+        // TODO ???? add tests!!! and log?
+        if (reqp.containsKey("workingSetQuery")) {
+            List<ScoredDocument> workingSet = null;
+            Node tmpQuery = null;
+
+            if (system.getConfig().get("queryType", "simple").equals("simple")) {
+                tmpQuery = SimpleQuery.parseTree( reqp.getAsString("workingSetQuery"));
+            } else {
+                tmpQuery = StructuredQuery.parse( reqp.getAsString("workingSetQuery"));
+            }
+            workingSet = system.search(kind, tmpQuery, Parameters.create());
+            List<String> docNames = new ArrayList<String>(workingSet.size());
+            for (ScoredDocument doc : workingSet){
+                docNames.add(doc.getName());
+            }
+            if (docNames.size() > 0){
+                qp.put("working", docNames);
+            }
+        }
+
         Parameters response = Parameters.create();
 
         List<Parameters> results = Collections.emptyList();
@@ -136,6 +163,7 @@ public class JSONSearch implements JSONHandler {
         logData.setDocIDs(ClickLogHelper.extractDocID(results).toString());
         LogHelper.log(logData, system);
 
+        response.set("queryid", queryid);
         response.set("results", results);
         if (pquery != null) {
             response.set("parsedQuery", pquery.toString());

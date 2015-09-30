@@ -12,15 +12,17 @@ var viewResourceDiv = $("#view-resource");
 var progressDiv = $("#progress");
 var queryBox = $("#ui-search");
 var loginInfo = $("#ui-login-info");
-var searchButtons = $("#search-buttons");
 var relevanceLabels = ["terrible", "not relevant", "neutral", "slightly relevant", "highly relevant"];
 var relevanceLabelColorClasses = ["rel-label-terrible", "rel-label-not-relevant", "rel-label-neutral", "rel-label-slightly-relevant", "rel-label-highly-relevant"];
 
-var ratingsJSON = {"document" : []};
+var ratingsJSON = {"document" : {}};
 
 // UI object/namespace
 var UI = {};
 UI.generateButtons = function() {
+
+    var urlParams = getURLParams();
+    var currentKind = urlParams["kind"];
 
     API.getKinds({}, function(data) {
         if (data.title)
@@ -39,12 +41,15 @@ UI.generateButtons = function() {
                 return;
             }
 
-            $("#search-button-choices").append('<li><a href="#" onclick="UI.onClickSearchButton(\'' + spec.kind + '\');">' + spec.button + '</a></li>');
+            $("#search-button-choices").append('<li><a href="#" onclick="UI.onClickSearchButton(\'' + spec.kind + '\', \'' + spec.button + '\');">' + spec.button + '</a></li>');
 
-            // see if we're the default button
-            if (kind === UI.defaultKind) {
+            // see if we're the default button - unless there's already a "kind" on the URL. If they're
+            // clicking on an entity it'll re-trigger this logic and we want to keep the current "kind" we
+            // do not want to rest the search button to be the default
+            if ((!_.isUndefined(currentKind) && currentKind == kind) || (_.isUndefined(currentKind) && kind === UI.defaultKind)){
+              $("#search-button-text").html(spec.button);
               $("#search-buttons").click(function() {
-                UI.onClickSearchButton(spec.kind);
+                  UI.onClickSearchButton(spec.kind, spec.button);
               });
             }
 
@@ -170,29 +175,29 @@ function getAve(ave, id){
 
 }
 
-function setSliderValue(name, init) {
-
-    var tot = 0;
-    var cnt = 0;
-
-    ratingsJSON.document[name].forEach(function (rec) {
-        tot += rec.rating;
-        cnt += 1;
-    })
-
-    if (cnt == 0){
-        return;
-    }
-    var ave = tot / cnt;
-
-    // remove old (if it's there - we use the "proteus-rating" class so we're sure)
-    $("#rating-" + name + "  .proteus-rating ").remove();
-
-    getAve(ave, name);
-
-    return ave-2;
-
-};
+//function setSliderValue(name, init) {
+//
+//    var tot = 0;
+//    var cnt = 0;
+//
+//    ratingsJSON.document[name].forEach(function (rec) {
+//        tot += rec.rating;
+//        cnt += 1;
+//    })
+//
+//    if (cnt == 0){
+//        return;
+//    }
+//    var ave = tot / cnt;
+//
+//    // remove old (if it's there - we use the "proteus-rating" class so we're sure)
+//    $("#rating-" + name + "  .proteus-rating ").remove();
+//
+//    getAve(ave, name);
+//
+//    return ave-2;
+//
+//};
 
 /**
  * Renders retrieval results into UI after current results
@@ -230,6 +235,28 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
         $(prependTo).after(renderer(queryTerms, result, resDiv));
     }
 
+    if (isLoggedIn()) {
+        setVoteHTML(result.name);
+        setUserRatingsHTML(result.name);
+    }
+
+    $("#" + result.name).data("metadata", result.meta);
+    $("#" + result.name).data("kind", result.viewKind);
+
+    // TODO ?? book specific - should be in internetArchive.js
+    var docType = guessKind(result.name);
+    if (docType == 'ia-books'){
+        resDiv.addClass('book-result');
+    }
+    if (docType == 'ia-pages'){
+        resDiv.addClass('page-result');
+    }
+    if ( result.viewKind == 'ia-books'){
+        var html =  '<div  id="search-pages-link-' + result.name + '" class="search-pages-link" >'
+        html += '<a href="#" onclick="UI.getPages(\'' + result.name + '\');"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show matching pages in this book...</a></div>';
+        html += '<div id="page-results-' + result.name + '"></div>';
+        resDiv.after(html);
+    }
     /* uncomment this to make entities draggable
      $(".mz-ner").draggable({
      appendTo: "body",
@@ -239,6 +266,9 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
      });
      */
 
+
+    // TODO - put other's ratings here
+    /*
     $("#rating-" + result.name)
             .slider({
                 max: 2,
@@ -334,6 +364,7 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
     $(".read-only-tags").tagit({
         readOnly: true
     });
+     */
 //
 //    var corpus = getCookie("corpus");
 //    var corpusID = getCorpusID(corpus);
@@ -367,6 +398,14 @@ UI.appendResults = function(queryTerms, results) {
     _(results).forEach(function(result) {
         UI.renderSingleResult(result, queryTerms);
     });
+
+    /*
+    $( ".result" ).draggable({
+        axis: "x",
+        revert: true,
+        helper: 'clone'
+    });
+*/
 
     // ???? tmp to test showing notes
 //    var corpus = getCookie("corpus");
@@ -567,33 +606,55 @@ UI.showHideMetadata = function(){
 
 }
 
+UI.getPages = function(bookid){
+  //  var terms = _.escape(UI.getQuery().trim()).toLowerCase();
+    var terms = (UI.getQuery().trim()).toLowerCase();
+    var setQuery = 'archiveid:' + bookid ;
+
+
+    // pass in a query to restrict the search to just this book.
+    doActionSearchPages({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery : setQuery });
+
+    // TODO this should be done in the search callback
+     //  $("#search-pages-link" + bookid).html('<a href="#" onclick="UI.hidePages(\'' + bookid + '\');"><span class="glyphicon glyphicon-collapse-up"></span>&nbsp;Hide pages</a>')
+}
+
+UI.hidePages = function(bookid){
+
+    $("#page-results-" + bookid).hide("slow");
+
+    var html = '<a href="#" onclick="UI.showPages(\'' + bookid + '\');"><span class="glyphicon glyphicon-collapse-down"></span>';
+    html += '&nbsp;Show pages (' + $("#search-pages-link-" + bookid).data('num_results') + ')</a>';
+
+    $("#search-pages-link-" + bookid).html(html)
+}
+
+UI.showPages = function(bookid){
+
+    $("#page-results-" + bookid).show("slow");
+
+    // TODO  - duplicate code with getPages
+
+    var html = '<a href="#" onclick="UI.hidePages(\'' + bookid + '\');"><span class="glyphicon glyphicon-collapse-up"></span>';
+    html += '&nbsp;Hide pages (' + $("#search-pages-link-" + bookid).data('num_results') + ')</a>';
+
+    $("#search-pages-link-" + bookid).html(html);
+
+}
+
 var init = true;
 
+
 function renderRatingsSidebar(id){
-    var html = "<div>";
-    var aveRating = 0;
-    var cnt = 0;
 
-    if (!_.isUndefined( ratingsJSON.document[id])) {
-
-        _.forEach(ratingsJSON.document[id], function (rec) {
-
-            // ignore any zero ratings
-            if (rec.rating -2 != 0){
-                cnt += 1;
-                html += '<span class="rating-user">' + rec.user.split("@")[0] + ':&nbsp;</span>  <span class="badge ' + relevanceLabelColorClasses[rec.rating] + '">' + (rec.rating - 2) + '</span><br>';
-              aveRating += rec.rating - 2;
-            }
-        })
+    // we already have this info in the document list - although it is hidden -
+    // so grab it and display it here
+    var rating_html = $('#' + id + '-user-ratings-w-names').html();
+    if (rating_html.length == 0){
+        rating_html = '<span>No ratings yet for this document</span>';
     }
 
-    if (cnt == 0){
-        html = '<span >No ratings yet for this document</span><br>' + html;
-    } else {
-        html = '<span class="rating-user">Ave Rating:&nbsp;</span><span class="rating-value">' + (aveRating/cnt).toFixed(2) + '</span><br>' + html;
-    }
-
-    $("#ratings").html(html + "</div>" );
+    $("#ratings").html(rating_html);
 
 }
 function setUpMouseEvents(){

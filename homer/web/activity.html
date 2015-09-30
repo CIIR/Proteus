@@ -14,9 +14,11 @@
     <script src="js/util.js"></script>
     <script src="js/logging.js"></script>
     <script src="js/API.js"></script>
-    <link rel="stylesheet" href="css/style.css" type="text/css"/>
+    <link rel="stylesheet" href="css/activity.css" type="text/css"/>
 
     <script>
+        var msgArr = [];
+
         function showHideActivity(that, type) {
 
             if (that.checked == true) {
@@ -28,14 +30,51 @@
         }
 
         function hideMsg(type) {
-            $(".activity-" + type).addClass("collapse")
-            $(".activity-" + type + "-off").removeClass("activity-" + type)
+          $(".activity-" + type).hide()
         }
 
-        function showMsg(type) {
-            $(".activity-" + type + "-off").addClass("activity-" + type)
-            $(".activity-" + type).removeClass("collapse")
+        function toggleAll(that){
+
+            _.each(msgArr, function(m){
+                var el = $('input:checkbox.broadcast-msg-' + m)[0]
+                if (!_.isUndefined(el)) {
+                    el.checked = that.checked;
+                    showHideActivity(that, m)
+                }
+            })
+
         }
+
+        function  hideMsgs(){
+
+            _.each(msgArr, function(m){
+
+                var el = $('input:checkbox.broadcast-msg-' + m)[0]
+                if (!_.isUndefined(el)) {
+                    var checked = el.checked
+                    if (!checked) {
+                        hideMsg(m)
+                    }
+                }
+            });
+        }
+        function showMsg(type) {
+
+            $(".activity-" + type).show()
+
+        }
+
+        function showHideUser(){
+
+            var txt = $("#filter-user")[0].value
+            if (txt.length == 0){
+                $(".activity-row").show()
+            } else {
+                $(".activity-row").hide()
+                $('[class*="user-' + txt + '"]').show()
+            }
+            hideMsgs()
+        };
 
         $(document).ready(function () {
 
@@ -67,11 +106,18 @@
                 var msgs = JSON.parse(localStorage["messages"]);
                 for (msg in msgs) {
 
+                    msgArr.push(msgs[msg].toLowerCase())
+
                     html += '<input onclick="showHideActivity(this, \'' + msgs[msg] + '\');" class="broadcast-msg-' + msgs[msg] + '" ' +
                     'type="checkbox" name="messages" value="' + msgs[msg] + '" checked /> ' + msgs[msg] + '&nbsp;';
                 }
 
+                html += '<input onclick="toggleAll(this);" type="checkbox" name="messages" value="toggle_all" checked />ALL&nbsp;';
+                html += ' | Filter by user: <input id="filter-user" type="text"  >'
                 $("#broadcast-chioces").html(html);
+                $("#filter-user").keyup(function(){
+                    showHideUser()
+                });
             }
 
             var data = getCookie("broadcast");
@@ -94,14 +140,11 @@
 
                 var msg = convertJSONtoHTML(data.message)
                 output(msg);
+
                 // check if we're displaying this type of message
-                var el = $('input:checkbox.broadcast-msg-' + data.action.toLowerCase())[0]
-                if (!_.isUndefined(el)){
-                    var checked = el.checked
-                    if (!checked) {
-                        hideMsg(data.action.toLowerCase())
-                    }
-                }
+                showHideUser();
+                hideMsgs();
+
             });
 
             socket.on('disconnect', function () {
@@ -113,6 +156,7 @@
             }
 
             function output(message) {
+
                 var element = $("<div>" + message + "</div>");
                 $('#activity').prepend(element);
             }

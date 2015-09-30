@@ -185,19 +185,23 @@ function isLoggedIn() {
     return (getCookie("username") !== "") ;
 }
 
-function enableAutoRetrieve() {
 
+function enableAutoRetrieve() {
+// TODO this needs to be for the "searched" kind - can't default to books
   $('#results-right').bind('scroll', function() {
+
     if($(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight) {
-      var prev = Model.request;
-      prev.skip = Model.results.length;
-      doSearchRequest(prev);
+
+        var prev = Model[gSearchedKind].request;
+        prev.skip = Model[gSearchedKind].results.length;
+        doSearchRequest(prev);
+
     }
   });
 }
 
 function disableAutoRetrieve(){
-  $('#results-right').unbind('scroll');
+   $('#results-right').unbind('scroll');
 }
 
 // mimic Google's URL redirect
@@ -290,9 +294,292 @@ String.prototype.capitalizeEachWord = function() {
 };
 
 function getNotesID(pageid, pagenum) {
-    if (!_.isUndefined(pagenum) && parseInt(pagenum) >= 0)
-        return 'notes-' + pageid + '_' + pagenum;
-    else
-        return 'notes-' + pageid;
+    return 'notes-' + getBookID(pageid, pagenum);
 }
+function getBookID(pageid, pagenum) {
+    if (!_.isUndefined(pagenum) && parseInt(pagenum) >= 0)
+        return pageid + '_' + pagenum;
+    else
+        return pageid;
+}
+// temp func - using "resource rating" to track swipe left/right
+
+var recordSwipe = function(res, kind, swipeVal) {
+
+    // send this rating to the DB
+
+    var userName = getCookie("username");
+    var userID = parseInt(getCookie("userid"));
+    var userToken = getCookie("token");
+    var corpus = getCookie("corpus");
+    var corpID = getCorpusID(corpus);
+    var queryID = 0;
+
+    if (!_.isUndefined(Model[kind])){
+        queryID = Model[kind].queryid;
+    }
+
+    var args = {
+        userid: userID,
+        user: userName,
+        token: userToken,
+        resource: res,
+        corpus: corpID,
+        corpusName: corpus,
+        rating: parseInt(swipeVal),
+        kind: kind,
+        queryid :  queryID
+    };
+
+    // update the local rating
+    if (_.isUndefined(ratingsJSON.document[res])){
+        ratingsJSON.document[res] = {};
+    }
+    ratingsJSON.document[res][userName] =  swipeVal;
+
+    API.rateResource(args, function () {
+        setUserRatingsHTML(res);
+        setVoteHTML(res);
+        renderRatingsSidebar(res);
+    }, function (req, status, err) {
+        UI.showError("ERROR: ``" + err + "``");
+        throw err;
+    });
+
+}
+
+var setUserRatingsHTML = function(res){
+
+    if (_.isUndefined( ratingsJSON.document[res]) || _.isEmpty(ratingsJSON.document[res])) {
+        return '';
+    }
+
+    var rating_html =   '<span>';
+    var rating_wo_names_html =   '<span>';
+
+    _.forEach(ratingsJSON.document[res], function (val, key) {
+
+        // ignore any zero ratings
+        if (val  != 0){
+            var user  = key.split("@")[0] ;
+
+            if (val == 1){
+                rating_html += user + ' <span class="glyphicon glyphicon-ok"></span><br>'
+                rating_wo_names_html +=   ' <span class="glyphicon glyphicon-ok"></span> '
+            } else {
+                rating_html += user + ' <span class="glyphicon glyphicon-remove"></span><br>'
+                rating_wo_names_html +=  ' <span class="glyphicon glyphicon-remove"></span> '
+            }
+        }
+    })
+
+    rating_html += '</span>';
+    rating_wo_names_html += '</span>';
+
+    $('#' + res + '-user-ratings').html(rating_wo_names_html);
+    $('#' + res + '-user-ratings-w-names').html(rating_html);
+
+}
+
+var setVoteHTML = function(res){
+
+    var myRating = 0;
+
+    if (!_.isUndefined( ratingsJSON.document[res])) {
+        myRating = ratingsJSON.document[res][getCookie("username").toLowerCase()];
+    }
+
+    // see if we've rated this
+    if (_.isUndefined(myRating)){
+        myRating = 0;
+    }
+
+    var vote_html =   '<div id="' + res + '-voting">';
+
+    var func = "recordSwipe('" + res + "', $('#" + res + "').data('kind'),"
+    vote_html += '<span id="' + res + '-accept-button" onclick="' + func + ' 1);" class="glyphicon glyphicon-ok-circle accept ';
+    if (myRating < 0){
+        vote_html += ' grey ';
+    }
+
+    vote_html += '"></span><span  id="' + res + '-reject-button" onclick="' + func + ' -1);" class="glyphicon glyphicon-remove-circle reject ';
+    if (myRating > 0){
+        vote_html += ' grey ';
+    }
+    vote_html += '"></span> </div> '   ;
+
+    $('#' + res + '-voting-buttons').html(vote_html);
+
+}
+
+var getResourcesForCorpus = function(that) {
+
+    if (!isLoggedIn()) {
+        return;
+    }
+
+    var groupByQuery = true;
+
+    if (!_.isUndefined(that) && that.checked == false){
+        groupByQuery = false;
+    }
+
+    var userName = getCookie("username");
+    var userID = parseInt(getCookie("userid"));
+    var userToken = getCookie("token");
+    var corpus = getCookie("corpus");
+    var corpID = getCorpusID(corpus);
+
+    // don't pass "numResults" so we get all resources
+    var args = {
+        userid: userID,
+        user: userName,
+        token: userToken,
+        corpus: corpID,
+        corpusName: corpus
+    };
+
+
+   // var args = JSON.parse(tmp);
+    API.getResourcesInCorpus(args, function(data) {
+
+        $("#corpus-docs").html('');
+
+        // there are (currently) two ways a doc can become part of a corpus:
+        // (1) right swipe on search results
+        // (2) adding a note in the OCR view
+        // if we display by "query group" we can miss some docs because they
+        // could be in page view, click "next page" then add a note. That doc
+        // is now part of the corpus but was not added via a query.
+        // The "metadata" passed back, includes ALL documents. They "queries" data
+        // only contains docs that were swiped to become part of the corpus.
+
+        if (!groupByQuery){
+            $("#corpus-docs").append('<ul>Resources</ul>');
+        }
+        // to get a unique ID we'll just use a counter. We can't use the actual
+        // query text because there could be spaces.
+        var query_count = 0;
+        for (i in data.queries) {
+            if (groupByQuery){
+                query_count += 1;
+                $("#corpus-docs").append('<ul>Query: ' + data.queries[i].query + '</ul>');
+            }
+            for (j in data.queries[i].resources){
+                var res = data.queries[i].resources[j];
+                var id = 'q-' + query_count + '-' + res;
+                var el = $("#" + id);
+                // see if we already have this resource listed
+                if (!_.isEmpty(el)){
+                    var fontSize = parseInt(el.css('font-size'));
+                    fontSize += 5;
+                    // increase it
+                    el.css('font-size', fontSize + "px")
+                } else {
+                    var title = res;
+                    if (!_.isUndefined(data.metadata[res].title)){
+                        title = data.metadata[res].title;
+                    }
+                    $("#corpus-docs ul:last").append('<li><a id="' + id + '" href="view.html?kind=' + guessKind(res) + '&id=' + res + '&action=view">' + title + '</a></li>');
+                }
+            }
+        }
+
+/*
+        // version w/o query headers
+        var query_count = 0;
+        $("#corpus-docs").append('<ul>Resources</ul>');
+        for (i in data.queries) {
+
+
+            for (j in data.queries[i].resources){
+                var res = data.queries[i].resources[j];
+                var id = 'q-' + query_count + '-' + res;
+                var el = $("#" + id);
+                // see if we already have this resource listed
+                if (!_.isEmpty(el)){
+                    var fontSize = parseInt(el.css('font-size'));
+                    fontSize += 5;
+                    // increase it
+                    el.css('font-size', fontSize + "px")
+                } else {
+                    var title = res;
+                    if (!_.isUndefined(data.metadata[res].title)){
+                        title = data.metadata[res].title;
+                        // adding a page number seems more confusing than helpful as they
+                        // don't correlate with what the actual page number is.
+//                        if (!_.isUndefined(data.metadata[res].pageNumber)){
+//                            title += ' (p ' + data.metadata[res].pageNumber + ')';
+//                        }
+                    }
+                    $("#corpus-docs ul").append('<li><a id="' + id + '" href="view.html?kind=' + guessKind(res) + '&id=' + res + '&action=view">' + title + '</a></li>');
+                }
+            }
+        }
+*/
+
+//        $("#corpus-docs").html(html);
+
+    }, function(req, status, err) {
+        UI.showError("ERROR: ``" + err + "``");
+        throw err;
+    });
+
+
+
+
+};
+
+var guessKind = function(resourceName){
+
+    // I'm not happy with this at all, but for now it'll work.
+
+    if (isNaN(Number(resourceName))){
+        // assume Internet Archive resource
+        if (resourceName.indexOf("_") > 0) {
+            return 'ia-pages';
+        } else {
+            return 'ia-books';
+        }
+    } else {
+        return "article"; // ACM paper
+    }
+
+};
+
+function addEntitySearchLinks() {
+
+    // convert entities to search links
+
+    $(".per-ent").each(function () {
+        var val = $(this).html();
+        $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('person', val, 'ia-books') + '\'>' + val + '</a>');
+    })
+
+    $(".org-ent").each(function () {
+        var val = $(this).html();
+        $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('organization', val, 'ia-books') + '\'>' + val + '</a>');
+    })
+    $(".loc-ent").each(function () {
+        var val = $(this).html();
+        $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('location', val, 'ia-books') + '\'>' + val + '</a>');
+    })
+}
+
+function updateRatings(args){
+
+    if (_.isUndefined(args.ratings)) {
+        return;
+    }
+
+    // if the doc has ratings, add them to the local ratings store
+    if (!_.isUndefined(args.ratings)){
+        ratingsJSON.document[args.request.id] = {};
+        // Loop through ratings
+        _.forEach(args.ratings, function (rating) {
+            ratingsJSON.document[args.request.id][rating.user] = rating.rating;
+        });
+    }
+}
+
 

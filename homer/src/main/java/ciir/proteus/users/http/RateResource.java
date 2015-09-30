@@ -26,8 +26,9 @@ public class RateResource extends DBAction {
         String res = reqp.getString("resource");
         int rating = (int) reqp.getLong("rating");
         int corpus = (int) reqp.getLong("corpus");
+        int queryid = (int) reqp.getLong("queryid");
 
-        userdb.upsertResourceRating(creds, res, creds.userid, corpus, rating);
+        userdb.upsertResourceRating(creds, res, creds.userid, corpus, rating, queryid);
 
         RateResourceLogData logData = new RateResourceLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
         logData.setCorpus(corpus);
@@ -35,7 +36,7 @@ public class RateResource extends DBAction {
         logData.setResource(res);
         logData.setCorpusName(reqp.getAsString("corpusName"));
         LogHelper.log(logData, system);
-
+        // TODO ??? include queryid?
         return Parameters.create();
     }
 }

@@ -21,13 +21,19 @@ var GLOBAL = {
 // the JSON of the application state
 var Model = {
     // retrieval result data
-    request: {}, query: "", results: [], queryType: null, queryTerms: []
+  //  request: {}, query: "", results: [], queryType: null, queryTerms: [], queryid: -1
 };
 
-Model.clearResults = function() {
-    Model.results = [];
-    Model.query = "";
-};
+var clearModelResults = function(m){
+    m.results = [];
+    m.query = "";
+}
+
+var gSearchedKind = 'ia-books'; // TODO ??? ia specific
+//Model.clearResults = function() {
+//    Model.results = [];
+//    Model.query = "";
+//};
 
 var privateURLParams = _(["user", "token"]);
 
@@ -76,6 +82,9 @@ var doActionRequest = function(args) {
         return doSearchRequest(args);
     }
     if (action == "view") {
+        var corpus = getCookie("corpus");
+        var corpusID = getCorpusID(corpus);
+        args = _.merge(args, {'corpusID' : corpusID});
         disableAutoRetrieve();
         return doViewRequest(args);
     }
@@ -87,8 +96,15 @@ var doActionRequest = function(args) {
 };
 
 /* handlers for retrieval button types */
-UI.onClickSearchButton = function(kind) {
+UI.onClickSearchButton = function(kind, text) {
 //    var kind = buttonDesc.kind;
+    gSearchedKind = kind;
+    // make this selection the "current default"
+    $("#search-buttons").unbind("click"); // prevent multiple clicks
+    $("#search-buttons").click(function() {
+        UI.onClickSearchButton(kind, text);
+    });
+    $("#search-button-text").html(text);
 
     // is this a new retrieval?
     var terms = _.escape(UI.getQuery().trim()).toLowerCase();
@@ -173,13 +189,17 @@ function tmpSearch(that, kind){
     doActionRequest({kind: kind, q: query, action: "search"});
 }
 
-function tmpEntSearch(entType, that, kind){
-    var query =  entType  + ':"' + that.text() + '"';
-    console.log("Query: " + query);
-    $("#ui-search").val(query);
-    UI.onClickSearchButton(kind);
-}
+//function tmpEntSearch(entType, that, kind){
+//    var query =  entType  + ':"' + that.text() + '"';
+//    console.log("Query: " + query);
+//    $("#ui-search").val(query);
+//    UI.onClickSearchButton(kind);
+//}
 
+function buildSearchLink(entType, q,  kind){
+    var query =  entType  + ':"' + q + '"';
+    return "index.html?action=search&kind=" + kind + "&q=" + query;
+}
 var logIn = function(userName) {
     if (!userName)
         return;

@@ -92,6 +92,9 @@
 
                 $(".fancybox").fancybox();
 
+                $("#corpus-name").html("Corpus: " + getCookie("corpus"));
+                getResourcesForCorpus();
+
             });
 
         </script>
@@ -103,10 +106,12 @@
             <div class="container-fluid " id="ui">
                 <div class="row clearfix">
                     <img id="sidebar-button" src="images/sidebar_expand.png"/>
-                    <span class="col-md-4 column col-1-class"> <div id="title"><a href="index.html" target="_blank">Proteus</a></div>
-                        <a href="https://github.com/CIIR/Proteus/issues/new">Report an issue or make a suggestion</a></span>
+                    <span class="col-md-4 column col-1-class header-link"> <div id="title"><a href="index.html" target="_blank">Proteus</a></div>
+                        <a href="https://github.com/CIIR/Proteus/issues/new" target="_blank">Report an issue or make a suggestion</a>&nbsp;|&nbsp;
+                        <a href="activity.html" target="_blank">View Activity</a></span></span>
 
-                    <div class="col-md-8 column right-align col-9-class">
+                    <div id="corpus-name" class="header-font col-md-8 column col-9-class">
+
                     </div>
 
                 </div>
@@ -122,12 +127,14 @@
 
 
             <div id="ocr-options">
-                <input checked type="checkbox" id="cb-per" value="per" onclick="handleNERHilightClick(this, 'per');" /><span class="per"> People</span><br />
-                <input checked type="checkbox" id="cb-org" value="org" onclick="handleNERHilightClick(this, 'org');" /><span class="org"> Organizations</span><br />
-                <input checked type="checkbox" id="cb-loc" value="loc" onclick="handleNERHilightClick(this, 'loc');" /><span class="loc"> Places</span><br />
+                <input checked type="checkbox" id="cb-per" value="per" onclick="handleNERHilightClick(this, 'per');" /><span id="cb-per-label"> People</span><br />
+                <input checked type="checkbox" id="cb-org" value="org" onclick="handleNERHilightClick(this, 'org');" /><span id="cb-org-label"> Organizations</span><br />
+                <input checked type="checkbox" id="cb-loc" value="loc" onclick="handleNERHilightClick(this, 'loc');" /><span id="cb-loc-label"> Places</span><br />
             </div>
 
             <div id="sidebar-notes"></div>
+            <input checked type="checkbox" id="cb-group-res-by-query" value="Y" onclick=" getResourcesForCorpus(this);" /><span > Group by query</span><br />
+            <div id="corpus-docs"></div>
         </div>
 
         <div id="results-right" class="col-md-10 column right-align">
