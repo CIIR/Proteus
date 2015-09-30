@@ -611,6 +611,7 @@ UI.getPages = function(bookid){
     var terms = (UI.getQuery().trim()).toLowerCase();
     var setQuery = 'archiveid:' + bookid ;
 
+    $("#search-pages-link-" + bookid).html($("#search-pages-link-" + bookid).html() + '&nbsp;&nbsp;<img src="/images/more-loader.gif"\>');
 
     // pass in a query to restrict the search to just this book.
     doActionSearchPages({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery : setQuery });
