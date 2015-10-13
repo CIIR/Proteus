@@ -1146,6 +1146,10 @@ public Parameters getResourcesForCorpusByQuery(Integer corpusID ) throws DBError
       return -1;
 
     query = query.toLowerCase().trim();
+    // don't go over the limit
+    if (query.length() > 500){
+      query = query.substring(0, 500);
+    }
 
     //checkSession(creds);
 

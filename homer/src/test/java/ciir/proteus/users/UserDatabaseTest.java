@@ -843,6 +843,19 @@ public class UserDatabaseTest {
     id = db.insertQuery(null, corpus_id_1, query_1, kind_2);
     assertTrue(id == 4);
 
+    // query too big
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < 500; i++){
+      sb.append(query_1);
+    }
+    id = db.insertQuery(null, corpus_id_1, sb.toString(), kind_2);
+    assertTrue(id == 5);
+
+    // make sure duplicate check works
+    id = db.insertQuery(null, corpus_id_1, sb.toString(), kind_2);
+    assertTrue(id == 5);
+
+
   }
 
   @Test
