@@ -222,11 +222,13 @@ UI.renderSingleResult_notes = function(result, queryTerms,  prependTo) {
 
 
 UI.renderSingleResult = function(result, queryTerms,  prependTo) {
+
     //console.debug("result name: " + result.name);
     var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
     var resDiv = $('<div>');
     resDiv.attr('class', 'result');
     resDiv.attr('id', result.name);
+
 
     // put it at the end unless we pass in where we want it to go
     if (_.isUndefined(prependTo)) {
@@ -255,7 +257,9 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
         var html =  '<div  id="search-pages-link-' + result.name + '" class="search-pages-link" >'
         html += '<a href="#" onclick="UI.getPages(\'' + result.name + '\');"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show matching pages in this book...</a></div>';
         html += '<div id="page-results-' + result.name + '"></div>';
-        resDiv.after(html);
+        $('#notes-' + result.name).after(html);
+
+
     }
     /* uncomment this to make entities draggable
      $(".mz-ner").draggable({
