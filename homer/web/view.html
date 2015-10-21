@@ -1,5 +1,8 @@
 ﻿<html>
     <head>
+        <!-- supply any functions that browsers like IE don't natively support-->
+        <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6"></script>
+
         <script>
             // check if the browser supports local storage, we have to do this FIRST
             // before any other JS stuff which could cause other issues and cause this
@@ -50,6 +53,7 @@
         <script src="js/acmdl.js"></script>
         <script src="js/tag-it.js" type="text/javascript" charset="utf-8"></script>
 
+
         <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="css/style.css" type="text/css"/>
         <link rel="stylesheet" href="css/annotation_viewer.css" type="text/css"/>
@@ -65,6 +69,7 @@
         <script type="text/javascript" src="js/annotator.auth.js"></script>
         <script type="text/javascript" src="js/annotator.store.js"></script>
         <script type="text/javascript" src="js/annotator.filter.js"></script>
+        <script type="text/javascript" src="js/annotator.tags.min.js"></script>
 
 
         <script src="js/jquery.slimscroll.js"></script>
@@ -135,6 +140,7 @@
             <div id="sidebar-notes"></div>
             <input checked type="checkbox" id="cb-group-res-by-query" value="Y" onclick=" getResourcesForCorpus(this);" /><span > Group by query</span><br />
             <div id="corpus-docs"></div>
+
         </div>
 
         <div id="results-right" class="col-md-10 column right-align">

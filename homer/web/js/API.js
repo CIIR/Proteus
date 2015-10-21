@@ -40,7 +40,7 @@ var method = function(method, url, terms) {
 
         ajaxOpts.data = dataFn(options);
 
-        console.log(ajaxOpts);
+       // console.log(ajaxOpts);
         $.ajax(ajaxOpts).done(function(data) {
             if (!doneCallback) {
                 return;

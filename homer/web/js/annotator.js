@@ -828,6 +828,7 @@ Annotator = (function(superClass) {
   extend(Annotator, superClass);
 
   Annotator.prototype.events = {
+    ".annotator-mzimportant button click": "onMZImportantClick",
     ".annotator-mzsearch button click": "onMZSearchClick",
     ".annotator-adder button click": "onAdderClick",
     ".annotator-adder button mousedown": "onAdderMousedown",
@@ -837,7 +838,8 @@ Annotator = (function(superClass) {
 
   Annotator.prototype.html = {
     adder: '<div class="annotator-adder"><button>' + _t('Annotate') + '</button></div>' +
-      '<div  class=" annotator-mzsearch"><button>Search</button></div>',
+      '<div  class=" annotator-mzsearch"><button>Search</button></div>' +
+    '<div  class=" annotator-mzimportant"><button>Important</button></div>',
     wrapper: '<div class="annotator-wrapper"></div>'
   };
 
@@ -864,6 +866,7 @@ Annotator = (function(superClass) {
     this.onEditAnnotation = bind(this.onEditAnnotation, this);
     this.onAdderClick = bind(this.onAdderClick, this);
     this.onMZSearchClick = bind(this.onMZSearchClick, this);
+    this.onMZImportantClick = bind(this.onMZImportantClick, this);
     this.onAdderMousedown = bind(this.onAdderMousedown, this);
     this.onHighlightMouseover = bind(this.onHighlightMouseover, this);
     this.checkForEndSelection = bind(this.checkForEndSelection, this);
@@ -1280,10 +1283,27 @@ Annotator = (function(superClass) {
   //  console.log(event)
  //   this.checkForStartSelection(event)
     var text = "";
+    var entType  = '';
     if (window.getSelection) {
       text = window.getSelection().toString();
+      // from: http://stackoverflow.com/questions/5643635/how-to-get-selected-html-text-with-javascript
+      var range = window.getSelection().getRangeAt(0);
+      console.log(range);
+      console.log(range.commonAncestorContainer.parentElement);
+      var content = range.cloneContents();
+      console.log(content)
+      if ($(range.commonAncestorContainer).hasClass('per-ent')){
+        entType = 'person:';
+      }
+      if ($(range.commonAncestorContainer).hasClass('loc-ent')){
+        entType = 'location:';
+      }
+      if ($(range.commonAncestorContainer).hasClass('org-ent')){
+        entType = 'organization:';
+      }
     } else if (document.selection && document.selection.type != "Control") {
       text = document.selection.createRange().text;
+
     }
     console.log(text);
 
@@ -1292,10 +1312,50 @@ Annotator = (function(superClass) {
  //   alert("Search for: '" + text + "'")
     // TODO need to test cross browser
     // assume they're searching for a phrase
-  window.open("index.html?action=search&kind=ia-books&q=\"" + text.trim() + "\"")
+    window.open("index.html?action=search&kind=ia-books&q=" + entType + "\"" + text.trim() + "\"")
   };
 
-    Annotator.prototype.onAdderClick = function(event) {
+  Annotator.prototype.onMZImportantClick = function(event) {
+
+    //  console.log(event)
+    //   this.checkForStartSelection(event)
+    var text = "";
+    var entType  = '';
+    if (window.getSelection) {
+      text = window.getSelection().toString();
+      // from: http://stackoverflow.com/questions/5643635/how-to-get-selected-html-text-with-javascript
+      var range = window.getSelection().getRangeAt(0);
+      console.log(range);
+      console.log(range.commonAncestorContainer.parentElement);
+      var content = range.cloneContents();
+      console.log(content)
+      if ($(range.commonAncestorContainer).hasClass('per-ent')){
+        entType = 'person:';
+      }
+      if ($(range.commonAncestorContainer).hasClass('loc-ent')){
+        entType = 'location:';
+      }
+      if ($(range.commonAncestorContainer).hasClass('org-ent')){
+        entType = 'organization:';
+      }
+    } else if (document.selection && document.selection.type != "Control") {
+      // TODO get ent type
+      text = document.selection.createRange().text;
+
+    }
+    console.log(text);
+
+    this.adder.hide();
+
+    //   alert("Search for: '" + text + "'")
+    // TODO need to test cross browser
+    // assume they're searching for a phrase
+
+    $('#corpus-docs').after(entType + text + '<br>');
+    // window.open("index.html?action=search&kind=ia-books&q=\"" + text.trim() + "\"")
+  };
+
+  Annotator.prototype.onAdderClick = function(event) {
 
     var annotation, cancel, cleanup, position, save;
     if (event != null) {
@@ -1534,7 +1594,10 @@ Annotator.Editor = (function(superClass) {
     focus: 'annotator-focus'
   };
 
-  Editor.prototype.html = "<div class=\"annotator-outer annotator-editor\">\n  <form class=\"annotator-widget\">\n    <ul class=\"annotator-listing\"></ul>\n    <div class=\"annotator-controls\">\n      <a href=\"#cancel\" class=\"annotator-cancel\">" + _t('Cancel') + "</a>\n<a href=\"#save\" class=\"annotator-save annotator-focus\">" + _t('Save') + "</a>\n    </div>\n  </form>\n</div>";
+  Editor.prototype.html = "<div class=\"annotator-outer annotator-editor\">\n  <form class=\"annotator-widget\">\n    <ul class=\"annotator-listing\"></ul>\n"
+  Editor.prototype.html += '<div class="mznotes" id="notes-obeahwitchcraft00bellgoog_213"><button type="button" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Obeah</button><button type="button" class="btn btn-default btn-sm"> Slave Master</button></div>'
+  Editor.prototype.html += "<div class=\"annotator-controls\">\n      <a href=\"#cancel\" class=\"annotator-cancel\">" + _t('Cancel') + "</a>\n<a href=\"#save\" class=\"annotator-save annotator-focus\">" + _t('Save') + "</a>\n    </div>\n  </form>\n</div>";
+
 
   Editor.prototype.options = {};
 

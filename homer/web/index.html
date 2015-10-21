@@ -1,6 +1,11 @@
 ﻿<html>
     <head>
+
+        <!-- supply any functions that browsers like IE don't natively support-->
+        <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6"></script>
+
         <script>
+
             // check if the browser supports local storage, we have to do this FIRST
             // before any other JS stuff which could cause other issues and cause this
             // to get skipped.
@@ -34,6 +39,7 @@
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
         <![endif]-->
+
 
         <script src="js/jquery/2.0.3/jquery.min.js"></script>
         <script src="js/lodash/2.4.1/lodash.min.js"></script>
@@ -318,14 +324,14 @@
         <div id="all-tags"></div>
 
         <div id="results-left" class="col-md-2 column">
-           <!--
-            <div id="accordion">
-                <h3>Recent Searches</h3>
-                <div id="pastSearches"></div>
-                <h3>Notes</h3>
-                <div id="note-list"></div>
-
-            </div>
+            <!--
+             <div id="accordion">
+                 <h3>Recent Searches</h3>
+                 <div id="pastSearches"></div>
+                 <h3>Notes</h3>
+                 <div id="note-list"></div>
+ 
+             </div>
             -->
             <div id="ratings">
 
@@ -333,52 +339,52 @@
             <!--
                      <div id="accpeted-docs" class="doc-list">Accepted<br></div>
                      <div id="rejeted-docs" class="doc-list">Rejected<br></div>
-                 -->
-                     <div id="tree">
-                         <div id="empty-tree"></div>
-                     </div>
-                 </div>
-                 <!--
-                 <div id="results-right" class="col-md-10 column right-align">
-                     <div id="metadata"></div>
-                     <div id="results"></div>
-                     <div id="view-resource">
-                         <div  class="row clearfix btn" id="view-nav-top"></div>
-                         <div id="book-pages"> </div>
-                         <div class="row clearfix btn" id="view-nav-bottom"></div>
-                     </div>
-                     <div class="row clearfix ">
+            -->
+            <div id="tree">
+                <div id="empty-tree"></div>
+            </div>
+        </div>
+        <!--
+        <div id="results-right" class="col-md-10 column right-align">
+            <div id="metadata"></div>
+            <div id="results"></div>
+            <div id="view-resource">
+                <div  class="row clearfix btn" id="view-nav-top"></div>
+                <div id="book-pages"> </div>
+                <div class="row clearfix btn" id="view-nav-bottom"></div>
+            </div>
+            <div class="row clearfix ">
 
-                         <div id="more"></div>
-                         <div id="footer">
-                             <div id="progress"></div>
-                         </div>
-                     </div>
-                 </div>
-         -->
-
-
-              <div  id="results-right" class="col-md-10 column  ">
-
-                <div id="metadata"></div>
-                <div id="results">
-
-
-
+                <div id="more"></div>
+                <div id="footer">
+                    <div id="progress"></div>
                 </div>
+            </div>
+        </div>
+        -->
 
-                <div id="view-resource"></div>
-                <div class="row clearfix ">
 
-                    <div id="more"> </div>
-                    <div id="footer">
-                        <div id="progress"></div>
-                    </div>
-                </div>
+        <div  id="results-right" class="col-md-10 column  ">
+
+            <div id="metadata"></div>
+            <div id="results">
+
+
 
             </div>
 
-               <!-- modal dialog to get a new corpus' name -->
+            <div id="view-resource"></div>
+            <div class="row clearfix ">
+
+                <div id="more"> </div>
+                <div id="footer">
+                    <div id="progress"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- modal dialog to get a new corpus' name -->
         <div class="modal fade" id="newCorpusDialog" tabindex="-1" role="dialog" aria-labelledby="newCorpusLabel"
              aria-hidden="true">
             <div class="modal-dialog">
@@ -390,7 +396,7 @@
                     </div>
                     <div class="modal-body">
                         <form onsubmit="submitCorpusDialog();
-                        return false;">
+                                return false;">
                             <div class="form-group">
                                 <input type="text" class="form-control" id="corpus-name"  min="0">
                             </div>

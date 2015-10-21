@@ -410,6 +410,26 @@ var setVoteHTML = function(res){
 
     $('#' + res + '-voting-buttons').html(vote_html);
 
+
+ //   var loc = jQuery.unique($(".loc"));
+    var locs =  $(".loc") ;
+
+    var entHTML = '';
+    var known = {};
+    locs.each(function(loc){
+//    _.forEach(jQuery.unique($(".loc a")), function(loc){
+
+        console.log((loc) )
+        entHTML += locs[loc].innerText
+        entHTML +=  '<br>';
+//        $('#' + res + '-voting-buttons').after(loc);
+//        $('#' + res + '-voting-buttons').after('<br>');
+
+    })
+
+//    $('#corpus-docs').after('');
+//    $('#corpus-docs').after(entHTML);
+
 }
 
 var getResourcesForCorpus = function(that) {
@@ -547,22 +567,68 @@ var guessKind = function(resourceName){
 
 };
 
+// http://stackoverflow.com/questions/6139107/programatically-select-text-in-a-contenteditable-html-element
+function selectElementContents(el) {
+    var range = document.createRange();
+    range.selectNodeContents(el);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+}
+
+
+var mzSelect = function(that, entType){
+
+    console.log(that);
+
+//    var event = new MouseEvent('mousedown', {
+//        'view': window,
+//        'bubbles': true,
+//        'cancelable': true
+//    });
+    //document.getElementById("David-link").fireEvent("ondblclick")
+//    $("#David-link").focus();
+//    $("#David-link").select();
+
+
+  //  var el = document.getElementById("David-link");
+//    var el = document.getElementById("David-link");
+    selectElementContents((that));
+   // el.dispatchEvent(event);
+
+
+}
 function addEntitySearchLinks() {
 
     // convert entities to search links
 
-    $(".per-ent").each(function () {
-        var val = $(this).html();
-        $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('person', val, 'ia-books') + '\'>' + val + '</a>');
+//    $(".per-ent").each(function () {
+////        var val = $(this).html();
+////        $(this).html('<a target="#"  >' + val + '</a>');
+////        $("#David-link").mouseup(function(){
+////            mzSelect()
+////        })
+//     //  $(this).html('<a target="#" id="' + val + '-link" onclick="mzSelect(this);">' + val + '</a>');
+//        //  $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('person', val, 'ia-books') + '\'>' + val + '</a>');
+//    })
+    $(".per-ent").bind("mouseup", function(){
+        mzSelect(this, 'PER')
     })
-
-    $(".org-ent").each(function () {
-        var val = $(this).html();
-        $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('organization', val, 'ia-books') + '\'>' + val + '</a>');
+//    $(".org-ent").each(function () {
+////        var val = $(this).html();
+////        $(this).html('<a target="#"  >' + val + '</a>');
+//    //    $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('organization', val, 'ia-books') + '\'>' + val + '</a>');
+//    })
+    $(".org-ent").bind("mouseup", function(){
+        mzSelect(this, 'ORG')
     })
-    $(".loc-ent").each(function () {
-        var val = $(this).html();
-        $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('location', val, 'ia-books') + '\'>' + val + '</a>');
+//    $(".loc-ent").each(function () {
+////        var val = $(this).html();
+////        $(this).html('<a target="#"  >' + val + '</a>');
+//    //    $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('location', val, 'ia-books') + '\'>' + val + '</a>');
+//    })
+    $(".loc-ent").bind("mouseup", function(){
+        mzSelect(this, 'LOC')
     })
 }
 
