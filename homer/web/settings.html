@@ -25,31 +25,97 @@
             // see if we have a value...
             var settings = JSON.parse(getCookie("settings"));
             var num_entities = settings.num_entities;
-            if (_.isUndefined(num_entities) ) {
+            if (_.isUndefined(num_entities)) {
                 $("#user-num-entities").val(5);
             } else {
                 $("#user-num-entities").val(num_entities);
             }
-//
-//            if (!_.isUndefined(localStorage["messages"])){
-//                // when we log in, we make sure we have a value for ALL the messages
-//
-//                var html = '';
-//
-//                var msgs = JSON.parse(localStorage["messages"]);
-//                for (msg in msgs){
-//                    var checkedStr = "";
-//                    if (settings.broadcast[msgs[msg]] == "Y"){
-//                        checkedStr = "checked"
-//                    }
-//                    html += '<input class="broadcast-msg" type="checkbox" name="messages" value="' + msgs[msg] + '"' + checkedStr + '/> ' + msgs[msg] + ' <br> ';
-//                }
-//
-//                $("#broadcast-chioces").html(html);
-//            }
-         });
+
+            // populate the subcorpora (labels)
+
+            var labels = localStorage["subcorpora"];
+            // 1st check ensures we have an entry for subcorpora, 2nd check makes sure there is data,
+            // 3rd check is just a safety - I manually cleared out the localstorage and the page would
+            // say "Uncaught SyntaxError: Unexpected end of input" because it was trying to parse an
+            // empty string.
+            if (!_.isUndefined(labels) && labels != 'undefined' && labels.length != 0) {
+
+                var recs = JSON.parse(labels);
+
+                _.each(recs, function (r) {
+                    $("#subcorpora-list").append('<input  placeholder="" class="form-control input-md ">');
+                    $("#subcorpora-list input:last").val(r.name);
+                    $("#subcorpora-list input:last").data(r);
+                });
+
+            }
+
+            // $("#subcorpora-list").html(html);
+
+            $("#add-subcorpora").bind("click", function () {
+                $("#subcorpora-list").append('<input  placeholder="" class="form-control input-md ">');
+            });
+
+
+        });
+
         // TODO: move this to a .js file - should be able to remove most of the script references in <head>
-        function submitSettings(){
+        function submitLabels() {
+
+            // for now, we'll send everything
+
+            var json = '{ "corpusid" : 1  , "subcorpora" : [';
+            var innerjson = '';
+            _.each($("#subcorpora-list input"), function (l) {
+
+                // don't submit empty fields
+                if (l.value.toString().trim().length == 0){
+                    return;
+                }
+                if (innerjson.length != 0){
+                    innerjson += ", ";
+                }
+                innerjson += '{ "name" : "' + l.value + '"' ;
+                if (jQuery.isEmptyObject($(l).data()) == false) {
+                    innerjson += ', "id" : ' + $(l).data().id;
+                }
+                innerjson += '}'
+            });
+
+            json += innerjson + ']}';
+             console.log(json);
+            API.updateSubcorpora(JSON.parse(json), function (data) {
+                console.log("success")
+                localStorage["subcorpora"] = JSON.stringify(data.subcorpora);
+                $('.label-error').removeClass("in");
+                $('.label-error').addClass("out");
+                $(".saved-labels").html("Labels have been saved.");
+                $(".saved-labels").addClass("in");
+
+                setTimeout(function () {
+                    $('.saved-labels').removeClass("in");
+                    $('.saved-labels').addClass("out");
+                }, 5000);
+
+                // reload the labels
+                var recs = JSON.parse(localStorage["subcorpora"]);
+                $("#subcorpora-list").html('');
+                _.each(recs, function (r) {
+                    $("#subcorpora-list").append('<input  placeholder="" class="form-control input-md ">');
+                    $("#subcorpora-list input:last").val(r.name);
+                    $("#subcorpora-list input:last").data(r);
+                });
+
+            }, function (req, status, err) {
+                console.log("failure")
+                $(".label-error").html(err);
+                $('.label-error').addClass("in");
+            });
+
+
+        }
+
+        function submitSettings() {
 
             var num = parseInt($("#user-num-entities").val());
 
@@ -60,69 +126,115 @@
 
             $('input:checkbox.broadcast-msg').each(function () {
                 var value = "N";
-                if (this.checked){
+                if (this.checked) {
                     value = "Y"
                 }
                 broadcastValues[$(this).val()] = value;
             });
 
-            var settings = { num_entities : num, broadcast: broadcastValues };
-            var args = {user: action, token: userToken, userid: userID, settings: { num_entities : num, broadcast: broadcastValues }};
-            API.updateUserSettings(args, function() { console.log("success")},  function(req, status, err) { console.log("failure")});
+            var settings = {num_entities: num, broadcast: broadcastValues};
+            var args = {
+                user: action,
+                token: userToken,
+                userid: userID,
+                settings: {num_entities: num, broadcast: broadcastValues}
+            };
+            API.updateUserSettings(args, function () {
+                console.log("success")
+                $(".saved-settings").html("Settings have been saved.");
+                $(".saved-settings").addClass("in");
+
+                setTimeout(function () {
+                    $('.saved-settings').removeClass("in");
+                    $('.saved-settings').addClass("out");
+
+                }, 5000);
+            }, function (req, status, err) {
+                console.log("failure")
+            });
 
             document.cookie = "settings=" + JSON.stringify(settings) + ";";
-            $(".alert-success").html("Settings have been saved.");
-            $(".alert-success").addClass("in")
 
-            setTimeout(function(){
-                $('.alert-success').removeClass("in");
-                $('.alert-success').addClass("out");
 
-            }, 5000);
-
-         }
+        }
 
 
     </script>
 </head>
-
+<body class="settings-body">
 <div class="container" id="settings-container">
     <div class="row">
-<form id="settings-form" class="form-horizontal" onsubmit="submitSettings(); return false;">
-    <fieldset>
+        <form id="settings-form" class="form-horizontal" onsubmit="submitSettings(); return false;">
+            <fieldset>
 
-        <!-- Form Name -->
-        <legend>Proteus Settings</legend>
-        <div class="alert alert-success fade" role="alert"></div>
+                <!-- Form Name -->
+                <legend>Proteus Settings</legend>
+                <div class="alert alert-success saved-settings fade" role="alert"></div>
 
-        <!-- Text input-->
-        <div class="form-group">
-            <label class="col-md-4 control-label" for="user-num-entities">Number of entities</label>
-            <div class="col-md-4">
-                <input id="user-num-entities" name="user-num-entities" placeholder="" class="form-control input-md" required="" type="number" min="0">
-            </div>
-            </div>
-        <!--
-           <div class="form-group">
-           <label class="col-md-4 control-label" for="messages">What broadcast messages to you want to see?</label>
-           <div class="col-md-4">
-               <div id="broadcast-chioces"></div>
-           </div>
-           -->
-       </div>
+                <!-- Text input-->
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="user-num-entities">Number of entities</label>
 
-       <!-- Button -->
-        <div class="form-group">
-            <label class="col-md-4 control-label" for="submit-settings"></label>
-            <div class="col-md-4">
-                <button id="submit-settings" name="submit-settings" class="btn btn-primary">Save</button>
-            </div>
-        </div>
+                    <div class="col-md-4">
+                        <input id="user-num-entities" name="user-num-entities" placeholder=""
+                               class="form-control input-md" required="" type="number" min="0">
+                    </div>
+                </div>
+                <!--
+                   <div class="form-group">
+                   <label class="col-md-4 control-label" for="messages">What broadcast messages to you want to see?</label>
+                   <div class="col-md-4">
+                       <div id="broadcast-chioces"></div>
+                   </div>
+                   -->
+                <!-- Button -->
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="submit-settings"></label>
 
-    </fieldset>
-</form>
-</div>
+                    <div class="col-md-4">
+                        <button id="submit-settings" name="submit-settings" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+
+            </fieldset>
+        </form>
     </div>
+</div>
+
+<div class="container" id="subcorpora-container">
+    <div class="row">
+        <form id="subcorpora-form" class="form-horizontal" onsubmit="submitLabels(); return false;">
+            <fieldset>
+
+                <!-- Form Name -->
+                <legend>Proteus Labels</legend>
+                <div class="alert alert-success saved-labels fade" role="alert"></div>
+                <div class="alert alert-danger label-error fade" role="alert"></div>
+
+                <!-- Text input-->
+                <div class="form-group">
+                    <label class="col-md-4 control-label">Labels:</label>
+
+                    <div id="subcorpora-list" class="col-md-4">
+
+                    </div>
+
+                    <button id="add-subcorpora" name="add-subcorpora" class="btn " type="button">+</button>
+
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="submit-settings"></label>
+
+                    <div class="col-md-4">
+                        <button id="submit-subcorpora" name="submit-settings" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+
+            </fieldset>
+        </form>
+    </div>
+</div>
 
 </body>
 </html>

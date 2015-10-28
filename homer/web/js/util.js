@@ -80,6 +80,11 @@ var removeURLParam = function(param){
 
 // from: http://www.w3schools.com/js/js_cookies.asp
 var getCookie = function(cname) {
+    // 10/2015 MCZ moving towards a tagging model so if they ask for
+    // the corpus, always return "default"
+    if (cname == "corpus"){
+        return "default";
+    }
     var name = cname + "=";
     var ca = document.cookie.split(';');
     for (var i = 0; i < ca.length; i++)
@@ -218,14 +223,17 @@ rwt = function (a, rank) {
 
 
 function getCorpusID(corpusName){
-    // TODO: has to be a better way to do this - just brute force it for now...
-    var corpora = JSON.parse(localStorage["corpora"]);
-    var corpID = -1;
-    _.forEach(corpora, function(c){
-        if (c.name == corpusName)
-            corpID = parseInt(c.id);
-    });
-    return corpID;
+    // 10/2015 MCZ moving towards a tagging model so this will always
+    // be "1" - the "umbrella" corpus
+    return 1;
+//    // TODO: has to be a better way to do this - just brute force it for now...
+//    var corpora = JSON.parse(localStorage["corpora"]);
+//    var corpID = -1;
+//    _.forEach(corpora, function(c){
+//        if (c.name == corpusName)
+//            corpID = parseInt(c.id);
+//    });
+//    return corpID;
 }
 
 jsonp_handler = function(data)
@@ -350,85 +358,129 @@ var recordSwipe = function(res, kind, swipeVal) {
 
 var setUserRatingsHTML = function(res){
 
-    if (_.isUndefined( ratingsJSON.document[res]) || _.isEmpty(ratingsJSON.document[res])) {
+    if (_.isUndefined( votingJSON.document[res]) || _.isEmpty(votingJSON.document[res])) {
         return '';
     }
 
-    var rating_html =   '<span>';
-    var rating_wo_names_html =   '<span>';
+    // TODO - fix this - completely brain dead way of building a map from subcorpus ID to
+    // subcorpus name  - should be a gobal built once
+    var id2name = {};
 
-    _.forEach(ratingsJSON.document[res], function (val, key) {
+    var recs = JSON.parse(localStorage["subcorpora"]);
+    _.each(recs, function (r) {
+        id2name[r.id] = r.name;
+    });
 
-        // ignore any zero ratings
-        if (val  != 0){
-            var user  = key.split("@")[0] ;
 
-            if (val == 1){
-                rating_html += user + ' <span class="glyphicon glyphicon-ok"></span><br>'
-                rating_wo_names_html +=   ' <span class="glyphicon glyphicon-ok"></span> '
+//    var rating_wo_names_html =   '<span>';
+
+    // use a map to group who "voted" for a subcorpus
+    var votes = {};
+
+    _.forEach(votingJSON.document[res], function (val, key) {
+
+        var user = key.split("@")[0];
+
+        _.forEach(val, function (v, k){
+            if (_.isUndefined(votes[id2name[k]])){
+                votes[id2name[k]] = user;
             } else {
-                rating_html += user + ' <span class="glyphicon glyphicon-remove"></span><br>'
-                rating_wo_names_html +=  ' <span class="glyphicon glyphicon-remove"></span> '
+                votes[id2name[k]] += ', ' + user;
             }
-        }
+        })
+
+    })
+    var rating_html =   '<span>';
+    _.forEach(votes, function(val, key){
+        rating_html += key + ': ' + val + '<br>';
     })
 
     rating_html += '</span>';
-    rating_wo_names_html += '</span>';
 
-    $('#' + res + '-user-ratings').html(rating_wo_names_html);
+  //  rating_wo_names_html += '</span>';
+
+ //   $('#' + res + '-user-ratings').html(rating_wo_names_html);
     $('#' + res + '-user-ratings-w-names').html(rating_html);
+
+    //    if (_.isUndefined( ratingsJSON.document[res]) || _.isEmpty(ratingsJSON.document[res])) {
+//        return '';
+//    }
+//
+//    var rating_html =   '<span>';
+//    var rating_wo_names_html =   '<span>';
+//
+//    _.forEach(ratingsJSON.document[res], function (val, key) {
+//
+//        // ignore any zero ratings
+//        if (val  != 0){
+//            var user  = key.split("@")[0] ;
+//
+//            if (val == 1){
+//                rating_html += user + ' <span class="glyphicon glyphicon-ok"></span><br>'
+//                rating_wo_names_html +=   ' <span class="glyphicon glyphicon-ok"></span> '
+//            } else {
+//                rating_html += user + ' <span class="glyphicon glyphicon-remove"></span><br>'
+//                rating_wo_names_html +=  ' <span class="glyphicon glyphicon-remove"></span> '
+//            }
+//        }
+//    })
+//
+//    rating_html += '</span>';
+//    rating_wo_names_html += '</span>';
+//
+//    $('#' + res + '-user-ratings').html(rating_wo_names_html);
+//    $('#' + res + '-user-ratings-w-names').html(rating_html);
 
 }
 
 var setVoteHTML = function(res){
 
-    var myRating = 0;
-
-    if (!_.isUndefined( ratingsJSON.document[res])) {
-        myRating = ratingsJSON.document[res][getCookie("username").toLowerCase()];
-    }
-
-    // see if we've rated this
-    if (_.isUndefined(myRating)){
-        myRating = 0;
-    }
-
-    var vote_html =   '<div id="' + res + '-voting">';
-
-    var func = "recordSwipe('" + res + "', $('#" + res + "').data('kind'),"
-    vote_html += '<span id="' + res + '-accept-button" onclick="' + func + ' 1);" class="glyphicon glyphicon-ok-circle accept ';
-    if (myRating < 0){
-        vote_html += ' grey ';
-    }
-
-    vote_html += '"></span><span  id="' + res + '-reject-button" onclick="' + func + ' -1);" class="glyphicon glyphicon-remove-circle reject ';
-    if (myRating > 0){
-        vote_html += ' grey ';
-    }
-    vote_html += '"></span> </div> '   ;
-
-    $('#' + res + '-voting-buttons').html(vote_html);
-
-
- //   var loc = jQuery.unique($(".loc"));
-    var locs =  $(".loc") ;
-
-    var entHTML = '';
-    var known = {};
-    locs.each(function(loc){
-//    _.forEach(jQuery.unique($(".loc a")), function(loc){
-
-        console.log((loc) )
-        entHTML += locs[loc].innerText
-        entHTML +=  '<br>';
-//        $('#' + res + '-voting-buttons').after(loc);
-//        $('#' + res + '-voting-buttons').after('<br>');
-
-    })
-
-//    $('#corpus-docs').after('');
-//    $('#corpus-docs').after(entHTML);
+//    var myRating = 0;
+//
+//    if (!_.isUndefined( ratingsJSON.document[res])) {
+//        myRating = ratingsJSON.document[res][getCookie("username").toLowerCase()];
+//    }
+//
+//    // see if we've rated this
+//    if (_.isUndefined(myRating)){
+//        myRating = 0;
+//    }
+//
+//    var vote_html =   '<div id="' + res + '-voting">';
+//
+//    var func = "recordSwipe('" + res + "', $('#" + res + "').data('kind'),"
+//    vote_html += '<span id="' + res + '-accept-button" onclick="' + func + ' 1);" class="glyphicon glyphicon-ok-circle accept ';
+//    if (myRating < 0){
+//        vote_html += ' grey ';
+//    }
+//
+//    vote_html += '"></span><span  id="' + res + '-reject-button" onclick="' + func + ' -1);" class="glyphicon glyphicon-remove-circle reject ';
+//    if (myRating > 0){
+//        vote_html += ' grey ';
+//    }
+//    vote_html += '"></span> </div> '   ;
+//
+//    $('#' + res + '-voting-buttons').html(vote_html);
+//
+//
+// //   var loc = jQuery.unique($(".loc"));
+//    var locs =  $(".loc") ;
+//
+//    var entHTML = '';
+//    var known = {};
+//    locs.each(function(loc){
+////    _.forEach(jQuery.unique($(".loc a")), function(loc){
+//
+//        console.log((loc) )
+//        entHTML += locs[loc].innerText
+//        entHTML +=  '<br>';
+////        $('#' + res + '-voting-buttons').after(loc);
+////        $('#' + res + '-voting-buttons').after('<br>');
+//
+//    })
+//
+////    $('#corpus-docs').after('');
+////    $('#corpus-docs').after(entHTML);
 
 }
 
@@ -632,20 +684,109 @@ function addEntitySearchLinks() {
     })
 }
 
-function updateRatings(args){
-
-    if (_.isUndefined(args.ratings)) {
-        return;
-    }
+function updateRatings(args) {
 
     // if the doc has ratings, add them to the local ratings store
-    if (!_.isUndefined(args.ratings)){
+    if (!_.isUndefined(args.ratings)) {
         ratingsJSON.document[args.request.id] = {};
         // Loop through ratings
         _.forEach(args.ratings, function (rating) {
             ratingsJSON.document[args.request.id][rating.user] = rating.rating;
         });
     }
+
+    // TODO ???? should be its own function but putting here for now so the
+    // curent program "flow" will work
+    if (!_.isUndefined(args.labels)) {
+        // Loop through ratings
+        _.forEach(args.labels, function (rec) {
+            if (_.isUndefined(votingJSON.document[rec.name])){
+                votingJSON.document[rec.name] = {};
+            }
+            if (_.isUndefined(votingJSON.document[rec.name][rec.user])) {
+                votingJSON.document[rec.name][rec.user] = {};
+            }
+            votingJSON.document[rec.name][rec.user][rec.subcorpusid] = 1;
+        });
+    }
 }
 
+function displayLabels(res){
 
+    // TODO ??? duplicate code
+
+    var html = '&nbsp;';
+    var labels = localStorage["subcorpora"];
+    // 1st check ensures we have an entry for subcorpora, 2nd check makes sure there is data,
+    // 3rd check is just a safety - I manually cleared out the localstorage and the page would
+    // say "Uncaught SyntaxError: Unexpected end of input" because it was trying to parse an
+    // empty string.
+    if (!_.isUndefined(labels) && labels != 'undefined' && labels.length != 0) {
+        html = '';
+        var recs = JSON.parse(labels);
+
+        _.each(recs, function (r) {
+            html += '<button type="button" class="btn btn-default btn-sm label-button" onclick="labelClick(this, ' + r.id + ', \'' + res + '\', $(\'#' + res + '\').data(\'kind\'));"><span';
+
+            if (!_.isUndefined(votingJSON.document[res]) && !_.isUndefined(votingJSON.document[res][getCookie("username").toLowerCase()]) && !_.isUndefined(votingJSON.document[res][getCookie("username").toLowerCase()][r.id])){
+                html +=  ' class="check-mark";'
+            }
+            html += '></span>' + r.name + '</button>';
+        });
+    }
+
+//    $(".label_button").bind("click", function(){
+//        console.log( this);
+//    })
+    return html;
+
+}
+
+function labelClick(that, subcorpus_id, res, kind){
+//    console.log($(that).text());
+//    console.log(res);
+    var action = 'add';
+    // toggle check mark
+    if ($(that).find('span').hasClass("check-mark")){
+        action = 'remove';
+        $(that).find('span').removeClass("check-mark");
+    } else {
+        $(that).find('span').addClass("check-mark");
+    }
+
+    var userName = getCookie("username");
+    var userID = parseInt(getCookie("userid"));
+    var userToken = getCookie("token");
+    var corpus = getCookie("corpus");
+    var corpID = getCorpusID(corpus);
+    var queryID = 0;
+
+    if (!_.isUndefined(Model[kind])){
+        queryID = Model[kind].queryid;
+    }
+
+    var args = {
+        userid: userID,
+        user: userName,
+        token: userToken,
+        resource: res,
+        corpusid: corpID,
+        subcorpusid: subcorpus_id,
+        queryid :  queryID,
+        action: action
+    };
+
+    API.voteForResource(args, function(){
+        console.log("voted!")
+        if (action == "add"){
+            votingJSON.document[res][userName][subcorpus_id] = 1;
+        } else {
+            delete votingJSON.document[res][userName][subcorpus_id];
+        }
+        setUserRatingsHTML(res);
+        renderRatingsSidebar(res);
+    }, function(){
+        console.log("problem voting")
+    });
+
+}

@@ -65,8 +65,10 @@ public class CreateCorpusTest {
         List<Parameters> corpora = new ArrayList<Parameters>();
         p = env.proteus.userdb.getAllCorpora();
         corpora = p.getAsList("corpora", Parameters.class);
-        assertEquals(corpora.size(), 1);
-        assertEquals(corpusName, corpora.get(0).getString("name"));
+        // MCZ 10/2015 - there is always a default corpus with id = 1
+        assertEquals(2, corpora.size());
+        assertEquals("default", corpora.get(0).getString("name"));
+        assertEquals(corpusName, corpora.get(1).getString("name"));
     }
 
 }

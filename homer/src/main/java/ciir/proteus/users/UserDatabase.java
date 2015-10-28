@@ -86,11 +86,16 @@ public interface UserDatabase {
 
     public Integer createCorpus(String corpus, String username) throws NoTuplesAffected, DuplicateCorpus, SQLException;
 
+    public Parameters upsertSubCorpus(Parameters subcorpus) throws DBError, SQLException;
+
     public Parameters getAllCorpora() throws DBError;
+
+    public Parameters getAllSubCorpora() throws DBError;
 
     public void updateUserSettings(Credentials creds, String settings) throws DBError;
 
     public Parameters getResourceRatings(String resource, Integer corpusID);
+    public Parameters getResourceRatings2(String resource, Integer corpusID);
 
     public void upsertResourceRating(Credentials creds, String resource, Integer userID, Integer corpusID, Integer rating, Integer queryid) throws DBError;
 
@@ -113,6 +118,9 @@ public interface UserDatabase {
     public Integer insertQuery(Credentials creds, Integer corpusID, String query, String kind) throws DBError;
 
     public void insertQueryResourceXref(Credentials creds, String resource, Integer corpusID, Integer queryid) throws DBError;
+
+    public void addVoteForResource(Credentials creds, String resource, Integer corpusID, Integer subcorpusID, Integer queryid) throws DBError;
+    public void removeVoteForResource(Credentials creds, String resource, Integer corpusID, Integer subcorpusID) throws DBError;
 
 
 }

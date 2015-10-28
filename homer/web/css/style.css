@@ -225,6 +225,10 @@ body {
     overflow-y: hidden;
 }
 
+.settings-body{
+    overflow-y: auto;
+}
+
 #body-view{
     margin: 0;
     overflow-y: hidden;
@@ -489,6 +493,14 @@ body {
     margin-top: 20px;
 }
 
+#subcorpora-container{
+    background-color: lightblue;
+    padding: 20px;
+    border-radius: 30px;
+    border: solid;
+    margin-top: 20px;
+}
+
 /*
 .mz-ner{
     margin-top: 5px;
@@ -637,3 +649,20 @@ body {
 .header-link a:hover{
      color: white;
  }
+
+.resource-labels{
+    background-color: lightgrey;
+    padding : 5px;
+    border-radius: 5px;
+}
+
+.label-button {
+    margin : 2px;
+}
+
+.check-mark:after {
+    font-family: "Glyphicons Halflings";
+    content:"\e013"; /* check mark */
+    color: green;
+    padding-right: 5px;
+}

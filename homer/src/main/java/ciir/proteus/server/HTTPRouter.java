@@ -49,6 +49,8 @@ public class HTTPRouter implements WebHandler {
     private final JSONHandler getActivityLog;
     private final ProteusSystem proteus;
     private final JSONHandler getResourcesInCorpus;
+    private final JSONHandler updateSubCorpora;
+    private final JSONHandler resourceVote;
 
     public HTTPRouter(ProteusSystem proteus) {
         this.proteus = proteus;
@@ -78,6 +80,8 @@ public class HTTPRouter implements WebHandler {
         getNotesHistory = new GetNotesHistory(proteus);
         getActivityLog = new GetActivityLog(proteus);
         getResourcesInCorpus = new GetResourcesInCorpus(proteus);
+        updateSubCorpora = new UpdateSubCorpora(proteus);
+        resourceVote = new ResourceVote(proteus);
     }
 
     // handle http requests
@@ -139,11 +143,15 @@ public class HTTPRouter implements WebHandler {
                 handler = updateUserSettings;
             } else if (POST && path.equals("/api/resourcesforlabels")) {
                 handler = resourcesforlabels;
-            } else if (POST && path.equals("/api/resourcesincorpus")) {
+            }  else if (POST && path.equals("/api/updatesubcorpora")) {
+                handler = updateSubCorpora;
+            }else if (POST && path.equals("/api/resourcesincorpus")) {
                 handler = getResourcesInCorpus;
             } else if (POST && path.equals("/api/rateresource")) {
                 handler = rateResource;
-            } else if (POST && path.equals("/api/notehistory")) {
+            } else if (POST && path.equals("/api/resourcevote")) {
+                handler = resourceVote;
+            }else if (POST && path.equals("/api/notehistory")) {
                 handler = getNotesHistory;
             } else if ((PUT) && path.startsWith("/store/annotations/upd")) {
                 handleJSON(updateNote, method, path, reqp, resp, req, 303);

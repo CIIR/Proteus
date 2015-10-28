@@ -48,7 +48,7 @@ public class UserDatabaseTest {
   @After
   public void tearDown() throws Exception {
     db.close();
- //   FSUtil.deleteDirectory(folder);
+    FSUtil.deleteDirectory(folder);
   }
 
   @Test
@@ -76,7 +76,8 @@ public class UserDatabaseTest {
     assertEquals("usER1", p.get("user"));
     List<Parameters> corpora = new ArrayList<Parameters>();
     corpora = p.getAsList("corpora", Parameters.class);
-    assertEquals(0, corpora.size());
+    // MCZ: 10/2015 - there is always a default corpus
+    assertEquals(1, corpora.size());
 
     Credentials user1 = new Credentials(p);
     assertTrue(db.validSession(user1));
@@ -538,11 +539,55 @@ public class UserDatabaseTest {
 
   }
 
+
+  @Test
+  public void resourceRank2Test() throws DBError, SQLException {
+
+    db.register("user1");
+    db.register("user2");
+
+    Parameters p = db.login("user1");
+    Credentials cred = new Credentials(p);
+
+    db.createCorpus("test corpus 2", "user");
+    Integer corpus1 = 1;
+    Integer corpus2 = 2;
+    Integer subcorpus1 = 1;
+    Integer queryid1 = 1;
+
+    String res1 = "resource1";
+    String res1_pg1 = "resource1_1";
+
+    db.addVoteForResource(cred, res1, corpus1, subcorpus1, queryid1);
+    db.addVoteForResource(cred, res1_pg1, corpus1, subcorpus1, queryid1);
+
+    Parameters labels = db.getResourceRatings2(res1, corpus1);
+    List<Parameters> recs = new ArrayList<Parameters>();
+    recs = labels.getAsList("labels");
+    assertEquals(2, recs.size());
+
+    // test for corpus that doesn't have anything
+    labels = db.getResourceRatings2(res1, corpus2);
+    recs = labels.getAsList("labels");
+    assertEquals(0, recs.size());
+
+    // have a 2nd user rate the resource
+    p = db.login("user2");
+    cred = new Credentials(p);
+
+    db.addVoteForResource(cred, res1, corpus1, subcorpus1, queryid1);
+    labels = db.getResourceRatings2(res1,corpus1 );
+    recs = labels.getAsList("labels");
+    assertEquals(3, recs.size());
+
+  }
+
   @Test
   public void getResourcesForCorpusTest() throws DBError, SQLException {
 
     db.createCorpus("a", "user");
     db.createCorpus("b", "user");
+
     Integer corpus1 = 1;
     Integer corpus2 = 2;
     Integer queryid1 = 1;
@@ -558,10 +603,12 @@ public class UserDatabaseTest {
     String res3 = "c_resource";
     String res4 = "d_resource";
 
-    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4, queryid1);
-    db.upsertResourceRating(cred, res3, cred.userid, corpus1, 4, queryid1);
+    Integer subcorpus1 = 1;
 
-    db.upsertResourceRating(cred, res2, cred.userid, corpus2, 4, queryid1);
+    db.addVoteForResource(cred, res1, corpus1, subcorpus1, queryid1);
+    db.addVoteForResource(cred, res3, corpus1, subcorpus1, queryid1);
+
+    db.addVoteForResource(cred, res2, corpus2, subcorpus1, queryid1);
 
     List<String> results = new ArrayList<>();
 
@@ -579,14 +626,12 @@ public class UserDatabaseTest {
 
     p = db.login("user2");
     cred = new Credentials(p);
-    // give res2 a zero rating - should not be returned
-    db.upsertResourceRating(cred, res2, cred.userid, corpus1, 0, queryid1);
 
     results = db.getResourcesForCorpus(cred.userid, corpus1, -1, -1) ;
     assertArrayEquals(new String[]{res1, res3}, results.toArray());
 
     // now give it a non-zero so it'll be returned
-    db.upsertResourceRating(cred, res2, cred.userid, corpus1, 1, queryid1);
+    db.addVoteForResource(cred, res2, corpus1,  subcorpus1, queryid1);
 
     results = db.getResourcesForCorpus( cred.userid, corpus1, -1, -1) ;
     assertArrayEquals(new String[]{res1, res2, res3}, results.toArray());
@@ -634,21 +679,21 @@ public class UserDatabaseTest {
 
     String query_1 = "query one";
     String kind_1 = "kind1";
+    Integer subcorpus1 = 1;
 
     Integer query_1_id = db.insertQuery(null, corpus1, query_1, kind_1);
 
     //db.insertQueryResourceXref(null, res1, corpus1, query_1_id);
     // TODO ^^^ should be private it's called inside upsertResourceRating - but that makes testing it stand alone kinda hard.
 
-    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 1, query_1_id);
-    db.upsertResourceRating(cred, res2, cred.userid, corpus1, -1, query_1_id);
-    db.upsertResourceRating(cred, res3, cred.userid, corpus1, 1, query_1_id);
+    db.addVoteForResource(cred, res1, corpus1, subcorpus1, query_1_id);
+    db.addVoteForResource(cred, res3, corpus1, subcorpus1, query_1_id);
     // rate resource for another corpus
-    db.upsertResourceRating(cred, res4, cred.userid, corpus2, 4, query_1_id);
+    db.addVoteForResource(cred, res4, corpus2, subcorpus1, query_1_id);
 
     Parameters results = db.getResourcesForCorpusByQuery(corpus1);
 
-    assertEquals(results.size(), 1);
+    assertEquals(1, results.size());
     List<Parameters> queryList = results.getAsList("queries");
     assertEquals(1, queryList.size());
     Parameters query = queryList.get(0);
@@ -660,7 +705,7 @@ public class UserDatabaseTest {
     // add resources for a 2nd query
     String query_2 = "query two";
     Integer query_2_id = db.insertQuery(null, corpus1, query_2, kind_1);
-    db.upsertResourceRating(cred, res4, cred.userid, corpus1, 1, query_2_id);
+    db.addVoteForResource(cred, res4, corpus1, subcorpus1, query_2_id);
 
     results = db.getResourcesForCorpusByQuery(corpus1);
 
@@ -900,6 +945,93 @@ public class UserDatabaseTest {
     assert (count == 2);
 
     conn.close();
+
+  }
+
+  @Test
+  public void testUpsertSubCorpus() throws DBError, SQLException {
+
+    Parameters p = Parameters.create();
+
+    p.put("corpusid", 1); // default corpus inserted when Proteus starts
+
+    // insert two subcorpora
+    Parameters sc = Parameters.create();
+    List<Parameters> plist = new ArrayList<Parameters>();
+    sc.put("name", "sc1");
+    plist.add(sc);
+    sc = Parameters.create();
+    sc.put("name", "sc2");
+    plist.add(sc);
+
+    p.set("subcorpora", plist);
+
+    Parameters ret = db.upsertSubCorpus(p);
+    plist = ret.getAsList("subcorpora");
+    p = plist.get(0);
+    assertEquals(p.get("name", "?"), "sc1");
+    p = plist.get(1);
+    assertEquals(p.get("name", "?"), "sc2");
+
+    // this is a bit of overkill, but check that the data is actually in the DB
+    Connection conn = db.getConnection();
+    ResultSet results = conn.createStatement().executeQuery("SELECT subcorpus, id FROM subcorpora ORDER BY subcorpus");
+
+    Integer id1 = -1;
+    Integer id2 = -1;
+
+    int count = 0;
+    results.next();
+    assertEquals("sc1", results.getString(1));
+    id1 = results.getInt(2);
+    count++;
+    results.next();
+    assertEquals("sc2", results.getString(1));
+    id2 = results.getInt(2);
+    count++;
+    assert(results.next() == false); // no more records
+    assert (count == 2);
+
+    // update the name of them
+    p = Parameters.create();
+
+    p.put("corpusid", 1);
+
+    // insert two subcorpora
+    sc = Parameters.create();
+    plist = new ArrayList<Parameters>();
+    sc.put("name", "z");
+    sc.put("id", id1);
+    plist.add(sc);
+    sc = Parameters.create();
+    sc.put("name", "a");
+    sc.put("id", id2);
+    plist.add(sc);
+
+    p.set("subcorpora", plist);
+
+    ret = db.upsertSubCorpus(p);
+
+    plist = ret.getAsList("subcorpora");
+    p = plist.get(0);
+    assertEquals(p.get("name", "?"), "a");
+    p = plist.get(1);
+    assertEquals(p.get("name", "?"), "z");
+
+    results = conn.createStatement().executeQuery("SELECT subcorpus, id FROM subcorpora ORDER BY subcorpus");
+
+    count = 0;
+    results.next();
+    assertEquals("a", results.getString(1));
+    assert(id2 == results.getInt(2));
+    count++;
+    results.next();
+    assertEquals("z", results.getString(1));
+    assert(id1 == results.getInt(2));
+    count++;
+    assert(results.next() == false); // no more records
+    assert (count == 2);
+
 
   }
 

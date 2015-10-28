@@ -87,11 +87,10 @@ var renderResult = function(queryTerms, result, resDiv) {
     } // end if we have entities
 
 
-  //  var func = "recordSwipe('" + result.name + "', $('#" + result.name + "').data('metadata'),$('#" + result.name + "').data('kind'),"
+  // var func = "recordSwipe('" + result.name + "', $('#" + result.name + "').data('metadata'),$('#" + result.name + "').data('kind'),"
     var html =
             '<table>' +
-            '<tr>' +
-            '<td rowspan="2"><span id="' + result.name + '-voting-buttons"></span></td>';
+            '<tr>';
 //    }
 
     html +=    '<td class="preview" rowspan="2">' + previewImage + '</td>' +
@@ -121,8 +120,9 @@ var renderResult = function(queryTerms, result, resDiv) {
 //        html += UI.renderTags(result);
 //    }
 
-    // list any notes:
-    html += '<div id="notes-' + result.name + '"></div>';
+    // show labels
+    html += '<div id="notes-' + result.name + '" class="resource-labels">' + displayLabels(result.name) + '</div>';
+
 
     resDiv.html(html);
 

@@ -16,6 +16,7 @@ var relevanceLabels = ["terrible", "not relevant", "neutral", "slightly relevant
 var relevanceLabelColorClasses = ["rel-label-terrible", "rel-label-not-relevant", "rel-label-neutral", "rel-label-slightly-relevant", "rel-label-highly-relevant"];
 
 var ratingsJSON = {"document" : {}};
+var votingJSON = {"document" : {}};
 
 // UI object/namespace
 var UI = {};

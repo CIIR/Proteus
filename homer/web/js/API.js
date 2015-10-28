@@ -71,3 +71,6 @@ API.getNotes = method("POST", "/store/annotations/search");
 API.getNoteHistory = method("POST", "/api/notehistory");
 API.getActivityLog = method("POST", "/api/activitylog");
 API.getResourcesInCorpus = method("POST", "/api/resourcesincorpus");
+API.updateSubcorpora = method("POST", "/api/updatesubcorpora");
+API.voteForResource = method("POST", "/api/resourcevote");
+

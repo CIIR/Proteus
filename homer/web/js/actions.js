@@ -203,6 +203,16 @@ var onSearchSuccess = function(data) {
             ratingsJSON.document[result.name][rating.user] = rating.rating;
         });
 
+    // TODO ??? duplicate code - we do this in a couple places - should probably just call updateRatings() (with a better name)
+        votingJSON.document[result.name] = {};
+        // Loop through ratings
+        _.forEach(result.labels, function(rec) {
+            if (_.isUndefined(votingJSON.document[result.name][rec.user])){
+                votingJSON.document[result.name][rec.user] = {};
+            }
+            votingJSON.document[result.name][rec.user][rec.subcorpusid] = 1;
+        });
+
 
         // see if we're getting pages for a book
         // TODO ??? kind specific logic
@@ -274,10 +284,13 @@ var renderBookPageHTML = function(text, pageID, pageNum, el) {
     var pgTxt = processTags(text);
     var id = getBookID(pageID, pageNum);
 
+    var labelHTML = '<div id="notes-' +  id + '" class="resource-labels">' + displayLabels( id) + '</div>';
+
     el.html('<div class="book-page row clearfix ">' +
-            '<div class="col-md-2 column left-align" ><span id="' + id + '-voting-buttons"></span><span id="' + id + '-user-ratings-w-names"></span></div>' +
-            '<div id="' + getNotesID(pageID, pageNum) + '" class="book-text col-md-4 column left-align">' + pgTxt + '</div>' +
+            '<div class="col-md-2 column left-align" ><span id="' + id + '-user-ratings-w-names"></span></div>' +
+            '<div id="' + getNotesID(pageID, pageNum) + '" class="book-text col-md-4 column left-align">' + pgTxt + labelHTML + '</div>' +
             '<div  class="page-image col-md-4 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img src="' + pgImage + '"></a></div>' +
+
             '</div>');
 
 
@@ -683,6 +696,8 @@ var onViewPageSuccess = function(args) {
 
     //  viewResourceDiv.html(html);
     setPageNavigation(pageID);
+
+
     viewResourceDiv.show();
     var corpus = getCookie("corpus");
     if (!isLoggedIn() || corpus == "")
@@ -821,7 +836,11 @@ var updateNoteDiv = function(bookid, pgnum) {
 
     var pb = '.page-break[page=' + pgnum + ']';
 
-    var pghtml = '<div id="' + noteid + '" class="book-text col-md-5 column left-align">' + $(pb).html() + '</div>' +
+    var id = getBookID(bookid, pgnum);
+    var labelHTML = '<div id="notes-' +  id + '" class="resource-labels">' + displayLabels( id) + '</div>';
+
+
+    var pghtml = '<div id="' + noteid + '" class="book-text col-md-5 column left-align">' + $(pb).html() + labelHTML +'</div>' +
             '<div id="' + noteid + '-page-image" class="page-image col-md-5 column left-align"><br><a href="#" onclick="getPageImage(\'' +
             noteid + '-page-image\',\'' + pgImage + '\');" >View the actual page</a></div>';
     $(pb).html(pghtml);
@@ -833,10 +852,10 @@ var getPageImage = function(id, imgURL) {
 
 };
 
-var setPageNavigation = function(pageID) {
+var setPageNavigation = function(bookID) {
 
-    var prevHTML = '<button style="width: 100%;"  onclick="doPrevPageRequest(\'' + pageID + '\',' + (page.previous) + ');" >&#9650;&nbsp;Previous Page&nbsp;&#9650;</button>';
-    var nextHTML = '<button style="width: 100%;" onclick="doNextPageRequest(\'' + pageID + '\',' + (page.next) + ');">&#9660;&nbsp;Next Page&nbsp;&#9660;</button>';
+    var prevHTML = '<button style="width: 100%;"  onclick="doPrevPageRequest(\'' + bookID + '\',' + (page.previous) + ');" >&#9650;&nbsp;Previous Page&nbsp;&#9650;</button>';
+    var nextHTML = '<button style="width: 100%;" onclick="doNextPageRequest(\'' + bookID + '\',' + (page.next) + ');">&#9660;&nbsp;Next Page&nbsp;&#9660;</button>';
 
     if ((page.max != -1 && page.next > page.max) || page.skips > page.MAX_SKIPS) {
         nextHTML = '';
@@ -846,8 +865,9 @@ var setPageNavigation = function(pageID) {
         prevHTML = '';
     }
 
+
     $("#view-nav-top").html(prevHTML);
-    $("#view-nav-bottom").html(nextHTML)
+    $("#view-nav-bottom").html( nextHTML)
 
 };
 

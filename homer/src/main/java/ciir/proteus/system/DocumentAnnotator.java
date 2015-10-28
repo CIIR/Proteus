@@ -127,6 +127,11 @@ public class DocumentAnnotator {
       ratings = system.userdb.getResourceRatings(doc.name, corpusID);
       docp.copyFrom(ratings);
 
+      // modified getResourcRatings to get labels.
+      Parameters labels = Parameters.create();
+      labels = system.userdb.getResourceRatings2(doc.name, corpusID);
+      docp.copyFrom(labels);
+
       resultData.add(docp);
     }
 

@@ -218,6 +218,7 @@ var logIn = function(userName) {
             var settings = JSON.parse(data.settings);
 
             localStorage["corpora"] = JSON.stringify(data.corpora);
+            localStorage["subcorpora"] = JSON.stringify(data.subcorpora);
             document.cookie = "broadcast=;";
             if (!_.isUndefined(data.broadcast)){
                 // TODO: duplicate info in the cookie and local storage

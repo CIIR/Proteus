@@ -1595,7 +1595,6 @@ Annotator.Editor = (function(superClass) {
   };
 
   Editor.prototype.html = "<div class=\"annotator-outer annotator-editor\">\n  <form class=\"annotator-widget\">\n    <ul class=\"annotator-listing\"></ul>\n"
-  Editor.prototype.html += '<div class="mznotes" id="notes-obeahwitchcraft00bellgoog_213"><button type="button" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Obeah</button><button type="button" class="btn btn-default btn-sm"> Slave Master</button></div>'
   Editor.prototype.html += "<div class=\"annotator-controls\">\n      <a href=\"#cancel\" class=\"annotator-cancel\">" + _t('Cancel') + "</a>\n<a href=\"#save\" class=\"annotator-save annotator-focus\">" + _t('Save') + "</a>\n    </div>\n  </form>\n</div>";
 
 
