@@ -37,7 +37,7 @@ var renderResult = function(queryTerms, result, resDiv) {
     var pgImage = iaURL;
     var kind = 'ia-books'; // default
     var thumbnail = '<img class="ia-thumbnail" src="' + pageThumbnail(identifier, pageNum) + '"/>';
-    var previewImage = Render.getDocumentURL(pgImage, thumbnail, queryTerms, result.rank);
+    var previewImage = Render.getDocumentURL(pgImage, thumbnail, queryTerms, result.rank, true);
 
     if (!_.isUndefined(pageNum)) {
         kind = 'ia-pages';

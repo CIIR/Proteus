@@ -666,3 +666,9 @@ body {
     color: green;
     padding-right: 5px;
 }
+
+.overimage {
+    z-index: 1000;
+ position: relative;
+    top: -15px;
+}

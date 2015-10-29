@@ -59,6 +59,13 @@ Render.makeViewLink = function(id, kind, label, rank) {
 Render.getPagePreviewURL = function(url, title, queryTerms, rank) {
     return '<a class="fancybox" href="' + url + '" >' + highlightText(queryTerms, title, '<span class="hili">', '</span>', 'title') + '</a>';
 }
-Render.getDocumentURL = function(url, title, queryTerms, rank) {
-    return '<a href="' + url + '" onmousedown="return rwt(this,' + rank + ')" target="_blank">' + highlightText(queryTerms, title, '<span class="hili">', '</span>', 'title') + '</a>';
+Render.getDocumentURL = function(url, title, queryTerms, rank, bImage) {
+    var html =  '<a href="' + url + '" onmousedown="return rwt(this,' + rank + ')" target="_blank">' + highlightText(queryTerms, title, '<span class="hili">', '</span>', 'title');
+    html +=  '&nbsp;<span class="fa fa-external-link '
+    if (bImage == true) {
+        html += ' overimage ';
+    }
+    html += '"></span></span></a>';
+    return html;
+
 }
