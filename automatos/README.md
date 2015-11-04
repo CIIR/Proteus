@@ -20,3 +20,9 @@ OPTIONS
 
 -list   assumes input file is a list of books and adds only djvu files in that 
         list
+
+example commands:
+
+python3 update_books.py /home/wem/book/djvu /home/wem/book/tei
+
+java -cp target/homer-0.4-SNAPSHOT.jar ciir.proteus.retrieval.EntityRetrieval ../automatos/person.index lincoln 5
