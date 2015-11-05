@@ -541,7 +541,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = cpds.getConnection();
+      conn = getConnection();
 
       List<String> resources = new ArrayList<>();
       Object[] objLabels = new Object[labels.size()];
@@ -552,33 +552,34 @@ public class H2Database implements UserDatabase {
       ResultSet results = null;
 
       // we may want to skip the user_id
-      // MCZ 3/15 - allow anyone to retrieval using anyone's labels.
+      // MCZ 3/15 - allow anyone to retrieval using anyone's labels so we don't filter by user id
       userid = -1;
-      String userClause = " AND tags.user_id = ? ";
-      if (userid == -1) {
-        userClause = "";
+      String userClause = " ";
+      //      if (userid != -1) {
+      //        userClause = " AND tags.user_id = ? ";
+      //      }
+
+      String limitClause = " ";
+      if (numResults != -1) {
+        limitClause = " LIMIT ? OFFSET ?";
       }
-      if (numResults == -1) {
-        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value " + userClause + " ORDER BY resource");
-        sql.setObject(1, objLabels);
-        if (userid != -1) {
-          sql.setInt(2, userid);
-        }
-        results = sql.executeQuery();
-      } else {
-        // prepared statements don't like "in(...)" clauses, hence the cryptic SQL to do this:
-        //  SELECT DISTINCT resource FROM tags WHERE user LIKE ? AND tag IN (?)
-        // we need to ORDER BY to ensure the result sets will always be in the same order.
-        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value " + userClause + " ORDER BY resource LIMIT ? OFFSET ?");
-        int paramNum = 1;
-        sql.setObject(paramNum, objLabels);
-        if (userid != -1) {
-          sql.setInt(++paramNum, userid);
-        }
+
+      // prepared statements don't like "in(...)" clauses, we have to use a temp table rather than this:
+      //  SELECT DISTINCT resource FROM tags WHERE user LIKE ? AND tag IN (?)
+      // we need to ORDER BY to ensure the result sets will always be in the same order.
+      PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM table(label VARCHAR=?) temp_table INNER JOIN tags ON temp_table.label = tags.label_type || ':' || tags.label_value " + userClause + " ORDER BY resource " + limitClause);
+      int paramNum = 1;
+      sql.setObject(paramNum, objLabels);
+      if (userid != -1) {
+        sql.setInt(++paramNum, userid);
+      }
+      if (numResults != -1) {
         sql.setInt(++paramNum, numResults);
         sql.setInt(++paramNum, startIndex);
-        results = sql.executeQuery();
       }
+
+      results = sql.executeQuery();
+
       while (results.next()) {
         String res = results.getString(1);
         resources.add(res);
