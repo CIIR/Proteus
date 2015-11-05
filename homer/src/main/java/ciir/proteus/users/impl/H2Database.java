@@ -541,7 +541,7 @@ public class H2Database implements UserDatabase {
 
     Connection conn = null;
     try {
-      conn = getConnection();
+      conn = cpds.getConnection();
 
       List<String> resources = new ArrayList<>();
       Object[] objLabels = new Object[labels.size()];
