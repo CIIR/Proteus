@@ -598,33 +598,34 @@ public class H2Database implements UserDatabase {
       ResultSet results = null;
 
       // we may want to skip the user_id
-      // MCZ 3/15 - allow anyone to retrieval using anyone's labels.
+      // MCZ 3/15 - allow anyone to retrieval using anyone's labels so we don't filter by user id
       userid = -1;
-      String userClause = " AND tags.user_id = ? ";
-      if (userid == -1) {
-        userClause = "";
+      String userClause = " ";
+      //      if (userid != -1) {
+      //        userClause = " AND tags.user_id = ? ";
+      //      }
+
+      String limitClause = " ";
+      if (numResults != -1) {
+        limitClause = " LIMIT ? OFFSET ?";
       }
-      if (numResults == -1) {
-        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value " + userClause + " ORDER BY resource");
-        sql.setObject(1, objLabels);
-        if (userid != -1) {
-          sql.setInt(2, userid);
-        }
-        results = sql.executeQuery();
-      } else {
-        // prepared statements don't like "in(...)" clauses, hence the cryptic SQL to do this:
-        //  SELECT DISTINCT resource FROM tags WHERE user LIKE ? AND tag IN (?)
-        // we need to ORDER BY to ensure the result sets will always be in the same order.
-        PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM table(x VARCHAR=?) t INNER JOIN tags ON t.x=tags.label_type || ':' || tags.label_value " + userClause + " ORDER BY resource LIMIT ? OFFSET ?");
-        int paramNum = 1;
-        sql.setObject(paramNum, objLabels);
-        if (userid != -1) {
-          sql.setInt(++paramNum, userid);
-        }
+
+      // prepared statements don't like "in(...)" clauses, we have to use a temp table rather than this:
+      //  SELECT DISTINCT resource FROM tags WHERE user LIKE ? AND tag IN (?)
+      // we need to ORDER BY to ensure the result sets will always be in the same order.
+      PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM table(label VARCHAR=?) temp_table INNER JOIN tags ON temp_table.label = tags.label_type || ':' || tags.label_value " + userClause + " ORDER BY resource " + limitClause);
+      int paramNum = 1;
+      sql.setObject(paramNum, objLabels);
+      if (userid != -1) {
+        sql.setInt(++paramNum, userid);
+      }
+      if (numResults != -1) {
         sql.setInt(++paramNum, numResults);
         sql.setInt(++paramNum, startIndex);
-        results = sql.executeQuery();
       }
+
+      results = sql.executeQuery();
+
       while (results.next()) {
         String res = results.getString(1);
         resources.add(res);
@@ -667,7 +668,7 @@ public class H2Database implements UserDatabase {
   }
 
   @Override
-  public Parameters upsertSubCorpus(Parameters p) throws DBError, SQLException{
+  public Parameters upsertSubCorpus(Parameters p) throws DBError, SQLException {
     Connection conn = null;
 
     try {
@@ -678,11 +679,11 @@ public class H2Database implements UserDatabase {
 
       // loop through the subcorpora, if there is no ID field, we'll insert the data,
       // otherwise update
-      for (Parameters rec : subcorpora){
+      for (Parameters rec : subcorpora) {
         Integer id = rec.get("id", -1);
         String name = rec.getString("name");
 
-        if (id == -1){
+        if (id == -1) {
           PreparedStatement sql = conn.prepareStatement("INSERT INTO subcorpora (corpus_id, subcorpus) VALUES(?, ?)");
 
           sql.setInt(1, corpusid);
@@ -701,12 +702,12 @@ public class H2Database implements UserDatabase {
 
         }
       } // end loop through subcorpora
-    // TODO log who created/updated - logic in other functions is in the caller
+      // TODO log who created/updated - logic in other functions is in the caller
 
       // return the new data
       Parameters ret = getAllSubCorpora();
 
-     return (ret);
+      return (ret);
 
     } catch (SQLException e) {
       if (e.getErrorCode() == ErrorCode.DUPLICATE_KEY_1) {
@@ -891,6 +892,7 @@ public class H2Database implements UserDatabase {
     return results;
 
   }
+
   public Parameters getResourceRatings(String resource, Integer corpusID) {
 
     Parameters tmp = Parameters.create();
@@ -1393,7 +1395,7 @@ public class H2Database implements UserDatabase {
     }
   }
 
-  public void addVoteForResource(Credentials creds, String resource, Integer corpusID, Integer subcorpusID, Integer queryid) throws DBError{
+  public void addVoteForResource(Credentials creds, String resource, Integer corpusID, Integer subcorpusID, Integer queryid) throws DBError {
 
     Connection conn = null;
 
@@ -1410,8 +1412,8 @@ public class H2Database implements UserDatabase {
 
       assert (numRows == 1);
     } catch (SQLException e) {
-        e.printStackTrace();
-        throw new RuntimeException(e);
+      e.printStackTrace();
+      throw new RuntimeException(e);
     } finally {
       // tie the resource the the query
       insertQueryResourceXref(creds, resource, corpusID, queryid);
@@ -1421,7 +1423,7 @@ public class H2Database implements UserDatabase {
 
   }
 
-  public void removeVoteForResource(Credentials creds, String resource, Integer corpusID, Integer subcorpusID) throws DBError{
+  public void removeVoteForResource(Credentials creds, String resource, Integer corpusID, Integer subcorpusID) throws DBError {
 
     Connection conn = null;
 
