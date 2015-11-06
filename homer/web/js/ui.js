@@ -403,6 +403,7 @@ UI.appendResults = function(queryTerms, results) {
     _(results).forEach(function(result) {
         UI.renderSingleResult(result, queryTerms);
     });
+  //  mzinitAnnotationLogic("#notes-atlastchristmasi00kinguoft_320")
 
     /*
     $( ".result" ).draggable({
@@ -657,7 +658,7 @@ function renderRatingsSidebar(id){
     // so grab it and display it here
     var rating_html = $('#' + id + '-user-ratings-w-names').html();
     if (rating_html.length == 0){
-        rating_html = '<span>No ratings yet for this document</span>';
+        rating_html = '<span>No labels yet for this document</span>';
     }
 
     $("#ratings").html(rating_html);

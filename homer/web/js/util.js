@@ -67,11 +67,11 @@ var getURLParams = function() {
     return urlParams;
 };
 
-var removeURLParam = function(param){
+var removeURLParam = function(param) {
 
-    var p =  getURLParams();
+    var p = getURLParams();
 
-    if (!_.isUndefined(p[param])){
+    if (!_.isUndefined(p[param])) {
         delete p[param]
         pushURLParams(p);
     }
@@ -82,7 +82,7 @@ var removeURLParam = function(param){
 var getCookie = function(cname) {
     // 10/2015 MCZ moving towards a tagging model so if they ask for
     // the corpus, always return "default"
-    if (cname == "corpus"){
+    if (cname == "corpus") {
         return "default";
     }
     var name = cname + "=";
@@ -96,7 +96,7 @@ var getCookie = function(cname) {
     return "";
 };
 
-var getUser = function(){
+var getUser = function() {
     return getCookie("username")
 }
 var highlightText = function(queryTerms, text, beforeTag, afterTag) {
@@ -149,7 +149,9 @@ function NO_TYPE_CONST() {
     return "*";
 }
 
-function TREE_KEY_SEP(){ return "\t";}
+function TREE_KEY_SEP() {
+    return "\t";
+}
 
 // users are allowed to enter labels w/o at TYPE, this is troublesome later when
 // we want to allow them to select type/values to filter/retrieval by/etc. So we'll store
@@ -175,8 +177,8 @@ function formatLabelForDatabase(origLabel) {
 // rating in a user friendly way
 function formatLabelForDispaly(origLabel, rating) {
     var _rating = rating.toString().split(":");
-    if (_.isUndefined(_rating[0])){
-      _rating = rating; // they didn't pass in colon sep values
+    if (_.isUndefined(_rating[0])) {
+        _rating = rating; // they didn't pass in colon sep values
     }
     if (origLabel.substring(0, 2) === NO_TYPE_CONST() + ":") {
         var label = origLabel.split(":");
@@ -187,30 +189,30 @@ function formatLabelForDispaly(origLabel, rating) {
 
 }
 function isLoggedIn() {
-    return (getCookie("username") !== "") ;
+    return (getCookie("username") !== "");
 }
 
 
 function enableAutoRetrieve() {
 // TODO this needs to be for the "searched" kind - can't default to books
-  $('#results-right').bind('scroll', function() {
+    $('#results-right').bind('scroll', function() {
 
-    if($(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight) {
+        if ($(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight) {
 
-        var prev = Model[gSearchedKind].request;
-        prev.skip = Model[gSearchedKind].results.length;
-        doSearchRequest(prev);
+            var prev = Model[gSearchedKind].request;
+            prev.skip = Model[gSearchedKind].results.length;
+            doSearchRequest(prev);
 
-    }
-  });
+        }
+    });
 }
 
-function disableAutoRetrieve(){
-   $('#results-right').unbind('scroll');
+function disableAutoRetrieve() {
+    $('#results-right').unbind('scroll');
 }
 
 // mimic Google's URL redirect
-rwt = function (a, rank) {
+rwt = function(a, rank) {
     try {
         var origURL = escape(a.href);
         var token = "&token=" + getCookie("token");
@@ -222,7 +224,7 @@ rwt = function (a, rank) {
 };
 
 
-function getCorpusID(corpusName){
+function getCorpusID(corpusName) {
     // 10/2015 MCZ moving towards a tagging model so this will always
     // be "1" - the "umbrella" corpus
     return 1;
@@ -243,25 +245,25 @@ jsonp_handler = function(data)
     var wikipedia = '';
 
 
-    _.forEach(data.query.pages, function(pg){
-        if (!_.isUndefined(pg.pageid)){
+    _.forEach(data.query.pages, function(pg) {
+        if (!_.isUndefined(pg.pageid)) {
             wikipedia += ' <a target="_blank" href="https://en.wikipedia.org/wiki/' + pg.title + '">' + pg.title + '</a>';
         }
 
     });
 
     if (wikipedia.length > 0)
-        $("#important-entities").html(html + " (" + wikipedia +  ")");
+        $("#important-entities").html(html + " (" + wikipedia + ")");
 
 }
 
 function initImportantEntities() {
     $("#important-entities").droppable({
-        drop: function (event, ui) {
+        drop: function(event, ui) {
             $(this).css("background-color", "");
             var html = $("#important-entities").html();
             console.log(ui)
-        //    $("#important-entities").html(html + "<br>" + ui.draggable[0].parentElement.nodeName + ": " + ui.draggable[0].textContent);
+            //    $("#important-entities").html(html + "<br>" + ui.draggable[0].parentElement.nodeName + ": " + ui.draggable[0].textContent);
             $("#important-entities").html(html + "<br>" + ui.draggable[0].parentElement.nodeName + ": " + ui.draggable[0].outerHTML);
             // remove any classes
             $("#important-entities .mz-ner").removeClass();
@@ -276,21 +278,21 @@ function initImportantEntities() {
             // the text we're taking the NER from is all lower case. The Wikipedia API will only capitalize the first
             // word so we'll pass the original version and one with the first letter capitalized.
 
-            var query =  encodeURI(ui.draggable[0].textContent) + "|" + encodeURI(ui.draggable[0].textContent.capitalizeEachWord());
+            var query = encodeURI(ui.draggable[0].textContent) + "|" + encodeURI(ui.draggable[0].textContent.capitalizeEachWord());
             var script = document.createElement('script');
             script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&format=json&titles=' + query;
 
-           // script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&prop=images&imlimit=20&format=json&titles=' + encodeURI(ui.draggable[0].textContent);
+            // script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&prop=images&imlimit=20&format=json&titles=' + encodeURI(ui.draggable[0].textContent);
             //      script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&list=retrieval&limit=20&format=json&srsearch=' + encodeURI(ui.draggable[0].textContent);
 
             document.head.appendChild(script);
 
 
         },
-        over: function () {
+        over: function() {
             $(this).css("background-color", "lightgrey");
         },
-        out: function () {
+        out: function() {
             $(this).css("background-color", "");
         }
 
@@ -298,7 +300,9 @@ function initImportantEntities() {
 }
 
 String.prototype.capitalizeEachWord = function() {
-    return this.replace(/(?:^|\s)\S/g, function(a) { return a.toUpperCase(); });
+    return this.replace(/(?:^|\s)\S/g, function(a) {
+        return a.toUpperCase();
+    });
 };
 
 function getNotesID(pageid, pagenum) {
@@ -323,7 +327,7 @@ var recordSwipe = function(res, kind, swipeVal) {
     var corpID = getCorpusID(corpus);
     var queryID = 0;
 
-    if (!_.isUndefined(Model[kind])){
+    if (!_.isUndefined(Model[kind])) {
         queryID = Model[kind].queryid;
     }
 
@@ -336,29 +340,29 @@ var recordSwipe = function(res, kind, swipeVal) {
         corpusName: corpus,
         rating: parseInt(swipeVal),
         kind: kind,
-        queryid :  queryID
+        queryid: queryID
     };
 
     // update the local rating
-    if (_.isUndefined(ratingsJSON.document[res])){
+    if (_.isUndefined(ratingsJSON.document[res])) {
         ratingsJSON.document[res] = {};
     }
-    ratingsJSON.document[res][userName] =  swipeVal;
+    ratingsJSON.document[res][userName] = swipeVal;
 
-    API.rateResource(args, function () {
+    API.rateResource(args, function() {
         setUserRatingsHTML(res);
         setVoteHTML(res);
         renderRatingsSidebar(res);
-    }, function (req, status, err) {
+    }, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
         throw err;
     });
 
 }
 
-var setUserRatingsHTML = function(res){
+var setUserRatingsHTML = function(res) {
 
-    if (_.isUndefined( votingJSON.document[res]) || _.isEmpty(votingJSON.document[res])) {
+    if (_.isUndefined(votingJSON.document[res]) || _.isEmpty(votingJSON.document[res])) {
         return '';
     }
 
@@ -367,7 +371,7 @@ var setUserRatingsHTML = function(res){
     var id2name = {};
 
     var recs = JSON.parse(localStorage["subcorpora"]);
-    _.each(recs, function (r) {
+    _.each(recs, function(r) {
         id2name[r.id] = r.name;
     });
 
@@ -377,12 +381,12 @@ var setUserRatingsHTML = function(res){
     // use a map to group who "voted" for a subcorpus
     var votes = {};
 
-    _.forEach(votingJSON.document[res], function (val, key) {
+    _.forEach(votingJSON.document[res], function(val, key) {
 
         var user = key.split("@")[0];
 
-        _.forEach(val, function (v, k){
-            if (_.isUndefined(votes[id2name[k]])){
+        _.forEach(val, function(v, k) {
+            if (_.isUndefined(votes[id2name[k]])) {
                 votes[id2name[k]] = user;
             } else {
                 votes[id2name[k]] += ', ' + user;
@@ -390,16 +394,16 @@ var setUserRatingsHTML = function(res){
         })
 
     })
-    var rating_html =   '<span>';
-    _.forEach(votes, function(val, key){
+    var rating_html = '<span>';
+    _.forEach(votes, function(val, key) {
         rating_html += key + ': ' + val + '<br>';
     })
 
     rating_html += '</span>';
 
-  //  rating_wo_names_html += '</span>';
+    //  rating_wo_names_html += '</span>';
 
- //   $('#' + res + '-user-ratings').html(rating_wo_names_html);
+    //   $('#' + res + '-user-ratings').html(rating_wo_names_html);
     $('#' + res + '-user-ratings-w-names').html(rating_html);
 
     //    if (_.isUndefined( ratingsJSON.document[res]) || _.isEmpty(ratingsJSON.document[res])) {
@@ -433,7 +437,7 @@ var setUserRatingsHTML = function(res){
 
 }
 
-var setVoteHTML = function(res){
+var setVoteHTML = function(res) {
 
 //    var myRating = 0;
 //
@@ -492,7 +496,7 @@ var getResourcesForCorpus = function(that) {
 
     var groupByQuery = true;
 
-    if (!_.isUndefined(that) && that.checked == false){
+    if (!_.isUndefined(that) && that.checked == false) {
         groupByQuery = false;
     }
 
@@ -512,7 +516,7 @@ var getResourcesForCorpus = function(that) {
     };
 
 
-   // var args = JSON.parse(tmp);
+    // var args = JSON.parse(tmp);
     API.getResourcesInCorpus(args, function(data) {
 
         $("#corpus-docs").html('');
@@ -526,30 +530,30 @@ var getResourcesForCorpus = function(that) {
         // The "metadata" passed back, includes ALL documents. They "queries" data
         // only contains docs that were swiped to become part of the corpus.
 
-        if (!groupByQuery){
+        if (!groupByQuery) {
             $("#corpus-docs").append('<ul>Resources</ul>');
         }
         // to get a unique ID we'll just use a counter. We can't use the actual
         // query text because there could be spaces.
         var query_count = 0;
         for (i in data.queries) {
-            if (groupByQuery){
+            if (groupByQuery) {
                 query_count += 1;
                 $("#corpus-docs").append('<ul>Query: ' + data.queries[i].query + '</ul>');
             }
-            for (j in data.queries[i].resources){
+            for (j in data.queries[i].resources) {
                 var res = data.queries[i].resources[j];
                 var id = 'q-' + query_count + '-' + res;
                 var el = $("#" + id);
                 // see if we already have this resource listed
-                if (!_.isEmpty(el)){
+                if (!_.isEmpty(el)) {
                     var fontSize = parseInt(el.css('font-size'));
                     fontSize += 5;
                     // increase it
                     el.css('font-size', fontSize + "px")
                 } else {
                     var title = res;
-                    if (!_.isUndefined(data.metadata[res].title)){
+                    if (!_.isUndefined(data.metadata[res].title)) {
                         title = data.metadata[res].title;
                     }
                     $("#corpus-docs ul:last").append('<li><a id="' + id + '" href="view.html?kind=' + guessKind(res) + '&id=' + res + '&action=view">' + title + '</a></li>');
@@ -557,38 +561,38 @@ var getResourcesForCorpus = function(that) {
             }
         }
 
-/*
-        // version w/o query headers
-        var query_count = 0;
-        $("#corpus-docs").append('<ul>Resources</ul>');
-        for (i in data.queries) {
-
-
-            for (j in data.queries[i].resources){
-                var res = data.queries[i].resources[j];
-                var id = 'q-' + query_count + '-' + res;
-                var el = $("#" + id);
-                // see if we already have this resource listed
-                if (!_.isEmpty(el)){
-                    var fontSize = parseInt(el.css('font-size'));
-                    fontSize += 5;
-                    // increase it
-                    el.css('font-size', fontSize + "px")
-                } else {
-                    var title = res;
-                    if (!_.isUndefined(data.metadata[res].title)){
-                        title = data.metadata[res].title;
-                        // adding a page number seems more confusing than helpful as they
-                        // don't correlate with what the actual page number is.
-//                        if (!_.isUndefined(data.metadata[res].pageNumber)){
-//                            title += ' (p ' + data.metadata[res].pageNumber + ')';
-//                        }
-                    }
-                    $("#corpus-docs ul").append('<li><a id="' + id + '" href="view.html?kind=' + guessKind(res) + '&id=' + res + '&action=view">' + title + '</a></li>');
-                }
-            }
-        }
-*/
+        /*
+         // version w/o query headers
+         var query_count = 0;
+         $("#corpus-docs").append('<ul>Resources</ul>');
+         for (i in data.queries) {
+         
+         
+         for (j in data.queries[i].resources){
+         var res = data.queries[i].resources[j];
+         var id = 'q-' + query_count + '-' + res;
+         var el = $("#" + id);
+         // see if we already have this resource listed
+         if (!_.isEmpty(el)){
+         var fontSize = parseInt(el.css('font-size'));
+         fontSize += 5;
+         // increase it
+         el.css('font-size', fontSize + "px")
+         } else {
+         var title = res;
+         if (!_.isUndefined(data.metadata[res].title)){
+         title = data.metadata[res].title;
+         // adding a page number seems more confusing than helpful as they
+         // don't correlate with what the actual page number is.
+         //                        if (!_.isUndefined(data.metadata[res].pageNumber)){
+         //                            title += ' (p ' + data.metadata[res].pageNumber + ')';
+         //                        }
+         }
+         $("#corpus-docs ul").append('<li><a id="' + id + '" href="view.html?kind=' + guessKind(res) + '&id=' + res + '&action=view">' + title + '</a></li>');
+         }
+         }
+         }
+         */
 
 //        $("#corpus-docs").html(html);
 
@@ -602,11 +606,11 @@ var getResourcesForCorpus = function(that) {
 
 };
 
-var guessKind = function(resourceName){
+var guessKind = function(resourceName) {
 
     // I'm not happy with this at all, but for now it'll work.
 
-    if (isNaN(Number(resourceName))){
+    if (isNaN(Number(resourceName))) {
         // assume Internet Archive resource
         if (resourceName.indexOf("_") > 0) {
             return 'ia-pages';
@@ -629,7 +633,7 @@ function selectElementContents(el) {
 }
 
 
-var mzSelect = function(that, entType){
+var mzSelect = function(that, entType) {
 
     console.log(that);
 
@@ -643,10 +647,10 @@ var mzSelect = function(that, entType){
 //    $("#David-link").select();
 
 
-  //  var el = document.getElementById("David-link");
+    //  var el = document.getElementById("David-link");
 //    var el = document.getElementById("David-link");
     selectElementContents((that));
-   // el.dispatchEvent(event);
+    // el.dispatchEvent(event);
 
 
 }
@@ -663,7 +667,7 @@ function addEntitySearchLinks() {
 //     //  $(this).html('<a target="#" id="' + val + '-link" onclick="mzSelect(this);">' + val + '</a>');
 //        //  $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('person', val, 'ia-books') + '\'>' + val + '</a>');
 //    })
-    $(".per-ent").bind("mouseup", function(){
+    $(".per-ent").bind("mouseup", function() {
         mzSelect(this, 'PER')
     })
 //    $(".org-ent").each(function () {
@@ -671,7 +675,7 @@ function addEntitySearchLinks() {
 ////        $(this).html('<a target="#"  >' + val + '</a>');
 //    //    $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('organization', val, 'ia-books') + '\'>' + val + '</a>');
 //    })
-    $(".org-ent").bind("mouseup", function(){
+    $(".org-ent").bind("mouseup", function() {
         mzSelect(this, 'ORG')
     })
 //    $(".loc-ent").each(function () {
@@ -679,7 +683,7 @@ function addEntitySearchLinks() {
 ////        $(this).html('<a target="#"  >' + val + '</a>');
 //    //    $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('location', val, 'ia-books') + '\'>' + val + '</a>');
 //    })
-    $(".loc-ent").bind("mouseup", function(){
+    $(".loc-ent").bind("mouseup", function() {
         mzSelect(this, 'LOC')
     })
 }
@@ -690,7 +694,7 @@ function updateRatings(args) {
     if (!_.isUndefined(args.ratings)) {
         ratingsJSON.document[args.request.id] = {};
         // Loop through ratings
-        _.forEach(args.ratings, function (rating) {
+        _.forEach(args.ratings, function(rating) {
             ratingsJSON.document[args.request.id][rating.user] = rating.rating;
         });
     }
@@ -699,8 +703,8 @@ function updateRatings(args) {
     // curent program "flow" will work
     if (!_.isUndefined(args.labels)) {
         // Loop through ratings
-        _.forEach(args.labels, function (rec) {
-            if (_.isUndefined(votingJSON.document[rec.name])){
+        _.forEach(args.labels, function(rec) {
+            if (_.isUndefined(votingJSON.document[rec.name])) {
                 votingJSON.document[rec.name] = {};
             }
             if (_.isUndefined(votingJSON.document[rec.name][rec.user])) {
@@ -711,7 +715,7 @@ function updateRatings(args) {
     }
 }
 
-function displayLabels(res){
+function displayLabels(res) {
 
     // TODO ??? duplicate code
 
@@ -725,11 +729,11 @@ function displayLabels(res){
         html = '';
         var recs = JSON.parse(labels);
 
-        _.each(recs, function (r) {
+        _.each(recs, function(r) {
             html += '<button type="button" class="btn btn-default btn-sm label-button" onclick="labelClick(this, ' + r.id + ', \'' + res + '\', $(\'#' + res + '\').data(\'kind\'));"><span';
 
-            if (!_.isUndefined(votingJSON.document[res]) && !_.isUndefined(votingJSON.document[res][getCookie("username").toLowerCase()]) && !_.isUndefined(votingJSON.document[res][getCookie("username").toLowerCase()][r.id])){
-                html +=  ' class="check-mark";'
+            if (!_.isUndefined(votingJSON.document[res]) && !_.isUndefined(votingJSON.document[res][getCookie("username").toLowerCase()]) && !_.isUndefined(votingJSON.document[res][getCookie("username").toLowerCase()][r.id])) {
+                html += ' class="check-mark";'
             }
             html += '></span>' + r.name + '</button>';
         });
@@ -742,12 +746,38 @@ function displayLabels(res){
 
 }
 
-function labelClick(that, subcorpus_id, res, kind){
+function displayFacets() {
+
+    // TODO ??? duplicate code
+
+    var html = '&nbsp;';
+    var labels = localStorage["subcorpora"];
+    // 1st check ensures we have an entry for subcorpora, 2nd check makes sure there is data,
+    // 3rd check is just a safety - I manually cleared out the localstorage and the page would
+    // say "Uncaught SyntaxError: Unexpected end of input" because it was trying to parse an
+    // empty string.
+    if (!_.isUndefined(labels) && labels != 'undefined' && labels.length != 0) {
+        $("#clear-all-facets").removeClass("disabled");
+        html = '';
+        var recs = JSON.parse(labels);
+
+        _.each(recs, function(r) {
+
+            html += '<input type="checkbox" name="facets" value="' + r.id + '" />&nbsp;' + r.name + '<br>';
+
+        });
+    }
+
+    return html;
+
+}
+
+function labelClick(that, subcorpus_id, res, kind) {
 //    console.log($(that).text());
 //    console.log(res);
     var action = 'add';
     // toggle check mark
-    if ($(that).find('span').hasClass("check-mark")){
+    if ($(that).find('span').hasClass("check-mark")) {
         action = 'remove';
         $(that).find('span').removeClass("check-mark");
     } else {
@@ -761,7 +791,7 @@ function labelClick(that, subcorpus_id, res, kind){
     var corpID = getCorpusID(corpus);
     var queryID = 0;
 
-    if (!_.isUndefined(Model[kind])){
+    if (!_.isUndefined(Model[kind])) {
         queryID = Model[kind].queryid;
     }
 
@@ -772,20 +802,20 @@ function labelClick(that, subcorpus_id, res, kind){
         resource: res,
         corpusid: corpID,
         subcorpusid: subcorpus_id,
-        queryid :  queryID,
+        queryid: queryID,
         action: action
     };
 
-    API.voteForResource(args, function(){
+    API.voteForResource(args, function() {
         console.log("voted!")
-        if (action == "add"){
+        if (action == "add") {
             votingJSON.document[res][userName][subcorpus_id] = 1;
         } else {
             delete votingJSON.document[res][userName][subcorpus_id];
         }
         setUserRatingsHTML(res);
         renderRatingsSidebar(res);
-    }, function(){
+    }, function() {
         console.log("problem voting")
     });
 

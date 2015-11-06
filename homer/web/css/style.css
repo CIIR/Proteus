@@ -342,12 +342,13 @@ body {
 }
 
 #ratings {
-    border: solid;
-    padding: 1em;
-    margin-bottom: 1em;
-    margin-top: 1em;
-    overflow-y: visible;
- /*   text-align: right; */
+    /*    border: solid;
+      padding: 1em;
+      margin-bottom: 1em;
+      margin-top: 1em;
+      overflow-y: visible;
+      border-radius: 5px;
+    text-align: right; */
 }
 
 #important-entities{
@@ -487,17 +488,11 @@ body {
 
 #settings-container{
     background-color: lightgray;
-    padding: 20px;
-    border-radius: 30px;
-    border: solid;
     margin-top: 20px;
 }
 
 #subcorpora-container{
     background-color: lightblue;
-    padding: 20px;
-    border-radius: 30px;
-    border: solid;
     margin-top: 20px;
 }
 
@@ -512,7 +507,7 @@ body {
     border: solid;
     border-color: red;
 }
-*/
+
 
 #ocr-options{
     border: solid;
@@ -520,7 +515,7 @@ body {
     padding: 5px;
     margin-top: 5px;
 }
-
+*/
 .notes {
     font-style: italic;
 }
@@ -671,4 +666,27 @@ body {
     z-index: 1000;
  position: relative;
     top: -15px;
+}
+
+
+/* based on http://stackoverflow.com/questions/19774653/css3-for-html5-legend-inside-fieldset */
+fieldset  {
+    font-family: sans-serif;
+    border: 5px solid #1F497D;
+   /* background: #ddd;*/
+    border-radius: 15px;
+    padding: 10px;
+    margin-top: 15px;
+}
+ fieldset legend {
+    background: #1F497D;
+    color: #fff;
+    padding: 2px 5px ;
+/* font-size: 32px; */
+    font-size: initial;
+border-radius: 5px;
+    box-shadow: 0 0 0 2px #ddd;
+    margin-left: 5px;
+    width: auto ;
+     margin-bottom: 0px;
 }

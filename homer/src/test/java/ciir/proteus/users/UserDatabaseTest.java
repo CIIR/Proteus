@@ -1035,5 +1035,89 @@ public class UserDatabaseTest {
 
   }
 
+  @Test
+  public void getResourcesForSubcorporaTest() throws DBError, SQLException {
+    String user = "maxdcat";
+    db.register(user);
+    Parameters p = db.login(user);
+
+    Credentials cred = new Credentials(p);
+    int userid = cred.userid;
+
+    p = Parameters.create();
+
+    p.put("corpusid", 1); // default corpus inserted when Proteus starts
+
+    // insert a subcorpus
+    Parameters sc = Parameters.create();
+    List<Parameters> plist = new ArrayList<Parameters>();
+    sc.put("name", "sc1");
+    plist.add(sc);
+    p.set("subcorpora", plist);
+
+    Parameters ret = db.upsertSubCorpus(p);
+
+    // associate a resource with that subcorpus
+    String res1 = "resource_1";
+    Integer corpus_id = 1;
+    Integer subcorpus_1_id = 1;
+    Integer query_id = 1;
+    db.addVoteForResource(cred, res1, corpus_id, subcorpus_1_id, query_id);
+
+    List<Long> subcorpora = new ArrayList<>();
+    subcorpora.add(1L);
+    List<String> resources = db.getResourcesForSubcorpora(userid, corpus_id, subcorpora);
+    assertArrayEquals(new String[]{res1}, resources.toArray());
+
+    // add some more resources
+    String res2 = "resource_2";
+    db.addVoteForResource(cred, res2, corpus_id, subcorpus_1_id, query_id);
+
+    resources = db.getResourcesForSubcorpora(userid, corpus_id, subcorpora);
+    assertArrayEquals(new String[]{res1, res2}, resources.toArray());
+
+    // add a new subcorpus, existing recourse
+    Integer subcorpus_2_id = 2;
+    db.addVoteForResource(cred, res1, corpus_id, subcorpus_2_id, query_id);
+
+    // add the second subcorpus the list of subcorpora to search
+    subcorpora.add(2L);
+
+    // should only return one instance of res1
+    resources = db.getResourcesForSubcorpora(userid, corpus_id, subcorpora);
+    assertEquals(2, resources.size());
+    assertArrayEquals(new String[]{res1, res2}, resources.toArray());
+
+    String res3 = "resource_3";
+    db.addVoteForResource(cred, res3, corpus_id, subcorpus_2_id, query_id);
+
+    resources = db.getResourcesForSubcorpora(userid, corpus_id, subcorpora);
+    assertArrayEquals(new String[]{res1, res2, res3}, resources.toArray());
+
+    // ignore subcorpus 2
+    subcorpora.clear();
+    subcorpora.add(1L);
+
+    resources = db.getResourcesForSubcorpora(userid, corpus_id, subcorpora);
+    assertArrayEquals(new String[]{res1, res2}, resources.toArray());
+
+    // test number of results and start index - results are sorted by RESOURCE
+    subcorpora.add(2L);
+    resources = db.getResourcesForSubcorpora(userid, corpus_id, subcorpora, 1, 0);
+    assertArrayEquals(new String[]{res1}, resources.toArray());
+
+    resources = db.getResourcesForSubcorpora(userid, corpus_id, subcorpora, 1, 2);
+    assertArrayEquals(new String[]{res3}, resources.toArray());
+
+    resources = db.getResourcesForSubcorpora(userid, corpus_id, subcorpora, 10, 10);
+    assertEquals(0, resources.size());
+
+    resources = db.getResourcesForSubcorpora(userid, corpus_id, subcorpora, 3, 0);
+    assertArrayEquals(new String[]{res1, res2, res3}, resources.toArray());
+
+    resources = db.getResourcesForSubcorpora(userid, corpus_id, subcorpora, 100, 0);
+    assertArrayEquals(new String[]{res1, res2, res3}, resources.toArray());
+
+  }
 }
 

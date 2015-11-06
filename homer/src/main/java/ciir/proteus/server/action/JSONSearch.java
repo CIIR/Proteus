@@ -46,16 +46,28 @@ public class JSONSearch implements JSONHandler {
         String action = reqp.get("action", "search");
         String corpusName = reqp.get("corpusName", "");
 
-        List<String> labels = new ArrayList<>(); // empty list
+        List<Long> subcorpora = new ArrayList<>(); // empty list
         List<String> resList =  new ArrayList<>(); // empty list
-        if (reqp.containsKey("labels")) {
-            labels = reqp.getAsList("labels", String.class);
-            // we pass in labels on the URL so it's possible that someone could share
-            // a URL with you that has THEIR tags. So we get the same results, we'll use the
-            // "labelOwner" to get the labels.
-            resList = system.userdb.getResourcesForLabels(Integer.parseInt(reqp.get("labelOwner", userid)), labels); // get all
-            log.info("We have labels: " + labels.toString());
-        } else {
+//        List<String> labels = new ArrayList<>(); // empty list
+//        if (reqp.containsKey("labels")) {
+//            labels = reqp.getAsList("labels", String.class);
+//            // we pass in labels on the URL so it's possible that someone could share
+//            // a URL with you that has THEIR tags. So we get the same results, we'll use the
+//            // "labelOwner" to get the labels.
+//            resList = system.userdb.getResourcesForLabels(Integer.parseInt(reqp.get("labelOwner", userid)), labels); // get all
+//            log.info("We have labels: " + labels.toString());
+        if (reqp.containsKey("subcorpora")) {
+            subcorpora = reqp.getAsList("subcorpora", Long.class);
+            resList = system.userdb.getResourcesForSubcorpora(Integer.parseInt(userid), corpusid, subcorpora); // get all
+
+            // if there are no resources for the subcorpora, we have nothing to search
+            if (resList.size() == 0){
+                return Parameters.create();
+            }
+
+            log.info("We have subcorpora: " + subcorpora.toString());
+
+            } else {
             // if we're searching by labels display ALL so only check if we
             // don't have labels
             if (numResults > 1000) {
@@ -69,15 +81,17 @@ public class JSONSearch implements JSONHandler {
             if (resList.isEmpty()) {
                 resList = system.userdb.getAllResourcesForCorpus(Integer.parseInt(userid), corpusid);
             } else {
-                // TODO: may want to use a set for this, but order may be important to the user
-                // a bit more work to do...
-                List<String> tmpResList = new ArrayList<>();
-                tmpResList = system.userdb.getAllResourcesForCorpus(Integer.parseInt(userid), corpusid);
-                for (String s : tmpResList){
-                    if (!resList.contains(s)){
-                        resList.add(s);
-                    }
-                }
+                // MCZ 11/2015 - this logic was when the resList was for labels. Now that we're using
+                // sub-corpora, we don't need this step.
+//                // TODO: may want to use a set for this, but order may be important to the user
+//                // a bit more work to do...
+//                List<String> tmpResList = new ArrayList<>();
+//                tmpResList = system.userdb.getAllResourcesForCorpus(Integer.parseInt(userid), corpusid);
+//                for (String s : tmpResList){
+//                    if (!resList.contains(s)){
+//                        resList.add(s);
+//                    }
+//                }
             }
             if (resList.isEmpty()) {
                 throw new RuntimeException("The corpus is empty.");
@@ -100,12 +114,13 @@ public class JSONSearch implements JSONHandler {
             }
         }
 
+        // TODO add subcorpora
         SearchLogData searchData = new SearchLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", "* not logged in *"));
         searchData.setEnteredQuery(query);
         searchData.setExpandedQuery((pquery == null ? "" : pquery.toString()));
         searchData.setKind(kind);
         searchData.setCorpus(corpusName);
-        searchData.setLabels(labels.toString());
+//        searchData.setLabels(labels.toString());
         searchData.setStartAt(skipResults);
         searchData.setNumResults(numResults);
         LogHelper.log(searchData, system);

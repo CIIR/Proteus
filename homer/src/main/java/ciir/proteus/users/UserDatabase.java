@@ -122,5 +122,9 @@ public interface UserDatabase {
     public void addVoteForResource(Credentials creds, String resource, Integer corpusID, Integer subcorpusID, Integer queryid) throws DBError;
     public void removeVoteForResource(Credentials creds, String resource, Integer corpusID, Integer subcorpusID) throws DBError;
 
+    public List<String> getResourcesForSubcorpora(Integer userid, Integer corpus, List<Long> subcorpora) throws DBError;
+
+    public List<String> getResourcesForSubcorpora(Integer userid, Integer corpus, List<Long> subcorpora, Integer numResults, Integer startIndex) throws DBError;
+
 
 }
