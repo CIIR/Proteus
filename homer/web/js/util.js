@@ -809,6 +809,9 @@ function labelClick(that, subcorpus_id, res, kind) {
     API.voteForResource(args, function() {
         console.log("voted!")
         if (action == "add") {
+            if (_.isUndefined(votingJSON.document[res][userName])){
+                votingJSON.document[res][userName] = {};
+            }
             votingJSON.document[res][userName][subcorpus_id] = 1;
         } else {
             delete votingJSON.document[res][userName][subcorpus_id];
