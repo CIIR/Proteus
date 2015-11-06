@@ -62,6 +62,16 @@
         <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="css/style.css" type="text/css"/>
 
+        <link rel="stylesheet" href="annotator-full.1.2.10/annotator.min.css" type="text/css" media="screen"/>
+
+        <script type="text/javascript" src="js/annotator.js"></script>
+        <script type="text/javascript" src="js/annotator.permissions.js"></script>
+        <script type="text/javascript" src="js/annotator.auth.js"></script>
+        <script type="text/javascript" src="js/annotator.store.js"></script>
+        <script type="text/javascript" src="js/annotator.filter.js"></script>
+        <script type="text/javascript" src="js/annotator.tags.min.js"></script>
+
+
         <!-- Add fancyBox -->
         <link rel="stylesheet" href="js/fancybox/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen"/>
         <script type="text/javascript" src="js/fancybox/jquery.fancybox.pack.js?v=2.1.5"></script>
@@ -188,6 +198,11 @@
                 enableAutoRetrieve();
 
 
+                $("#facets").html(displayFacets());
+
+                $("#clear-all-facets").on('click', function() {
+                    $('#facets input[type="checkbox"]:checked').removeAttr('checked');
+                });
 
 
             });</script>
@@ -320,9 +335,18 @@
  
              </div>
             -->
-            <div id="ratings">
+            <fieldset  >
+                <legend   >Document labels</legend>
+            <div id="ratings"></div>
+</fieldset>
 
-            </div>
+                <fieldset  >
+                    <legend   >Refine by</legend>
+                    <div id="facets"></div>
+                    <button type="button" id="clear-all-facets" class="btn btn-xs disabled ">Clear All</button>
+                </fieldset>
+
+
             <!--
                      <div id="accpeted-docs" class="doc-list">Accepted<br></div>
                      <div id="rejeted-docs" class="doc-list">Rejected<br></div>

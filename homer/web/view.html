@@ -130,12 +130,14 @@
 
         <div id="results-left" class="col-md-2 column">
 
-
+            <fieldset  >
+                <legend>Entity types</legend>
             <div id="ocr-options">
                 <input checked type="checkbox" id="cb-per" value="per" onclick="handleNERHilightClick(this, 'per');" /><span id="cb-per-label"> People</span><br />
                 <input checked type="checkbox" id="cb-org" value="org" onclick="handleNERHilightClick(this, 'org');" /><span id="cb-org-label"> Organizations</span><br />
                 <input checked type="checkbox" id="cb-loc" value="loc" onclick="handleNERHilightClick(this, 'loc');" /><span id="cb-loc-label"> Places</span><br />
             </div>
+                </fieldset>
 
             <div id="sidebar-notes"></div>
             <input checked type="checkbox" id="cb-group-res-by-query" value="Y" onclick=" getResourcesForCorpus(this);" /><span > Group by query</span><br />

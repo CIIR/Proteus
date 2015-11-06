@@ -1449,6 +1449,67 @@ public class H2Database implements UserDatabase {
 
   }
 
+  @Override
+  public List<String> getResourcesForSubcorpora(Integer userid, Integer corpus, List<Long> subcorpora) throws DBError {
+    return getResourcesForSubcorpora(userid, corpus, subcorpora, -1, -1);
+  }
+
+  @Override
+  public List<String> getResourcesForSubcorpora(Integer userid, Integer corpus, List<Long> subcorpora, Integer numResults, Integer startIndex) throws DBError {
+
+    // NOTE: we may want to filter by the user_id in the future. Not currently used.
+
+    Connection conn = null;
+    try {
+      conn = getConnection();
+
+      List<String> resources = new ArrayList<>();
+      Object[] objLabels = new Object[subcorpora.size()];
+      int i = 0;
+      for (Long label : subcorpora) {
+        objLabels[i++] = label;
+      }
+
+      ResultSet results = null;
+
+      String limitClause = " ";
+      if (numResults != -1) {
+        limitClause = " LIMIT ? OFFSET ?";
+      }
+
+      // prepared statements don't like "in(...)" clauses, we have to use a temp table rather than this:
+      //  SELECT DISTINCT resource FROM RESOURCE_LABELS WHERE subcorpus_id IN (?)
+      // we need to ORDER BY to ensure the result sets will always be in the same order.
+      String sqlStatement = "SELECT DISTINCT resource FROM table(subcorpus_id BIGINT=?) temp_table ";
+      sqlStatement += " INNER JOIN resource_labels rl ON temp_table.subcorpus_id = rl.subcorpus_id ";
+      sqlStatement += " WHERE corpus_id = ? ORDER BY resource " + limitClause;
+
+      PreparedStatement sql = conn.prepareStatement(sqlStatement);
+      int paramNum = 1;
+      sql.setObject(paramNum, objLabels);
+      sql.setInt(++paramNum, corpus);
+      if (numResults != -1) {
+        sql.setInt(++paramNum, numResults);
+        sql.setInt(++paramNum, startIndex);
+      }
+
+      results = sql.executeQuery();
+
+      while (results.next()) {
+        String res = results.getString(1);
+        resources.add(res);
+      }
+
+      results.close();
+
+      return resources;
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    } finally {
+      attemptClose(conn);
+    }
+  }
 
   // "borrowed" from the C3P0 examples: http://sourceforge.net/projects/c3p0/files/c3p0-src/c3p0-0.9.2.1/
   static void attemptClose(Connection o) {

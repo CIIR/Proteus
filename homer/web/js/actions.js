@@ -97,6 +97,19 @@ var doSearchRequest = function(args) {
         top_k_entities: parseInt(numEntities)
     };
 
+    var subcorpora = [];
+    // TODO temp
+    _.forEach($('#facets input[type="checkbox"]:checked'), function(rec){
+             console.log($(rec).attr("value") + ' is checked')
+            subcorpora.push(parseInt($(rec).attr("value")));
+    })
+    if (!_.isEmpty(subcorpora)) {
+        var subcorporaArgs = '{ "subcorpora":  ' + JSON.stringify(subcorpora) + '}';
+        args = _.merge(args, JSON.parse(subcorporaArgs));
+    }
+    // end temp
+
+
     // we could have args passed in esp if they're reusing an URL
     if (_.isUndefined(args.labels)) {
         var labelList = getSelectedLabels();
