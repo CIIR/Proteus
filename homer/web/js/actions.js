@@ -204,6 +204,9 @@ var onSearchSuccess = function(data) {
     Model[data.request.kind].queryType = data.queryType;
     Model[data.request.kind].queryid = data.queryid;
 
+    localStorage["subcorpora"] = JSON.stringify(data.subcorpora);
+    updateFacets();
+
     var rank = Model[data.request.kind].results.length + 1;
     var newResults = _(data.results).map(function(result) {
         result.viewKind = data.request.viewKind || data.request.kind;

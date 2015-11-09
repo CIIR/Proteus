@@ -772,6 +772,22 @@ function displayFacets() {
 
 }
 
+// if we added a subcorpus, add it to the facet list
+function updateFacets() {
+
+    // TODO ??? duplicate code
+
+    var html = '&nbsp;';
+    var labels = JSON.parse(localStorage["subcorpora"]);
+
+    _.each(labels, function(rec){
+        // see if it exists, if not add it
+        if (_.isEmpty($('#facets input[value=' + rec.id + ']'))){
+            $("#facets").append('<input type="checkbox" name="facets" value="' + rec.id + '" />&nbsp;' + rec.name + '<br>');
+        }
+    })
+
+}
 function labelClick(that, subcorpus_id, res, kind) {
 //    console.log($(that).text());
 //    console.log(res);

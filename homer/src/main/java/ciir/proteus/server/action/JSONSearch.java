@@ -185,6 +185,15 @@ public class JSONSearch implements JSONHandler {
             response.set("queryTerms", QueryUtil.queryTerms(pquery));
         }
 
+        // add sub-corpora
+        subcorpora = null;
+        try {
+            Parameters labels = system.userdb.getAllSubCorpora();
+            response.copyFrom(labels);
+        } catch (DBError dbError) {
+            dbError.printStackTrace();
+        }
+
         return response;
     }
 
