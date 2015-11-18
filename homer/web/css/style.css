@@ -311,7 +311,7 @@ body {
 }
 
 .book-result:hover{
-    background-color: lightyellow !important;
+    background-color: lavenderblush !important;
 }
 .page-result:hover{
     background-color: aliceblue !important;
@@ -319,7 +319,9 @@ body {
 .page-result{
     margin-left: 50px;
 }
-
+.note-result:hover{
+    background-color: lemonchiffon !important;
+}
 /* enable scrollbars */
 #pastSearches{
     height:30%;
@@ -649,6 +651,14 @@ body {
     background-color: lightgrey;
     padding : 5px;
     border-radius: 5px;
+}
+
+
+.resource-notes{
+    background-color: lemonchiffon;
+    padding : 5px;
+    border-radius: 5px;
+    margin : 5px;
 }
 
 .label-button {

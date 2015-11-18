@@ -41,7 +41,7 @@ public class NoteAPITest {
     }
 
     @Test
-    public void noteTest() throws DBError, SQLException, IOException {
+    public void noteTest() throws Exception {
 
         String user = "maxdcat";
         env.proteus.userdb.register(user);

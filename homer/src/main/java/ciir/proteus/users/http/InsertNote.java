@@ -7,9 +7,20 @@ import ciir.proteus.users.error.DBError;
 import ciir.proteus.util.logging.ClickLogHelper;
 import ciir.proteus.util.logging.AddNoteLogData;
 import ciir.proteus.util.logging.LogHelper;
+import org.lemurproject.galago.core.index.mem.FlushToDisk;
+import org.lemurproject.galago.core.parse.Document;
+import org.lemurproject.galago.core.parse.Tag;
+import org.lemurproject.galago.core.parse.TagTokenizer;
+import org.lemurproject.galago.core.retrieval.Retrieval;
+import org.lemurproject.galago.core.retrieval.RetrievalFactory;
 import org.lemurproject.galago.utility.Parameters;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author michaelz.
@@ -21,7 +32,7 @@ public class InsertNote extends DBAction {
     }
 
     @Override
-    public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DBError {
+    public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DBError, IOException {
         Integer id = -1;
 
         Credentials creds = Credentials.fromJSON(reqp);
@@ -30,6 +41,40 @@ public class InsertNote extends DBAction {
         String data = reqp.toString();
         Integer corpusid = reqp.get("corpus", -1);
         id = userdb.insertNote(creds, corpusid, res, data);
+
+        if (system.noteIndex != null){
+            TagTokenizer tok = new TagTokenizer();
+
+            // TODO dup code, should have an addNoteToIndex() funciton
+            Document d = new Document();
+            d.name = reqp.get("uri") + "_" + id;
+            d.text = reqp.getString("user").split("@")[0] + " : " + reqp.get("quote") + " : " + reqp.get("text");
+            d.tags = new ArrayList<Tag>();
+            d.metadata = new HashMap<String,String>();
+            // TODO : do we use metadata for things like who made the note, etc?
+            d.metadata.put("docType", "note");
+            tok.process(d);
+            system.noteIndex.process(d);
+
+            String noteIndexPath = system.getConfig().get("noteIndex", "????");
+            // flush the index to disk
+            FlushToDisk.flushMemoryIndex(system.noteIndex, noteIndexPath);
+
+            Retrieval retrieval = system.getRetrieval("ia-corpus");
+            Parameters newParams = Parameters.create();
+            Parameters globalParams = retrieval.getGlobalParameters();
+            List<String> idx = globalParams.getAsList("index");
+
+            // no need to re-add the memory index
+//            idx.add(noteIndexPath);
+            newParams.put("index", idx);
+            try {
+                system.kinds.put("ia-corpus", RetrievalFactory.create(newParams));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
 
         AddNoteLogData logData = new AddNoteLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
         logData.setCorpus(corpusid);

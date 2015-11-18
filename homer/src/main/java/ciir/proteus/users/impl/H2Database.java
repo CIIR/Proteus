@@ -1105,18 +1105,22 @@ public class H2Database implements UserDatabase {
       // NOTE: we ignore any resources that have ONLY -1 ratings. If ANYONE said it belongs (+1) we'll include it.
       if (numResults == -1) {
         PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM resource_labels WHERE corpus_id = ? " +
-                " UNION SELECT DISTINCT resource FROM notes WHERE corpus_id = ? ORDER BY resource");
+                " UNION SELECT DISTINCT resource || '_' || notes.id FROM notes WHERE corpus_id = ? " + // get notes
+                " UNION SELECT DISTINCT resource FROM notes WHERE corpus_id = ? ORDER BY resource"); // get any pages that have notes
         sql.setInt(1, corpusID);
         sql.setInt(2, corpusID);
+        sql.setInt(3, corpusID);
         results = sql.executeQuery();
       } else {
         // we need to ORDER BY to ensure the result sets will always be in the same order.
         PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM resource_labels WHERE corpus_id = ? " +
+                " UNION SELECT DISTINCT resource || '_' || notes.id FROM notes WHERE corpus_id = ? " +
                 " UNION SELECT DISTINCT resource FROM notes WHERE corpus_id = ? ORDER BY resource LIMIT ? OFFSET ?");
         sql.setInt(1, corpusID);
         sql.setInt(2, corpusID);
-        sql.setInt(3, numResults);
-        sql.setInt(4, startIndex);
+        sql.setInt(3, corpusID);
+        sql.setInt(4, numResults);
+        sql.setInt(5, startIndex);
         results = sql.executeQuery();
       }
 
@@ -1274,14 +1278,16 @@ public class H2Database implements UserDatabase {
     try {
       conn = getConnection();
 
-      PreparedStatement sql = conn.prepareStatement("SELECT GREATEST(upd_dttm, ins_dttm) as dttm, data FROM notes WHERE corpus_id = ? ORDER BY dttm  DESC");
+      PreparedStatement sql = conn.prepareStatement("SELECT GREATEST(upd_dttm, ins_dttm) as dttm, id, resource, data FROM notes WHERE corpus_id = ? ORDER BY dttm  DESC");
 
       sql.setInt(1, corpusID);
 
       ResultSet tuples = sql.executeQuery();
       while (tuples.next()) {
-        Parameters p = Parameters.parseString(tuples.getString(2));
+        Parameters p = Parameters.parseString(tuples.getString(4));
         p.put("dttm", tuples.getString(1));
+        p.put("id", tuples.getString(2));
+        p.put("resource", tuples.getString(3));
         notes.add(p);
       }
       tuples.close();

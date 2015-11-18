@@ -6,6 +6,8 @@ import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
 import static ciir.proteus.users.http.DBAction.log;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +29,7 @@ public class GetResourcesForLabels extends DBAction {
     }
 
     @Override
-    public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError {
+    public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, IOException {
 
         Credentials creds = Credentials.fromJSON(reqp);
         List<String> labels = reqp.getAsList("labels", String.class);

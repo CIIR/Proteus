@@ -41,7 +41,6 @@ var renderResult = function(queryTerms, result, resDiv) {
 
     if (!_.isUndefined(pageNum)) {
         kind = 'ia-pages';
-
         // if page result - make the link go to the page
         name = Render.getDocumentURL('https://archive.org/stream/' + identifier + '#page/n' + pageNum + '/mode/2up', result.meta.title || result.name, queryTerms, result.rank);
 
@@ -50,6 +49,16 @@ var renderResult = function(queryTerms, result, resDiv) {
         //name += ' pp. ' + pageNum;
         pgImage = pageImage(identifier, pageNum);
         previewImage = Render.getPagePreviewURL(pgImage, thumbnail, queryTerms, result.rank);
+
+        // check if we're a note. Can either check metadata "docType" = "note" or there are two underscores
+        // TODO : this should be moved up
+        if (!_.isUndefined(result.meta)) {
+            if (result.meta.docType == "note") {
+                return renderNoteResult(queryTerms, result, resDiv);
+            }
+        }
+
+
     }
 
     var tmphtml = '';
@@ -64,7 +73,7 @@ var renderResult = function(queryTerms, result, resDiv) {
 
         var urlParams = getURLParams();
         var currentKind = urlParams["kind"];
-        if (_.isUndefined(currentKind)){
+        if (_.isUndefined(currentKind)) {
             // we should be guarenteed to have a kind on the URL, but since
             // they can easily be changed, we'll take the kind from the search
             // result just in case.
@@ -87,13 +96,13 @@ var renderResult = function(queryTerms, result, resDiv) {
     } // end if we have entities
 
 
-  // var func = "recordSwipe('" + result.name + "', $('#" + result.name + "').data('metadata'),$('#" + result.name + "').data('kind'),"
+    // var func = "recordSwipe('" + result.name + "', $('#" + result.name + "').data('metadata'),$('#" + result.name + "').data('kind'),"
     var html =
             '<table>' +
             '<tr>';
 //    }
 
-    html +=    '<td class="preview" rowspan="2">' + previewImage + '</td>' +
+    html += '<td class="preview" rowspan="2">' + previewImage + '</td>' +
             '<td class="name">' + name + '&nbsp;(<a target="_blank" href="view.html?kind=' + kind + '&action=view&id=' + result.name + '">view OCR</a>)&nbsp;'
 
     // store the ratings with names but keep it hidden, we'll use this on hover to display the users and
@@ -101,10 +110,10 @@ var renderResult = function(queryTerms, result, resDiv) {
     html += '<span id="' + result.name + '-user-ratings"></span><span  style="display:none" id="' + result.name + '-user-ratings-w-names"></span>';
 
     html += '</td></div></td>' +
-                //    '<td class="slider-rating"><div id="rating-' + result.name + '" class="rainbow-slider"></div></td>' +
-  //  '<td class="score">&nbsp;&nbsp;rank: ' + result.rank + '</td>' +
-    '<td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td>' +
-    '</tr>';
+            //    '<td class="slider-rating"><div id="rating-' + result.name + '" class="rainbow-slider"></div></td>' +
+            //  '<td class="score">&nbsp;&nbsp;rank: ' + result.rank + '</td>' +
+            '<td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td>' +
+            '</tr>';
 
     if (snippet) {
         html += '<tr><td class="snippet" colspan="3"> ...';
@@ -120,96 +129,64 @@ var renderResult = function(queryTerms, result, resDiv) {
 //        html += UI.renderTags(result);
 //    }
 
+    // show notes
+    var noteHTML = '';
+    _.each(result.notes.rows, function(note) {
+        noteHTML += '<div class="resource-notes" ><a target="_blank" href="../view.html?kind=ia-pages&action=view&id=' + note.uri + '&noteid=' + note.id + '">';
+        noteHTML += note.user.split('@')[0] + ' : ' + note.text + ' : ';
+        noteHTML += highlightText(queryTerms, note.quote, '<span class="hili">', '</span>');
+        noteHTML += '</a></div>';
+        //
+    })
+
+    if (noteHTML.length > 0) {
+        html += '<a href="#" onclick="UI.toggleNotes(\'tmpnotes-' + result.name + '\');"><span class="fa fa-pencil"></span>&nbsp;Show/Hide notes</a></div>';
+        html += '<div id="tmpnotes-' + result.name + '"  style="display:none">' + noteHTML + '</div>';
+    }
+
     // show labels
-    html += '<div id="notes-' + result.name + '" class="resource-labels">' + displayLabels(result.name) + '</div>';
+    // TODO change notes to labels or subcorpus
+    html += '<div id="notes-' + result.name + '" class="resource-labels" >' + displayLabels(result.name) + '</div>';
 
 
     resDiv.html(html);
-
-
-    //  var corpus = getCookie("corpus");
-    //  var corpusID = getCorpusID(corpus);
-    //
-    //  var args = {uri: result.name, corpus: corpusID};
-    //
-    //
-    //
-    //  API.getNotes(args,
-    //          function(results) {
-    //            $('#notes-' + result.name).html(JSON.parse(results));
-    //          },
-    //          function() {alert("error getting notes!")});
 
     return resDiv;
 
 };
 
-//var renderResult_notes = function(queryTerms, result, resDiv) {
-//
-//    var name = result.uri;
-//    var identifier = result.uri.split('_')[0];
-//    var snippet = result.quote;
-//    var pageNum = result.uri.split('_')[1];
-//    var iaURL = result.uri;
-//
-//    if (iaURL) {
-//        name = Render.getDocumentURL(iaURL, name, queryTerms, result.rank);
-//    }
-//    var pgImage = iaURL;
-//    var kind = 'ia-books'; // default
-//    var thumbnail = '<img class="ia-thumbnail" src="' + pageThumbnail(identifier, pageNum) + '"/>';
-//    var previewImage = Render.getDocumentURL(pgImage, thumbnail, queryTerms, result.rank);
-//
-//    if (!_.isUndefined(pageNum)) {
-//        kind = 'ia-pages';
-//
-//        // if page result - make the link go to the page
-//        name = Render.getDocumentURL('https://archive.org/stream/' + identifier + '#page/n' + pageNum + '/mode/2up', result.uri || result.name, queryTerms, 1);
-//
-//        // MCZ : removing page number for now as it does not match up with
-//        // the physical page number shown on the page
-//        //name += ' pp. ' + pageNum;
-//        pgImage = pageImage(identifier, pageNum);
-//        previewImage = Render.getPagePreviewURL(pgImage, thumbnail, queryTerms, result.rank);
-//    }
-//
-//
-//    var dt = result.dttm.substring(0, result.dttm.lastIndexOf(":"));
-////  var html =
-////          '<table>' +
-////          '<tr><td>' + dt + '</td></tr>' +
-////          '<tr>' +
-////          '<td class="name">' + name + '&nbsp;(<a target="_blank" href="?kind=' + kind +'&action=view&id=' + result.uri + '">view OCR</a>)</td>' +
-////          '</tr>' ;
-////
-////  if (snippet) {
-////    html += '<tr><td class="quoted-text" >';
-////    html +=   snippet ;
-////    html += '</td></tr>';
-////    html += '<tr><td class="notes">';
-////    html += result.text
-////    html += '</td></tr>';
-////  }
-//
-//    var html =
-//            '<div class="note">' +
-//            result.id + ' ' +
-//            dt + ' ' +
-//            result.user + ' added the note: "<i>' +
-//            result.text + '</i>" to the text "<b>' + snippet + '</b>"' +
-//            ' for resource: <a target="_blank" href="view.html?kind=' + kind + '&action=view&id=' + result.uri + '&noteid=' + result.id + '">view</a>'
-//
-//    html += '</div><br>';
-//
-//    $("#note-list").html(html);
-//
-//
-//
-//    resDiv.html(html);
-//
-//    return resDiv;
-//
-//};
+var renderNoteResult = function(queryTerms, result, resDiv) {
+
+    // TODO duplicate code with renderResult()
+
+    var name = "Note: ";
+    var snippet = result.text;
+    var idParts = result.name.split('_');
+
+    var html =
+            '<table>' +
+            '<tr>';
+
+    html += '<td class="name">' + name;
+
+    html += '</td></div></td>' +
+            '<td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td>' +
+            '</tr>';
+
+    if (snippet) {
+        html += '<tr><td class="snippet" colspan="3">';
+        html += '<div  ><a target="_blank" href="../view.html?kind=ia-pages&action=view&id=' + idParts[0] + '_' + idParts[1] + '&noteid=' + idParts[2] + '">';
+        html += highlightText(queryTerms, snippet, '<span class="hili">', '</span>', false); // last param says not to strip out punctuation
+        html += '</a></td></tr>';
+    }
+
+    html += '</table>';
+
+    resDiv.html(html);
+
+    return resDiv;
+
+};
 
 
 var doActionSearchPages = function(args) {

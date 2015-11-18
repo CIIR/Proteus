@@ -11,6 +11,7 @@ import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.Utility;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -18,7 +19,7 @@ import java.util.*;
  */
 public class DocumentAnnotator {
 
-  public static List<Parameters> annotate(ProteusSystem system, String kind, List<String> names, Parameters reqp) throws DBError {
+  public static List<Parameters> annotate(ProteusSystem system, String kind, List<String> names, Parameters reqp) throws DBError, IOException {
     reqp.put("metadata", false);
     List<ScoredDocument> fakeDocs = new ArrayList<>();
     for (String id : names) {
@@ -28,7 +29,7 @@ public class DocumentAnnotator {
   }
 
   // note that they query could be null if we want to get all documents for a label or corpus.
-  public static List<Parameters> annotate(ProteusSystem system, String kind, List<ScoredDocument> results, Node query, Parameters reqp) throws DBError {
+  public static List<Parameters> annotate(ProteusSystem system, String kind, List<ScoredDocument> results, Node query, Parameters reqp) throws DBError, IOException {
     boolean snippets = reqp.get("snippets", true);
     boolean metadata = reqp.get("metadata", true);
     boolean tags = reqp.get("tags", reqp.isString("user"));
@@ -37,10 +38,9 @@ public class DocumentAnnotator {
 
     List<String> names =   RetrievalUtil.names(results);
 
-
     // retrieve snippets if requested AND we have a query
     if (snippets && query != null) {
-      results = system.findPassages(kind, query, names);
+       results = system.findPassages(kind, query, names);
     }
 
     // if we need to pull the documents:
@@ -80,8 +80,11 @@ public class DocumentAnnotator {
       if (metadata) {
         docp.put("meta", Parameters.parseMap(doc.metadata));
       }
-      // snippet annotation
-      if (snippets) {
+
+      // if this is a note, put the use the whole text
+      if (doc.metadata.containsKey("docType") && doc.metadata.get("docType").equals("note")){
+        docp.put("text", doc.text);
+      } else if (snippets) {
         // if the query was null, we'll just get the first part of
         // the document.
         int begin = 0;
@@ -131,6 +134,13 @@ public class DocumentAnnotator {
       Parameters labels = Parameters.create();
       labels = system.userdb.getResourceRatings2(doc.name, corpusID);
       docp.copyFrom(labels);
+
+      // get any notes
+      // TODO : pass a flag indicating if we want to get notes
+      Parameters tmpNotes = system.userdb.getNotesForResource(doc.name, corpusID);
+      Parameters notes = Parameters.create();
+      notes.put("notes", tmpNotes);
+      docp.copyFrom(notes);
 
       resultData.add(docp);
     }

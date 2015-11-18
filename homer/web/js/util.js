@@ -99,8 +99,11 @@ var getCookie = function(cname) {
 var getUser = function() {
     return getCookie("username")
 }
-var highlightText = function(queryTerms, text, beforeTag, afterTag) {
+var highlightText = function(queryTerms, text, beforeTag, afterTag, stripPunctuation) {
 
+    if (_.isUndefined(stripPunctuation)) {
+        stripPunctuation = true;
+    }
     // there are situations where the "text" is actually an image such
     // as a thumbnail so skip those.
     if (text.toString().substring(0, 4) == "<img")
@@ -110,7 +113,10 @@ var highlightText = function(queryTerms, text, beforeTag, afterTag) {
     // spearated by semicolons.
     // Note we use toString(), because if a string like "2014" is passed
     // in, JS will think it's a numeric datatype.
-    text = text.toString().replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+    if (stripPunctuation) {
+        text = text.toString().replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+    }
+
     var words = text.split(/\s/);
 
     return _(words).map(function(word) {
@@ -612,11 +618,17 @@ var guessKind = function(resourceName) {
 
     if (isNaN(Number(resourceName))) {
         // assume Internet Archive resource
-        if (resourceName.indexOf("_") > 0) {
-            return 'ia-pages';
-        } else {
+        var parts = resourceName.split("_");
+        if (parts.length == 1) {
             return 'ia-books';
         }
+        if (parts.length == 2) {
+            return 'ia-pages';
+        }
+        if (parts.length == 3) {
+            return 'ia-notes';
+        }
+
     } else {
         return "article"; // ACM paper
     }
@@ -780,9 +792,9 @@ function updateFacets() {
     var html = '&nbsp;';
     var labels = JSON.parse(localStorage["subcorpora"]);
 
-    _.each(labels, function(rec){
+    _.each(labels, function(rec) {
         // see if it exists, if not add it
-        if (_.isEmpty($('#facets input[value=' + rec.id + ']'))){
+        if (_.isEmpty($('#facets input[value=' + rec.id + ']'))) {
             $("#facets").append('<input type="checkbox" name="facets" value="' + rec.id + '" />&nbsp;' + rec.name + '<br>');
         }
     })
@@ -825,7 +837,7 @@ function labelClick(that, subcorpus_id, res, kind) {
     API.voteForResource(args, function() {
         console.log("voted!")
         if (action == "add") {
-            if (_.isUndefined(votingJSON.document[res][userName])){
+            if (_.isUndefined(votingJSON.document[res][userName])) {
                 votingJSON.document[res][userName] = {};
             }
             votingJSON.document[res][userName][subcorpus_id] = 1;

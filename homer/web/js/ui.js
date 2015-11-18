@@ -254,6 +254,9 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
     if (docType == 'ia-pages'){
         resDiv.addClass('page-result');
     }
+    if (docType == 'ia-notes'){
+        resDiv.addClass('note-result');
+    }
     if ( result.viewKind == 'ia-books'){
         var html =  '<div  id="search-pages-link-' + result.name + '" class="search-pages-link" >'
         html += '<a href="#" onclick="UI.getPages(\'' + result.name + '\');"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show matching pages in this book...</a></div>';
@@ -403,7 +406,49 @@ UI.appendResults = function(queryTerms, results) {
     _(results).forEach(function(result) {
         UI.renderSingleResult(result, queryTerms);
     });
-  //  mzinitAnnotationLogic("#notes-atlastchristmasi00kinguoft_320")
+
+//    $("#atlastchristmasi00kinguoft_320").annotator.subscribe('onAnnotationsLoaded', function(){
+//        console.log('poop')
+//    })
+  //  initAnnotationLogic("#notes-atlastchristmasi00kinguoft_320")
+    var corpus = getCookie("corpus");
+    var userName = getCookie("username");
+    var userToken = getCookie("token");
+    var userID = getCookie("userid");
+    var corpusID = getCorpusID(corpus);
+
+    var ann = $("#notes-atlastchristmasi00kinguoft_320").annotator();
+    var resource = "atlastchristmasi00kinguoft_320";//element.substring(7).toString(); // strip off "[#|.]notes-"
+
+    ann.annotator('addPlugin', 'NoteEvent', true);
+
+//    ann.annotator.subscribe('onAnnotationsLoaded', function(){
+//            console.log('poop')
+//        })
+
+    ann.annotator('addPlugin', 'Store', {
+        annotationData: {
+            uri: resource,
+            userid: parseInt(userID),
+            user: userName,
+            token: userToken,
+            corpus: parseInt(corpusID),
+            corpusName: corpus
+        },
+        loadFromSearch: {
+            'uri': resource,
+            corpus: parseInt(corpusID)
+
+        },
+        urls: {
+            // These are the default URLs.
+            create: '/annotations/ins',
+            update: '/annotations/upd/:id',
+            destroy: '/annotations/del/:id',
+            search: '/annotations/search'
+        }
+    });
+
 
     /*
     $( ".result" ).draggable({
@@ -647,6 +692,10 @@ UI.showPages = function(bookid){
 
     $("#search-pages-link-" + bookid).html(html);
 
+}
+
+UI.toggleNotes = function(noteDivID){
+    $('#' + noteDivID).toggle();
 }
 
 var init = true;

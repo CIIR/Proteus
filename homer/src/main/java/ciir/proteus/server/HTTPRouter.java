@@ -191,12 +191,12 @@ public class HTTPRouter implements WebHandler {
 
     // the notes API requires that different status codes are returned, so we have a method that
     // accepts the correct code to return.
-    private void handleJSON(JSONHandler which, String method, String path, Parameters reqp, HttpServletResponse resp, HttpServletRequest req) throws IOException, SQLException {
+    private void handleJSON(JSONHandler which, String method, String path, Parameters reqp, HttpServletResponse resp, HttpServletRequest req) throws Exception {
         handleJSON(which, method, path, reqp, resp, req, 200);
     }
 
     // forward to JSON handler interface
-    private void handleJSON(JSONHandler which, String method, String path, Parameters reqp, HttpServletResponse resp, HttpServletRequest req, Integer statusCode) throws IOException, SQLException {
+    private void handleJSON(JSONHandler which, String method, String path, Parameters reqp, HttpServletResponse resp, HttpServletRequest req, Integer statusCode) throws Exception {
         resp.addHeader("Access-Control-Allow-Origin", "*");
         resp.addHeader("Content-Type", "application/json");
 

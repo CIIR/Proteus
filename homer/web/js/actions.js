@@ -99,9 +99,9 @@ var doSearchRequest = function(args) {
 
     var subcorpora = [];
     // TODO temp
-    _.forEach($('#facets input[type="checkbox"]:checked'), function(rec){
-             console.log($(rec).attr("value") + ' is checked')
-            subcorpora.push(parseInt($(rec).attr("value")));
+    _.forEach($('#facets input[type="checkbox"]:checked'), function(rec) {
+        console.log($(rec).attr("value") + ' is checked')
+        subcorpora.push(parseInt($(rec).attr("value")));
     })
     if (!_.isEmpty(subcorpora)) {
         var subcorporaArgs = '{ "subcorpora":  ' + JSON.stringify(subcorpora) + '}';
@@ -219,11 +219,11 @@ var onSearchSuccess = function(data) {
             ratingsJSON.document[result.name][rating.user] = rating.rating;
         });
 
-    // TODO ??? duplicate code - we do this in a couple places - should probably just call updateRatings() (with a better name)
+        // TODO ??? duplicate code - we do this in a couple places - should probably just call updateRatings() (with a better name)
         votingJSON.document[result.name] = {};
         // Loop through ratings
         _.forEach(result.labels, function(rec) {
-            if (_.isUndefined(votingJSON.document[result.name][rec.user])){
+            if (_.isUndefined(votingJSON.document[result.name][rec.user])) {
                 votingJSON.document[result.name][rec.user] = {};
             }
             votingJSON.document[result.name][rec.user][rec.subcorpusid] = 1;
@@ -300,13 +300,12 @@ var renderBookPageHTML = function(text, pageID, pageNum, el) {
     var pgTxt = processTags(text);
     var id = getBookID(pageID, pageNum);
 
-    var labelHTML = '<div id="notes-' +  id + '" class="resource-labels">' + displayLabels( id) + '</div>';
+    var labelHTML = '<div id="notes-' + id + '" class="resource-labels">' + displayLabels(id) + '</div>';
 
     el.html('<div class="book-page row clearfix ">' +
             '<div class="col-md-2 column left-align" ><span id="' + id + '-user-ratings-w-names"></span></div>' +
             '<div id="' + getNotesID(pageID, pageNum) + '" class="book-text col-md-4 column left-align">' + pgTxt + labelHTML + '</div>' +
             '<div  class="page-image col-md-4 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img src="' + pgImage + '"></a></div>' +
-
             '</div>');
 
 
@@ -664,6 +663,9 @@ var doNextPageRequest = function(pageID) {
 /** this gets called with the response from ViewResource */
 var onViewPageSuccess = function(args) {
 
+    var identifier = args.request.id.split('_')[0];
+    var pageNum = args.request.id.split('_')[1];
+
     var pageID = "";
     UI.clearError();
     metadataDiv.hide();
@@ -676,7 +678,6 @@ var onViewPageSuccess = function(args) {
         page.max = args.metadata.imagecount;
     }
     pageID = args.request.id.slice(0, pos);
-
 
     var metaHtml = '';
     metaHtml += ' <table>';
@@ -697,14 +698,10 @@ var onViewPageSuccess = function(args) {
     //        html += '<div id="prevPage"></div>';
     //    }
 
-    var identifier = args.request.id.split('_')[0];
-    var pageNum = args.request.id.split('_')[1];
-
     var elid = "page-" + args.request.id;
     $("#book-pages").html('<div id="' + elid + '"></div>');
 
     html += renderBookPageHTML(args.text, identifier, pageNum, $("#" + elid));
-
 
     // base the page size on the first page
     pageHeight = Math.max(MIN_PAGE_HEIGHT, $(".book-text").height());
@@ -713,11 +710,38 @@ var onViewPageSuccess = function(args) {
     //  viewResourceDiv.html(html);
     setPageNavigation(pageID);
 
-
     viewResourceDiv.show();
     var corpus = getCookie("corpus");
-    if (!isLoggedIn() || corpus == "")
+    if (!isLoggedIn() || corpus == "") {
         return;
+    }
+
+    // if we have a noteid, scroll to that note
+    var el = "#" + getNotesID(identifier, pageNum);
+    var urlParams = getURLParams();
+    if (!_.isUndefined(urlParams["noteid"])) {
+        // scroll to the note once all notes for that page are loaded.
+        $(el).bind("annotationsLoaded", function() {
+
+            var note = '.annotator-hl[data-annotation-id="' + urlParams["noteid"] + '"]';
+
+            if ($(note).length) {
+
+                $('#results-right').animate({
+                    scrollTop: $(note).offset().top - 80
+                }, 2000);
+
+            } else {
+                alert("Couldn't find that note, perhaps it was deleted?")
+            }
+
+            // remove the notid from the URL so we don't re-trigger
+            removeURLParam("noteid");
+
+            // unbind once we're done
+            $(el).unbind("annotationsLoaded");
+        });
+    }
 
     initBookAnnotationLogic(identifier, pageNum);
 
@@ -853,10 +877,10 @@ var updateNoteDiv = function(bookid, pgnum) {
     var pb = '.page-break[page=' + pgnum + ']';
 
     var id = getBookID(bookid, pgnum);
-    var labelHTML = '<div id="notes-' +  id + '" class="resource-labels">' + displayLabels( id) + '</div>';
+    var labelHTML = '<div id="notes-' + id + '" class="resource-labels">' + displayLabels(id) + '</div>';
 
 
-    var pghtml = '<div id="' + noteid + '" class="book-text col-md-5 column left-align">' + $(pb).html() + labelHTML +'</div>' +
+    var pghtml = '<div id="' + noteid + '" class="book-text col-md-5 column left-align">' + $(pb).html() + labelHTML + '</div>' +
             '<div id="' + noteid + '-page-image" class="page-image col-md-5 column left-align"><br><a href="#" onclick="getPageImage(\'' +
             noteid + '-page-image\',\'' + pgImage + '\');" >View the actual page</a></div>';
     $(pb).html(pghtml);
@@ -883,7 +907,7 @@ var setPageNavigation = function(bookID) {
 
 
     $("#view-nav-top").html(prevHTML);
-    $("#view-nav-bottom").html( nextHTML)
+    $("#view-nav-bottom").html(nextHTML)
 
 };
 

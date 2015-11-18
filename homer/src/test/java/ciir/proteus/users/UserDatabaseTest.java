@@ -647,15 +647,11 @@ public class UserDatabaseTest {
     assertArrayEquals(new String[]{res1, res2, res3}, results.toArray());
 
     // now add it to the corpus we're getting the resources for
-    db.insertNote(cred, corpus1, res4, "{ data: '123' }");
+    Integer noteid = db.insertNote(cred, corpus1, res4, "{ data: '123' }");
     results = db.getAllResourcesForCorpus(cred.userid, corpus1) ;
-    assertArrayEquals(new String[]{res1, res2, res3, res4}, results.toArray());
+    assertArrayEquals(new String[]{res1, res2, res3, res4, res4 + "_" + noteid}, results.toArray());
 
-    // add resource to notes that already exists in ratings to ensure no duplicates
-    db.insertNote(cred, corpus1, res2, "{ data: '123' }");
-    results = db.getAllResourcesForCorpus(cred.userid, corpus1) ;
-    assertArrayEquals(new String[]{res1, res2, res3, res4}, results.toArray());
-  }
+ }
 
   @Test
   public void getResourcesForCorpusByQueryTest() throws DBError, SQLException {
