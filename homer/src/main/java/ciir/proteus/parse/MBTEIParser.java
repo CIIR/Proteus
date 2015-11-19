@@ -81,10 +81,13 @@ public abstract class MBTEIParser extends DocumentStreamParser {
       archiveId = basename.split(".mbtei.gz")[0];
     else if (basename.endsWith(".toktei.gz"))
       archiveId = basename.split(".toktei.gz")[0];
+    else if (basename.endsWith(".rawtei.gz"))
+      archiveId = basename.split(".rawtei.gz")[0];
     else {
-      System.err.println("File extension was expected to be .mbtei.gz or .toktei.gz");
+      System.err.println("File extension was expected to be .rawtei.gz, .mbtei.gz or .toktei.gz");
       archiveId = basename;
     }
+    
     // put it in the metadata if we had to guess it.
     metadata.put("identifier", archiveId);
     return archiveId;
