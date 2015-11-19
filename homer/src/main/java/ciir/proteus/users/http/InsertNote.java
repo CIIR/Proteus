@@ -61,13 +61,18 @@ public class InsertNote extends DBAction {
             FlushToDisk.flushMemoryIndex(system.noteIndex, noteIndexPath);
 
             Retrieval retrieval = system.getRetrieval("ia-corpus");
-            Parameters newParams = Parameters.create();
             Parameters globalParams = retrieval.getGlobalParameters();
-            List<String> idx = globalParams.getAsList("index");
+            List<String> idx = new ArrayList<String>();
+            idx.addAll(globalParams.getAsList("index"));
 
-            // no need to re-add the memory index
-//            idx.add(noteIndexPath);
+            // only add the note index path if it's not already there
+            if (idx.contains(noteIndexPath) == false){
+                idx.add(noteIndexPath);
+            }
+
+            Parameters newParams = Parameters.create();
             newParams.put("index", idx);
+
             try {
                 system.kinds.put("ia-corpus", RetrievalFactory.create(newParams));
             } catch (Exception e) {

@@ -16,6 +16,7 @@ import org.lemurproject.galago.core.retrieval.processing.MaxPassageFinder;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.utility.Parameters;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -144,16 +145,18 @@ public class ProteusSystem {
       return;
     }
 
-    TagTokenizer tok = new TagTokenizer();
-
-    // add disk flushed memory index to the "ia-corpus" kind
-
     noteIndex = new MemoryIndex(Parameters.parseArray("makecorpus", true));
 
-    //            // get all the notes and add them as documents
     // TODO : get corpus number
     Parameters notes = this.userdb.getNotesForCorpus(1);
     List<Parameters> arr = notes.getAsList("rows");
+
+    // only have to do the below logic if we have notes
+    if (arr.size() == 0){
+      return;
+    }
+
+    TagTokenizer tok = new TagTokenizer();
 
     for (Parameters p : arr) {
       Document d = new Document();
@@ -170,10 +173,12 @@ public class ProteusSystem {
     // flush the index to disk
     FlushToDisk.flushMemoryIndex(noteIndex, noteIndexPath);
 
+    // add disk flushed memory index to the "ia-corpus" kind
     Retrieval retrieval = getRetrieval("ia-corpus");
     Parameters newParams = Parameters.create();
     Parameters globalParams = retrieval.getGlobalParameters();
-    List<String> idx = globalParams.getAsList("index");
+    List<String> idx = new ArrayList<String>();
+    idx.addAll(globalParams.getAsList("index"));
 
     // only add the note index path if it's not already there
     if (idx.contains(noteIndexPath) == false){

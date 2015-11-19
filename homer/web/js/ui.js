@@ -706,7 +706,7 @@ function renderRatingsSidebar(id){
     // we already have this info in the document list - although it is hidden -
     // so grab it and display it here
     var rating_html = $('#' + id + '-user-ratings-w-names').html();
-    if (rating_html.length == 0){
+    if (_.isUndefined(rating_html) || rating_html.length == 0){
         rating_html = '<span>No labels yet for this document</span>';
     }
 
