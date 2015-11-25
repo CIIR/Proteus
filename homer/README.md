@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/CIIR/Proteus.svg?branch=master)](https://travis-ci.org/CIIR/Proteus)
 ## Compiling
 
     mvn package
