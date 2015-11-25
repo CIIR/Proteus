@@ -27,7 +27,7 @@ To run the Proteus demonstration server (in its current state) on these books, r
 There appears to be some issues with hostname resolution with JDK7 on a Mac. Adding a workaround to your ``/etc/hosts`` seems to be the [solution](https://groups.google.com/forum/#!topic/h2-database/DuIlTLN5KOo). TL;DR - you need to explain to your computer that your hostname is the same as 127.0.0.1.
 
 
-## Run examples of searching acm digital library articles
+## Run examples of searching ACM digital library articles
 
 	Step 1: recompile the whole package if you haven't updated changes of ACMArticleParser.java in 2014/04/23
 	
