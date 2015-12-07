@@ -105,6 +105,7 @@ public abstract class MBTEIParser extends DocumentStreamParser {
   }
 
   public static Map<String, String> parseMetadata(XMLStreamReader xml) throws XMLStreamException {
+
     Map<String, String> metadata = new HashMap<>();
 
     if (!xml.hasNext())
@@ -143,7 +144,12 @@ public abstract class MBTEIParser extends DocumentStreamParser {
 
       // add the built text when we hit a close
       if (event == XMLStreamConstants.END_ELEMENT) {
-        metadata.put(currentMetaTag, tagBuilder.toString().trim());
+        if (metadata.containsKey(currentMetaTag)) {
+          // separate values with a semicolon
+          metadata.put(currentMetaTag, metadata.get(currentMetaTag) + " ; " + tagBuilder.toString().trim());
+        } else {
+           metadata.put(currentMetaTag, tagBuilder.toString().trim());
+        }
         currentMetaTag = null;
         tagBuilder = null;
       }
