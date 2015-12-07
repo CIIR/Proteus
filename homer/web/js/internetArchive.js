@@ -25,14 +25,15 @@ var pageThumbnail = function(archiveId, pageNum) {
 //console.log("Defining table, renderResult=" + renderResult);
 var renderResult = function(queryTerms, result, resDiv) {
 
-    var name = result.meta.title || result.name;
+    var name = result.meta.title || result.meta.TEI|| result.name ;
     var identifier = result.name.split('_')[0];
     var snippet = result.snippet;
     var pageNum = result.name.split('_')[1];
     var iaURL = result.meta["identifier-access"];
+    var nameLink = '';
 
     if (iaURL) {
-        name = Render.getDocumentURL(iaURL, name, queryTerms, result.rank);
+        nameLink = Render.getDocumentURL(iaURL, name, queryTerms, result.rank);
     }
     var pgImage = iaURL;
     var kind = 'ia-books'; // default
@@ -42,7 +43,7 @@ var renderResult = function(queryTerms, result, resDiv) {
     if (!_.isUndefined(pageNum)) {
         kind = 'ia-pages';
         // if page result - make the link go to the page
-        name = Render.getDocumentURL('https://archive.org/stream/' + identifier + '#page/n' + pageNum + '/mode/2up', result.meta.title || result.name, queryTerms, result.rank);
+        nameLink = Render.getDocumentURL('https://archive.org/stream/' + identifier + '#page/n' + pageNum + '/mode/2up', name, queryTerms, result.rank);
 
         // MCZ : removing page number for now as it does not match up with
         // the physical page number shown on the page
@@ -103,7 +104,7 @@ var renderResult = function(queryTerms, result, resDiv) {
 //    }
 
     html += '<td class="preview" rowspan="2">' + previewImage + '</td>' +
-            '<td class="name">' + name + '&nbsp;(<a target="_blank" href="view.html?kind=' + kind + '&action=view&id=' + result.name + '">view OCR</a>)&nbsp;'
+            '<td class="name">' + nameLink + '&nbsp;(<a target="_blank" href="view.html?kind=' + kind + '&action=view&id=' + result.name + '">view OCR</a>)&nbsp;'
 
     // store the ratings with names but keep it hidden, we'll use this on hover to display the users and
     // their ratings on the left hand side of the screen.
