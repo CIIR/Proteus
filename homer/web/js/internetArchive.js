@@ -58,15 +58,13 @@ var renderResult = function(queryTerms, result, resDiv) {
                 return renderNoteResult(queryTerms, result, resDiv);
             }
         }
-
-
     }
 
     var tmphtml = '';
 
     if (!_.isUndefined(result.entities)) {
 
-        // the "kind" varialbe right now represents the kind for this specific search result.
+        // the "kind" variable right now represents the kind for this specific search result.
         // But for the link to search by entity we want the "kind" that we orginally
         // searched for, which is on the URL.
         // So if we searched "ia-all" (both books and pages) we want this to search "ia-all" too
@@ -103,7 +101,7 @@ var renderResult = function(queryTerms, result, resDiv) {
             '<tr>';
 //    }
 
-    html += '<td class="preview" rowspan="2">' + previewImage + '</td>' +
+    html += '<td class="preview" rowspan="3">' + previewImage + '</td>' +
             '<td class="name">' + nameLink + '&nbsp;(<a target="_blank" href="view.html?kind=' + kind + '&action=view&id=' + result.name + '">view OCR</a>)&nbsp;'
 
     // store the ratings with names but keep it hidden, we'll use this on hover to display the users and
@@ -111,10 +109,10 @@ var renderResult = function(queryTerms, result, resDiv) {
     html += '<span id="' + result.name + '-user-ratings"></span><span  style="display:none" id="' + result.name + '-user-ratings-w-names"></span>';
 
     html += '</td></div></td>' +
-            //    '<td class="slider-rating"><div id="rating-' + result.name + '" class="rainbow-slider"></div></td>' +
-            //  '<td class="score">&nbsp;&nbsp;rank: ' + result.rank + '</td>' +
-            '<td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td>' +
+        '<td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td> ' +
             '</tr>';
+
+    html += '<tr><td>' + result.meta.creator + '&nbsp;•&nbsp;published: ' + result.meta.date + '</td></tr>' ;
 
     if (snippet) {
         html += '<tr><td class="snippet" colspan="3"> ...';
