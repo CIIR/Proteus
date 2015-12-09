@@ -559,7 +559,7 @@ var getResourcesForCorpus = function(that) {
                     el.css('font-size', fontSize + "px")
                 } else {
                     var title = res;
-                    if (!_.isUndefined(data.metadata[res].title)) {
+                    if (!_.isUndefined(data.metadata[res]) && !_.isUndefined(data.metadata[res].title)) {
                         title = data.metadata[res].title;
                     }
                     $("#corpus-docs ul:last").append('<li><a id="' + id + '" href="view.html?kind=' + guessKind(res) + '&id=' + res + '&action=view">' + title + '</a></li>');

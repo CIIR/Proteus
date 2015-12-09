@@ -180,6 +180,7 @@ var renderNoteResult = function(queryTerms, result, resDiv) {
     }
 
     html += '</table>';
+    html += '<div id="notes-' + result.name + '" class="resource-labels" >' + displayLabels(result.name) + '</div>';
 
     resDiv.html(html);
 
