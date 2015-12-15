@@ -223,10 +223,13 @@ var onSearchSuccess = function(data) {
         votingJSON.document[result.name] = {};
         // Loop through ratings
         _.forEach(result.labels, function(rec) {
-            if (_.isUndefined(votingJSON.document[result.name][rec.user])) {
-                votingJSON.document[result.name][rec.user] = {};
+            if (_.isUndefined(votingJSON.document[rec.name])) {
+                votingJSON.document[rec.name] = {};
             }
-            votingJSON.document[result.name][rec.user][rec.subcorpusid] = 1;
+            if (_.isUndefined(votingJSON.document[rec.name][rec.user])) {
+                votingJSON.document[rec.name][rec.user] = {};
+            }
+            votingJSON.document[rec.name][rec.user][rec.subcorpusid] = 1;
         });
 
 

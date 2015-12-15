@@ -167,6 +167,9 @@ var renderNoteResult = function(queryTerms, result, resDiv) {
             '<tr>';
 
     html += '<td class="name">' + name;
+    // store the ratings with names but keep it hidden, we'll use this on hover to display the users and
+    // their ratings on the left hand side of the screen.
+    html += '<span id="' + result.name + '-user-ratings"></span><span  style="display:none" id="' + result.name + '-user-ratings-w-names"></span>';
 
     html += '</td></div></td>' +
             '<td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td>' +
