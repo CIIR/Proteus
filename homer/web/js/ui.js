@@ -402,7 +402,7 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
 
 UI.appendResults = function(queryTerms, results) {
 
-    UI.showProgress("Ajax response received!");
+    //UI.showProgress("Ajax response received!");
     _(results).forEach(function(result) {
         UI.renderSingleResult(result, queryTerms);
     });

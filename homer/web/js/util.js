@@ -789,6 +789,9 @@ function updateFacets() {
 
     // TODO ??? duplicate code
 
+    if (_.isUndefined(localStorage["subcorpora"])){
+        return;
+    }
     var html = '&nbsp;';
     var labels = JSON.parse(localStorage["subcorpora"]);
 

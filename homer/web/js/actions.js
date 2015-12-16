@@ -199,13 +199,26 @@ var onSearchSuccess = function(data) {
     $("#more").html(""); // clear progress animation
     // console.log(data);
 
+    //  var tmp = JSON.parse(data.tf);
+    if (!_.isUndefined(data.tf)){
+        console.log(Object.keys(data.tf));
+        console.log(data.tf);
+        var q = ""
+        _.forEach(data.tfnormalized, function(t) {
+            q += t.term + "^" + t.weight + " ";
+        })
+        console.log(q);
+    }
+
     // mark up results with rank and kind
     Model[data.request.kind].query = data.request.q;
     Model[data.request.kind].queryType = data.queryType;
     Model[data.request.kind].queryid = data.queryid;
 
-    localStorage["subcorpora"] = JSON.stringify(data.subcorpora);
-    updateFacets();
+    if (!_.isUndefined(data.subcorpora)) {
+        localStorage["subcorpora"] = JSON.stringify(data.subcorpora);
+        updateFacets();
+    }
 
     var rank = Model[data.request.kind].results.length + 1;
     var newResults = _(data.results).map(function(result) {
@@ -259,6 +272,7 @@ var onSearchSuccess = function(data) {
         }
         return;
     }
+
     var usingLabels = false;
     var tree = $("#tree").fancytree("getTree");
     if (!_.isUndefined(data.request.labels)) {
@@ -285,12 +299,17 @@ var onSearchSuccess = function(data) {
     }
     UI.appendResults(Model[data.request.kind].queryTerms, newResults);
 
-    // if we searched by labels or corpus, we returned EVERYTHING so we
+    if (data.request.n > data.results.length){
+        UI.showProgress("No more results for '" + data.request.q + "'");
+    }
+    // if we searched by labels or (sub)corpus, we returned EVERYTHING so we
     // don't re-enable the auto-retrieve
-    if (usingLabels === false && Model[data.request.kind].request.action != "search-corpus") {
+    if (usingLabels === false && Model[data.request.kind].request.action != "search-corpus" && (_.isUndefined(data.request.subcorpora) || data.request.subcorpora.length == 0)) {
         // ??? if we're expanding pages for a book, this happens TOO SOON, the pages haven't rendered
         // yet so the scroll bar size is wrong
         enableAutoRetrieve();
+    } else {
+        UI.showProgress("No more results." );
     }
 
     setUpMouseEvents(); // TODO : only want to do this once
