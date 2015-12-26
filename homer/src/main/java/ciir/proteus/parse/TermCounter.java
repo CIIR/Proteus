@@ -85,14 +85,14 @@ public class TermCounter {
         int docCount = 0;
         ArrayList<Path> thesePaths = new ArrayList<Path>();
 
-        //Files.walk(Paths.get(termDirectory)).forEach(filePath -> {
-        //    if (Files.isRegularFile(filePath)) {
-        //        //System.out.println("File Name: " + filePath.getFileName());
-        //        thesePaths.add(filePath);
-        //    }
-        //});
-        File directory = new File(termDirectory);
-        File[] directoryList = directory.list();
+        Files.walk(Paths.get(termDirectory)).forEach(filePath -> {
+            if (Files.isRegularFile(filePath)) {
+                //System.out.println("File Name: " + filePath.getFileName());
+                thesePaths.add(filePath);
+            }
+        });
+        //File directory = new File(termDirectory);
+        //File[] directoryList = directory.list();
         for(Path filePath: thesePaths){
                 List<String> lines = null;
                 try {
