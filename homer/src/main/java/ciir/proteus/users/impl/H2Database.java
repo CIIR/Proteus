@@ -1444,7 +1444,6 @@ public class H2Database implements UserDatabase {
 
       int numRows = sql.executeUpdate();
 
-      assert (numRows == 1);
     } catch (SQLException e) {
       e.printStackTrace();
       throw new RuntimeException(e);

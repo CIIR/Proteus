@@ -41,6 +41,19 @@ public class UpdateNote extends DBAction {
         Integer corpusid = reqp.get("corpus", -1);
         userdb.updateNote(creds, id, corpusid, data);
 
+        // add any subcorpus labels for this comment
+        List<Parameters> labels = reqp.getAsList("subcorpusLabels", Parameters.class);
+        for (Parameters label : labels){
+            if (label.containsKey("checked") == false){
+                continue;
+            }
+            if (label.get("checked", true)){
+                userdb.addVoteForResource(creds, res + "_" + id, corpusid, label.getInt("subcorpusid"), -1);
+            } else {
+                userdb.removeVoteForResource(creds, res + "_" + id, corpusid, label.getInt("subcorpusid"));
+            }
+        } // end loop through labels
+        
         // to delete a note from the index, we have to re-load from the database
         system.loadNoteIndex();
 

@@ -42,6 +42,20 @@ public class InsertNote extends DBAction {
         Integer corpusid = reqp.get("corpus", -1);
         id = userdb.insertNote(creds, corpusid, res, data);
 
+        // add any subcorpus labels for this comment
+        List<Parameters> labels = reqp.getAsList("subcorpusLabels", Parameters.class);
+        for (Parameters label : labels){
+            if (label.containsKey("checked") == false){
+                continue;
+            }
+            if (label.get("checked", true)){
+                userdb.addVoteForResource(creds, res + "_" + id, corpusid, label.getInt("subcorpusid"), -1);
+            }
+            // it's possible that we get a false value for checked, but since this is a new note,
+            // there's no reason to remove it because it doesn't exist.
+
+        } // end loop through labels
+
         if (system.noteIndex != null){
             TagTokenizer tok = new TagTokenizer();
 

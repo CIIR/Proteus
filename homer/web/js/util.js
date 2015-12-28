@@ -726,6 +726,54 @@ function updateRatings(args) {
         });
     }
 }
+function displayLabelsForComments(annotation) {
+
+    var res = annotation.uri + '_' + annotation.id;
+    // if this is a NEW annotation the vote isn't in votingJSON yet - because we don't know the
+    // annotation ID when the annotation is created - so we'll update the votingJSON if needed.
+    _.forEach(annotation.subcorpusLabels, function(obj){
+
+        if (_.isUndefined(votingJSON.document[res])) {
+            votingJSON.document[res] = {};
+        }
+        if (_.isUndefined(votingJSON.document[res][annotation.user])) {
+            votingJSON.document[res][annotation.user] = {};
+        }
+        if (obj.checked == true){
+            votingJSON.document[res][annotation.user][obj.subcorpusid] = 1;
+        } else {
+            delete votingJSON.document[res][annotation.user][obj.subcorpusid];
+        }
+
+    });
+
+
+    // TODO ??? duplicate code - with displayLables() only diff is the onclick function
+
+    var html = '&nbsp;';
+    var labels = localStorage["subcorpora"];
+    // 1st check ensures we have an entry for subcorpora, 2nd check makes sure there is data,
+    // 3rd check is just a safety - I manually cleared out the localstorage and the page would
+    // say "Uncaught SyntaxError: Unexpected end of input" because it was trying to parse an
+    // empty string.
+    if (!_.isUndefined(labels) && labels != 'undefined' && labels.length != 0) {
+        html = '';
+        var recs = JSON.parse(labels);
+
+        _.each(recs, function(r) {
+            html += '<button type="button" class="btn btn-default btn-sm label-button" onclick="labelClickComment(this, ' + r.id + ');"><span';
+
+            if (!_.isUndefined(votingJSON.document[res]) && !_.isUndefined(votingJSON.document[res][getCookie("username").toLowerCase()]) && !_.isUndefined(votingJSON.document[res][getCookie("username").toLowerCase()][r.id])) {
+                html += ' class="check-mark";'
+            }
+            html += '></span>' + r.name + '</button>';
+        });
+
+    }
+
+    return html;
+
+}
 
 function displayLabels(res) {
 
@@ -751,9 +799,6 @@ function displayLabels(res) {
         });
     }
 
-//    $(".label_button").bind("click", function(){
-//        console.log( this);
-//    })
     return html;
 
 }
@@ -804,8 +849,8 @@ function updateFacets() {
 
 }
 function labelClick(that, subcorpus_id, res, kind) {
-//    console.log($(that).text());
-//    console.log(res);
+    //    console.log($(that).text());
+    //    console.log(res);
     var action = 'add';
     // toggle check mark
     if ($(that).find('span').hasClass("check-mark")) {
@@ -854,3 +899,19 @@ function labelClick(that, subcorpus_id, res, kind) {
     });
 
 }
+
+function labelClickComment(that, subcorpus_id) {
+
+    $(that).data('subcorpusid', subcorpus_id);
+
+    // toggle check mark
+    if ($(that).find('span').hasClass("check-mark")) {
+        $(that).find('span').removeClass("check-mark");
+        $(that).data('checked', false);
+    } else {
+        $(that).find('span').addClass("check-mark");
+        $(that).data('checked', true);
+    }
+
+}
+

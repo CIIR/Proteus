@@ -700,3 +700,7 @@ border-radius: 5px;
     width: auto ;
      margin-bottom: 0px;
 }
+
+.comment-labels button{
+    margin: 3px !important;
+}
