@@ -1,14 +1,24 @@
 package ciir.proteus.util;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
+import javax.servlet.http.Part;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
@@ -128,6 +138,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    public String changeSessionId() {
+        return null;
+    }
+
     @Override
     public boolean isRequestedSessionIdValid() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -146,6 +160,30 @@ public class MockHttpServletRequest implements HttpServletRequest {
     @Override
     public boolean isRequestedSessionIdFromUrl() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public boolean authenticate(HttpServletResponse httpServletResponse) throws IOException, ServletException {
+        return false;
+    }
+
+    public void login(String s, String s1) throws ServletException {
+
+    }
+
+    public void logout() throws ServletException {
+
+    }
+
+    public Collection<Part> getParts() throws IOException, ServletException {
+        return null;
+    }
+
+    public Part getPart(String s) throws IOException, ServletException {
+        return null;
+    }
+
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> aClass) throws IOException, ServletException {
+        return null;
     }
 
     @Override
@@ -171,6 +209,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
     @Override
     public int getContentLength() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public long getContentLengthLong() {
+        return 0;
     }
 
     @Override
@@ -286,5 +328,33 @@ public class MockHttpServletRequest implements HttpServletRequest {
     @Override
     public int getLocalPort() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public ServletContext getServletContext() {
+        return null;
+    }
+
+    public AsyncContext startAsync() throws IllegalStateException {
+        return null;
+    }
+
+    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+        return null;
+    }
+
+    public boolean isAsyncStarted() {
+        return false;
+    }
+
+    public boolean isAsyncSupported() {
+        return false;
+    }
+
+    public AsyncContext getAsyncContext() {
+        return null;
+    }
+
+    public DispatcherType getDispatcherType() {
+        return null;
     }
 }
