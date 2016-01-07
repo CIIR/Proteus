@@ -1,10 +1,7 @@
 package ciir.proteus.parse;
 
-import org.lemurproject.galago.core.index.stats.NodeStatistics;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.parse.TagTokenizer;
-import org.lemurproject.galago.core.retrieval.LocalRetrieval;
-import org.lemurproject.galago.core.retrieval.query.Node;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -13,19 +10,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * @author David Wemhoener
  */
 
-public class TermCounter {
+public class TFIDFCalculator {
 
     String writeOutLocation;
     int offset;
 
-    public TermCounter(String possibleWriteOutLocation) {
+    public TFIDFCalculator(String possibleWriteOutLocation) {
 
         this.writeOutLocation = possibleWriteOutLocation;
         offset = 10;
@@ -81,23 +80,30 @@ public class TermCounter {
         }
         bw.close();
     }
-    public void generateCountFile(String termFrequencyDirectory, String index,String termDictionary) throws Exception {
-
-        ArrayList<Path> thesePaths = new ArrayList<Path>();
+    public void generateTfIdfFile(String termFrequencyDirectory,String idfScoresFile, String termDictionary) throws IOException {
+        HashSet<String> globalTerms = new HashSet<String>();
         HashMap<String, Integer> termIdDict = new HashMap<String, Integer>();
+        HashMap<String, Double> idfScores = new HashMap<String, Double>();
+        int loc = 0;
+        int docCount = 0;
 
-        BufferedReader br = Files.newBufferedReader(Paths.get(termDictionary));
+        BufferedReader br = Files.newBufferedReader(Paths.get(idfScoresFile));
         String line = null;
+        while ((line = br.readLine()) != null) {
+            idfScores.put(line.split(" ")[0],Double.valueOf(line.split(" ")[1]));
+        }
+        br.close();
+
+        br = Files.newBufferedReader(Paths.get(termDictionary));
         while ((line = br.readLine()) != null) {
             termIdDict.put(line.split(" ")[1],Integer.valueOf(line.split(" ")[0]));
         }
         br.close();
 
-        LocalRetrieval ret = new LocalRetrieval(index);
-        int docCount = (int)ret.getCollectionStatistics(new Node("lengths")).documentCount;
-
+        ArrayList<Path> thesePaths = new ArrayList<Path>();
         Files.walk(Paths.get(termFrequencyDirectory)).forEach(filePath -> {
             if (Files.isRegularFile(filePath)) {
+                //System.out.println("File Name: " + filePath.getFileName());
                 thesePaths.add(filePath);
             }
         });
@@ -117,14 +123,8 @@ public class TermCounter {
                 //System.out.println(element);
                 if(!element.isEmpty()) {
                     String[] e = element.split(" ");
-                    //System.out.println(e[0]);
-                    //System.out.println(e[1]);
-                    //System.out.println(Integer.parseInt(e[1]));
-                    //System.out.println(globalTermCounts.get(e[0]));
-                    //System.out.println(Math.log10(docCount / globalTermCounts.get(e[0])));
                     if(!isStopWord(e[0])){
-                        NodeStatistics textStats = ret.getNodeStatistics(new Node("text", e[0]));
-                        double d = Integer.parseInt(e[1]) * Math.log10(docCount / textStats.nodeDocumentCount);
+                        double d = Integer.parseInt(e[1]) * idfScores.get(String.valueOf(termIdDict.get(e[0])));
                         //System.out.println(d);
                         terms.add(String.valueOf(termIdDict.get(e[0])) + " " + String.valueOf(d));
                     }
@@ -141,7 +141,6 @@ public class TermCounter {
             bw.write("\n");
             bw.close();
         }
-
     }
     public boolean isStopWord(String term){
         HashSet<String> stopWords = new HashSet<String>();
@@ -158,9 +157,9 @@ public class TermCounter {
     }
     public static void main(String[] args) throws Exception {
         String termFrequencyDirectory = args[0];
-        String index = args[1];
+        String idfScoresFile = args[1];
         String termDictionary = args[2];
-        TermCounter tc = new TermCounter("output/");
-        tc.generateCountFile(termFrequencyDirectory, index,termDictionary);
+        TFIDFCalculator tc = new TFIDFCalculator("output/");
+        tc.generateTfIdfFile(termFrequencyDirectory,idfScoresFile,termDictionary);
     }
 }
