@@ -158,7 +158,7 @@ public class TermCounter {
         stopWords.add("or");
         stopWords.add("and");
         if(stopWords.contains(term.toLowerCase())) return true;
-        else return false;    
+        else return false;
     }
     public static void main(String[] args) throws Exception {
         String termFrequencyDirectory = args[0];
