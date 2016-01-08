@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.nio.charset.Charset;
 
 /**
  * @author David Wemhoener
@@ -86,10 +87,13 @@ public class TermCounter {
         ArrayList<Path> thesePaths = new ArrayList<Path>();
         HashMap<String, Integer> termIdDict = new HashMap<String, Integer>();
 
-        BufferedReader br = Files.newBufferedReader(Paths.get(termDictionary));
+        BufferedReader br = Files.newBufferedReader(Paths.get(termDictionary),Charset.forName("UTF-16"));
         String line = null;
-        while ((line = br.readLine()) != null) {
+        line = br.readLine();
+        while (line != null) {
+            System.out.println(line);
             termIdDict.put(line.split(" ")[1],Integer.valueOf(line.split(" ")[0]));
+            line = br.readLine();
         }
         br.close();
 

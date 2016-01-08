@@ -65,7 +65,9 @@ public class NamedEntityRecorder {
                 for (int i = tag.begin; i < tag.end; i++) {
                     nb.append(doc.terms.get(i) + " ");
                 }
-                nb.deleteCharAt(nb.lastIndexOf(" "));
+                if(!(nb.lastIndexOf(" ")==-1)){
+                    nb.deleteCharAt(nb.lastIndexOf(" "));
+                }
                 String name = nb.toString();
                 boolean isNum = name.matches("\\d+");
                 if(isNum || entity.equals("location")) {
