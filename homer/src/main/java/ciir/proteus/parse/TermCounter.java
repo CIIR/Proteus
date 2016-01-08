@@ -87,7 +87,7 @@ public class TermCounter {
         ArrayList<Path> thesePaths = new ArrayList<Path>();
         HashMap<String, Integer> termIdDict = new HashMap<String, Integer>();
 
-        BufferedReader br = Files.newBufferedReader(Paths.get(termDictionary));
+        BufferedReader br = Files.newBufferedReader(Paths.get(termDictionary),Charset.forName("UTF-8"));
         String line = null;
         line = br.readLine();
         while (line != null) {
