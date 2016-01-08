@@ -4,10 +4,7 @@ import org.lemurproject.galago.core.index.IndexPartReader;
 import org.lemurproject.galago.core.index.disk.DiskIndex;
 import org.lemurproject.galago.core.index.KeyIterator;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -49,7 +46,7 @@ public class TermEncoder {
         }
         reader.close();
 
-        BufferedWriter bw = new BufferedWriter(new FileWriter("termDictionary"));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("termDictionary"),"UTF-8"));
         for(String entry: output){
             bw.write(entry + "\n");
         }
