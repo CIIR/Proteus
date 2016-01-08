@@ -1,5 +1,9 @@
 package ciir.proteus.parse;
 
+import org.lemurproject.galago.core.index.IndexPartReader;
+import org.lemurproject.galago.core.index.disk.DiskIndex;
+import org.lemurproject.galago.core.index.KeyIterator;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -30,21 +34,20 @@ public class TermEncoder {
     }
 
     public static void main(String[] args) throws Exception {
-        String termFile = args[0];
+        String index = args[0];
 
         ArrayList<String> output = new ArrayList<String>();
         int counter = 0;
 
+        IndexPartReader reader = DiskIndex.openIndexPart(index);
 
-        BufferedReader br = Files.newBufferedReader(Paths.get(termFile));
-        String line = null;
-        line = br.readLine();
-        while (line != null) {
-            output.add(Integer.toString(counter) + " " + line.trim());
+        KeyIterator iterator = reader.getIterator();
+        while (!iterator.isDone()) {
+            output.add(Integer.toString(counter) + " " + iterator.getKeyString());
+            iterator.nextKey();
             counter++;
-            line = br.readLine();
         }
-        br.close();
+        reader.close();
 
         BufferedWriter bw = new BufferedWriter(new FileWriter("termDictionary"));
         for(String entry: output){
