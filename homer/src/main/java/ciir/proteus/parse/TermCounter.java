@@ -90,10 +90,12 @@ public class TermCounter {
         BufferedReader br = Files.newBufferedReader(Paths.get(termDictionary),Charset.forName("UTF-8"));
         String line = null;
         line = br.readLine();
+        int counter = 1;
         while (line != null) {
             if(line.trim().split(" ").length == 2) termIdDict.put(line.trim().split(" ")[1],Integer.valueOf(line.trim().split(" ")[0]));
-            else System.out.println(line.trim());
+            else System.out.println(counter);
             line = br.readLine();
+            counter++;
         }
         br.close();
 
@@ -127,10 +129,15 @@ public class TermCounter {
                     //System.out.println(globalTermCounts.get(e[0]));
                     //System.out.println(Math.log10(docCount / globalTermCounts.get(e[0])));
                     if(!isStopWord(e[0])){
-                        NodeStatistics textStats = ret.getNodeStatistics(new Node("text", e[0]));
-                        double d = Integer.parseInt(e[1]) * Math.log10(docCount / textStats.nodeDocumentCount);
-                        //System.out.println(d);
-                        terms.add(String.valueOf(termIdDict.get(e[0])) + " " + String.valueOf(d));
+                        try {
+                            NodeStatistics textStats = ret.getNodeStatistics(new Node("text", e[0]));
+                            double d = Integer.parseInt(e[1]) * Math.log10(docCount / textStats.nodeDocumentCount);
+                            //System.out.println(d);
+                            terms.add(String.valueOf(termIdDict.get(e[0])) + " " + String.valueOf(d));
+                        }
+                        catch(java.lang.IllegalArgumentException iae){
+                            System.out.println("java.lang.IllegalArgumentException for term: " + e[0]);
+                        }
                     }
                 }
             }
