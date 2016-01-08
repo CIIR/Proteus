@@ -87,12 +87,12 @@ public class TermCounter {
         ArrayList<Path> thesePaths = new ArrayList<Path>();
         HashMap<String, Integer> termIdDict = new HashMap<String, Integer>();
 
-        BufferedReader br = Files.newBufferedReader(Paths.get(termDictionary),Charset.forName("UTF-16"));
+        BufferedReader br = Files.newBufferedReader(Paths.get(termDictionary));
         String line = null;
         line = br.readLine();
         while (line != null) {
-            System.out.println(line);
-            termIdDict.put(line.split(" ")[1],Integer.valueOf(line.split(" ")[0]));
+            if(line.trim().split(" ").length == 2) termIdDict.put(line.trim().split(" ")[1],Integer.valueOf(line.trim().split(" ")[0]));
+            else System.out.println(line.trim());
             line = br.readLine();
         }
         br.close();
