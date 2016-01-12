@@ -5,6 +5,7 @@ import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.parse.TagTokenizer;
 import org.lemurproject.galago.core.retrieval.LocalRetrieval;
 import org.lemurproject.galago.core.retrieval.query.Node;
+import org.lemurproject.galago.utility.Parameters;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -101,8 +102,6 @@ public class TermCounter {
         br.close();
 
         LocalRetrieval ret = new LocalRetrieval(index);
-        NodeStatistics textStatss = ret.getNodeStatistics(new Node("text", "the"));
-        System.out.println("The is in "+textStatss.nodeDocumentCount+" documents...");
 
         int docCount = (int)ret.getCollectionStatistics(new Node("lengths")).documentCount;
 
@@ -145,6 +144,8 @@ public class TermCounter {
                         try {
                             Node n = new Node("text", e[0]);
                             n.getNodeParameters().set("part", "postings");
+                            n.getNodeParameters().set("queryType", "count");
+                            n = ret.transformQuery(n, Parameters.create());
                             NodeStatistics textStats = ret.getNodeStatistics(n);
                             double d = Integer.parseInt(e[1]) * Math.log10(docCount / textStats.nodeDocumentCount);
                             //System.out.println(d);
