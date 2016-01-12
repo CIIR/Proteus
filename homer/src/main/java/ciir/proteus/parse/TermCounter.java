@@ -83,7 +83,7 @@ public class TermCounter {
         }
         bw.close();
     }
-    public void generateCountFile(String termFrequencyDirectory, String index,String termDictionary) throws Exception {
+    public void generateCountFile(String termFrequencyDirectory, String index,String termDictionary, String suffix) throws Exception {
 
         ArrayList<Path> thesePaths = new ArrayList<Path>();
         HashMap<String, Integer> termIdDict = new HashMap<String, Integer>();
@@ -157,7 +157,7 @@ public class TermCounter {
                 }
             }
             String docName = filePath.getFileName().toString().replace(".txt","");
-            String outputName = "tf-idf/"+docName+".txt";
+            String outputName = "tf-idf/"+suffix+"/"+docName+".txt";
             //if the name is not new, then append rather than start a new file
             BufferedWriter bw = new BufferedWriter(new FileWriter(outputName));
             bw.write(docName);
@@ -186,7 +186,8 @@ public class TermCounter {
         String termFrequencyDirectory = args[0];
         String index = args[1];
         String termDictionary = args[2];
+        String suffix = args[3];
         TermCounter tc = new TermCounter("output/");
-        tc.generateCountFile(termFrequencyDirectory, index,termDictionary);
+        tc.generateCountFile(termFrequencyDirectory, index,termDictionary,suffix);
     }
 }
