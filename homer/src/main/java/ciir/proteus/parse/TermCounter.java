@@ -92,7 +92,8 @@ public class TermCounter {
         line = br.readLine();
         int counter = 1;
         while (line != null) {
-            if(line.trim().split(" ").length == 2) termIdDict.put(line.trim().split(" ")[1],Integer.valueOf(line.trim().split(" ")[0]));
+            String[] elements = line.trim().split(" ");
+            if(elements.length == 2) termIdDict.put(elements[1],Integer.valueOf(elements[0]));
             else System.out.println(counter);
             line = br.readLine();
             counter++;
@@ -141,11 +142,16 @@ public class TermCounter {
                         //catch(java.lang.IllegalArgumentException iae){
                         //    System.out.println("java.lang.IllegalArgumentException for term: " + e[0]);
                         //}
-                        Node n = new Node("text", e[0]);
-                        NodeStatistics textStats = ret.getNodeStatistics(n);
-                        double d = Integer.parseInt(e[1]) * Math.log10(docCount / textStats.nodeDocumentCount);
-                        //System.out.println(d);
-                        terms.add(String.valueOf(termIdDict.get(e[0])) + " " + String.valueOf(d));
+                        try {
+                            Node n = new Node("text", e[0]);
+                            n.getNodeParameters().set("part", "postings");
+                            NodeStatistics textStats = ret.getNodeStatistics(n);
+                            double d = Integer.parseInt(e[1]) * Math.log10(docCount / textStats.nodeDocumentCount);
+                            //System.out.println(d);
+                            terms.add(String.valueOf(termIdDict.get(e[0])) + " " + String.valueOf(d));
+                        } catch(java.lang.IllegalArgumentException iae){
+                            System.out.println("java.lang.IllegalArgumentException for term: " + e[0]);
+                        }
                     }
                 }
             }
