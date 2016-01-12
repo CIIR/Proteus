@@ -100,6 +100,9 @@ public class TermCounter {
         br.close();
 
         LocalRetrieval ret = new LocalRetrieval(index);
+        NodeStatistics textStats = ret.getNodeStatistics(new Node("text", "the"));
+        System.out.println("The is in "+textStats.nodeDocumentCount+" documents...");
+
         int docCount = (int)ret.getCollectionStatistics(new Node("lengths")).documentCount;
 
         Files.walk(Paths.get(termFrequencyDirectory)).forEach(filePath -> {
