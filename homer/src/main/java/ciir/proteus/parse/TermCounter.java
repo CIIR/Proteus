@@ -5,6 +5,7 @@ import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.parse.TagTokenizer;
 import org.lemurproject.galago.core.retrieval.LocalRetrieval;
 import org.lemurproject.galago.core.retrieval.query.Node;
+import org.lemurproject.galago.core.util.WordLists;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.BufferedReader;
@@ -102,6 +103,8 @@ public class TermCounter {
         br.close();
 
         LocalRetrieval ret = new LocalRetrieval(index);
+        Set<String> stopWords = WordLists.getWordList("inquery");
+
 
         int docCount = (int)ret.getCollectionStatistics(new Node("lengths")).documentCount;
 
@@ -131,7 +134,7 @@ public class TermCounter {
                     //System.out.println(Integer.parseInt(e[1]));
                     //System.out.println(globalTermCounts.get(e[0]));
                     //System.out.println(Math.log10(docCount / globalTermCounts.get(e[0])));
-                    if(!isStopWord(e[0])){
+                    if(!stopWords.contains(e[0])){
                         //try {
                         //    NodeStatistics textStats = ret.getNodeStatistics(new Node("text", e[0]));
                         //    double d = Integer.parseInt(e[1]) * Math.log10(docCount / textStats.nodeDocumentCount);
@@ -147,7 +150,6 @@ public class TermCounter {
                             n.getNodeParameters().set("queryType", "count");
                             n = ret.transformQuery(n, Parameters.create());
                             NodeStatistics textStats = ret.getNodeStatistics(n);
-                            if(textStats.nodeDocumentCount == 0) System.out.println("Document count = 0 for term: " + e[0]);
                             double d = Integer.parseInt(e[1]) * Math.log10(docCount / textStats.nodeDocumentCount);
                             //System.out.println(d);
                             terms.add(String.valueOf(termIdDict.get(e[0])) + " " + String.valueOf(d));
