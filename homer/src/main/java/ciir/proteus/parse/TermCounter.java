@@ -147,6 +147,7 @@ public class TermCounter {
                             n.getNodeParameters().set("queryType", "count");
                             n = ret.transformQuery(n, Parameters.create());
                             NodeStatistics textStats = ret.getNodeStatistics(n);
+                            if(textStats.nodeDocumentCount == 0) System.out.println("Document count = 0 for term: " + e[0]);
                             double d = Integer.parseInt(e[1]) * Math.log10(docCount / textStats.nodeDocumentCount);
                             //System.out.println(d);
                             terms.add(String.valueOf(termIdDict.get(e[0])) + " " + String.valueOf(d));
