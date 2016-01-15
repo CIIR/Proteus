@@ -103,8 +103,7 @@ public class TermCounter {
         br.close();
 
         LocalRetrieval ret = new LocalRetrieval(index);
-        Set<String> stopWords = WordLists.getWordList("inquery");
-
+        //Set<String> stopWords = WordLists.getWordList("inquery");
 
         int docCount = (int)ret.getCollectionStatistics(new Node("lengths")).documentCount;
 
@@ -166,9 +165,10 @@ public class TermCounter {
                 }
             }
             String docName = filePath.getFileName().toString().replace(".txt","");
-            String outputName = "tf-idf/"+suffix+"/"+docName+".txt";
+            //String outputName = "tf-idf/"+suffix+"/"+docName+".txt";
+            String outputName = "tf-idf/"+suffix+".txt";
             //if the name is not new, then append rather than start a new file
-            BufferedWriter bw = new BufferedWriter(new FileWriter(outputName));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(outputName, true));
             bw.write(docName);
             for(String term: terms){
                 bw.write(" " + term);
