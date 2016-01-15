@@ -152,10 +152,13 @@ public class TermCounter {
                             NodeStatistics textStats = ret.getNodeStatistics(n);
                             if(textStats.nodeDocumentCount > 0){
                                 double d = Integer.parseInt(e[1]) * Math.log10(docCount / textStats.nodeDocumentCount);
-                                //System.out.println(d);
                                 terms.add(String.valueOf(termIdDict.get(e[0])) + " " + String.valueOf(d));
                             }
-                            else System.out.println("WARNING: " + e[0] + " does not occur in any documents!");
+                            else{
+                                System.out.println("WARNING: " + e[0] + " does not occur in any documents!");
+                                double d = Integer.parseInt(e[1]) * Math.log10(docCount / 1);
+                                terms.add(String.valueOf(termIdDict.get(e[0])) + " " + String.valueOf(d));
+                            }
                         } catch(java.lang.IllegalArgumentException iae){
                             System.out.println("java.lang.IllegalArgumentException for term: " + e[0]);
                         }
