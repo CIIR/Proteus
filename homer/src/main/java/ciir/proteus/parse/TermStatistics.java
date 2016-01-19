@@ -40,7 +40,7 @@ public class TermStatistics {
         frequencies[1] = 0;
         frequencies[2] = 0;
 
-        IndexPartReader reader = DiskIndex.openIndexPart(index);
+        IndexPartReader reader = DiskIndex.openIndexPart(postings);
         LocalRetrieval ret = new LocalRetrieval(index);
 
         KeyIterator iterator = reader.getIterator();
