@@ -54,7 +54,7 @@ public class TermStatistics {
                 NodeStatistics textStats = ret.getNodeStatistics(n);
                 if(textStats.nodeDocumentCount > 0){
                     output.add(s + " " + String.valueOf(textStats.nodeDocumentCount));
-                    frequencies[(int)textStats.nodeDocumentCount-1]++;
+                    if(textStats.nodeDocumentCount < 4) frequencies[(int)textStats.nodeDocumentCount-1]++;
                 }
                 else System.out.println("WARNING: " + s + " does not occur in any documents!");
             } catch(java.lang.IllegalArgumentException iae){
