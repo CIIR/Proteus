@@ -31,6 +31,7 @@ public class TermStatistics {
 
     public static void main(String[] args) throws Exception {
         String index = args[0];
+        String postings = args[1];
 
         ArrayList<String> output = new ArrayList<String>();
         int counter = 0;
@@ -64,7 +65,7 @@ public class TermStatistics {
         }
         reader.close();
 
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("termDictionary"),"UTF-8"));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("termDocumentFrequencies.txt"),"UTF-8"));
         for(String entry: output){
             bw.write(entry + "\n");
         }
