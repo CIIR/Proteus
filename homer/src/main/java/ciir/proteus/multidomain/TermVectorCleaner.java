@@ -102,8 +102,6 @@ public class TermVectorCleaner {
         }
         br.close();
 
-
-
         //write out new file
         String outputName = "new-tf-idf/"+suffix+".txt";
         BufferedWriter bw = new BufferedWriter(new FileWriter(outputName));

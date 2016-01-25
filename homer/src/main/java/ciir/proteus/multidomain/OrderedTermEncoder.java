@@ -44,7 +44,7 @@ public class OrderedTermEncoder {
         String line = null;
         while ((line = br.readLine()) != null) {
             //only add those entries whose frequency is greater than 1
-            if(Integer.valueOf(line.split(" ")[1]) == 1)
+            if(Integer.valueOf(line.split(" ")[1]) != 1)
             termFrequencies.put(line.split(" ")[0],Integer.valueOf(line.split(" ")[1]));
         }
         br.close();
