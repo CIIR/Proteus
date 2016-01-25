@@ -32,15 +32,13 @@ public class TermVectorCleaner {
 
     public static void generateCountFile(String termVectorFile, String oldTermDictionaryFile, String newTermDictionaryFile, String suffix, String pagesToDeleteFile) throws Exception {
 
-        ArrayList<Path> thesePaths = new ArrayList<Path>();
-
         //create a dictionary from terms to new ids
         HashMap<String, String> newTermDictionary = new HashMap<String, String>();
         BufferedReader br = Files.newBufferedReader(Paths.get(newTermDictionaryFile), Charset.forName("UTF-8"));
-        String line = null;
-        line = br.readLine();
+        String line = br.readLine();
         int counter = 1;
         while (line != null) {
+
             String[] elements = line.trim().split(" ");
             if(elements.length == 2) newTermDictionary.put(elements[1],elements[0]);
             else System.out.println(counter);
@@ -49,19 +47,40 @@ public class TermVectorCleaner {
         }
         br.close();
 
-        //create a dictionary from old ids to terms
-        HashMap<Integer, String> oldTermDictionary = new HashMap<Integer, String>();
+        //create a dictionary from old ids to new ids
+        HashMap<Integer, String> idDictionary = new HashMap<Integer, String>();
         br = Files.newBufferedReader(Paths.get(oldTermDictionaryFile), Charset.forName("UTF-8"));
         line = br.readLine();
         counter = 1;
         while (line != null) {
-            String[] elements = line.trim().split(" ");
-            if(elements.length == 2) oldTermDictionary.put(Integer.valueOf(elements[0]),elements[1]);
-            else System.out.println(counter);
-            line = br.readLine();
-            counter++;
+            try {
+                String[] elements = line.trim().split(" ");
+                if(newTermDictionary.containsKey(elements[1])) idDictionary.put(Integer.valueOf(elements[0]),newTermDictionary.get(elements[1]));
+                line = br.readLine();
+                counter++;
+            }
+            catch(Exception e){
+                System.out.println("Exception at line " + counter);
+                System.out.println(line);
+                throw e;
+            }
         }
         br.close();
+
+        //create a dictionary from old ids to terms
+        //HashMap<Integer, String> oldTermDictionary = new HashMap<Integer, String>();
+        //br = Files.newBufferedReader(Paths.get(oldTermDictionaryFile), Charset.forName("UTF-8"));
+        //line = br.readLine();
+        counter = 1;
+        //while (line != null) {
+        //    String[] elements = line.trim().split(" ");
+        //    if(elements.length == 2) oldTermDictionary.put(Integer.valueOf(elements[0]),elements[1]);
+        //    else System.out.println(counter);
+        //    line = br.readLine();
+        //    counter++;
+        //}
+        //br.close();
+
 
         //create a list of pages to delete
         HashSet<String> pagesToDelete = new HashSet<String>();
@@ -87,13 +106,19 @@ public class TermVectorCleaner {
                 newline.append(docid);
                 int i = 1;
                 while(i < elements.length) {
-                    String term = oldTermDictionary.get(Integer.parseInt(elements[i]));
                     i++; //pointing at score
-                    if (newTermDictionary.containsKey(term)) {
-                        String newID = newTermDictionary.get(term);
+                    if (idDictionary.containsKey(Integer.parseInt(elements[i-1]))) {
+                        String newID = idDictionary.get(Integer.parseInt(elements[i-1]));
                         String score = elements[i];
                         newline.append(" " + newID + " " + score);
                     }
+                    //String term = oldTermDictionary.get(Integer.parseInt(elements[i]));
+                    //i++; //pointing at score
+                    //if (newTermDictionary.containsKey(term)) {
+                    //    String newID = newTermDictionary.get(term);
+                    //    String score = elements[i];
+                    //    newline.append(" " + newID + " " + score);
+                    //}
                     i++; //pointing at term
                 }
             output.add(newline.toString());
