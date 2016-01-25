@@ -58,6 +58,9 @@ public class OrderedTermEncoder {
             }
         });
 
+        //covert to ascending order
+        Collections.reverse(sortedTerms);
+
         //generate the new encoding from the ordered list of terms
         ArrayList<String> output = new ArrayList<String>();
         int counter = 0;
