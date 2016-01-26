@@ -96,21 +96,28 @@ public class TermVectorCleaner {
                 newline.append(docid);
                 int i = 1;
                 while(i < elements.length) {
-                    i++; //pointing at score
-                    Integer key = Integer.parseInt(elements[i-1]);
-                    if (idDictionary.containsKey(key)) {
-                        String newID = idDictionary.get(key);
-                        String score = elements[i];
-                        newline.append(" " + newID + " " + score);
+                    try {
+                        Integer key = Integer.parseInt(elements[i]);
+                        i++; //pointing at score
+                        if (idDictionary.containsKey(key)) {
+                            String newID = idDictionary.get(key);
+                            String score = elements[i];
+                            newline.append(" " + newID + " " + score);
+                        }
+                        //String term = oldTermDictionary.get(Integer.parseInt(elements[i]));
+                        //i++; //pointing at score
+                        //if (newTermDictionary.containsKey(term)) {
+                        //    String newID = newTermDictionary.get(term);
+                        //    String score = elements[i];
+                        //    newline.append(" " + newID + " " + score);
+                        //}
+                        i++; //pointing at term
                     }
-                    //String term = oldTermDictionary.get(Integer.parseInt(elements[i]));
-                    //i++; //pointing at score
-                    //if (newTermDictionary.containsKey(term)) {
-                    //    String newID = newTermDictionary.get(term);
-                    //    String score = elements[i];
-                    //    newline.append(" " + newID + " " + score);
-                    //}
-                    i++; //pointing at term
+                    catch(java.lang.NumberFormatException e){
+                        System.err.println("DOCID: " + docid);
+                        System.err.println("PREVIOUS ELEMENT: " + elements[i-1]);
+                        throw e;
+                    }
                 }
             output.add(newline.toString());
             }
