@@ -97,8 +97,9 @@ public class TermVectorCleaner {
                 int i = 1;
                 while(i < elements.length) {
                     i++; //pointing at score
-                    if (idDictionary.containsKey(Integer.parseInt(elements[i-1]))) {
-                        String newID = idDictionary.get(Integer.parseInt(elements[i-1]));
+                    Integer key = Integer.parseInt(elements[i-1]);
+                    if (idDictionary.containsKey(key)) {
+                        String newID = idDictionary.get(key);
                         String score = elements[i];
                         newline.append(" " + newID + " " + score);
                     }
