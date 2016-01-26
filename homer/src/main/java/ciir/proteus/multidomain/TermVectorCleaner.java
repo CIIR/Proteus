@@ -54,13 +54,14 @@ public class TermVectorCleaner {
         counter = 1;
         while (line != null) {
             try {
+                System.out.println(line);
                 String[] elements = line.trim().split(" ");
                 if(newTermDictionary.containsKey(elements[1])) idDictionary.put(Integer.valueOf(elements[0]),newTermDictionary.get(elements[1]));
                 line = br.readLine();
                 counter++;
             }
             catch(Exception e){
-                System.err.println("Exception at line " + counter);
+                System.err.println("Exception at dictionary file line " + counter);
                 System.err.println(line);
                 throw e;
             }
