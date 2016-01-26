@@ -60,8 +60,8 @@ public class TermVectorCleaner {
                 counter++;
             }
             catch(Exception e){
-                System.out.println("Exception at line " + counter);
-                System.out.println(line);
+                System.err.println("Exception at line " + counter);
+                System.err.println(line);
                 throw e;
             }
         }
