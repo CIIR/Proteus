@@ -38,7 +38,6 @@ public class TermVectorCleaner {
         String line = br.readLine();
         int counter = 1;
         while (line != null) {
-
             String[] elements = line.trim().split(" ");
             if(elements.length == 2) newTermDictionary.put(elements[1],elements[0]);
             else System.out.println(counter);
@@ -72,7 +71,7 @@ public class TermVectorCleaner {
         //HashMap<Integer, String> oldTermDictionary = new HashMap<Integer, String>();
         //br = Files.newBufferedReader(Paths.get(oldTermDictionaryFile), Charset.forName("UTF-8"));
         //line = br.readLine();
-        counter = 1;
+        //counter = 1;
         //while (line != null) {
         //    String[] elements = line.trim().split(" ");
         //    if(elements.length == 2) oldTermDictionary.put(Integer.valueOf(elements[0]),elements[1]);
