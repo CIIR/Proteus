@@ -30,42 +30,32 @@ public class TermVectorCleaner {
     //read through a vector file
     //format: <book> <
 
-    public static void generateCountFile(String termVectorFile, String oldTermDictionaryFile, String newTermDictionaryFile, String suffix, String pagesToDeleteFile) throws Exception {
+    public static void generateCountFile(String termVectorFile, String idDictionaryFile, String suffix, String pagesToDeleteFile) throws Exception {
 
         //create a dictionary from terms to new ids
-        HashMap<String, String> newTermDictionary = new HashMap<String, String>();
-        BufferedReader br = Files.newBufferedReader(Paths.get(newTermDictionaryFile), Charset.forName("UTF-8"));
+        HashMap<String, String> idDictionary = new HashMap<String, String>();
+        BufferedReader br = Files.newBufferedReader(Paths.get(idDictionaryFile), Charset.forName("UTF-8"));
         String line = br.readLine();
-        int counter = 1;
         while (line != null) {
             String[] elements = line.trim().split(" ");
-            if(elements.length == 2) newTermDictionary.put(elements[1],elements[0]);
-            else System.out.println(counter);
+            idDictionary.put(elements[0],elements[1]);
             line = br.readLine();
-            counter++;
         }
         br.close();
 
-        //create a dictionary from old ids to new ids
-        HashMap<Integer, String> idDictionary = new HashMap<Integer, String>();
-        br = Files.newBufferedReader(Paths.get(oldTermDictionaryFile), Charset.forName("UTF-8"));
-        line = br.readLine();
-        counter = 1;
-        while (line != null) {
-            try {
-                System.out.println(line);
-                String[] elements = line.trim().split(" ");
-                if(newTermDictionary.containsKey(elements[1])) idDictionary.put(Integer.valueOf(elements[0]),newTermDictionary.get(elements[1]));
-                line = br.readLine();
-                counter++;
-            }
-            catch(Exception e){
-                System.err.println("Exception at dictionary file line " + counter);
-                System.err.println(line);
-                throw e;
-            }
-        }
-        br.close();
+        //create a dictionary from terms to new ids
+        //HashMap<String, String> newTermDictionary = new HashMap<String, String>();
+        //BufferedReader br = Files.newBufferedReader(Paths.get(newTermDictionaryFile), Charset.forName("UTF-8"));
+        //String line = br.readLine();
+        //int counter = 1;
+        //while (line != null) {
+        //    String[] elements = line.trim().split(" ");
+        //    if(elements.length == 2) newTermDictionary.put(elements[1],elements[0]);
+        //    else System.out.println(counter);
+        //    line = br.readLine();
+        //    counter++;
+        //}
+        //br.close();
 
         //create a dictionary from old ids to terms
         //HashMap<Integer, String> oldTermDictionary = new HashMap<Integer, String>();
@@ -139,11 +129,10 @@ public class TermVectorCleaner {
 
     public static void main(String[] args) throws Exception {
         String termVectorFile = args[0];
-        String oldTermDictionaryFile = args[1];
-        String newTermDictionaryFile = args[2];
-        String suffix = args[3];
-        String pagesToDeleteFile = args[4];
-        generateCountFile(termVectorFile, oldTermDictionaryFile,newTermDictionaryFile,suffix,pagesToDeleteFile);
+        String idDictionaryFile = args[1];
+        String suffix = args[2];
+        String pagesToDeleteFile = args[3];
+        generateCountFile(termVectorFile, idDictionaryFile,suffix,pagesToDeleteFile);
     }
 
 }
