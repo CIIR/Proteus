@@ -581,3 +581,12 @@ function handleNERHilightClick(that, type){
     }
 
 }
+
+UI.showHideDups = function() {
+    var el = $('#hide-dups input[type="checkbox"]:checked');
+    if (el.length ==0){
+        $("#results .dup-result").show("slow");
+    } else {
+        $("#results .dup-result").hide("slow");
+    }
+}

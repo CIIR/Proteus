@@ -422,7 +422,9 @@ function renderDups(data) {
         }
     }
 
-    printMatrix(conf, count)
+    UI.showHideDups();
+
+    //printMatrix(conf, count)
 
 }
 
