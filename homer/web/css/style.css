@@ -704,3 +704,17 @@ border-radius: 5px;
 .comment-labels button{
     margin: 3px !important;
 }
+
+.dup-result {
+    opacity: 0.5;
+    margin-left: 100px;
+}
+
+#dup-slider{
+    margin: 10px;
+}
+
+.highlight{
+    background-color: yellow;
+    font-weight: bold;
+}

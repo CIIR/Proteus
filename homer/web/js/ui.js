@@ -176,50 +176,6 @@ function getAve(ave, id){
 
 }
 
-//function setSliderValue(name, init) {
-//
-//    var tot = 0;
-//    var cnt = 0;
-//
-//    ratingsJSON.document[name].forEach(function (rec) {
-//        tot += rec.rating;
-//        cnt += 1;
-//    })
-//
-//    if (cnt == 0){
-//        return;
-//    }
-//    var ave = tot / cnt;
-//
-//    // remove old (if it's there - we use the "proteus-rating" class so we're sure)
-//    $("#rating-" + name + "  .proteus-rating ").remove();
-//
-//    getAve(ave, name);
-//
-//    return ave-2;
-//
-//};
-
-/**
- * Renders retrieval results into UI after current results
- */
-
-UI.renderSingleResult_notes = function(result, queryTerms,  prependTo) {
-    //console.debug("result name: " + result.name);
-    var renderer = getResultRenderer('ia-pages'); //added this line and 5 below make adding/subt elements in future easier
-    var resDiv = $('<div>');
-    resDiv.attr('class', 'result');
-    resDiv.attr('id', result.uri);
-
-    // put it at the end unless we pass in where we want it to go
-    if (_.isUndefined(prependTo)) {
-        resultsDiv.append(renderer(queryTerms, result, resDiv)); //* 6/26/2014
-    } else {
-        $(prependTo).after(renderer(queryTerms, result, resDiv));
-    }
-
-
-};
 
 
 UI.renderSingleResult = function(result, queryTerms,  prependTo) {
@@ -257,146 +213,17 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
     if (docType == 'ia-notes'){
         resDiv.addClass('note-result');
     }
+
+    resDiv.addClass('result-' + result.rank);
+    html =  '<div class="result-dups-' + result.rank + '"</div>';
+
     if ( result.viewKind == 'ia-books'){
-        var html =  '<div  id="search-pages-link-' + result.name + '" class="search-pages-link" >'
+
+        html +=  '<div  id="search-pages-link-' + result.name + '" class="search-pages-link" >'
         html += '<a href="#" onclick="UI.getPages(\'' + result.name + '\');"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show matching pages in this book...</a></div>';
         html += '<div id="page-results-' + result.name + '"></div>';
-        $('#notes-' + result.name).after(html);
-
-
     }
-    /* uncomment this to make entities draggable
-     $(".mz-ner").draggable({
-     appendTo: "body",
-     helper: 'clone',
-     scroll: 'true',
-     refreshPositions: true
-     });
-     */
-
-
-    // TODO - put other's ratings here
-    /*
-    $("#rating-" + result.name)
-            .slider({
-                max: 2,
-                min: -2
-            })
-            .slider("pips", {
-                rest: "label",
-                labels: relevanceLabels
-            })
-            .slider("float").slider({
-
-                change: function( event, ui ) {
-
-                    // send this rating to the DB
-
-                    // TODO: we do this a lot - should have it's own function
-                    var userName = getCookie("username");
-                    var userID = parseInt(getCookie("userid"));
-                    var userToken = getCookie("token");
-                    var corpus = getCookie("corpus");
-                    var corpID = getCorpusID(corpus);
-
-                    var args = { userid:  userID, user: userName, token : userToken, resource: result.name, corpus: corpID, corpusName: corpus, rating: ui.value };
-
-                    API.rateResource(args, function(){
-
-                        if (_.isUndefined(ratingsJSON.document[result.name])) {
-                            ratingsJSON.document[result.name] = [];
-                            // add our rating
-                            ratingsJSON.document[result.name].push({"user": userName, "rating": ui.value + 2}); // +2 hack to keep it consistent with other ratings
-                        }
-                        // see if we have a value
-                        var idx =  _.findIndex(ratingsJSON.document[result.name], function(rec) {
-                            return rec.user == userName;
-                        });
-
-                        // update our rating - or remove it if it's zero
-                        if (idx < 0){
-                            ratingsJSON.document[result.name].push({ "user" : userName, "rating" : ui.value + 2});
-                        }else{
-                            ratingsJSON.document[result.name][idx].rating = ui.value + 2;
-                        }
-
-                        setSliderValue(result.name, false);
-                        renderRatingsSidebar(result.name);
-                    }, function(req, status, err) {
-                        UI.showError("ERROR: ``" + err + "``");
-                        throw err;
-                    });
-
-                }
-
-            }) ;
-
-    var myVal = setSliderValue(result.name, true);
-    $("#rating-" + result.name).slider("values", myVal);
-
-
-
-    var tagName = "#tags_" + result.name;
-    $(tagName).tagit({
-        availableTags: GLOBAL.uniqTypes,
-        autocomplete: {delay: 0, minLength: 0},
-        allowSpaces: true,
-        placeholderText: "Add a Label",
-        afterTagRemoved: function(event, ui) {
-
-            deleteTag(ui.tagLabel, result.name);
-            // update the buttons
-            //deleteLabelFromButtons(ui.tagLabel);
-
-            return true;
-        },
-        beforeTagAdded: function(event, ui) {
-            var that = this;
-            if (!ui.duringInitialization) {
-                // only ask "are you sure" if this is a NEW tag TYPE
-                tmp = ui.tagLabel.split(":");
-                var res = true;
-                if (tmp.length === 2 && $.inArray(tmp[0], GLOBAL.uniqTypes) === -1) {
-                    res = confirm("Are you sure you want to create the label type \"" + tmp[0] + "\"?");
-                    if (res == false)
-                        return false;
-                    // add the new type to our list
-                    GLOBAL.uniqTypes.push(tmp[0]);
-                }
-
-            } else {
-                return true;
-            }
-        }
-    });
-    $(".read-only-tags").tagit({
-        readOnly: true
-    });
-     */
-//
-//    var corpus = getCookie("corpus");
-//    var corpusID = getCorpusID(corpus);
-//
-//    var args = {corpus: corpusID};
-//
-//    API.getNoteHistory(args,
-//            function(results) {
-//
-//                var html = '';
-//                for (i in results.rows){
-//                    rec = results.rows[i];
-//                    // strip the seconds/milliseconds from the date
-//                    var dt = rec.dttm.substring(0, rec.dttm.lastIndexOf(":"));
-//                    var name = rec.user.split("@")[0];
-//                  //  html += rec.user + ' (' + dt + ') : ' + rec.text + '<br>';
-//                  html += ' <a target="_blank" href="?kind=' + kind +'&action=view&id=' + rec.uri + '&noteid=' + rec.id + '">' +
-//                    dt + ' ' + name + ': <i>' +
-//                  rec.text + '</i></a>';
-//                    $('#notes-' + rec.name).html(html);
-//                }
-//            },
-//            function() {alert("error getting notes!")});
-
+    $('#notes-' + result.name).after(html);
 
 };
 
@@ -406,81 +233,6 @@ UI.appendResults = function(queryTerms, results) {
     _(results).forEach(function(result) {
         UI.renderSingleResult(result, queryTerms);
     });
-
-//    $("#atlastchristmasi00kinguoft_320").annotator.subscribe('onAnnotationsLoaded', function(){
-//        console.log('poop')
-//    })
-  //  initAnnotationLogic("#notes-atlastchristmasi00kinguoft_320")
-    var corpus = getCookie("corpus");
-    var userName = getCookie("username");
-    var userToken = getCookie("token");
-    var userID = getCookie("userid");
-    var corpusID = getCorpusID(corpus);
-
-    var ann = $("#notes-atlastchristmasi00kinguoft_320").annotator();
-    var resource = "atlastchristmasi00kinguoft_320";//element.substring(7).toString(); // strip off "[#|.]notes-"
-
-    ann.annotator('addPlugin', 'NoteEvent', true);
-
-//    ann.annotator.subscribe('onAnnotationsLoaded', function(){
-//            console.log('poop')
-//        })
-
-    ann.annotator('addPlugin', 'Store', {
-        annotationData: {
-            uri: resource,
-            userid: parseInt(userID),
-            user: userName,
-            token: userToken,
-            corpus: parseInt(corpusID),
-            corpusName: corpus
-        },
-        loadFromSearch: {
-            'uri': resource,
-            corpus: parseInt(corpusID)
-
-        },
-        urls: {
-            // These are the default URLs.
-            create: '/annotations/ins',
-            update: '/annotations/upd/:id',
-            destroy: '/annotations/del/:id',
-            search: '/annotations/search'
-        }
-    });
-
-
-    /*
-    $( ".result" ).draggable({
-        axis: "x",
-        revert: true,
-        helper: 'clone'
-    });
-*/
-
-    // ???? tmp to test showing notes
-//    var corpus = getCookie("corpus");
-//    var corpusID = getCorpusID(corpus);
-//
-//    var args = {corpus: corpusID};
-//
-//    API.getNoteHistory(args,
-//            function(results) {
-//                _(results.rows).forEach(function(result) {
-//                    UI.renderSingleResult_notes(result, queryTerms);
-//                });
-////                var html = '';
-////                for (i in results.rows){
-////                    rec = results.rows[i];
-////                    // strip the seconds/milliseconds from the date
-////                    var dt = rec.dttm.substring(0, rec.dttm.lastIndexOf(":"));
-////                    html += rec.user + ' (' + dt + ') : ' + rec.text + '<br>';
-////                }
-////                $('#notes-' + result.name).html(html);
-//            },
-//            function() {alert("error getting notes!")});
-
-
 
 };
 /**
@@ -658,7 +410,7 @@ UI.showHideMetadata = function(){
 }
 
 UI.getPages = function(bookid){
-  //  var terms = _.escape(UI.getQuery().trim()).toLowerCase();
+
     var terms = (UI.getQuery().trim()).toLowerCase();
     var setQuery = 'archiveid:' + bookid ;
 
@@ -667,8 +419,6 @@ UI.getPages = function(bookid){
     // pass in a query to restrict the search to just this book.
     doActionSearchPages({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery : setQuery });
 
-    // TODO this should be done in the search callback
-     //  $("#search-pages-link" + bookid).html('<a href="#" onclick="UI.hidePages(\'' + bookid + '\');"><span class="glyphicon glyphicon-collapse-up"></span>&nbsp;Hide pages</a>')
 }
 
 UI.hidePages = function(bookid){

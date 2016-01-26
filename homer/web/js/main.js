@@ -98,6 +98,8 @@ var doActionRequest = function(args) {
 /* handlers for retrieval button types */
 UI.onClickSearchButton = function(kind, text) {
 //    var kind = buttonDesc.kind;
+
+    // TODO ??? this needs to be set correctly if they REFRESH the page rather than hit the button
     gSearchedKind = kind;
     // make this selection the "current default"
     $("#search-buttons").unbind("click"); // prevent multiple clicks

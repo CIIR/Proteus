@@ -915,3 +915,7 @@ function labelClickComment(that, subcorpus_id) {
 
 }
 
+// when selecting IDs/classes in JQuery, need to escape certain characters.
+function jqEsc( myid ) {
+    return  myid.replace( /(:|\.|\[|\])/g, "\\$1" );
+}

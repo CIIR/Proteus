@@ -76,7 +76,6 @@ var doSearchRequest = function(args) {
         resultsDiv = $("#page-results-" + args.workingSetQuery.split('archiveid:')[1]);
     }
 
-
     disableAutoRetrieve(); // prevent double requests
 
     var tmpSettings = getCookie("settings");
@@ -103,7 +102,9 @@ var doSearchRequest = function(args) {
         console.log($(rec).attr("value") + ' is checked')
         subcorpora.push(parseInt($(rec).attr("value")));
     })
-    if (!_.isEmpty(subcorpora)) {
+
+    // don't limit by subcorport IFF we're searching for pages within a book
+    if (!_.isEmpty(subcorpora) && _.isUndefined(args.workingSetQuery)) {
         var subcorporaArgs = '{ "subcorpora":  ' + JSON.stringify(subcorpora) + '}';
         args = _.merge(args, JSON.parse(subcorporaArgs));
     }
@@ -124,6 +125,7 @@ var doSearchRequest = function(args) {
         args.labels = "";
         args = _.merge(args, JSON.parse(labelArgs));
     }
+
 
     // if we didn't ask for more
     if (!args.skip || args.skip === 0) {
@@ -190,26 +192,50 @@ var doSearchRequest = function(args) {
 /**
  * This gets called with the response from JSONSearch
  */
+var savedData = [];
+var uniqWords = [];
+
 var onSearchSuccess = function(data) {
 
-    $("#per-cloud").hide();
+    // clear unique words on each new search IFF we're not
+    // searching pages within a book
+    if (data.request.skip == 0 && _.isUndefined(data.request.workingSetQuery) == true) {
+        uniqWords = [];
+        savedData = [];
+    }
+
     UI.clearError();
 
     var userID = getCookie("userid");
     $("#more").html(""); // clear progress animation
-    // console.log(data);
 
-    //  var tmp = JSON.parse(data.tf);
-    if (!_.isUndefined(data.tf)){
-        console.log(Object.keys(data.tf));
-        console.log(data.tf);
-        var q = ""
-        _.forEach(data.tfnormalized, function(t) {
-            q += t.term + "^" + t.weight + " ";
-        })
-        console.log(q);
-    }
-
+    /*
+     if (!_.isUndefined(data.tf)) {
+     console.log(Object.keys(data.tf));
+     console.log(data.tf);
+     var q = ""
+     _.forEach(data.tfnormalized, function (t) {
+     q += t.term + "^" + t.weight + " ";
+     })
+     console.log("Everything: " + q);
+     
+     // snippet
+     console.log(Object.keys(data.snippettf));
+     console.log(data.snippettf);
+     q = ""
+     _.forEach(data.snippettfnormalized, function (t) {
+     q += t.term + "^" + t.weight + " ";
+     })
+     console.log("Snippets: " + q);
+     
+     q = ""
+     _.forEach(data.dfnormalized, function (t) {
+     q += t.term + "^" + t.weight + " ";
+     })
+     console.log("DF: " + q);
+     
+     }
+     */
     // mark up results with rank and kind
     Model[data.request.kind].query = data.request.q;
     Model[data.request.kind].queryType = data.queryType;
@@ -299,7 +325,18 @@ var onSearchSuccess = function(data) {
     }
     UI.appendResults(Model[data.request.kind].queryTerms, newResults);
 
-    if (data.request.n > data.results.length){
+    if (_.isUndefined(data.request.workingSetQuery)) {
+        // TODO : we only really need the results array - not the whole structure
+        savedData = _.merge(savedData, data, function(a, b) {
+            return _.isArray(a) ? a.concat(b) : undefined;
+        });
+
+        renderDups(savedData);
+    }
+
+    //  printMatrix(conf, count)
+
+    if (data.request.n > data.results.length) {
         UI.showProgress("No more results for '" + data.request.q + "'");
     }
     // if we searched by labels or (sub)corpus, we returned EVERYTHING so we
@@ -309,13 +346,119 @@ var onSearchSuccess = function(data) {
         // yet so the scroll bar size is wrong
         enableAutoRetrieve();
     } else {
-        UI.showProgress("No more results." );
+        UI.showProgress("No more results.");
     }
 
     setUpMouseEvents(); // TODO : only want to do this once
 
 };
 
+function renderDups(data) {
+
+    if (!_.isUndefined(data.request.workingSetQuery)) {
+        // if we're searching for pages in a book, don't look for duplicates - there can't be any unless
+        // something was scanned twice.
+        return;
+    }
+
+    // create a matrix that tells us how confident we are that two docs are duplicates
+    var count = uniqWords.length
+
+    var conf = Array.apply(null, Array(count)).map(Number.prototype.valueOf, 0);
+
+    for (i = 0; i < count; i += 1) {
+        conf[i] = Array.apply(null, Array(count)).map(Number.prototype.valueOf, 0);
+        for (j = 0; j < count; j += 1) {
+
+            if (i == j) {
+                continue; // don't compare a doc with itself
+            }
+
+            // skip any empty entries - these are things like notes
+            if (uniqWords[i].length == 0 || uniqWords[j].length == 0) {
+                continue;
+            }
+            var diff = _.xor(uniqWords[i], uniqWords[j]);
+            var confidence = (100 - (diff.length * 2));
+
+            conf[i][j] = Math.max(conf[i][j], confidence);
+
+        }
+    }
+
+    var ignoreCol = new Set();
+
+    var minConfidence = $("#dup-slider").slider("value");
+
+    // using a greedy algorithm, ANY doc that has a non-zero confidence is
+    // considered a duplicate of the document at that rank (row number).
+    // The slider can be used to remove low confidence values
+    for (row = 0; row < count; row += 1) {
+        var doneRow = false;
+        while (doneRow == false) {
+            // find the max confidence for the row
+            var m = _.max(conf[row]);
+            if (m <= minConfidence) {
+                doneRow = true;
+                // console.log("done row " + row);
+                //        printMatrix(conf, count)
+                continue;
+            }
+
+            var col = conf[row].indexOf(m)
+            // check if this is a column we want to ignore
+            if (ignoreCol.has(col)) {
+                conf[row][col] = 0;
+                continue;
+            }
+
+            conf[row][col] = -1 * conf[row][col];
+            conf[col][row] = -1 * conf[col][row];
+
+            // we don't need to check this column again
+            ignoreCol.add(col);
+
+            moveDocument(data, row, col, m);
+        }
+    }
+
+    printMatrix(conf, count)
+
+}
+
+
+function moveDocument(data, parentIdx, dupIdx, confidence) {
+
+    //console.log("\tmoving " + dupIdx + " under " + parentIdx);
+
+    var name = jqEsc(data.results[dupIdx].name);
+
+    $("#" + name + '-dup-confidence').html("    Duplicate confidence: " + confidence + "%")
+
+    // dim out the 2nd one
+    $("#" + name).addClass("dup-result")
+
+    // get the html for the dup - note we don't use "html()" because we want the outer <div> too.
+    var dupHTML = $("#" + name).get(0).outerHTML;
+    $("#" + name).get(0).outerHTML = '';
+    // append it to the first doc
+
+    $(dupHTML).insertAfter($(".result-" + (parentIdx + 1)))
+
+}
+
+function printMatrix(conf, count) {
+    return;
+    var tmp = '';
+    for (i = 0; i < count; i += 1) {
+        console.log(tmp);
+        tmp = 'index ' + i + '\t';
+        for (j = 0; j < count; j += 1) {
+            tmp += '\t' + conf[i][j];
+        }
+    }
+    console.log(tmp);
+}
 
 var renderBookPageHTML = function(text, pageID, pageNum, el) {
     var pgImage = pageImage(pageID, pageNum);
@@ -329,7 +472,6 @@ var renderBookPageHTML = function(text, pageID, pageNum, el) {
             '<div id="' + getNotesID(pageID, pageNum) + '" class="book-text col-md-4 column left-align">' + pgTxt + labelHTML + '</div>' +
             '<div  class="page-image col-md-4 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img src="' + pgImage + '"></a></div>' +
             '</div>');
-
 
     setUserRatingsHTML(id);
     setVoteHTML(id);
@@ -377,7 +519,6 @@ var viewPrevPageSuccess = function(args) {
 
         // ??? whole issue with this is that we don't know where to render the page in the
         // DOM, why not put in a placeholder THEN renderBookPageHTML can  do the substitution?????
-
 
 
         if ($(".book-page:first").height() > pageHeight && $(".book-page:first").height() < MAX_PAGE_HEIGHT) {
@@ -550,30 +691,6 @@ var initAnnotationLogic = function(element, reorder) {
         noteFilterDiv.annotator('addPlugin', 'ProteusAnnotationFilter');
     }
 
-
-    // TODO temp - need a better place for this (if we use it)
-    /*
-     // should be just one class
-     $(".org").draggable({
-     appendTo: "body",
-     helper: 'clone',
-     scroll: 'true',
-     refreshPositions: true
-     });
-     $(".per").draggable({
-     appendTo: "body",
-     helper: 'clone',
-     scroll: 'true',
-     refreshPositions: true
-     });
-     
-     $(".loc").draggable({
-     appendTo: "body",
-     helper: 'clone',
-     scroll: 'true',
-     refreshPositions: true
-     });
-     */
     $(".annotator-hl-test").draggable({
         appendTo: "body",
         helper: 'clone',
@@ -926,7 +1043,6 @@ var setPageNavigation = function(bookID) {
     if (page.previous < 0) {
         prevHTML = '';
     }
-
 
     $("#view-nav-top").html(prevHTML);
     $("#view-nav-bottom").html(nextHTML)
