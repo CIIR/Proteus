@@ -29,7 +29,11 @@ var clearModelResults = function(m){
     m.query = "";
 }
 
-var gSearchedKind = 'ia-books'; // TODO ??? ia specific
+var gSearchedKind = 'ia-books'; // default
+var urlParams = getURLParams();
+if (!_.isUndefined(urlParams["kind"])) {
+    gSearchedKind = urlParams["kind"];
+}
 //Model.clearResults = function() {
 //    Model.results = [];
 //    Model.query = "";
