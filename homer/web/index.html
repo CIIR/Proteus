@@ -96,6 +96,9 @@
                     max: 100,
                     value: 30,
                     stop: function(ui){
+                        if (_.isUndefined(savedData.results)){
+                            return;
+                        }
                         // need to clear out ALL results, if we just searched for
                         // "pages within a book" the "resultDiv" would be the pages so only
                         // that would get cleared out.

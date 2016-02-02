@@ -191,9 +191,9 @@ var renderNoteResult = function (queryTerms, result, resDiv) {
     html += highlightText(queryTerms, snippet, '<span class="hili">', '</span>', false); // last param says not to strip out punctuation
     html += '</a></td></tr>';
   }
-
-  uniqWords.push(""); // put an empty entry, we don't want to compare notes to check for duplicates.
-
+  if (_.isUndefined(uniqWords[result.rank - 1])) {
+    uniqWords.push(""); // put an empty entry, we don't want to compare notes to check for duplicates.
+  }
   html += '</table>';
   html += '<div id="notes-' + result.name + '" class="resource-labels" >' + displayLabels(result.name) + '</div>';
 
