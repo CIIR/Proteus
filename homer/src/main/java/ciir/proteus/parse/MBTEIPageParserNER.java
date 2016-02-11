@@ -46,7 +46,7 @@ public class MBTEIPageParserNER extends MBTEIParser {
       page.name = archiveId + "_" + pageNumber;
       page.metadata = metadata;
       page.metadata.put("pageNumber", pageNumber);
-      NamedEntityRecorder ner = new NamedEntityRecorder("entity-records/");
+      NamedEntityRecorder ner = new NamedEntityRecorderNoFilter("entity-records/");
       ner.record(page);
       return page;
 
