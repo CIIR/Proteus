@@ -26,13 +26,13 @@ public class OldToNewIdGenerator {
         HashMap<String, String> newTermDictionary = new HashMap<String, String>();
         BufferedReader br = Files.newBufferedReader(Paths.get(newTermDictionaryFile), Charset.forName("UTF-8"));
         String line = br.readLine();
-        int counter = 1;
+        //int counter = 1;
         while (line != null) {
             String[] elements = line.trim().split(" ");
             if(elements.length == 2) newTermDictionary.put(elements[1],elements[0]);
-            else System.out.println(counter);
+            //else System.out.println(counter);
             line = br.readLine();
-            counter++;
+            //counter++;
         }
         br.close();
 
@@ -40,17 +40,17 @@ public class OldToNewIdGenerator {
         ArrayList<String> output = new ArrayList<>();
         br = Files.newBufferedReader(Paths.get(oldTermDictionaryFile), Charset.forName("UTF-8"));
         line = br.readLine();
-        counter = 1;
+        //counter = 1;
         while (line != null) {
             try {
                 System.out.println(line);
                 String[] elements = line.trim().split(" ");
                 if(newTermDictionary.containsKey(elements[1])) output.add(elements[0] + " " + newTermDictionary.get(elements[1]) + "\n");
                 line = br.readLine();
-                counter++;
+                //counter++;
             }
             catch(Exception e){
-                System.err.println("Exception at dictionary file line " + counter);
+                //System.err.println("Exception at dictionary file line " + counter);
                 System.err.println(line);
                 throw e;
             }

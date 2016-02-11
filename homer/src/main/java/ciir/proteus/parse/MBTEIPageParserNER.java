@@ -13,8 +13,11 @@ import java.util.logging.Level;
  */
 public class MBTEIPageParserNER extends MBTEIParser {
 
+  String outputPath;
+
   public MBTEIPageParserNER(DocumentSplit split, Parameters p) throws Exception {
     super(split, p);
+    outputPath = p.get("outputPath","entity-records/");
   }
 
   @Override
@@ -46,7 +49,7 @@ public class MBTEIPageParserNER extends MBTEIParser {
       page.name = archiveId + "_" + pageNumber;
       page.metadata = metadata;
       page.metadata.put("pageNumber", pageNumber);
-      NamedEntityRecorder ner = new NamedEntityRecorderNoFilter("entity-records/");
+      NamedEntityRecorder ner = new NamedEntityRecorder(outputPath);
       ner.record(page);
       return page;
 

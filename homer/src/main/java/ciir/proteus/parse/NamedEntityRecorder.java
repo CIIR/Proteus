@@ -10,10 +10,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author David Wemhoener
@@ -69,8 +68,22 @@ public class NamedEntityRecorder {
                     nb.deleteCharAt(nb.lastIndexOf(" "));
                 }
                 String name = nb.toString();
-                boolean isNum = name.matches("\\d+");
-                if(isNum || entity.equals("location")) {
+
+                Pattern p = Pattern.compile("(\\d{4}|\\d{3})");
+                Matcher m = p.matcher(name);
+
+                List<String> years = new ArrayList<String>();
+                while (m.find()) {
+                    years.add(m.group());
+                }
+                if(years.size() > 0) {
+                    for(String year: years)
+                        sb.append(year);
+                        sb.append(",");
+                        sb.append(doc.name);
+                        sb.append("\n");
+                }
+                else if(entity.equals("location")) {
                     sb.append(name);
                     sb.append(",");
                     sb.append(doc.name);
