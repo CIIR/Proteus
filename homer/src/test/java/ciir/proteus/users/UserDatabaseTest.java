@@ -849,7 +849,7 @@ public class UserDatabaseTest {
   }
 
   @Test
-  public void testInsertQuery() throws DBError {
+  public void testInsertAndGetQuery() throws DBError {
 
     Integer corpus_id_1 = 1;
     String kind_1 = "kind1";
@@ -858,21 +858,33 @@ public class UserDatabaseTest {
     Integer id = db.insertQuery(null, corpus_id_1, query_1, kind_1);
     assertTrue(id == 1);
 
+    String q = db.getQuery(null, id);
+    assertEquals(q, query_1);
+
     // test that queries are trimmed
 
     id = db.insertQuery(null, corpus_id_1, " " + query_1 + " ", kind_1);
     assertTrue(id == 1);
+    q = db.getQuery(null, id);
+    assertEquals(q, query_1);
 
     // test case sensitivity
     id = db.insertQuery(null, corpus_id_1, query_1.toLowerCase(), kind_1);
     assertTrue(id == 1);
+    q = db.getQuery(null, id);
+    assertEquals(q, query_1);
+
     id = db.insertQuery(null, corpus_id_1, query_1.toUpperCase(), kind_1);
     assertTrue(id == 1);
+    q = db.getQuery(null, id);
+    assertEquals(q, query_1);
 
     // same query, diff corpus
     Integer corpus_id_2 = 2;
     id = db.insertQuery(null, corpus_id_2, query_1.toUpperCase(), kind_1);
     assertTrue(id == 2);
+    q = db.getQuery(null, id);
+    assertEquals(q, query_1);
 
     // new query
     String query_2 = "query2";
@@ -883,6 +895,8 @@ public class UserDatabaseTest {
     String kind_2 = "kind2";
     id = db.insertQuery(null, corpus_id_1, query_1, kind_2);
     assertTrue(id == 4);
+    q = db.getQuery(null, id);
+    assertEquals(q, query_1);
 
     // query too big
     StringBuilder sb = new StringBuilder();

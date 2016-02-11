@@ -1304,6 +1304,40 @@ public class H2Database implements UserDatabase {
     return results;
   }
 
+
+  public String getQuery(Credentials creds, Integer queryID) throws DBError {
+
+    String query = "";
+    Connection conn = null;
+    try {
+      conn = getConnection();
+
+      // have we already seen this query?
+      try {
+        PreparedStatement sql = conn.prepareStatement("select query from queries where id = ?");
+        sql.setInt(1, queryID);
+
+        ResultSet tuples = sql.executeQuery();
+        int count = 0;
+        while (tuples.next()) {
+          count++;
+          query = tuples.getString(1);
+        }
+        assert(count <= 1);
+        tuples.close();
+
+      } catch (SQLException e1) {
+        throw new RuntimeException(e1);
+      }
+
+    } finally {
+      attemptClose(conn);
+    }
+
+    return (query);
+
+  }
+
   public Integer insertQuery(Credentials creds, Integer corpusID, String query, String kind) throws DBError {
 
     if (query.length() == 0)
