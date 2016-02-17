@@ -52,7 +52,7 @@ public class NamedEntityRecorder {
             TagTokenizer tok = new TagTokenizer();
             tok.addField(entity);
             tok.tokenize(doc);
-            if(entity.equals("date")) sb = findLocations(doc,sb);
+            if(entity.equals("date")) sb = findDates(doc,sb);
             else if(entity.equals("location")) sb = findLocations(doc,sb);
 
             String docName = doc.name.split("_")[0];
