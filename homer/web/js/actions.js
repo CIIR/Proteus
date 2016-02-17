@@ -992,7 +992,7 @@ var onViewBookSuccess = function (args) {
 
   viewResourceDiv.html(html);
   viewResourceDiv.show();
-
+  processTags();
 
   var corpus = getCookie("corpus");
   if (!isLoggedIn() || corpus == "")
