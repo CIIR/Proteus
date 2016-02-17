@@ -1,0 +1,50 @@
+
+#cb-loc-label {
+    color: white;
+    background-color: saddlebrown;
+}
+
+location {
+    color: white;
+    background-color: saddlebrown;
+    opacity: 0.5;
+}
+.location-off{
+    color: saddlebrown;
+    background-color: transparent;
+    opacity: 1;
+
+}
+
+#cb-org-label {
+    color: white;
+    background-color: slateblue;
+}
+
+organization {
+    color: white;
+    background-color: slateblue;
+    opacity: 0.5;
+}
+.organization-off {
+    color: slateblue;
+    background-color: transparent;
+    opacity: 1;
+}
+
+#cb-per-label{
+    color: white;
+    background-color: orangered;
+}
+
+person  {
+    color: white;
+    background-color: orangered;
+    opacity: 0.5;
+}
+
+.person-off {
+    color: orangered;
+    background-color: transparent;
+    opacity: 1;
+}

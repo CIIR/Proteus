@@ -266,38 +266,6 @@ body {
     z-index: 5000
 }
 
-.per {
-    color: white;
-    background-color: orange;
-}
-
-#cb-per-label{
-    color: white;
-    background-color: orange;
-}
-.per-off {
- }
-.org {
-    color: white;
-    background-color: skyblue;
-}
-#cb-org-label {
-    color: white;
-    background-color: skyblue;
-}
-.org-off {
-}
-.loc {
-    color: white;
-    background-color: tan;
-}
-#cb-loc-label {
-    color: white;
-    background-color: tan;
-}
-
-.loc-off {
-}
 .pageNavigation{
     cursor: pointer; cursor: hand;
 }
@@ -661,6 +629,13 @@ body {
     margin : 5px;
 }
 
+.resource-query{
+    background-color: lemonchiffon;
+    padding : 5px;
+    border-radius: 5px;
+    margin : 5px;
+}
+
 .label-button {
     margin : 2px;
 }
@@ -670,6 +645,13 @@ body {
     content:"\e013"; /* check mark */
     color: green;
     padding-right: 5px;
+}
+
+.term-check-mark:after {
+    font-family: "Glyphicons Halflings";
+    content:"\e013"; /* check mark */
+    color: black;
+    padding-left: 5px;
 }
 
 .overimage {
@@ -705,6 +687,11 @@ border-radius: 5px;
     margin: 3px !important;
 }
 
+.highlight{
+    background-color: yellow;
+    font-weight: bold;
+}
+
 .dup-result {
     opacity: 0.5;
     margin-left: 100px;
@@ -714,7 +701,13 @@ border-radius: 5px;
     margin: 10px;
 }
 
-.highlight{
-    background-color: yellow;
-    font-weight: bold;
+.button .term-freq {
+    display: none;
 }
+.button:hover .term-freq {
+    display: block;
+}
+.button .term  {
+    display: block;
+}
+

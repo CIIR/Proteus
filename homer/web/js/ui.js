@@ -15,8 +15,8 @@ var loginInfo = $("#ui-login-info");
 var relevanceLabels = ["terrible", "not relevant", "neutral", "slightly relevant", "highly relevant"];
 var relevanceLabelColorClasses = ["rel-label-terrible", "rel-label-not-relevant", "rel-label-neutral", "rel-label-slightly-relevant", "rel-label-highly-relevant"];
 
-var ratingsJSON = {"document" : {}};
-var votingJSON = {"document" : {}};
+var ratingsJSON = {"document": {}};
+var votingJSON = {"document": {}};
 
 // UI object/namespace
 var UI = {};
@@ -47,16 +47,16 @@ UI.generateButtons = function() {
             // see if we're the default button - unless there's already a "kind" on the URL. If they're
             // clicking on an entity it'll re-trigger this logic and we want to keep the current "kind" we
             // do not want to rest the search button to be the default
-            if ((!_.isUndefined(currentKind) && currentKind == kind) || (_.isUndefined(currentKind) && kind === UI.defaultKind)){
-              $("#search-button-text").html(spec.button);
-              $("#search-buttons").click(function() {
-                  UI.onClickSearchButton(spec.kind, spec.button);
-              });
+            if ((!_.isUndefined(currentKind) && currentKind == kind) || (_.isUndefined(currentKind) && kind === UI.defaultKind)) {
+                $("#search-button-text").html(spec.button);
+                $("#search-buttons").click(function() {
+                    UI.onClickSearchButton(spec.kind, spec.button);
+                });
             }
 
         });
         // add an option to retrieval rated documents
-      //  $("#retrieval-button-choices").append('<li class="divider"></li><li><a href="#" onclick="UI.onClickSearchButton(\'rated-only\');">Rated Documents</a></li>');
+        //  $("#retrieval-button-choices").append('<li class="divider"></li><li><a href="#" onclick="UI.onClickSearchButton(\'rated-only\');">Rated Documents</a></li>');
 
     });
 
@@ -125,7 +125,7 @@ function addLabelToButtons(newLabel) {
     // see if the current user is in the tree
 
     var userNode = tree.getNodeByKey(GLOBAL.users[userID]);
-    if (userNode == null){
+    if (userNode == null) {
         rootNode.addChildren({
             key: GLOBAL.users[userID],
             title: GLOBAL.users[userID],
@@ -135,7 +135,7 @@ function addLabelToButtons(newLabel) {
 
     }
 
-     // new labels:
+    // new labels:
 
     // retrieval for the parent to attach it to
     var node = tree.getNodeByKey(GLOBAL.users[userID] + TREE_KEY_SEP() + type);
@@ -168,17 +168,17 @@ function addLabelToButtons(newLabel) {
     }
 }
 
-function getAve(ave, id){
-    var pct = (ave/4)*100;
+function getAve(ave, id) {
+    var pct = (ave / 4) * 100;
 
-   var aveRating = '<span class="ui-state-hover ui-slider-handle ui-slider-ave ui-slider-horizontal proteus-rating " style="left: ' +  pct.toFixed(0) + '%; "><span class=" ui-slider-tip">' + (ave-2).toFixed(2) + '</span></span>';
-   $("#rating-" + id + " span:first").before(aveRating);
+    var aveRating = '<span class="ui-state-hover ui-slider-handle ui-slider-ave ui-slider-horizontal proteus-rating " style="left: ' + pct.toFixed(0) + '%; "><span class=" ui-slider-tip">' + (ave - 2).toFixed(2) + '</span></span>';
+    $("#rating-" + id + " span:first").before(aveRating);
 
 }
 
 
 
-UI.renderSingleResult = function(result, queryTerms,  prependTo) {
+UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
 
     //console.debug("result name: " + result.name);
     var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
@@ -188,10 +188,10 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
 
 
     // put it at the end unless we pass in where we want it to go
-    if (_.isUndefined(prependTo)) {
-        resultsDiv.append(renderer(queryTerms, result, resDiv)); //* 6/26/2014
+    if (_.isUndefined(prependTo) || prependTo == false) {
+        resultsDiv.append(renderer(queryTerms, result, resDiv, queryid)); //* 6/26/2014
     } else {
-        $(prependTo).after(renderer(queryTerms, result, resDiv));
+        $(prependTo).after(renderer(queryTerms, result, resDiv, queryid));
     }
 
     if (isLoggedIn()) {
@@ -204,22 +204,22 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
 
     // TODO ?? book specific - should be in internetArchive.js
     var docType = guessKind(result.name);
-    if (docType == 'ia-books'){
+    if (docType == 'ia-books') {
         resDiv.addClass('book-result');
     }
-    if (docType == 'ia-pages'){
+    if (docType == 'ia-pages') {
         resDiv.addClass('page-result');
     }
-    if (docType == 'ia-notes'){
+    if (docType == 'ia-notes') {
         resDiv.addClass('note-result');
     }
 
     resDiv.addClass('result-' + result.rank);
-    html =  '<div class="result-dups-' + result.rank + '"</div>';
+    html = '<div class="result-dups-' + result.rank + '"</div>';
 
-    if ( result.viewKind == 'ia-books'){
+    if (result.viewKind == 'ia-books') {
 
-        html +=  '<div  id="search-pages-link-' + result.name + '" class="search-pages-link" >'
+        html += '<div  id="search-pages-link-' + result.name + '" class="search-pages-link" >'
         html += '<a href="#" onclick="UI.getPages(\'' + result.name + '\');"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show matching pages in this book...</a></div>';
         html += '<div id="page-results-' + result.name + '"></div>';
     }
@@ -227,11 +227,11 @@ UI.renderSingleResult = function(result, queryTerms,  prependTo) {
 
 };
 
-UI.appendResults = function(queryTerms, results) {
+UI.appendResults = function(queryTerms, results, queryid) {
 
     //UI.showProgress("Ajax response received!");
     _(results).forEach(function(result) {
-        UI.renderSingleResult(result, queryTerms);
+        UI.renderSingleResult(result, queryTerms, false, queryid);
     });
 
 };
@@ -398,8 +398,8 @@ UI.clearSelectedLabels = function() {
     });
 };
 
-UI.showHideMetadata = function(){
-    if (metadataDiv.is(':visible') == true){
+UI.showHideMetadata = function() {
+    if (metadataDiv.is(':visible') == true) {
         metadataDiv.hide();
         $(".show-hide-metadata").html("Show metadata");
     } else {
@@ -409,19 +409,19 @@ UI.showHideMetadata = function(){
 
 }
 
-UI.getPages = function(bookid){
+UI.getPages = function(bookid) {
 
     var terms = (UI.getQuery().trim()).toLowerCase();
-    var setQuery = 'archiveid:' + bookid ;
+    var setQuery = 'archiveid:' + bookid;
 
     $("#search-pages-link-" + bookid).html($("#search-pages-link-" + bookid).html() + '&nbsp;&nbsp;<img src="/images/more-loader.gif"\>');
 
     // pass in a query to restrict the search to just this book.
-    doActionSearchPages({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery : setQuery });
+    doActionSearchPages({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery: setQuery});
 
 }
 
-UI.hidePages = function(bookid){
+UI.hidePages = function(bookid) {
 
     $("#page-results-" + bookid).hide("slow");
 
@@ -431,7 +431,7 @@ UI.hidePages = function(bookid){
     $("#search-pages-link-" + bookid).html(html)
 }
 
-UI.showPages = function(bookid){
+UI.showPages = function(bookid) {
 
     $("#page-results-" + bookid).show("slow");
 
@@ -444,50 +444,50 @@ UI.showPages = function(bookid){
 
 }
 
-UI.toggleNotes = function(noteDivID){
+UI.toggleNotes = function(noteDivID) {
     $('#' + noteDivID).toggle();
 }
 
 var init = true;
 
 
-function renderRatingsSidebar(id){
+function renderRatingsSidebar(id) {
 
     // we already have this info in the document list - although it is hidden -
     // so grab it and display it here
     var rating_html = $('#' + id + '-user-ratings-w-names').html();
-    if (_.isUndefined(rating_html) || rating_html.length == 0){
+    if (_.isUndefined(rating_html) || rating_html.length == 0) {
         rating_html = '<span>No labels yet for this document</span>';
     }
 
     $("#ratings").html(rating_html);
 
 }
-function setUpMouseEvents(){
- 
-        $(".result").mouseenter(function(  event) {
+function setUpMouseEvents() {
 
-            renderRatingsSidebar(this.id);
-            $(this).css("background", "lightyellow");
+    $(".result").mouseenter(function(event) {
 
-        });
+        renderRatingsSidebar(this.id);
+        $(this).css("background", "lightyellow");
 
-        $(".result").mouseleave(function(  event) {
+    });
+
+    $(".result").mouseleave(function(event) {
 
         $(this).css("background", "");
 
-        });
+    });
 
 }
 
-UI.populateRatedDocuments = function(){
+UI.populateRatedDocuments = function() {
 
-    _.forEach(GLOBAL.ratedDocuments, function(rec){
-        $("#ratedDocuments").prepend( '<div class="query">&#8226;&nbsp;<a  onclick="">'
-            + rec.doc
-            + '</a><div>'
-            + rec.aveRating
-            + '</div>' );
+    _.forEach(GLOBAL.ratedDocuments, function(rec) {
+        $("#ratedDocuments").prepend('<div class="query">&#8226;&nbsp;<a  onclick="">'
+                + rec.doc
+                + '</a><div>'
+                + rec.aveRating
+                + '</div>');
 
     });
 
@@ -497,7 +497,7 @@ UI.populateRatedDocuments = function(){
 function bindCorpusMenuClick() {
 
     $("ul#corpus-list.dropdown-menu li a").off("click");
-    $("ul#corpus-list.dropdown-menu li a").on("click", function () {
+    $("ul#corpus-list.dropdown-menu li a").on("click", function() {
 
         console.log("clicked: " + $(this).text())
         if ($(this).text() == "New...") {
@@ -521,17 +521,17 @@ function setCorpus(corpus) {
 }
 
 
-function hideSideBar(){
+function hideSideBar() {
     $('#sidebar-button').attr("src", "images/sidebar_expand.png");
     $("#results-left").hide();
     $("#results-right").removeClass("col-md-10");
     $("#results-right").addClass("col-md-12");
     showSideBarFlag = false;
     p = getURLParams();
-    p = _.merge(p, {'showSideBar' : '0'});
+    p = _.merge(p, {'showSideBar': '0'});
     pushURLParams(p);
 }
-function showSideBar(){
+function showSideBar() {
     $('#sidebar-button').attr("src", "images/sidebar_shrink.png");
     $("#results-left").show();
     showSideBarFlag = true;
@@ -539,7 +539,7 @@ function showSideBar(){
     $("#results-right").addClass("col-md-10");
 
     p = getURLParams();
-    p = _.merge(p, {'showSideBar' : '1'});
+    p = _.merge(p, {'showSideBar': '1'});
     pushURLParams(p);
 }
 $('#sidebar-button').click(function() {
@@ -551,40 +551,35 @@ $('#sidebar-button').click(function() {
 });
 
 
-UI.appendToCorpusList = function(corpusName){
+UI.appendToCorpusList = function(corpusName) {
     $("#corpus-list-divider").before('<li><a href="#">' + corpusName + '</a></li>');
 }
 
-UI.updateCorpusListButton = function(){
+UI.updateCorpusListButton = function() {
 
     if (localStorage["corpora"] == null)
         return;
 
     var corpora = JSON.parse(localStorage["corpora"]);
-    _.forEach(corpora, function(c){
+    _.forEach(corpora, function(c) {
         UI.appendToCorpusList(c.name);
     });
 
 }
 
-function handleNERHilightClick(that, type){
+function handleNERHilightClick(that, type) {
 
-    // TODO : not sure if it's faster to change CSS or replace the class?
-    if (that.checked == true){
-        console.log(type + " has been checked")
-        $("." + type + "-off").addClass(type)
-        $("." + type ).removeClass(type+ "-off")
+    if (that.checked == true) {
+        $(type).removeClass(type + "-off")
     } else {
-        console.log(type + " has been UNchecked")
-        $("." + type ).addClass(type+ "-off")
-        $("." + type + "-off").removeClass(type)
+        $(type).addClass(type + "-off")
     }
 
 }
 
 UI.showHideDups = function() {
     var el = $('#hide-dups input[type="checkbox"]:checked');
-    if (el.length ==0){
+    if (el.length == 0) {
         $("#results .dup-result").show("slow");
     } else {
         $("#results .dup-result").hide("slow");
