@@ -1019,6 +1019,8 @@ Annotator = (function(superClass) {
 
     Annotator.prototype.getSelectedRanges = function() {
         var browserRange, i, len2, normedRange, o, r, ranges, rangesToIgnore, selection;
+
+
         selection = Util.getGlobal().getSelection();
         ranges = [];
         rangesToIgnore = [];
@@ -1059,6 +1061,28 @@ Annotator = (function(superClass) {
     };
 
     Annotator.prototype.setupAnnotation = function(annotation) {
+
+        // MCZ - when CREATING an annotation, we want to grab the HTML not just
+        // the text. We know we're creating if there is no "quote" passed in.
+        // Code to get HTML from: http://stackoverflow.com/questions/5669448/get-selected-texts-html-in-div
+        var html = "";
+        if (_.isUndefined(annotation.quote)){
+            if (typeof window.getSelection != "undefined") {
+                var sel = window.getSelection();
+                if (sel.rangeCount) {
+                    var container = document.createElement("div");
+                    for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                        container.appendChild(sel.getRangeAt(i).cloneContents());
+                    }
+                    html = container.innerHTML;
+                }
+            } else if (typeof document.selection != "undefined") {
+                if (document.selection.type == "Text") {
+                    html = document.selection.createRange().htmlText;
+                }
+            }
+        }
+
         var e, len2, len3, normed, normedRanges, o, q, r, ref1, root;
         root = this.wrapper[0];
         annotation.ranges || (annotation.ranges = this.selectedRanges);
@@ -1086,9 +1110,16 @@ Annotator = (function(superClass) {
             annotation.ranges.push(normed.serialize(this.wrapper[0], '.annotator-hl'));
             $.merge(annotation.highlights, this.highlightRange(normed));
         }
-        annotation.quote = annotation.quote.join(' / ');
+        // MCZ - user the HTML if creating a new annotation
+        if (html.length > 0){
+            annotation.quote = html;
+        } else{
+            annotation.quote =  annotation.quote.join(' / ');
+        }
+
         $(annotation.highlights).data('annotation', annotation);
         $(annotation.highlights).attr('data-annotation-id', annotation.id);
+
         return annotation;
     };
 
