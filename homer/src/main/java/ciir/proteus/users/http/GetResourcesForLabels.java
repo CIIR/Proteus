@@ -46,17 +46,17 @@ public class GetResourcesForLabels extends DBAction {
             // now get results
             Parameters param = Parameters.create();
             param.set("snippets", false);
-            param.set("tags", true);
+            param.set("tags", false); // 2/2016 - tags are currently not used
 
             List<ScoredDocument> fakeDocs = new ArrayList<>();
             for (String id : resList) {
                 fakeDocs.add(new ScoredDocument(id, 0, 0.0));
             }
-
-            List<Parameters> results = DocumentAnnotator.annotate(system, kind, fakeDocs, null, param);
+            DocumentAnnotator da = new DocumentAnnotator();
+            Parameters results = da.annotate(system, kind, fakeDocs, null, param);
 
             Parameters response = Parameters.create();
-            response.set("results", results);
+            response.set("results", results.getAsList("results"));
             return response;
 
         } catch (DBError dbError) {

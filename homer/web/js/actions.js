@@ -191,11 +191,12 @@ var doSearchRequest = function (args) {
 var savedData = [];
 var uniqWords = [];
 
-function calcPixelSize(t){
-//  return Math.ceil(10 + (Math.log10(t.count)*10))
-//  return 10+ (t.weight * 100);
+function getTermHTMl(term, count, classes){
+  return '<button class="button term" type="button"  onclick="termClick(this);"><span  class="term ' + classes + '" style="font-size: ' +  calcPixelSize(count)  + 'px !important;">' +  term + '</span><span class="term-freq"> (' + count + ') </span></button> ';
 
-  return 14+ (t.count / 100);
+}
+function calcPixelSize(count){
+  return 14 + (count / 100);
 }
 var onSearchSuccess = function (data) {
 
@@ -211,80 +212,48 @@ var onSearchSuccess = function (data) {
   var userID = getCookie("userid");
   $("#more").html(""); // clear progress animation
 
-  if (!_.isUndefined(data.totalTF)) {
-   // console.log(Object.keys(data.totalTF));
- //   console.log(data.totalTF);
-    var q = ""
-    var minFont = 10;
-    var maxFont = 100;
-    var maxCount = data.totalTF[0].count;
+  $("#show-corpus-terms").hide();
+  $("#query-builder-link").hide();
+
+  // show query builder if they searched the corpus OR have a sub-corpus selected
+  if (($('#facets input[type="checkbox"]:checked').length > 0 || data.request.action == "search-corpus") && _.isUndefined(data.totalTF) == false) {
+
+//    $("#show-corpus-terms").show();
+    $("#query-builder-link").show();
+    $('#build-a-query').html('');
+
+
+    $(".query-term-buttons").html(''); // clear any prior terms
 
     _.forEach(data.totalTF, function (t) {
-        q += '<button class="button" type="button"  onclick="termClick(this);"><span  class="term" style="font-size: ' +  calcPixelSize(t)  + 'px !important;">' + t.term + '</span><span class="term-freq">(' + t.count + ') </span></button> '; // + "^" + t.weight + " ";
+      $("#high-tf").append(getTermHTMl(t.term, t.count, ''));
     })
-    $("#high-tf").html(q);
 
-    q = ""
- //   maxCount = data.snippetTF[0].count;
     _.forEach(data.snippetTF, function (t) {
-      q += '<button class="button" type="button" onclick="termClick(this);"><span  class="term" style="font-size: ' +  calcPixelSize(t) + 'px !important;" >' + t.term + '</span><span class="term-freq">(' + t.count + ') </span></button> '; // + "^" + t.weight + " ";
+      $("#high-snippettf").append(getTermHTMl(t.term, t.count, ''));
     })
-    $("#high-snippettf").html(q);
 
-    q = ""
     _.forEach(data.bigrams, function (t) {
-      q += '<button class="button" type="button" onclick="termClick(this);"><span  class="term" style="font-size: ' +  calcPixelSize(t) + 'px !important;" >' + t.ngram + '</span><span class="term-freq">(' + t.count + ') </span></button> '; // + "^" + t.weight + " ";
+      $("#high-bigrams").append(getTermHTMl(t.ngram, t.count, 'add-quote'));
     })
-    $("#high-bigrams").html(q);
 
-    q = ""
+    _.forEach(data.trigrams, function (t) {
+      $("#high-trigrams").append(getTermHTMl(t.ngram, t.count, 'add-quote'));
+    })
+
     _.forEach(data.perEntities, function (t) {
-      q += '<button class="button" type="button" onclick="termClick(this);"><span  class="term entity person" style="font-size: ' +  calcPixelSize(t) + 'px !important;">' + t.entity + '</span><span class="term-freq">(' + t.count + ') </span></button> '; // + "^" + t.weight + " ";
+      $("#high-entities-per").append(getTermHTMl(t.entity, t.count, 'entity person'));
     })
-    $("#high-entities-per").html(q);
 
-    q = ""
     _.forEach(data.locEntities, function (t) {
-      q += '<button class="button" type="button" onclick="termClick(this);"><span  class="term entity location" style="font-size: ' +  calcPixelSize(t) + 'px !important;">' + t.entity + '</span><span class="term-freq">(' + t.count + ') </span></button> '; // + "^" + t.weight + " ";
+      $("#high-entities-loc").append(getTermHTMl(t.entity, t.count, 'entity location'));
     })
-    $("#high-entities-loc").html(q);
 
-    q = ""
     _.forEach(data.orgEntities, function (t) {
-      q += '<button class="button" type="button" onclick="termClick(this);"><span  class="term entity organization" style="font-size: ' +  calcPixelSize(t) + 'px !important;">' + t.entity + '</span><span class="term-freq">(' + t.count + ') </span></button> '; // + "^" + t.weight + " ";
+      $("#high-entities-org").append(getTermHTMl(t.entity, t.count, 'entity organization'));
     })
-    $("#high-entities-org").html(q);
 
-
-    //    console.log("Everything: " + q);
-//
-//    // snippet
-//    console.log(Object.keys(data.snippetTF));
-//    console.log(data.snippetTF);
-//    q = ""
-//    _.forEach(data.snippettfnormalized, function (t) {
-//      q += t.term + " "; // + "^" + t.weight + " ";
-//    })
-//    console.log("Snippets: " + q);
-
-    //     q = ""
-    //     _.forEach(data.dfnormalized, function (t) {
-    //     q += t.term  + " "; // + "^" + t.weight + " ";
-    //     })
-    //     console.log("DF: " + q);
-
-    //         console.log("All Entities: ");
-    //         _.forEach(data.allEntities, function(e){
-    //             console.log(e);
-    //         });
-//    console.log(data.perEntities);
-//    console.log(data.locEntities);
-//    console.log(data.bigrams);
-
-    //
-
-
-  }
+  } // end if show query builder
 
   // mark up results with rank and kind
   Model[data.request.kind].query = data.request.q;
@@ -469,9 +438,6 @@ function renderDups(data) {
         if (_.min(conf[row]) >= 0) {
           docScores[row][row] = data.results[row].score;
         }
-
-        // console.log("done row " + row);
-        //        printMatrix(conf, count)
         continue;
       }
 

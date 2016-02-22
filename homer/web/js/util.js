@@ -848,6 +848,7 @@ function updateFacets() {
     })
 
 }
+
 function labelClick(that, subcorpus_id, res, kind) {
     //    console.log($(that).text());
     //    console.log(res);
@@ -897,6 +898,49 @@ function labelClick(that, subcorpus_id, res, kind) {
     }, function() {
         console.log("problem voting")
     });
+
+}
+
+
+function termClick(that ) {
+
+    // toggle check mark
+    if ($($(that).find('span')[0]).hasClass("term-check-mark")) {
+        $($(that).find('span')[0]).removeClass("term-check-mark");
+    } else {
+        $($(that).find('span')[0]).addClass("term-check-mark");
+    }
+
+    // re-build the query
+    // get all the spans with the "term-check-mark" class
+    var terms = $("span.term-check-mark")
+
+    var query = '';
+
+    _.forEach($(terms), function(t){
+        if ($(t).hasClass("entity")){
+            if ($(t).hasClass("person")) {
+                query += 'person:';
+            }
+            if ($(t).hasClass("location")){
+                query += 'location:';
+            }
+            if ($(t).hasClass("organization")){
+                query += 'organization:';
+            }
+            query += '"' + $(t).text() + '" ';
+        } else {
+            if ($(t).hasClass("add-quote")){
+                query +=  '"' +  $(t).text() + '" ';
+            } else {
+                query += $(t).text() + ' ';
+            }
+        }
+
+    })
+
+
+    $("#build-a-query").html('<a target="_BLANK" href="index.html?action=search&kind=ia-pages&q=' + encodeURI(query) + '">' + query + '</a>');
 
 }
 

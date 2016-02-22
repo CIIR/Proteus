@@ -958,6 +958,76 @@ public class UserDatabaseTest {
 
   }
 
+
+  @Test
+  public void testGetQueriesForResource() throws DBError, SQLException, IOException {
+
+    String res_1 = "res1";
+    Integer corpus_1 = 1;
+
+
+    // resource does not exist
+    Parameters q = db.getQueriesForResource("i-do-not-exist", corpus_1);
+    assertEquals(q.get("total", -1), 0);
+
+    String query_text_1 = "test query one";
+    String kind_1 = "kind_1";
+
+    Integer id = db.insertQuery(null, corpus_1, query_text_1, kind_1);
+    assertTrue(id == 1);
+    db.insertQueryResourceXref(null, res_1, corpus_1, id);
+
+    q = db.getQueriesForResource(res_1, corpus_1);
+    assertEquals(1, q.get("total", -1));
+    List<Parameters> arr = q.getAsList("rows");
+    assertEquals(arr.size(), 1);
+    assertEquals(arr.get(0).get("kind"), kind_1);
+    assertEquals(arr.get(0).get("query"), query_text_1);
+
+    // add a 2nd query for this resource
+    String query_text_2 = "test query two";
+    id = db.insertQuery(null, corpus_1, query_text_2, kind_1);
+    assertTrue(id == 2);
+    db.insertQueryResourceXref(null, res_1, corpus_1, id);
+
+    q = db.getQueriesForResource(res_1, corpus_1);
+    assertEquals(2, q.get("total", -1));
+    arr = q.getAsList("rows");
+    assertEquals(arr.size(), 2);
+    // can't be 100% sure of the order
+    Parameters data_1 = Parameters.create();
+    data_1.put("kind", kind_1);
+    data_1.put("query", query_text_1);
+    assertTrue(arr.contains(data_1));
+    Parameters data_2 = Parameters.create();
+    data_2.put("kind", kind_1);
+    data_2.put("query", query_text_2);
+    assertTrue(arr.contains(data_2));
+
+    // insert the SAME query/resource/corpus triple
+    id = db.insertQuery(null, corpus_1, query_text_2, kind_1);
+    assertTrue(id == 2); // original ID is returned
+    q = db.getQueriesForResource(res_1, corpus_1);
+    assertEquals(2, q.get("total", -1));
+    arr = q.getAsList("rows");
+    assertEquals(arr.size(), 2);
+
+    assertTrue(arr.contains(data_1));
+    assertTrue(arr.contains(data_2));
+
+    // insert the same query/resource but for a different corpus
+    Integer corpus_2 = 2;
+    id = db.insertQuery(null, corpus_2, query_text_2, kind_1);
+    assertTrue(id == 3);
+    db.insertQueryResourceXref(null, res_1, corpus_2, id);
+
+    q = db.getQueriesForResource(res_1, corpus_1); // still 1st corpus
+    assertEquals(2, q.get("total", -1));
+    assertTrue(arr.contains(data_1));
+    assertTrue(arr.contains(data_2));
+
+  }
+
   @Test
   public void testUpsertSubCorpus() throws DBError, SQLException {
 

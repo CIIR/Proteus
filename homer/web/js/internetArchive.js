@@ -24,7 +24,7 @@ var pageThumbnail = function (archiveId, pageNum) {
 };
 
 //console.log("Defining table, renderResult=" + renderResult);
-var renderResult = function (queryTerms, result, resDiv) {
+var renderResult = function (queryTerms, result, resDiv, queryid) {
 
   var name = result.meta.title || result.meta.TEI || result.name;
   var identifier = result.name.split('_')[0];
@@ -83,7 +83,7 @@ var renderResult = function (queryTerms, result, resDiv) {
     var type;
     _(result.entities).forEach(function (entKey) {
       _(entKey).forIn(function (value, key) {
-        type = key;
+        type = key + "-entities";
         tmphtml += '<div align="left"><' + type + '><b>' + key + ':</b> ';
         _(value).forIn(function (rec, key2) {
           // TODO: whould use default kind not hard code
@@ -103,7 +103,7 @@ var renderResult = function (queryTerms, result, resDiv) {
   //    }
 
   html += '<td class="preview" rowspan="3">' + previewImage + '</td>' +
-  '<td class="name">' + nameLink + '&nbsp;(<a target="_blank" href="view.html?kind=' + kind + '&action=view&id=' + result.name + '">view OCR</a>)&nbsp;'
+  '<td class="name">' + nameLink + '&nbsp;(<a target="_blank" href="view.html?kind=' + kind + '&action=view&id=' + result.name + '&queryid=' + queryid + '">view OCR</a>)&nbsp;'
 
   // store the ratings with names but keep it hidden, we'll use this on hover to display the users and
   // their ratings on the left hand side of the screen.
@@ -112,7 +112,7 @@ var renderResult = function (queryTerms, result, resDiv) {
   html += '<span class="highlight" id="' + result.name + '-dup-confidence"></span>';
 
   html += '</td></div></td>' +
-  '<td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '&nbsp;&nbsp;&nbsp;score: ' + result.score + '</td> ' +
+  '<td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td>'; // + '&nbsp;&nbsp;&nbsp;score: ' + Math.exp(result.score) + '</td> ' +
   '</tr>';
 
   html += '<tr><td>' + result.meta.creator + '&nbsp;•&nbsp;published: ' + result.meta.date + '</td></tr>';
@@ -151,6 +151,18 @@ var renderResult = function (queryTerms, result, resDiv) {
   if (noteHTML.length > 0) {
     html += '<a href="#" onclick="UI.toggleNotes(\'tmpnotes-' + result.name + '\');"><span class="fa fa-pencil"></span>&nbsp;Show/Hide notes</a></div>';
     html += '<div id="tmpnotes-' + result.name + '"  style="display:none">' + noteHTML + '</div>';
+  }
+
+  // show queries
+  var queries = [];
+  _.each(result.queries.rows, function (query) {
+    queries.push('<a target="_BLANK" href="index.html?action=search&kind=' + query.kind + '&q=' + encodeURI(query.query ) + '">' + query.query  + '</a>');
+  })
+  if (queries.length == 1) {
+    html += '<div class="resource-query" >Found with query: ' + queries.toString() + '</div>';
+  }
+  if (queries.length > 1) {
+    html += '<div class="resource-query" >Found with queries: ' + queries.join(', ').toString() + '</div>';
   }
 
   // show labels

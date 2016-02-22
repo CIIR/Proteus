@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * @author jfoley
+ * @author jfoley, michaelz
  */
 public class ViewResource implements JSONHandler {
   private static final Logger log = Logger.getLogger(ViewResource.class.getName());
@@ -40,6 +40,13 @@ public class ViewResource implements JSONHandler {
     String docId = reqp.getString("id");
     if(!reqp.isString("kind")) {
       throw new IllegalArgumentException("Expected argument 'kind'");
+    }
+    Integer queryid = -1;
+
+    if (reqp.isString("queryid")){
+      queryid = Integer.parseInt(reqp.get("queryid", "-1"));
+    } else {
+      queryid = reqp.get("queryid", -1);
     }
 
     String kind = reqp.getString("kind");
@@ -68,6 +75,13 @@ public class ViewResource implements JSONHandler {
     }
     response.put("metadata", metadata);
     response.put("text", doc.text);
+
+    // get the query that "found" this document
+    String query = null;
+    if (queryid != -1){
+      query = system.userdb.getQuery(null, queryid);
+      response.put("query", query);
+    }
 
     // get ratings
     Parameters ratings = Parameters.create();

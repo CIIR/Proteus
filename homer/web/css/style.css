@@ -633,7 +633,7 @@ body {
     background-color: lemonchiffon;
     padding : 5px;
     border-radius: 5px;
-    margin : 5px;
+
 }
 
 .label-button {
@@ -647,12 +647,7 @@ body {
     padding-right: 5px;
 }
 
-.term-check-mark:after {
-    font-family: "Glyphicons Halflings";
-    content:"\e013"; /* check mark */
-    color: black;
-    padding-left: 5px;
-}
+
 
 .overimage {
     z-index: 1000;
@@ -701,13 +696,39 @@ border-radius: 5px;
     margin: 10px;
 }
 
-.button .term-freq {
-    display: none;
-}
-.button:hover .term-freq {
-    display: block;
-}
-.button .term  {
-    display: block;
+.button:hover.term {
+    background-color: cornflowerblue;
+    color:  white;
+
 }
 
+.button span.term-check-mark{
+    color: blueviolet;
+    font-weight: bold;
+}
+
+.term-check-mark:after {
+    font-family: "Glyphicons Halflings";
+    content:"\e013"; /* check mark */
+    color: blueviolet;
+    padding-left: 5px;
+}
+
+.query-terms-area{
+    background-color: lightgrey;
+    margin: 5px;
+    padding: 10px;
+    border-radius: 15px;
+}
+
+#build-a-query{
+    background-color: lightblue;
+    margin: 5px;
+    padding: 10px;
+    border-radius: 15px;
+}
+
+#query-div{
+    margin: 5px;
+    padding: 10px;
+}

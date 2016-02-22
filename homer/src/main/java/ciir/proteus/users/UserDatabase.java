@@ -119,6 +119,8 @@ public interface UserDatabase {
 
     public Integer insertQuery(Credentials creds, Integer corpusID, String query, String kind) throws DBError;
 
+    public Parameters getQueriesForResource(String resource, Integer corpusID) throws DBError, IOException;
+
     public void insertQueryResourceXref(Credentials creds, String resource, Integer corpusID, Integer queryid) throws DBError;
 
     public void addVoteForResource(Credentials creds, String resource, Integer corpusID, Integer subcorpusID, Integer queryid) throws DBError;

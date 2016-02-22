@@ -19,6 +19,7 @@ import org.lemurproject.galago.utility.Parameters;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,12 +141,20 @@ public class ProteusSystem {
 
   public void loadNoteIndex() throws Exception {
 
-    String noteIndexPath = config.get("noteIndex", "");
+    Parameters noteParams = config.get("notes", Parameters.create());
+    String noteIndexPath = noteParams.get("noteIndex", "");
     if (noteIndexPath.length() == 0) {
       return;
     }
 
-    noteIndex = new MemoryIndex(Parameters.parseArray("makecorpus", true));
+    List<String> noteFields = noteParams.getAsList("noteFields", String.class);
+
+    Parameters memIdxParams = Parameters.create();
+    memIdxParams.set("corpus", true);
+    memIdxParams.set("tokenizer", Parameters.create());
+    memIdxParams.getMap("tokenizer").set("fields", noteFields.toArray());
+
+    noteIndex = new MemoryIndex(memIdxParams); //Parameters.parseArray("makecorpus", true));
 
     // TODO : get corpus number
     Parameters notes = this.userdb.getNotesForCorpus(1);
@@ -157,7 +166,9 @@ public class ProteusSystem {
     }
 
     TagTokenizer tok = new TagTokenizer();
-
+    for (String field : noteFields) {
+      tok.addField(field);
+    }
     for (Parameters p : arr) {
       Document d = new Document();
       d.name = p.get("resource") + "_" + p.get("id");

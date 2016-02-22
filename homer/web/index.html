@@ -86,6 +86,9 @@
 
             $(document).ready(function() {
 
+                $("#show-corpus-terms").hide();
+                $("#query-builder-link").hide();
+
                 $("#hide-dups").on("click", function(){
                     UI.showHideDups();
                 })
@@ -230,6 +233,13 @@
 
                 $("#clear-all-facets").on('click', function() {
                     $('#facets input[type="checkbox"]:checked').removeAttr('checked');
+                });
+                $("#clear-all-terms").on('click', function() {
+                    _.forEach($('span.term-check-mark'), function(t) {
+                        $(t).removeClass("term-check-mark");
+                    });
+                    $('#build-a-query').html('');
+
                 });
 
 
@@ -389,11 +399,12 @@
 
                 <input type="text" id="dup-value" readonly style="border:0; font-weight:bold;">
 
-            <div id="dup-slider"></div>
+                <div id="dup-slider"></div>
                 <div id="hide-dups">
-                <input type="checkbox" name="hide-dups" value="4">&nbsp;Hide possible duplicates
+                    <input type="checkbox" name="hide-dups" value="4">&nbsp;Hide possible duplicates
                 </div>
-                </fieldset>
+            </fieldset>
+
 
         </div>
         <!--
@@ -419,6 +430,29 @@
         <div  id="results-right" class="col-md-10 column  ">
 
             <div id="metadata"></div>
+
+    <div id="query-builder-link"><a href="#" onclick="$('#show-corpus-terms').toggle();">Show/Hide Query Builder</a></div>
+    <div id="show-corpus-terms">
+        <fieldset  >
+                <legend>Build a query</legend>
+                <div id="query-div"><b>Query:</b> <span id="build-a-query"></span></div>
+                <button type="button" id="clear-all-terms" class="btn btn-xs ">Clear All</button>
+                <div class="query-terms-area"><b>Terms (whole documents):</b>
+                <span class="query-term-buttons" id="high-tf"></span></div>
+                <div class="query-terms-area"><b>Terms (document snippets):</b>
+                <span class="query-term-buttons" id="high-snippettf"></span></div>
+                <div class="query-terms-area"><b>Bigrams:</b>
+                <span  class="query-term-buttons" id="high-bigrams"></span></div>
+                <div class="query-terms-area"><b>Trigrams:</b>
+                <span  class="query-term-buttons" id="high-trigrams"></span></div>
+                <div class="query-terms-area"><b>People:</b>
+                <span class="query-term-buttons" id="high-entities-per"></span></div>
+                <div class="query-terms-area"><b>Places:</b>
+                <span class="query-term-buttons" id="high-entities-loc"></span></div>
+                <div class="query-terms-area"><b>Organizations:</b>
+                <span class="query-term-buttons" id="high-entities-org"></span></div>
+            </fieldset>
+</div>
             <div id="results">
 
 

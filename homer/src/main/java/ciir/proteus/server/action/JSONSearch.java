@@ -98,6 +98,14 @@ public class JSONSearch implements JSONHandler {
             }
         }
 
+        // the client should turn off the "get more results" functionality, but just in case, make sure we
+        // don't keep returning the same results over and over
+        if (!resList.isEmpty() && skipResults > 0){
+            Parameters none =  Parameters.create();
+            none.set("results",  Parameters.create());
+            return none;
+        }
+
         Node pquery = null;
 
         // save the query
@@ -128,6 +136,11 @@ public class JSONSearch implements JSONHandler {
         Parameters qp = Parameters.create();
         qp.put("requested", numResults + skipResults);
 
+        // setting this to false, otherwise #scale queries fail
+        // see: https://sourceforge.net/p/lemur/bugs/272/
+        qp.put("deltaReady", false);
+
+
         // give them the ability to restrict the results to a working set
         // specified by a query passed in - most likely an archive id
         // TODO ???? add tests!!! and log?
@@ -151,14 +164,15 @@ public class JSONSearch implements JSONHandler {
         }
 
         Parameters response = Parameters.create();
+        Parameters annotations = Parameters.create();
+        DocumentAnnotator da = new DocumentAnnotator();
 
-        List<Parameters> results = Collections.emptyList();
         List<ScoredDocument> docs = null;
         // if we're searching using a working set
         if (resList.isEmpty()) {
             docs = ListUtil.drop(system.search(kind, pquery, qp), skipResults);
             if (!docs.isEmpty()) {
-                results = DocumentAnnotator.annotate(this.system, kind, docs, pquery, reqp);
+                annotations = da.annotate(this.system, kind, docs, pquery, reqp);
             }
         } else {
             docs = new ArrayList<>();
@@ -167,19 +181,20 @@ public class JSONSearch implements JSONHandler {
             }
             if (!docs.isEmpty()) {
                 log.info(docs.toString());
-                reqp.set("tags", true);
+                reqp.set("tags", false); // 2/2016 - tags are currently not used
                 // remove the param that says how many to get
                 reqp.remove("n");
-                results = DocumentAnnotator.annotate(this.system, kind, docs, pquery, reqp);
+                annotations = da.annotate(this.system, kind, docs, pquery, reqp);
             }
         }
-
+        List<Parameters> results = annotations.getAsList("results");
         ResultLogData logData = new ResultLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", "* not logged in *"));
         logData.setDocIDs(ClickLogHelper.extractDocID(results).toString());
         LogHelper.log(logData, system);
 
         response.set("queryid", queryid);
-        response.set("results", results);
+
+        response.copyFrom(annotations);
         if (pquery != null) {
             response.set("parsedQuery", pquery.toString());
             response.set("queryTerms", QueryUtil.queryTerms(pquery));

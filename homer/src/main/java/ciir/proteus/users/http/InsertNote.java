@@ -32,7 +32,7 @@ public class InsertNote extends DBAction {
     }
 
     @Override
-    public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DBError, IOException {
+    public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws Exception {
         Integer id = -1;
 
         Credentials creds = Credentials.fromJSON(reqp);
@@ -56,44 +56,7 @@ public class InsertNote extends DBAction {
 
         } // end loop through labels
 
-        if (system.noteIndex != null){
-            TagTokenizer tok = new TagTokenizer();
-
-            // TODO dup code, should have an addNoteToIndex() funciton
-            Document d = new Document();
-            d.name = reqp.get("uri") + "_" + id;
-            d.text = reqp.getString("user").split("@")[0] + " : " + reqp.get("quote") + " : " + reqp.get("text");
-            d.tags = new ArrayList<Tag>();
-            d.metadata = new HashMap<String,String>();
-            // TODO : do we use metadata for things like who made the note, etc?
-            d.metadata.put("docType", "note");
-            tok.process(d);
-            system.noteIndex.process(d);
-
-            String noteIndexPath = system.getConfig().get("noteIndex", "????");
-            // flush the index to disk
-            FlushToDisk.flushMemoryIndex(system.noteIndex, noteIndexPath);
-
-            Retrieval retrieval = system.getRetrieval("ia-corpus");
-            Parameters globalParams = retrieval.getGlobalParameters();
-            List<String> idx = new ArrayList<String>();
-            idx.addAll(globalParams.getAsList("index"));
-
-            // only add the note index path if it's not already there
-            if (idx.contains(noteIndexPath) == false){
-                idx.add(noteIndexPath);
-            }
-
-            Parameters newParams = Parameters.create();
-            newParams.put("index", idx);
-
-            try {
-                system.kinds.put("ia-corpus", RetrievalFactory.create(newParams));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }
+        system.loadNoteIndex();
 
         AddNoteLogData logData = new AddNoteLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
         logData.setCorpus(corpusid);

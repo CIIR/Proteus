@@ -1408,6 +1408,48 @@ public class H2Database implements UserDatabase {
 
   }
 
+  @Override
+  public Parameters getQueriesForResource(String resource, Integer corpusID) throws DBError, IOException {
+
+    Integer queryCount = 0;
+    Parameters rows = Parameters.create();
+    List<Parameters> queryies = new ArrayList<>();
+
+    Connection conn = null;
+    try {
+      conn = getConnection();
+
+      // TODO ??? probably should return user too, BUT we don't have that data stored (as of now)
+      String sqlStatement = "SELECT query, kind FROM queries q, query_res_xref x";
+      sqlStatement += " WHERE q.id = x.query_id AND x.resource = ? AND x.corpus_id = ? ";
+      PreparedStatement sql = conn.prepareStatement(sqlStatement);
+
+      sql.setString(1, resource);
+      sql.setInt(2, corpusID);
+
+      ResultSet tuples = sql.executeQuery();
+      while (tuples.next()) {
+        queryCount++;
+        Parameters result = Parameters.create();
+        result.put("query", tuples.getString(1));
+        result.put("kind", tuples.getString(2));
+        queryies.add(result);
+      }
+      tuples.close();
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } finally {
+      attemptClose(conn);
+    }
+
+    Parameters results = Parameters.create();
+    results.put("rows", queryies);
+    results.put("total", queryCount);
+
+    return results;
+  }
+
   public void insertQueryResourceXref(Credentials creds, String resource, Integer corpusID, Integer queryid) throws DBError {
 
     Connection conn = null;
@@ -1505,7 +1547,7 @@ public class H2Database implements UserDatabase {
       List<String> resources = new ArrayList<>();
       Object[] objLabels = new Object[subcorpora.size()];
       int i = 0;
-      for (Long label : subcorpora) {
+      for (Object label : subcorpora) {
         objLabels[i++] = label;
       }
 

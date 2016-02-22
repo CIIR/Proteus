@@ -1101,20 +1101,20 @@ Annotator = (function(superClass) {
                 }
             }
         }
-        annotation.quote = [];
+        // MCZ - we want to preseve HTML tags in the notes so commenting out
+        // the quote processing
+        //  annotation.quote = [];
         annotation.ranges = [];
         annotation.highlights = [];
         for (q = 0, len3 = normedRanges.length; q < len3; q++) {
             normed = normedRanges[q];
-            annotation.quote.push($.trim(normed.text()));
+            // annotation.quote.push($.trim(normed.text()));
             annotation.ranges.push(normed.serialize(this.wrapper[0], '.annotator-hl'));
             $.merge(annotation.highlights, this.highlightRange(normed));
         }
-        // MCZ - user the HTML if creating a new annotation
+        // MCZ - use the HTML if creating a new annotation
         if (html.length > 0){
             annotation.quote = html;
-        } else{
-            annotation.quote =  annotation.quote.join(' / ');
         }
 
         $(annotation.highlights).data('annotation', annotation);
