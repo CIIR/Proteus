@@ -182,6 +182,8 @@ var renderNoteResult = function (queryTerms, result, resDiv) {
 
   var name = "Note: ";
   var snippet = result.text;
+  // remove any <br> tags, they make the note look odd in the results list
+  snippet = snippet.replace(/<br>/g, " ");
   var idParts = result.name.split('_');
 
   var html =
