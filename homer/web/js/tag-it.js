@@ -735,7 +735,7 @@
             $("#"+id).children(".tagit-choice").last().children("span.tagit-label").text(label + " (" + rating + ")");
 
             addTag(label, resource, rating, comment);
-            addLabelToButtons(label);
+            //addLabelToButtons(label);
             // add it to our in memory representation
             // NOTE: this may be the first tag for this document so we need to make sure to add any elements we need
             var fullLabel = formatLabelForDatabase(label);

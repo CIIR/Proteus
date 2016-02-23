@@ -127,26 +127,6 @@ var highlightText = function(queryTerms, text, beforeTag, afterTag, stripPunctua
     }).join(' ');
 };
 
-function getSelectedLabels() {
-
-    var labels = [];
-    var tree = $("#tree").fancytree("getTree");
-    var selNodes = tree.getSelectedNodes();
-
-    selNodes.forEach(function(node) {
-
-        if (!node.hasChildren()) {// ONLY count leaf nodes
-            // strip out the user's email part of the key
-            key = node.key.split(TREE_KEY_SEP())[1];
-            labels.push(key);
-        }
-    });
-
-    console.log("LABELS: " + labels);
-
-    return labels;
-
-}
 
 // users have the ability to just type a value w/o a type,
 // in order to let them choose these, we need to "group" them

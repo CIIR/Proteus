@@ -10,21 +10,21 @@
 var GLOBAL = {
     uniqTypes: [], allTags: [], users: {}, userComments: [], corpora: [],
     ratedDocuments: [
-        {"doc" : "westindiesincana1916grea", "aveRating" : 3},
-        {"doc" : "sirfrancisdrakeh04mayn_75", "aveRating" : 1.5},
-        {"doc" : "westindiesincana1916grea_18", "aveRating" : 5},
-        {"doc" : "obeahwitchcraft00bellgoog_197", "aveRating" : 4.5},
-        {"doc" : "obeahwitchcraft00bellgoog", "aveRating" : 3}
+        {"doc": "westindiesincana1916grea", "aveRating": 3},
+        {"doc": "sirfrancisdrakeh04mayn_75", "aveRating": 1.5},
+        {"doc": "westindiesincana1916grea_18", "aveRating": 5},
+        {"doc": "obeahwitchcraft00bellgoog_197", "aveRating": 4.5},
+        {"doc": "obeahwitchcraft00bellgoog", "aveRating": 3}
     ]
 };
 
 // the JSON of the application state
 var Model = {
     // retrieval result data
-  //  request: {}, query: "", results: [], queryType: null, queryTerms: [], queryid: -1
+    //  request: {}, query: "", results: [], queryType: null, queryTerms: [], queryid: -1
 };
 
-var clearModelResults = function(m){
+var clearModelResults = function(m) {
     m.results = [];
     m.query = "";
 }
@@ -43,10 +43,10 @@ var privateURLParams = _(["user", "token"]);
 
 var updateURL = function(request) {
 
-    if (showSideBarFlag){
-        request = _.merge(request, {'showSideBar' : '1'});
+    if (showSideBarFlag) {
+        request = _.merge(request, {'showSideBar': '1'});
     } else {
-        request = _.merge(request, {'showSideBar' : '0'});
+        request = _.merge(request, {'showSideBar': '0'});
     }
 
     pushURLParams(_.omit(request, privateURLParams));
@@ -88,7 +88,7 @@ var doActionRequest = function(args) {
     if (action == "view") {
         var corpus = getCookie("corpus");
         var corpusID = getCorpusID(corpus);
-        args = _.merge(args, {'corpusID' : corpusID});
+        args = _.merge(args, {'corpusID': corpusID});
         disableAutoRetrieve();
         return doViewRequest(args);
     }
@@ -116,33 +116,33 @@ UI.onClickSearchButton = function(kind, text) {
     var terms = _.escape(UI.getQuery().trim()).toLowerCase();
 
     var tmp = [];
-    if (localStorage["pastSearches"] != null){
-        tmp  = JSON.parse(localStorage["pastSearches"]);
+    if (localStorage["pastSearches"] != null) {
+        tmp = JSON.parse(localStorage["pastSearches"]);
     }
     // check if it exists
     var found = false;
-    _.forEach(tmp, function(rec){
-        if (rec.kind == kind && rec.terms == terms){
+    _.forEach(tmp, function(rec) {
+        if (rec.kind == kind && rec.terms == terms) {
             found = true;
         }
     });
 
-    if (found != true){
-        tmp.push({ terms: terms, kind: kind});
+    if (found != true) {
+        tmp.push({terms: terms, kind: kind});
         localStorage["pastSearches"] = JSON.stringify(tmp);
-        if (terms.length == 0){
+        if (terms.length == 0) {
             terms = SEARCH_FOR_EVERYTHING;
         }
-        $("#pastSearches").prepend( '<div class="query">&#8226;&nbsp;<a onclick="tmpSearch( $(this), \''+kind+'\')">' + terms +  '</a>'+ '&nbsp;(' + kind + ')<div class="xtmp"><img class="delimg" src=\'images/del.png\'/> </div>&nbsp;</div>' );
+        $("#pastSearches").prepend('<div class="query">&#8226;&nbsp;<a onclick="tmpSearch( $(this), \'' + kind + '\')">' + terms + '</a>' + '&nbsp;(' + kind + ')<div class="xtmp"><img class="delimg" src=\'images/del.png\'/> </div>&nbsp;</div>');
     }
     doActionRequest({kind: kind, q: UI.getQuery(), action: "search"});
 };
 
-UI.populateRecentSearches = function(){
+UI.populateRecentSearches = function() {
 
     // TODO should be it's own function
     var corpus = getCookie("corpus");
-    if (corpus == ""){
+    if (corpus == "") {
         $("#pastSearches").html("");
         $('#note-list').html("");
         return;
@@ -155,7 +155,7 @@ UI.populateRecentSearches = function(){
             function(results) {
 
                 var html = '';
-                for (i in results.rows){
+                for (i in results.rows) {
                     rec = results.rows[i];
                     var identifier = rec.uri.split('_')[0];
                     var pageNum = rec.uri.split('_')[1];
@@ -163,30 +163,32 @@ UI.populateRecentSearches = function(){
                     // strip the seconds/milliseconds from the date
                     var dt = rec.dttm.substring(0, rec.dttm.lastIndexOf(":"));
                     var name = rec.user.toString();
-                        name = name.split("@")[0];
+                    name = name.split("@")[0];
 
                     html += '&#8226;&nbsp;' + dt + ' ' + name + ': <i>' + rec.text
-                        + '</i> view: <a target="_blank" href="view.html?kind=ia-pages&action=view&id=' + identifier + '&pgno=' + pageNum + '&noteid=' + rec.id + '">Page, </a>'
-                        + '<a target="_blank" href="view.html?kind=ia-books&action=view&id=' + identifier + '_' + pageNum +'&noteid=' + rec.id + '">Book</a><br>';
+                            + '</i> view: <a target="_blank" href="view.html?kind=ia-pages&action=view&id=' + identifier + '&pgno=' + pageNum + '&noteid=' + rec.id + '">Page, </a>'
+                            + '<a target="_blank" href="view.html?kind=ia-books&action=view&id=' + identifier + '_' + pageNum + '&noteid=' + rec.id + '">Book</a><br>';
 
                 }
                 $('#note-list').html(html);
             },
-            function() {alert("error getting notes!")});
+            function() {
+                alert("error getting notes!")
+            });
 
 
-    if (localStorage["pastSearches"] == null){
+    if (localStorage["pastSearches"] == null) {
         return;
     }
     $("#pastSearches").html("");
-    _.forEach( JSON.parse(localStorage["pastSearches"]), function(rec){
-        $("#pastSearches").prepend( '<div class="query">&#8226;&nbsp;<a onclick="tmpSearch( $(this), \''+rec.kind+'\')">' + rec.terms +  '</a>'+ '&nbsp;(' + rec.kind + ')<div class="xtmp"><img class="delimg" src=\'images/del.png\'/> </div>&nbsp;</div>' );
+    _.forEach(JSON.parse(localStorage["pastSearches"]), function(rec) {
+        $("#pastSearches").prepend('<div class="query">&#8226;&nbsp;<a onclick="tmpSearch( $(this), \'' + rec.kind + '\')">' + rec.terms + '</a>' + '&nbsp;(' + rec.kind + ')<div class="xtmp"><img class="delimg" src=\'images/del.png\'/> </div>&nbsp;</div>');
     });
 }
 
-function tmpSearch(that, kind){
+function tmpSearch(that, kind) {
     var query = that.text();
-    if (query == SEARCH_FOR_EVERYTHING){
+    if (query == SEARCH_FOR_EVERYTHING) {
         query = "";
     }
     console.log("Query: " + query);
@@ -202,8 +204,8 @@ function tmpSearch(that, kind){
 //    UI.onClickSearchButton(kind);
 //}
 
-function buildSearchLink(entType, q,  kind){
-    var query =  entType  + ':"' + q + '"';
+function buildSearchLink(entType, q, kind) {
+    var query = entType + ':"' + q + '"';
     return "index.html?action=search&kind=" + kind + "&q=" + query;
 }
 var logIn = function(userName) {
@@ -226,19 +228,19 @@ var logIn = function(userName) {
             localStorage["corpora"] = JSON.stringify(data.corpora);
             localStorage["subcorpora"] = JSON.stringify(data.subcorpora);
             document.cookie = "broadcast=;";
-            if (!_.isUndefined(data.broadcast)){
+            if (!_.isUndefined(data.broadcast)) {
                 // TODO: duplicate info in the cookie and local storage
                 document.cookie = "broadcast=" + JSON.stringify(data.broadcast) + ";";
                 // set all the messages we can receive and if we want to see them.
                 localStorage["messages"] = JSON.stringify(data.broadcast.messages);
-                if (_.isUndefined(settings.broadcast)){
+                if (_.isUndefined(settings.broadcast)) {
                     settings.broadcast = {};
                 }
                 // if there are any new broadcast messages, default them to "Yes, I want to see them"
                 // until the user explicitly disables them on the setting page.
-                for (msg in data.broadcast.messages){
+                for (msg in data.broadcast.messages) {
 
-                    if (!settings.broadcast.hasOwnProperty(data.broadcast.messages[msg])){
+                    if (!settings.broadcast.hasOwnProperty(data.broadcast.messages[msg])) {
                         settings.broadcast[data.broadcast.messages[msg]] = "Y";
                     }
                 }
@@ -250,8 +252,9 @@ var logIn = function(userName) {
             UI.dispalyUserName();
             // update the type tags
             getAllTagsByUser();
-            location.reload(true);
             showSideBar();
+            location.reload(true);
+
         }, function(req, status, err) {
             UI.showError("ERROR: ``" + err + "``");
             throw err;
@@ -402,7 +405,7 @@ var getAllTagsByUser = function() {
             for (tag in tags) {
                 uniqType.push(tag.split(":")[0]);
             }
-            UI.createLabelMultiselect(user);
+
         }
 
         GLOBAL.uniqTypes = _.uniq(uniqType);
@@ -441,7 +444,7 @@ var getAllTagsByUser = function() {
     });
 };
 
-var createNewCorpus = function(corpusName){
+var createNewCorpus = function(corpusName) {
 
     if (!isLoggedIn()) {
         return;
@@ -453,22 +456,22 @@ var createNewCorpus = function(corpusName){
 
     API.newCorpus(args, function(data) {
 
-                UI.appendToCorpusList(corpusName);
-                // add this to the localStorage
-                var tmp = JSON.parse(localStorage["corpora"]);
-                tmp.push({ name: corpusName, id: data.id });
-                localStorage["corpora"] = JSON.stringify(tmp);
-                // need to re-bind click event...
-                bindCorpusMenuClick();
+        UI.appendToCorpusList(corpusName);
+        // add this to the localStorage
+        var tmp = JSON.parse(localStorage["corpora"]);
+        tmp.push({name: corpusName, id: data.id});
+        localStorage["corpora"] = JSON.stringify(tmp);
+        // need to re-bind click event...
+        bindCorpusMenuClick();
 
-                // set the corpus selection to the newly created one...
-                setCorpus(corpusName);
-        },
-        function(req, status, err) {
-            console.log("ERROR: ``" + err + "``");
-            UI.showError("ERROR: ``" + err + "``");
-            throw err;
-        });
+        // set the corpus selection to the newly created one...
+        setCorpus(corpusName);
+    },
+            function(req, status, err) {
+                console.log("ERROR: ``" + err + "``");
+                UI.showError("ERROR: ``" + err + "``");
+                throw err;
+            });
 }
 
 // get all tags grouped by user on start up

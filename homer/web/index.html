@@ -89,17 +89,17 @@
                 $("#show-corpus-terms").hide();
                 $("#query-builder-link").hide();
 
-                $("#hide-dups").on("click", function(){
+                $("#hide-dups").on("click", function() {
                     UI.showHideDups();
                 })
 
-                $( "#dup-slider" ).slider({
+                $("#dup-slider").slider({
                     range: "min",
                     min: 0,
                     max: 100,
                     value: 30,
-                    stop: function(ui){
-                        if (_.isUndefined(savedData.results)){
+                    stop: function(ui) {
+                        if (_.isUndefined(savedData.results)) {
                             return;
                         }
                         // need to clear out ALL results, if we just searched for
@@ -110,12 +110,12 @@
                         UI.appendResults(Model[savedData.request.kind].queryTerms, savedData.results);
                         renderDups(savedData);
                     },
-                    slide: function( event, ui ) {
-                        $( "#dup-value" ).val( ui.value );
+                    slide: function(event, ui) {
+                        $("#dup-value").val(ui.value);
 
                     }
                 });
-                $( "#dup-value" ).val( $( "#dup-slider" ).slider( "value" ) );
+                $("#dup-value").val($("#dup-slider").slider("value"));
 
 //                $(".droppable").droppable({
 //                    tolerance: "touch",
@@ -244,36 +244,8 @@
 
 
             });</script>
-        <script type="text/javascript">
-            var treeData = [];
-            $(function() {
-                $("#tree").fancytree({
-                    //    extensions: ["persist"],
-                    checkbox: true,
-                    selectMode: 3,
-                    source: treeData,
-                    loadChildren: function(event, ctx) {
-                        ctx.node.fixSelection3AfterClick();
-                    },
-                    select: null,
-                    dblclick: function(event, data) {
-                        data.node.toggleSelected();
-                    },
-                    keydown: function(event, data) {
-                        if (event.which === 32) {
-                            data.node.toggleSelected();
-                            return false;
-                        }
-                    },
-                    // The following options are only required, if we have more than one tree on one page:
-                    //				initId: "treeData",
-                    cookieId: "fancytree-Cb3",
-                    idPrefix: "fancytree-Cb3-"
-                });
 
-            });
 
-        </script>
     </head>
     <body>
 
@@ -375,11 +347,11 @@
             -->
 
 
-                <fieldset  >
-                    <legend   >Refine by</legend>
-                    <div id="facets"></div>
-                    <button type="button" id="clear-all-facets" class="btn btn-xs disabled ">Clear All</button>
-                </fieldset>
+            <fieldset  >
+                <legend   >Refine by</legend>
+                <div id="facets"></div>
+                <button type="button" id="clear-all-facets" class="btn btn-xs disabled ">Clear All</button>
+            </fieldset>
 
             <fieldset  >
                 <legend   >Document labels</legend>
@@ -431,28 +403,28 @@
 
             <div id="metadata"></div>
 
-    <div id="query-builder-link"><a href="#" onclick="$('#show-corpus-terms').toggle();">Show/Hide Query Builder</a></div>
-    <div id="show-corpus-terms">
-        <fieldset  >
-                <legend>Build a query</legend>
-                <div id="query-div"><b>Query:</b> <span id="build-a-query"></span></div>
-                <button type="button" id="clear-all-terms" class="btn btn-xs ">Clear All</button>
-                <div class="query-terms-area"><b>Terms (whole documents):</b>
-                <span class="query-term-buttons" id="high-tf"></span></div>
-                <div class="query-terms-area"><b>Terms (document snippets):</b>
-                <span class="query-term-buttons" id="high-snippettf"></span></div>
-                <div class="query-terms-area"><b>Bigrams:</b>
-                <span  class="query-term-buttons" id="high-bigrams"></span></div>
-                <div class="query-terms-area"><b>Trigrams:</b>
-                <span  class="query-term-buttons" id="high-trigrams"></span></div>
-                <div class="query-terms-area"><b>People:</b>
-                <span class="query-term-buttons" id="high-entities-per"></span></div>
-                <div class="query-terms-area"><b>Places:</b>
-                <span class="query-term-buttons" id="high-entities-loc"></span></div>
-                <div class="query-terms-area"><b>Organizations:</b>
-                <span class="query-term-buttons" id="high-entities-org"></span></div>
-            </fieldset>
-</div>
+            <div id="query-builder-link"><a href="#" onclick="$('#show-corpus-terms').toggle();">Show/Hide Query Builder</a></div>
+            <div id="show-corpus-terms">
+                <fieldset  >
+                    <legend>Build a query</legend>
+                    <div id="query-div"><b>Query:</b> <span id="build-a-query"></span></div>
+                    <button type="button" id="clear-all-terms" class="btn btn-xs ">Clear All</button>
+                    <div class="query-terms-area"><b>Terms (whole documents):</b>
+                        <span class="query-term-buttons" id="high-tf"></span></div>
+                    <div class="query-terms-area"><b>Terms (document snippets):</b>
+                        <span class="query-term-buttons" id="high-snippettf"></span></div>
+                    <div class="query-terms-area"><b>Bigrams:</b>
+                        <span  class="query-term-buttons" id="high-bigrams"></span></div>
+                    <div class="query-terms-area"><b>Trigrams:</b>
+                        <span  class="query-term-buttons" id="high-trigrams"></span></div>
+                    <div class="query-terms-area"><b>People:</b>
+                        <span class="query-term-buttons" id="high-entities-per"></span></div>
+                    <div class="query-terms-area"><b>Places:</b>
+                        <span class="query-term-buttons" id="high-entities-loc"></span></div>
+                    <div class="query-terms-area"><b>Organizations:</b>
+                        <span class="query-term-buttons" id="high-entities-org"></span></div>
+                </fieldset>
+            </div>
             <div id="results">
 
 
