@@ -172,7 +172,7 @@ public class ProteusSystem {
     for (Parameters p : arr) {
       Document d = new Document();
       d.name = p.get("resource") + "_" + p.get("id");
-      d.text = p.getString("user").split("@")[0] + " : " + p.get("quote") + " : " + p.get("text");
+      d.text = "<b>" + p.getString("user").split("@")[0] + " : <i>" + p.get("text") + "</i></b> : " + p.get("quote");
       d.tags = new ArrayList<Tag>();
       d.metadata = new HashMap<String, String>();
       // TODO : do we use metadata for things like who made the note, etc?

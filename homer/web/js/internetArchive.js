@@ -142,9 +142,9 @@ var renderResult = function (queryTerms, result, resDiv, queryid) {
   // show notes
   var noteHTML = '';
   _.each(result.notes.rows, function (note) {
-    noteHTML += '<div class="resource-notes" ><a target="_blank" href="../view.html?kind=ia-pages&action=view&id=' + note.uri + '&noteid=' + note.id + '">';
+    noteHTML += '<div class="resource-notes" ><a target="_blank" href="../view.html?kind=ia-pages&action=view&id=' + note.uri + '&noteid=' + note.id + '"><b>';
     // remove any <br> tags, they make the note look odd in the results list
-    noteHTML += note.user.split('@')[0] + ' : ' + note.text.replace(/<br>/g, " ") + ' : ';
+    noteHTML += note.user.split('@')[0] + ' : <i>' + note.text.replace(/<br>/g, " ") + '</i></b> : ';
     noteHTML += highlightText(queryTerms, note.quote.replace(/<br>/g, " "), '<span class="hili">', '</span>');
     noteHTML += '</a></div>';
   })
@@ -182,9 +182,9 @@ var renderNoteResult = function (queryTerms, result, resDiv) {
   // TODO duplicate code with renderResult()
 
   var name = "Note: ";
-  var snippet = result.text;
   // remove any <br> tags, they make the note look odd in the results list
-  snippet = snippet.replace(/<br>/g, " ");
+  var snippet = result.text.replace(/<br>/g, " ");
+
   var idParts = result.name.split('_');
 
   var html =
