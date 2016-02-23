@@ -128,6 +128,15 @@
             var jsonData = JSON.parse(data);
 
             var port = jsonData.port;
+
+            // if there is a port on the URL, we'll override the port stored locally, because
+            // we may be in one browser but want to look at multiple activity streams. Since it's
+            // stored at the cookie level, we can only have one per browser
+            var urlParams = getURLParams();
+
+            if (_.isUndefined(urlParams.port) == false){
+                port = urlParams.port;
+            }
             var host = jsonData.url;
 
             var socket = io.connect(host + ':' + port);
