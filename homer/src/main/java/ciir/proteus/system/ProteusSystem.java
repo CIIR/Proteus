@@ -184,7 +184,7 @@ public class ProteusSystem {
     // flush the index to disk
     FlushToDisk.flushMemoryIndex(noteIndex, noteIndexPath);
 
-    // add disk flushed memory index to the "ia-corpus" kind
+    // add disk flushed memory index to the "ia-corpus" & "ia-all" kind
     Retrieval retrieval = getRetrieval("ia-corpus");
     Parameters newParams = Parameters.create();
     Parameters globalParams = retrieval.getGlobalParameters();
@@ -198,6 +198,9 @@ public class ProteusSystem {
 
     newParams.put("index", idx);
     kinds.put("ia-corpus", RetrievalFactory.create(newParams));
-
+    // making the (safe) assumption that the indexes for ia-corpus
+    // are the same as ia-all
+    kinds.put("ia-all", RetrievalFactory.create(newParams));
+ 
   }
 }
