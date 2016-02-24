@@ -198,7 +198,7 @@ function getTermHTMl(term, count, classes) {
 
 }
 function calcPixelSize(count) {
-    return Math.max(12, Math.min(100, Math.round(Math.sqrt(count))));}
+   return Math.max(12, Math.min(100, Math.round(Math.sqrt(count))));}
 var onSearchSuccess = function(data) {
 
     // clear unique words on each new search IFF we're not
