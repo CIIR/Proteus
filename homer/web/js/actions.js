@@ -120,7 +120,7 @@ var doSearchRequest = function(args) {
         args.labels = "";
         args = _.merge(args, JSON.parse(labelArgs));
     }
-  
+
     // if we didn't ask for more
     if (!args.skip || args.skip === 0) {
         //Model.clearResults();
@@ -198,8 +198,7 @@ function getTermHTMl(term, count, classes) {
 
 }
 function calcPixelSize(count) {
-    return 14 + (count / 100);
-}
+    return Math.max(12, Math.min(100, Math.round(Math.sqrt(count))));}
 var onSearchSuccess = function(data) {
 
     // clear unique words on each new search IFF we're not
