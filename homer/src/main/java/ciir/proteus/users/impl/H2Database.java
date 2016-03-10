@@ -100,7 +100,7 @@ public class H2Database implements UserDatabase {
 
       conn.createStatement().executeUpdate("create sequence IF NOT EXISTS note_seq");
       conn.createStatement().executeUpdate("create table IF NOT EXISTS notes (ID BIGINT NOT NULL, CORPUS_ID BIGINT NOT NULL, resource VARCHAR(256) NOT NULL," +
-              " data VARCHAR(2000) NOT NULL, ins_user BIGINT NOT NULL, ins_dttm DATETIME NOT NULL, upd_user BIGINT, upd_dttm DATETIME, " +
+              " data CLOB NOT NULL, ins_user BIGINT NOT NULL, ins_dttm DATETIME NOT NULL, upd_user BIGINT, upd_dttm DATETIME, " +
               " PRIMARY KEY (ID), foreign key (corpus_id) references corpora(id))");
       conn.createStatement().executeUpdate("create index IF NOT EXISTS notes_res_idx on notes(resource)");
       conn.createStatement().executeUpdate("create sequence IF NOT EXISTS query_seq");
