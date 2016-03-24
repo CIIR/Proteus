@@ -83,7 +83,7 @@
         <script>
 
             var showSideBarFlag = true;
-
+            var lastChecked = null;
             $(document).ready(function() {
 
                 $("#show-corpus-terms").hide();
@@ -229,10 +229,13 @@
                 enableAutoRetrieve();
 
 
-                $("#facets").html(displayFacets());
+                $("#facets").html(displaySubcorporaFacets());
 
                 $("#clear-all-facets").on('click', function() {
                     $('#facets input[type="checkbox"]:checked').removeAttr('checked');
+                });
+                $("#clear-all-dates").on('click', function() {
+                    $('#pub-date input[type="checkbox"]:checked').removeAttr('checked');
                 });
                 $("#clear-all-terms").on('click', function() {
                     _.forEach($('span.term-check-mark'), function(t) {
@@ -242,6 +245,33 @@
 
                 });
 
+                if (!_.isUndefined(localStorage["pub-years"])) {
+                    var recs = JSON.parse(localStorage["pub-years"]);
+                    $("#pub-date").html('');
+                    _.each(recs, function (r) {
+                        var s = r.split(":");
+                        $("#pub-date").append('<input type="checkbox" id="year-' + s[0] + '" class="year-chkbox" value="1" />' + s[0] + ' (' + s[1] + ')<br>');
+
+                    });
+                }
+                // allow shift-click on year checkboxes. From: http://stackoverflow.com/questions/659508/how-can-i-shift-select-multiple-checkboxes-like-gmail
+                var $chkboxes = $('.year-chkbox');
+                $chkboxes.click(function(e) {
+                    if(!lastChecked) {
+                        lastChecked = this;
+                        return;
+                    }
+
+                    if(e.shiftKey) {
+                        var start = $chkboxes.index(this);
+                        var end = $chkboxes.index(lastChecked);
+
+                        $chkboxes.slice(Math.min(start,end), Math.max(start,end)+ 1).prop('checked', lastChecked.checked);
+
+                    }
+
+                    lastChecked = this;
+                });
 
             });</script>
 
@@ -377,7 +407,7 @@
                 </div>
             </fieldset>
 
-
+    
         </div>
         <!--
         <div id="results-right" class="col-md-10 column right-align">

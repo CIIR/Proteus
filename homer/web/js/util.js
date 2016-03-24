@@ -783,9 +783,7 @@ function displayLabels(res) {
 
 }
 
-function displayFacets() {
-
-    // TODO ??? duplicate code
+function displaySubcorporaFacets() {
 
     var html = '&nbsp;';
     var labels = localStorage["subcorpora"];
@@ -799,33 +797,11 @@ function displayFacets() {
         var recs = JSON.parse(labels);
 
         _.each(recs, function(r) {
-
-            html += '<input type="checkbox" name="facets" value="' + r.id + '" />&nbsp;' + r.name + '<br>';
-
+            html += '<input type="checkbox" name="facets" value="' + r.id + '" />&nbsp;' + r.name  + ' (' + r.count + ')<br>';
         });
     }
 
     return html;
-
-}
-
-// if we added a subcorpus, add it to the facet list
-function updateFacets() {
-
-    // TODO ??? duplicate code
-
-    if (_.isUndefined(localStorage["subcorpora"])){
-        return;
-    }
-    var html = '&nbsp;';
-    var labels = JSON.parse(localStorage["subcorpora"]);
-
-    _.each(labels, function(rec) {
-        // see if it exists, if not add it
-        if (_.isEmpty($('#facets input[value=' + rec.id + ']'))) {
-            $("#facets").append('<input type="checkbox" name="facets" value="' + rec.id + '" />&nbsp;' + rec.name + '<br>');
-        }
-    })
 
 }
 
@@ -863,18 +839,34 @@ function labelClick(that, subcorpus_id, res, kind) {
         action: action
     };
 
+    // TODO MCZ Horribly, HORRIBLY brain dead way of updating
+    // subcorpus document counts. really needs to be revisited
     API.voteForResource(args, function() {
         console.log("voted!")
+        var delta = 0;
         if (action == "add") {
             if (_.isUndefined(votingJSON.document[res][userName])) {
                 votingJSON.document[res][userName] = {};
             }
             votingJSON.document[res][userName][subcorpus_id] = 1;
+            delta = +1;
         } else {
             delete votingJSON.document[res][userName][subcorpus_id];
+            delta = -1;
         }
         setUserRatingsHTML(res);
         renderRatingsSidebar(res);
+
+        // find the correct record
+        var recs = JSON.parse(localStorage["subcorpora"]);
+        _.forEach(recs, function(rec){
+            if (rec.id == subcorpus_id){
+                rec.count += delta;
+            }
+        });
+        localStorage["subcorpora"] = JSON.stringify(recs);
+
+        $("#facets").html(displaySubcorporaFacets());
     }, function() {
         console.log("problem voting")
     });
