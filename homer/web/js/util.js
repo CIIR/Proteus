@@ -848,11 +848,24 @@ function labelClick(that, subcorpus_id, res, kind) {
             if (_.isUndefined(votingJSON.document[res][userName])) {
                 votingJSON.document[res][userName] = {};
             }
-            votingJSON.document[res][userName][subcorpus_id] = 1;
+            // ONLY increment the count IFF we're the ONLY "vote"
             delta = +1;
+            _.forEach(votingJSON.document[res], function(user){
+                if (!_.isUndefined(user[subcorpus_id])){
+                    delta = 0;
+                }
+            });
+            votingJSON.document[res][userName][subcorpus_id] = 1;
+
         } else {
             delete votingJSON.document[res][userName][subcorpus_id];
             delta = -1;
+            _.forEach(votingJSON.document[res], function(user){
+                if (!_.isUndefined(user[subcorpus_id])){
+                    delta = 0;
+                }
+            });
+
         }
         setUserRatingsHTML(res);
         renderRatingsSidebar(res);
