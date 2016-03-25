@@ -113,7 +113,8 @@ public class H2Database implements UserDatabase {
       // TODO ??? add keys, etc
       conn.createStatement().executeUpdate("create table IF NOT EXISTS resource_labels (USER_ID BIGINT NOT NULL, CORPUS_ID BIGINT NOT NULL, SUBCORPUS_ID BIGINT NOT NULL, resource VARCHAR(256) NOT NULL, foreign key (user_id) references users(id), foreign key (corpus_id) references corpora(id))");
 
-      conn.createStatement().executeUpdate("CREATE VIEW IF NOT EXISTS subcopus_doc_count AS SELECT s.corpus_id, s.id, subcorpus, COUNT(resource) as num FROM subcorpora s LEFT OUTER JOIN resource_labels l ON s.corpus_id = l.corpus_id AND s.id = l.subcorpus_id GROUP BY s.id");
+      conn.createStatement().executeUpdate("DROP VIEW subcopus_doc_count");
+      conn.createStatement().executeUpdate("CREATE VIEW IF NOT EXISTS subcopus_doc_count AS SELECT s.corpus_id, s.id, subcorpus, COUNT(DISTINCT resource) as num FROM subcorpora s LEFT OUTER JOIN resource_labels l ON s.corpus_id = l.corpus_id AND s.id = l.subcorpus_id GROUP BY s.id");
 
 
       try {
