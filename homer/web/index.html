@@ -229,7 +229,7 @@
                 enableAutoRetrieve();
 
 
-                $("#facets").html(displaySubcorporaFacets());
+                displaySubcorporaFacets();
 
                 $("#clear-all-facets").on('click', function() {
                     $('#facets input[type="checkbox"]:checked').removeAttr('checked');
@@ -407,7 +407,11 @@
                 </div>
             </fieldset>
 
-    
+            <fieldset  >
+                <legend   >Publication Date</legend>
+                <div id="pub-date"></div>
+                <button type="button" id="clear-all-dates" class="btn btn-xs ">Clear All</button>
+            </fieldset>
         </div>
         <!--
         <div id="results-right" class="col-md-10 column right-align">

@@ -263,7 +263,7 @@ var onSearchSuccess = function(data) {
 
     if (!_.isUndefined(data.subcorpora)) {
         localStorage["subcorpora"] = JSON.stringify(data.subcorpora);
-        $("#facets").html(displaySubcorporaFacets());
+        displaySubcorporaFacets();
     }
 
     var rank = Model[data.request.kind].results.length + 1;

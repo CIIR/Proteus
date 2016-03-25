@@ -787,6 +787,9 @@ function displaySubcorporaFacets() {
 
     var html = '&nbsp;';
     var labels = localStorage["subcorpora"];
+
+    // save the check box state
+    var array = $.map($('#facets input[type="checkbox"]:checked'), function(c){return c.value; })
     // 1st check ensures we have an entry for subcorpora, 2nd check makes sure there is data,
     // 3rd check is just a safety - I manually cleared out the localstorage and the page would
     // say "Uncaught SyntaxError: Unexpected end of input" because it was trying to parse an
@@ -797,11 +800,15 @@ function displaySubcorporaFacets() {
         var recs = JSON.parse(labels);
 
         _.each(recs, function(r) {
-            html += '<input type="checkbox" name="facets" value="' + r.id + '" />&nbsp;' + r.name  + ' (' + r.count + ')<br>';
+            var checked = '';
+            if ($.inArray(r.id.toString(), array) >= 0){
+                checked = 'checked';
+            }
+            html += '<input type="checkbox" name="facets" value="' + r.id + '" ' + checked + ' />&nbsp;' + r.name  + ' (' + r.count + ')<br>';
         });
     }
 
-    return html;
+    $("#facets").html(html);
 
 }
 
@@ -879,7 +886,7 @@ function labelClick(that, subcorpus_id, res, kind) {
         });
         localStorage["subcorpora"] = JSON.stringify(recs);
 
-        $("#facets").html(displaySubcorporaFacets());
+        displaySubcorporaFacets();
     }, function() {
         console.log("problem voting")
     });
