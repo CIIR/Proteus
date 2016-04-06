@@ -68,7 +68,7 @@ UI.setReadyHandler(function() {
 
     UI.dispalyUserName();
 
-    if (params.action == "search" && (!isBlank(params.q) || !isBlank(params.labels))) {
+    if (params.action == "search"){// && (!isBlank(params.q) || !isBlank(params.labels))) {
         UI.setQuery(params.q);
         doActionRequest(params);
     } else if (params.action == "view") {
@@ -100,17 +100,22 @@ var doActionRequest = function(args) {
 };
 
 /* handlers for retrieval button types */
-UI.onClickSearchButton = function(kind, text) {
-//    var kind = buttonDesc.kind;
+UI.onClickSearchButton = function() {
+
+    // disable the buttons so they can't quickly switch between them which mixes result sets
+    UI.enableSearchButtons(false);
+
+    // get the kind from the radio buttons
+    kind = $('input[name=search-kind]:checked').val();
 
     // TODO ??? this needs to be set correctly if they REFRESH the page rather than hit the button
     gSearchedKind = kind;
     // make this selection the "current default"
-    $("#search-buttons").unbind("click"); // prevent multiple clicks
-    $("#search-buttons").click(function() {
-        UI.onClickSearchButton(kind, text);
-    });
-    $("#search-button-text").html(text);
+//    $("#search-buttons").unbind("click"); // prevent multiple clicks
+//    $("#search-buttons").click(function() {
+//        UI.onClickSearchButton(kind, text);
+//    });
+//    $("#search-button-text").html(text);
 
     // is this a new retrieval?
     var terms = _.escape(UI.getQuery().trim()).toLowerCase();
@@ -193,6 +198,7 @@ function tmpSearch(that, kind) {
     }
     console.log("Query: " + query);
     $("#ui-search").val(query);
+
     // TODO: can have > 1 retrieval button so we need to know which one to trigger
     doActionRequest({kind: kind, q: query, action: "search"});
 }

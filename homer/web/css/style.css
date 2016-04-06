@@ -556,10 +556,9 @@ body {
     color: green !important;
     cursor: hand;
 }
-
+/*
 .glyphicon.glyphicon-remove-circle {
     font-size: 55px;
-
 }
 
 .glyphicon.glyphicon-remove-circle:hover {
@@ -567,7 +566,7 @@ body {
     color: red !important;
     cursor: hand;
 }
-
+*/
 
 .glyphicon.glyphicon-ok {
     color: green;
@@ -630,20 +629,26 @@ body {
 }
 
 .resource-query{
-    background-color: lemonchiffon;
+    background-color: floralwhite;
     padding : 5px;
     border-radius: 5px;
-
 }
 
 .label-button {
     margin : 2px;
 }
 
-.check-mark:after {
+.check-mark:before {
     font-family: "Glyphicons Halflings";
     content:"\e013"; /* check mark */
     color: green;
+    padding-right: 5px;
+}
+
+.thumbs-up:after {
+    font-family: "Glyphicons Halflings";
+    content:"\e125"; /* check mark */
+    color: grey;
     padding-right: 5px;
 }
 
@@ -720,15 +725,32 @@ border-radius: 5px;
     padding: 10px;
     border-radius: 15px;
 }
-
+/*
 #build-a-query{
     background-color: lightblue;
     margin: 5px;
     padding: 10px;
     border-radius: 15px;
 }
-
+*/
 #query-div{
     margin: 5px;
     padding: 10px;
+}
+
+#facets-hr {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-top: 1px solid #1F497D;
+}
+
+::-ms-clear {
+    display: none;
+}
+
+.form-control-clear {
+    z-index: 10;
+    pointer-events: auto;
+    cursor: pointer;
+    color: grey;
 }

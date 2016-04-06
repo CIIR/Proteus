@@ -4,6 +4,9 @@
  * For Javascript shims and other things that don't have a clear project-specific home.
  */
 
+// keep track of how many documents we found for a subcorpus
+var foundDocCount = new Map();
+
 if (!String.prototype.trim) {
     String.prototype.trim = function() {
         return this.replace(/^\s+|\s+$/g, '');
@@ -755,7 +758,10 @@ function displayLabelsForComments(annotation) {
 
 }
 
+
 function displayLabels(res) {
+
+
 
     // TODO ??? duplicate code
 
@@ -771,11 +777,28 @@ function displayLabels(res) {
 
         _.each(recs, function(r) {
             html += '<button type="button" class="btn btn-default btn-sm label-button" onclick="labelClick(this, ' + r.id + ', \'' + res + '\', $(\'#' + res + '\').data(\'kind\'));"><span';
+            var checkClass = '';
+            var thumbClass = '';
+            if (!_.isUndefined(votingJSON.document[res])){
 
-            if (!_.isUndefined(votingJSON.document[res]) && !_.isUndefined(votingJSON.document[res][getCookie("username").toLowerCase()]) && !_.isUndefined(votingJSON.document[res][getCookie("username").toLowerCase()][r.id])) {
-                html += ' class="check-mark";'
+                var voteCount =  0;
+
+                _.forEach(votingJSON.document[res], function(val, key) {
+                    if (!_.isUndefined(votingJSON.document[res][key][r.id])){
+                        voteCount += 1;
+                    }
+                });
+
+                if (!_.isUndefined(votingJSON.document[res][getCookie("username").toLowerCase()]) && !_.isUndefined(votingJSON.document[res][getCookie("username").toLowerCase()][r.id])) {
+                    checkClass = 'check-mark';
+                    voteCount -= 1;
+                }
+                // if anyone ELSE has "voted" for this resource, put a visual indication
+                if (voteCount > 0){
+                    thumbClass = 'thumbs-up';
+                }
             }
-            html += '></span>' + r.name + '</button>';
+            html += ' class="' + thumbClass + ' ' + checkClass + '"></span>' + r.name + '</button>';
         });
     }
 
@@ -783,13 +806,33 @@ function displayLabels(res) {
 
 }
 
+
+function clearSubcorpusFoundDocCount(){
+    foundDocCount = new Map();
+
+    _.each($('.num-docs-retrieved-for-subcorpus'), function(el){
+        $(el).html(0);
+    });
+}
+
 function displaySubcorporaFacets() {
 
     var html = '&nbsp;';
     var labels = localStorage["subcorpora"];
 
+    // TODO ??? should be it's own function
+    // save the searh radio button state
+//    var kind = $('input[name=search-kind]:checked').val();
+//    console.log('saved kinds: ' + kind);
     // save the check box state
-    var array = $.map($('#facets input[type="checkbox"]:checked'), function(c){return c.value; })
+    var array = [];
+    var urlParams = getURLParams();
+    if (!_.isUndefined(urlParams["subcorpora"])){
+        array = urlParams["subcorpora"].split(',');// $.map(getSubcorporaElements(), function(c){return c.value; })
+    }
+
+//    console.log('saved subcorpra: ' + array);
+//    console.log('url: ' + urlParams["subcorpora"]);
     // 1st check ensures we have an entry for subcorpora, 2nd check makes sure there is data,
     // 3rd check is just a safety - I manually cleared out the localstorage and the page would
     // say "Uncaught SyntaxError: Unexpected end of input" because it was trying to parse an
@@ -804,11 +847,18 @@ function displaySubcorporaFacets() {
             if ($.inArray(r.id.toString(), array) >= 0){
                 checked = 'checked';
             }
-            html += '<input type="checkbox" name="facets" value="' + r.id + '" ' + checked + ' />&nbsp;' + r.name  + ' (' + r.count + ')<br>';
+            // TODO ??? really should be doing the append() thing here rather than building an HTML string.
+            html += '<input type="checkbox" onclick="UI.onClickSearchButton();" name="facets" value="' + r.id + '" ' + checked + ' />&nbsp;' + r.name;
+            html += ' (<span class="num-docs-retrieved-for-subcorpus" id="' + r.id + '-subcorpus-num-found">0</span>/' + r.count + ')<br>';
         });
     }
 
     $("#facets").html(html);
+
+    // say how many docs we've returned
+    foundDocCount.forEach(function(v, k){
+        $('#' + k + '-subcorpus-num-found').html(v);
+    }, foundDocCount);
 
 }
 
@@ -843,7 +893,8 @@ function labelClick(that, subcorpus_id, res, kind) {
         corpusid: corpID,
         subcorpusid: subcorpus_id,
         queryid: queryID,
-        action: action
+        action: action,
+        kind: kind
     };
 
     // TODO MCZ Horribly, HORRIBLY brain dead way of updating
@@ -882,6 +933,12 @@ function labelClick(that, subcorpus_id, res, kind) {
         _.forEach(recs, function(rec){
             if (rec.id == subcorpus_id){
                 rec.count += delta;
+                if (foundDocCount.has(subcorpus_id)){
+                    foundDocCount.set(subcorpus_id, foundDocCount.get(subcorpus_id) + delta );
+                } else {
+                    foundDocCount.set(subcorpus_id, delta);
+                }
+
             }
         });
         localStorage["subcorpora"] = JSON.stringify(recs);
@@ -931,9 +988,7 @@ function termClick(that ) {
 
     })
 
-
-    $("#build-a-query").html('<a target="_BLANK" href="index.html?action=search&kind=ia-pages&q=' + encodeURI(query) + '">' + query + '</a>');
-
+    $("#ui-search").val(query);
 }
 
 function labelClickComment(that, subcorpus_id) {
@@ -950,6 +1005,8 @@ function labelClickComment(that, subcorpus_id) {
     }
 
 }
+
+function getSubcorporaElements() { return $('#facets input[type="checkbox"]:checked'); }
 
 // when selecting IDs/classes in JQuery, need to escape certain characters.
 function jqEsc( myid ) {

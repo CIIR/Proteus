@@ -153,8 +153,9 @@ public class ProteusSystem {
     memIdxParams.set("corpus", true);
     memIdxParams.set("tokenizer", Parameters.create());
     memIdxParams.getMap("tokenizer").set("fields", noteFields.toArray());
+    memIdxParams.getMap("tokenizer").set("class", TagTokenizer.class.getCanonicalName());
 
-    noteIndex = new MemoryIndex(memIdxParams); //Parameters.parseArray("makecorpus", true));
+    noteIndex = new MemoryIndex(memIdxParams);
 
     // TODO : get corpus number
     Parameters notes = this.userdb.getNotesForCorpus(1);
@@ -165,10 +166,6 @@ public class ProteusSystem {
       return;
     }
 
-    TagTokenizer tok = new TagTokenizer();
-    for (String field : noteFields) {
-      tok.addField(field);
-    }
     for (Parameters p : arr) {
       Document d = new Document();
       d.name = p.get("resource") + "_" + p.get("id");
@@ -177,15 +174,15 @@ public class ProteusSystem {
       d.metadata = new HashMap<String, String>();
       // TODO : do we use metadata for things like who made the note, etc?
       d.metadata.put("docType", "note");
-      tok.process(d);
       noteIndex.process(d);
     }
 
     // flush the index to disk
     FlushToDisk.flushMemoryIndex(noteIndex, noteIndexPath);
 
-    // add disk flushed memory index to the "ia-corpus" & "ia-all" kind
-    Retrieval retrieval = getRetrieval("ia-corpus");
+    // add disk flushed memory index to the "ia-all" kind
+
+    Retrieval retrieval = getRetrieval("ia-all");
     Parameters newParams = Parameters.create();
     Parameters globalParams = retrieval.getGlobalParameters();
     List<String> idx = new ArrayList<String>();
@@ -197,9 +194,6 @@ public class ProteusSystem {
     }
 
     newParams.put("index", idx);
-    kinds.put("ia-corpus", RetrievalFactory.create(newParams));
-    // making the (safe) assumption that the indexes for ia-corpus
-    // are the same as ia-all
     kinds.put("ia-all", RetrievalFactory.create(newParams));
  
   }

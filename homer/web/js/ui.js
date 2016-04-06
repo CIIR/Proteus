@@ -29,6 +29,11 @@ UI.generateButtons = function() {
         if (data.title)
             $("#proteus-title").html(data.title);
         UI.defaultKind = data.defaultKind;
+        $("#search-buttons").click(function() {
+            UI.onClickSearchButton(data.defaultKind, "Search");
+
+        });
+
         var availableKinds = _(data.kinds);
         var buttonDescriptions = _(UI.buttons);
         // for all kinds the server gives back, make a button
@@ -42,23 +47,20 @@ UI.generateButtons = function() {
                 return;
             }
 
-            $("#search-button-choices").append('<li><a href="#" onclick="UI.onClickSearchButton(\'' + spec.kind + '\', \'' + spec.button + '\');">' + spec.button + '</a></li>');
+            $("#search-rb").append('<label class="radio-inline"><input type="radio" name="search-kind" value="' + spec.kind + '">' + spec.button + '</label>');
 
             // see if we're the default button - unless there's already a "kind" on the URL. If they're
             // clicking on an entity it'll re-trigger this logic and we want to keep the current "kind" we
             // do not want to rest the search button to be the default
-            if ((!_.isUndefined(currentKind) && currentKind == kind) || (_.isUndefined(currentKind) && kind === UI.defaultKind)) {
-                $("#search-button-text").html(spec.button);
-                $("#search-buttons").click(function() {
-                    UI.onClickSearchButton(spec.kind, spec.button);
-                });
+           if ((!_.isUndefined(currentKind) && currentKind == kind) || (_.isUndefined(currentKind) && kind === UI.defaultKind)) {
+               $('#search-rb input[value=' + kind + ']').attr('checked',true);
+               $("#search-rb").click(function() {
+                   UI.onClickSearchButton(spec.kind, spec.button);
+               });
             }
 
         });
-        // add an option to retrieval rated documents
-        //  $("#retrieval-button-choices").append('<li class="divider"></li><li><a href="#" onclick="UI.onClickSearchButton(\'rated-only\');">Rated Documents</a></li>');
-
-    });
+     });
 
 };
 
@@ -87,6 +89,10 @@ UI.getQuery = function() {
 };
 UI.setQuery = function(q) {
     queryBox.val(q);
+    // show the "x" if there is something in the search input (helpful if they refresh)
+    if (q != ''){
+        $('.form-control-clear').toggleClass('hidden', false);
+    }
 };
 /**
  * Render a single retrieval result.
@@ -146,7 +152,8 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
     resDiv.addClass('result-' + result.rank);
     html = '<div class="result-dups-' + result.rank + '"</div>';
 
-    if (result.viewKind == 'ia-books') {
+    // if they search a subcorpus for just books with a blank query, "search pages" doesn't make sense
+    if (result.viewKind == 'ia-books' && queryTerms.length > 0) {
 
         html += '<div  id="search-pages-link-' + result.name + '" class="search-pages-link" >'
         html += '<a href="#" onclick="UI.getPages(\'' + result.name + '\');"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show matching pages in this book...</a></div>';
@@ -356,6 +363,11 @@ function renderRatingsSidebar(id) {
     $("#ratings").html(rating_html);
 
 }
+function clearRatingsSidebar() {
+
+    $("#ratings").html('');
+
+}
 function setUpMouseEvents() {
 
     $(".result").mouseenter(function(event) {
@@ -368,7 +380,7 @@ function setUpMouseEvents() {
     $(".result").mouseleave(function(event) {
 
         $(this).css("background", "");
-
+        clearRatingsSidebar()
     });
 
 }
@@ -477,4 +489,25 @@ UI.showHideDups = function() {
     } else {
         $("#results .dup-result").hide("slow");
     }
+}
+
+
+UI.enableSearchButtons = function(state){
+    $('input[name=search-kind]').attr('disabled',!state);
+    $('#facets input[type=checkbox]').attr('disabled',!state);
+    $('#clear-all-facets').attr('disabled',!state);
+}
+
+function clearQueryBuilder(){
+    $("#query-builder-link").hide();
+    $("#show-corpus-terms").hide();
+    $(".query-term-buttons").html(''); // clear any prior terms
+    $("#high-tf").html('');
+    $("#high-snippettf").html('');
+    $("#high-bigrams").html('');
+    $("#high-trigrams").html('');
+    $("#high-entities-per").html('');
+    $("#high-entities-loc").html('');
+    $("#high-entities-org").html('');
+
 }

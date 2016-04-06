@@ -59,6 +59,10 @@ var page = {
 };
 var doSearchRequest = function(args) {
 
+    UI.enableSearchButtons(false);
+
+    clearQueryBuilder();
+
     if (_.isUndefined(Model[args.kind])) {
         Model[args.kind] = {};
     }
@@ -94,10 +98,19 @@ var doSearchRequest = function(args) {
 
     var subcorpora = [];
     // TODO temp
-    _.forEach($('#facets input[type="checkbox"]:checked'), function(rec) {
+    _.forEach(getSubcorporaElements(), function(rec) {
         console.log($(rec).attr("value") + ' is checked')
         subcorpora.push(parseInt($(rec).attr("value")));
     })
+
+    // if they refreshed the page, subcorpora will be empty here, but
+    // we may have subcorpora on the URL, so check for that
+    if (!_.isUndefined(args.subcorpora)){
+        var sc = args.subcorpora.split(',');
+        _.forEach(sc, function(id) {
+            subcorpora.push(parseInt(id));
+        })
+    }
 
     // don't limit by subcorport IFF we're searching for pages within a book
     if (!_.isEmpty(subcorpora) && _.isUndefined(args.workingSetQuery)) {
@@ -125,6 +138,9 @@ var doSearchRequest = function(args) {
     if (!args.skip || args.skip === 0) {
         //Model.clearResults();
         clearModelResults(Model[args.kind])
+
+   //     displaySubcorporaFacets();
+        clearSubcorpusFoundDocCount();
         UI.clearResults();
         // don't update the URL if we're getting pages for a book
         if (_.isUndefined(args.workingSetQuery)) {
@@ -167,8 +183,9 @@ var doSearchRequest = function(args) {
     }
 
     // only allow blank queries if we're searching a corpus or by label(s)
-    if ((!actualArgs.q || isBlank(actualArgs.q)) && (_.isEmpty(actualArgs.labels)) && (actualArgs.action != "search-corpus")) {
+    if ((!actualArgs.q || isBlank(actualArgs.q)) && (_.isEmpty(actualArgs.labels)) && (_.isUndefined(actualArgs.subcorpora) || actualArgs.subcorpora.length == 0)) {
         UI.showProgress("Query is blank!");
+        UI.enableSearchButtons(true);
         return;
     }
     $("#more").html('<img src="/images/more-loader.gif"\>');
@@ -179,6 +196,8 @@ var doSearchRequest = function(args) {
     UI.showProgress("Search Request sent to server!");
     API.action(actualArgs, onSearchSuccess, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
+        UI.enableSearchButtons(true);
+
         // set up the auto retrieve again
         enableAutoRetrieve();
         throw err;
@@ -198,10 +217,14 @@ function getTermHTMl(term, count, classes) {
 
 }
 function calcPixelSize(count) {
-   return Math.max(12, Math.min(100, Math.round(Math.sqrt(count))));}
+   return Math.max(12, Math.min(50, Math.round(Math.sqrt(count))));
+}
+
 var onSearchSuccess = function(data) {
 
-    // clear unique words on each new search IFF we're not
+    UI.enableSearchButtons(true);
+
+    // clear data on each new search IFF we're not
     // searching pages within a book
     if (data.request.skip == 0 && _.isUndefined(data.request.workingSetQuery) == true) {
         uniqWords = [];
@@ -213,18 +236,16 @@ var onSearchSuccess = function(data) {
     var userID = getCookie("userid");
     $("#more").html(""); // clear progress animation
 
-    $("#show-corpus-terms").hide();
-    $("#query-builder-link").hide();
+   $("#show-corpus-terms").hide();
+
 
     // show query builder if they searched the corpus OR have a sub-corpus selected
-    if (($('#facets input[type="checkbox"]:checked').length > 0 || data.request.action == "search-corpus") && _.isUndefined(data.totalTF) == false) {
+    if (getSubcorporaElements().length > 0){//(getSubcorporaElements().length > 0 || data.request.action == "search-corpus") && _.isUndefined(data.totalTF) == false) {
 
 //    $("#show-corpus-terms").show();
         $("#query-builder-link").show();
-        $('#build-a-query').html('');
 
 
-        $(".query-term-buttons").html(''); // clear any prior terms
 
         _.forEach(data.totalTF, function(t) {
             $("#high-tf").append(getTermHTMl(t.term, t.count, ''));
@@ -261,11 +282,6 @@ var onSearchSuccess = function(data) {
     Model[data.request.kind].queryType = data.queryType;
     Model[data.request.kind].queryid = data.queryid;
 
-    if (!_.isUndefined(data.subcorpora)) {
-        localStorage["subcorpora"] = JSON.stringify(data.subcorpora);
-        displaySubcorporaFacets();
-    }
-
     var rank = Model[data.request.kind].results.length + 1;
     var newResults = _(data.results).map(function(result) {
         result.viewKind = data.request.viewKind || data.request.kind;
@@ -281,6 +297,11 @@ var onSearchSuccess = function(data) {
         // TODO ??? duplicate code - we do this in a couple places - should probably just call updateRatings() (with a better name)
         votingJSON.document[result.name] = {};
         // Loop through ratings
+
+        // HUGE UGLY HACK - we only want to count one vote per label so we'll use a
+        // set to make sure we only get one per label per document
+        var docSubcorpus = new Set();
+
         _.forEach(result.labels, function(rec) {
             if (_.isUndefined(votingJSON.document[rec.name])) {
                 votingJSON.document[rec.name] = {};
@@ -289,8 +310,23 @@ var onSearchSuccess = function(data) {
                 votingJSON.document[rec.name][rec.user] = {};
             }
             votingJSON.document[rec.name][rec.user][rec.subcorpusid] = 1;
+
+            // the labels are found using "LIKE <resource-name>%" so we are getting pages & notes
+            // for a book. Make sure we're dealing with the current document.
+            if (rec.name == result.name){
+                docSubcorpus.add(rec.subcorpusid);
+            }
         });
 
+        // loop through the set and add ONE for each label found for the current doc
+        docSubcorpus.forEach(function(value){
+            // keep track of how many documents per subcorpus are returned
+            if (foundDocCount.has(value)){
+                foundDocCount.set(value, foundDocCount.get(value) + 1 );
+            } else {
+                foundDocCount.set(value, 1);
+            }
+        });
 
         // see if we're getting pages for a book
         // TODO ??? kind specific logic
@@ -305,6 +341,13 @@ var onSearchSuccess = function(data) {
 
         return result;
     }).value();
+
+
+    if (!_.isUndefined(data.subcorpora)) {
+        localStorage["subcorpora"] = JSON.stringify(data.subcorpora);
+        displaySubcorporaFacets();
+    }
+
 
     // update the model
     Model[data.request.kind].results = _(Model[data.request.kind].results).concat(data.results).value();

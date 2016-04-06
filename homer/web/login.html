@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <script src="js/jquery/2.0.3/jquery.min.js"></script>
+    <script src="js/lodash/2.4.1/lodash.min.js"></script>
+
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css" type="text/css"/>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="js/util.js"></script>
+
+    <meta charset="UTF-8">
+    <title>Proteus Login</title>
+
+    <script>
+
+        $(document).ready(function () {
+
+            // make sure we're not logged in
+            if (isLoggedIn() == true) {
+                window.location = "index.html";
+                return;
+            }
+            $('#login-form').submit(function (event) {
+                event.preventDefault();
+                var username = $("#login-email").val();
+                window.location = "index.html?user=" + username;
+            });
+        });
+
+    </script>
+</head>
+<body class="login-body">
+<div class="container" >
+    <div class="row">
+        <form class="form-horizontal"  accept-charset="UTF-8" id="login-form">
+            <fieldset id="login-container">
+
+                <!-- Form Name -->
+                <legend>Please Login</legend>
+
+                <!-- Text input-->
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="login-email">Email:</label>
+
+                    <div class="col-md-4">
+                        <input id="login-email" name="login-email" placeholder="Your email address..."
+                               class="form-control input-md" required="" type="email">
+                    </div>
+                </div>
+
+                <!-- Button -->
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="submit-login"></label>
+
+                    <div class="col-md-4">
+                        <button id="submit-login" name="submit-login" class="btn btn-primary">Login</button>
+                    </div>
+                </div>
+
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+
+</body>
+</html>
