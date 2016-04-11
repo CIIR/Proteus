@@ -75,7 +75,8 @@
                 if (innerjson.length != 0){
                     innerjson += ", ";
                 }
-                innerjson += '{ "name" : "' + l.value + '"' ;
+                innerjson += '{ "name" : "' + l.value.replace(/\"/g, '\\\"') + '"' ;
+
                 if (jQuery.isEmptyObject($(l).data()) == false) {
                     innerjson += ', "id" : ' + $(l).data().id;
                 }
