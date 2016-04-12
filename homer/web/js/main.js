@@ -108,6 +108,7 @@ UI.onClickSearchButton = function() {
     // get the kind from the radio buttons
     kind = $('input[name=search-kind]:checked').val();
 
+    $("#search-button-text").html("Search " + $('input[name=search-kind]:checked').parent().text());
     // TODO ??? this needs to be set correctly if they REFRESH the page rather than hit the button
     gSearchedKind = kind;
     // make this selection the "current default"
