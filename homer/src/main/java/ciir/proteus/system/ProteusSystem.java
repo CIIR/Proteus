@@ -180,9 +180,9 @@ public class ProteusSystem {
     // flush the index to disk
     FlushToDisk.flushMemoryIndex(noteIndex, noteIndexPath);
 
-    // add disk flushed memory index to the "ia-all" kind
+    // add disk flushed memory index to the "all" kind
 
-    Retrieval retrieval = getRetrieval("ia-all");
+    Retrieval retrieval = getRetrieval("all");
     Parameters newParams = Parameters.create();
     Parameters globalParams = retrieval.getGlobalParameters();
     List<String> idx = new ArrayList<String>();
@@ -194,7 +194,7 @@ public class ProteusSystem {
     }
 
     newParams.put("index", idx);
-    kinds.put("ia-all", RetrievalFactory.create(newParams));
+    kinds.put("all", RetrievalFactory.create(newParams));
  
   }
 }

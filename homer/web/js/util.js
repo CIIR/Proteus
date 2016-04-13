@@ -305,49 +305,6 @@ function getBookID(pageid, pagenum) {
 }
 // temp func - using "resource rating" to track swipe left/right
 
-var recordSwipe = function(res, kind, swipeVal) {
-
-    // send this rating to the DB
-
-    var userName = getCookie("username");
-    var userID = parseInt(getCookie("userid"));
-    var userToken = getCookie("token");
-    var corpus = getCookie("corpus");
-    var corpID = getCorpusID(corpus);
-    var queryID = 0;
-
-    if (!_.isUndefined(Model[kind])) {
-        queryID = Model[kind].queryid;
-    }
-
-    var args = {
-        userid: userID,
-        user: userName,
-        token: userToken,
-        resource: res,
-        corpus: corpID,
-        corpusName: corpus,
-        rating: parseInt(swipeVal),
-        kind: kind,
-        queryid: queryID
-    };
-
-    // update the local rating
-    if (_.isUndefined(ratingsJSON.document[res])) {
-        ratingsJSON.document[res] = {};
-    }
-    ratingsJSON.document[res][userName] = swipeVal;
-
-    API.rateResource(args, function() {
-        setUserRatingsHTML(res);
-        setVoteHTML(res);
-        renderRatingsSidebar(res);
-    }, function(req, status, err) {
-        UI.showError("ERROR: ``" + err + "``");
-        throw err;
-    });
-
-}
 
 var setUserRatingsHTML = function(res) {
 
@@ -542,8 +499,8 @@ var getResourcesForCorpus = function(that) {
                     el.css('font-size', fontSize + "px")
                 } else {
                     var title = res;
-                    if (!_.isUndefined(data.metadata[res]) && !_.isUndefined(data.metadata[res].title)) {
-                        title = data.metadata[res].title;
+                    if (!_.isUndefined(data.metadata[res]) && (!_.isUndefined(data.metadata[res].title) || !_.isUndefined(data.metadata[res].TEI))) {
+                        title = (data.metadata[res].title || data.metadata[res].TEI);
                     }
                     $("#corpus-docs ul:last").append('<li><a id="' + id + '" href="view.html?kind=' + guessKind(res) + '&id=' + res + '&action=view">' + title + '</a></li>');
                 }
@@ -685,14 +642,14 @@ function addEntitySearchLinks() {
 
 function updateRatings(args) {
 
-    // if the doc has ratings, add them to the local ratings store
-    if (!_.isUndefined(args.ratings)) {
-        ratingsJSON.document[args.request.id] = {};
-        // Loop through ratings
-        _.forEach(args.ratings, function(rating) {
-            ratingsJSON.document[args.request.id][rating.user] = rating.rating;
-        });
-    }
+    /*  // if the doc has ratings, add them to the local ratings store
+     if (!_.isUndefined(args.ratings)) {
+     ratingsJSON.document[args.request.id] = {};
+     // Loop through ratings
+     _.forEach(args.ratings, function(rating) {
+     ratingsJSON.document[args.request.id][rating.user] = rating.rating;
+     });
+     }*/
 
     // TODO ???? should be its own function but putting here for now so the
     // curent program "flow" will work
@@ -714,7 +671,7 @@ function displayLabelsForComments(annotation) {
     var res = annotation.uri + '_' + annotation.id;
     // if this is a NEW annotation the vote isn't in votingJSON yet - because we don't know the
     // annotation ID when the annotation is created - so we'll update the votingJSON if needed.
-    _.forEach(annotation.subcorpusLabels, function(obj){
+    _.forEach(annotation.subcorpusLabels, function(obj) {
 
         if (_.isUndefined(votingJSON.document[res])) {
             votingJSON.document[res] = {};
@@ -722,7 +679,7 @@ function displayLabelsForComments(annotation) {
         if (_.isUndefined(votingJSON.document[res][annotation.user])) {
             votingJSON.document[res][annotation.user] = {};
         }
-        if (obj.checked == true){
+        if (obj.checked == true) {
             votingJSON.document[res][annotation.user][obj.subcorpusid] = 1;
         } else {
             delete votingJSON.document[res][annotation.user][obj.subcorpusid];
@@ -760,9 +717,6 @@ function displayLabelsForComments(annotation) {
 
 
 function displayLabels(res) {
-
-
-
     // TODO ??? duplicate code
 
     var html = '&nbsp;';
@@ -779,12 +733,12 @@ function displayLabels(res) {
             html += '<button type="button" class="btn btn-default btn-sm label-button" onclick="labelClick(this, ' + r.id + ', \'' + res + '\', $(\'#' + res + '\').data(\'kind\'));"><span';
             var checkClass = '';
             var thumbClass = '';
-            if (!_.isUndefined(votingJSON.document[res])){
+            if (!_.isUndefined(votingJSON.document[res])) {
 
-                var voteCount =  0;
+                var voteCount = 0;
 
                 _.forEach(votingJSON.document[res], function(val, key) {
-                    if (!_.isUndefined(votingJSON.document[res][key][r.id])){
+                    if (!_.isUndefined(votingJSON.document[res][key][r.id])) {
                         voteCount += 1;
                     }
                 });
@@ -794,23 +748,24 @@ function displayLabels(res) {
                     voteCount -= 1;
                 }
                 // if anyone ELSE has "voted" for this resource, put a visual indication
-                if (voteCount > 0){
+                if (voteCount > 0) {
                     thumbClass = 'thumbs-up';
                 }
             }
+
             html += ' class="' + thumbClass + ' ' + checkClass + '"></span>' + r.name + '</button>';
         });
     }
 
-    return html;
+    return  html;
 
 }
 
 
-function clearSubcorpusFoundDocCount(){
+function clearSubcorpusFoundDocCount() {
     foundDocCount = new Map();
 
-    _.each($('.num-docs-retrieved-for-subcorpus'), function(el){
+    _.each($('.num-docs-retrieved-for-subcorpus'), function(el) {
         $(el).html(0);
     });
 }
@@ -827,7 +782,7 @@ function displaySubcorporaFacets() {
     // save the check box state
     var array = [];
     var urlParams = getURLParams();
-    if (!_.isUndefined(urlParams["subcorpora"])){
+    if (!_.isUndefined(urlParams["subcorpora"])) {
         array = urlParams["subcorpora"].split(',');// $.map(getSubcorporaElements(), function(c){return c.value; })
     }
 
@@ -844,7 +799,7 @@ function displaySubcorporaFacets() {
 
         _.each(recs, function(r) {
             var checked = '';
-            if ($.inArray(r.id.toString(), array) >= 0){
+            if ($.inArray(r.id.toString(), array) >= 0) {
                 checked = 'checked';
             }
             // TODO ??? really should be doing the append() thing here rather than building an HTML string.
@@ -856,7 +811,7 @@ function displaySubcorporaFacets() {
     $("#facets").html(html);
 
     // say how many docs we've returned
-    foundDocCount.forEach(function(v, k){
+    foundDocCount.forEach(function(v, k) {
         $('#' + k + '-subcorpus-num-found').html(v);
     }, foundDocCount);
 
@@ -908,8 +863,8 @@ function labelClick(that, subcorpus_id, res, kind) {
             }
             // ONLY increment the count IFF we're the ONLY "vote"
             delta = +1;
-            _.forEach(votingJSON.document[res], function(user){
-                if (!_.isUndefined(user[subcorpus_id])){
+            _.forEach(votingJSON.document[res], function(user) {
+                if (!_.isUndefined(user[subcorpus_id])) {
                     delta = 0;
                 }
             });
@@ -918,8 +873,8 @@ function labelClick(that, subcorpus_id, res, kind) {
         } else {
             delete votingJSON.document[res][userName][subcorpus_id];
             delta = -1;
-            _.forEach(votingJSON.document[res], function(user){
-                if (!_.isUndefined(user[subcorpus_id])){
+            _.forEach(votingJSON.document[res], function(user) {
+                if (!_.isUndefined(user[subcorpus_id])) {
                     delta = 0;
                 }
             });
@@ -930,15 +885,14 @@ function labelClick(that, subcorpus_id, res, kind) {
 
         // find the correct record
         var recs = JSON.parse(localStorage["subcorpora"]);
-        _.forEach(recs, function(rec){
-            if (rec.id == subcorpus_id){
+        _.forEach(recs, function(rec) {
+            if (rec.id == subcorpus_id) {
                 rec.count += delta;
-                if (foundDocCount.has(subcorpus_id)){
-                    foundDocCount.set(subcorpus_id, foundDocCount.get(subcorpus_id) + delta );
+                if (foundDocCount.has(subcorpus_id)) {
+                    foundDocCount.set(subcorpus_id, foundDocCount.get(subcorpus_id) + delta);
                 } else {
                     foundDocCount.set(subcorpus_id, delta);
                 }
-
             }
         });
         localStorage["subcorpora"] = JSON.stringify(recs);
@@ -951,7 +905,7 @@ function labelClick(that, subcorpus_id, res, kind) {
 }
 
 
-function termClick(that ) {
+function termClick(that) {
 
     // toggle check mark
     if ($($(that).find('span')[0]).hasClass("term-check-mark")) {
@@ -966,21 +920,21 @@ function termClick(that ) {
 
     var query = '';
 
-    _.forEach($(terms), function(t){
-        if ($(t).hasClass("entity")){
+    _.forEach($(terms), function(t) {
+        if ($(t).hasClass("entity")) {
             if ($(t).hasClass("person")) {
                 query += 'person:';
             }
-            if ($(t).hasClass("location")){
+            if ($(t).hasClass("location")) {
                 query += 'location:';
             }
-            if ($(t).hasClass("organization")){
+            if ($(t).hasClass("organization")) {
                 query += 'organization:';
             }
             query += '"' + $(t).text() + '" ';
         } else {
-            if ($(t).hasClass("add-quote")){
-                query +=  '"' +  $(t).text() + '" ';
+            if ($(t).hasClass("add-quote")) {
+                query += '"' + $(t).text() + '" ';
             } else {
                 query += $(t).text() + ' ';
             }
@@ -1006,9 +960,11 @@ function labelClickComment(that, subcorpus_id) {
 
 }
 
-function getSubcorporaElements() { return $('#facets input[type="checkbox"]:checked'); }
+function getSubcorporaElements() {
+    return $('#facets input[type="checkbox"]:checked');
+}
 
 // when selecting IDs/classes in JQuery, need to escape certain characters.
-function jqEsc( myid ) {
-    return  myid.replace( /(:|\.|\[|\])/g, "\\$1" );
+function jqEsc(myid) {
+    return  myid.replace(/(:|\.|\[|\])/g, "\\$1");
 }
