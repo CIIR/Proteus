@@ -468,6 +468,7 @@ UI.toggleDups = function(clazz, rank) {
 }
 
 UI.setDupLinkHTML = function(rank) {
+
     var upOrDown = 'down';
     var showOrHide = 'Show';
 
