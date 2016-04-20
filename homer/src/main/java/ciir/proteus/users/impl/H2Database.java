@@ -3,7 +3,13 @@ package ciir.proteus.users.impl;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.UserDatabase;
 import ciir.proteus.users.Users;
-import ciir.proteus.users.error.*;
+import ciir.proteus.users.error.BadSessionException;
+import ciir.proteus.users.error.BadUserException;
+import ciir.proteus.users.error.DBError;
+import ciir.proteus.users.error.DuplicateCorpus;
+import ciir.proteus.users.error.DuplicateSubCorpus;
+import ciir.proteus.users.error.DuplicateUser;
+import ciir.proteus.users.error.NoTuplesAffected;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
 import org.h2.constant.ErrorCode;
@@ -15,7 +21,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 /**
@@ -858,8 +869,9 @@ public class H2Database implements UserDatabase {
   public Parameters getResourceRatings2(String resource, Integer corpusID) {
 
     List<Parameters> userRating = new ArrayList<>(0);
-
+    Parameters userLabels = Parameters.create();
     Connection conn = null;
+
     try {
       conn = getConnection();
 
@@ -871,6 +883,7 @@ public class H2Database implements UserDatabase {
       sql.setInt(2, corpusID);
 
       ResultSet tuples = sql.executeQuery();
+
       while (tuples.next()) {
         Integer userid = tuples.getInt(1);
         String user = tuples.getString(2);
@@ -883,6 +896,18 @@ public class H2Database implements UserDatabase {
         p.set("user", user);
         p.set("subcorpusid", subcorpusid);
         userRating.add(p);
+
+        // only do this for exact matches
+        if (resource.equals(res)) {
+          Parameters s = null;
+          if (userLabels.containsKey(subcorpusid.toString())) {
+            s = userLabels.getMap(subcorpusid.toString());
+          } else {
+            s = Parameters.create();
+          }
+          s.put(userid.toString(), user);
+          userLabels.put(subcorpusid.toString(), s);
+        }
       }
       tuples.close();
 
@@ -893,6 +918,7 @@ public class H2Database implements UserDatabase {
     }
 
     Parameters results = Parameters.create();
+    results.put("newLabels", userLabels);
     results.put("labels", userRating);
     return results;
 
@@ -1061,10 +1087,8 @@ public class H2Database implements UserDatabase {
           queryList.add(tmp);
           currentQuery = q;
           resources = new ArrayList<String>();
-          resources.add(results.getString(2));
-        } else {
-          resources.add(results.getString(2));
         }
+        resources.add(results.getString(2));
 
       } // end loop through results
 
@@ -1328,7 +1352,7 @@ public class H2Database implements UserDatabase {
           count++;
           query = tuples.getString(1);
         }
-        assert(count <= 1);
+        assert (count <= 1);
         tuples.close();
 
       } catch (SQLException e1) {

@@ -88,13 +88,14 @@
         var lastChecked = null;
         $(document).ready(function () {
 
+
             var urlParams = getURLParams();
-            if (_.isUndefined(urlParams['user']) && isLoggedIn() == false){
+            if (_.isUndefined(urlParams['user']) && isLoggedIn() == false) {
                 window.location = "login.html";
                 return;
             }
 
-            if (!_.isUndefined(urlParams['user']) && isLoggedIn() == false){
+            if (!_.isUndefined(urlParams['user']) && isLoggedIn() == false) {
                 logIn(urlParams['user']);
             }
             // code to add an "x" to the search input field from: https://www.thewebflash.com/clear-button-in-bootstrap-input-group-component/
@@ -111,13 +112,18 @@
             });
 
 
-
             $("#show-corpus-terms").hide();
             $("#query-builder-link").hide();
 
             $("#hide-dups").on("click", function () {
                 UI.showHideDups();
             })
+/*
+            $("#show-overlap").on("click", function () {
+                UI.showOverlap();
+            })
+*/
+
 
             $("#dup-slider").slider({
                 range: "min",
@@ -199,7 +205,6 @@
 
             UI.updateCorpusListButton();
             bindCorpusMenuClick();
-            UI.populateRatedDocuments();
 
             // put focus on the name field when the modal box is shown
             $('#newCorpusDialog').on('shown.bs.modal', function () {
@@ -312,8 +317,9 @@
                         <a href="activity.html" target="_blank">View Activity</a>
 
   <a href="https://docs.google.com/document/d/1sdr9nJoeo-V360IWf8nOUJ1VnomI1uxrOKHX5PzYahM/edit#heading=h.bqb6wxplsnzv"
-           target="_blank" id="search-help"><img src="images/help.png"></a>
+     target="_blank" id="search-help"><img src="images/help.png"></a>
                     </span>
+
             <div class="col-md-4 column right-align col-2-class">
                 <div class="input-group">
                     <div class="form-group has-feedback has-clear">
@@ -386,13 +392,13 @@
 
 <div id="results-left" class="col-md-2 column">
     <!--
-     <div id="accordion">
-         <h3>Recent Searches</h3>
-         <div id="pastSearches"></div>
-         <h3>Notes</h3>
-         <div id="note-list"></div>
+         <div id="accordion">
+             <h3>Recent Searches</h3>
+             <div id="pastSearches"></div>
+             <h3>Notes</h3>
+             <div id="note-list"></div>
 
-     </div>
+         </div>
     -->
 
 
@@ -402,6 +408,9 @@
         <hr id="facets-hr">
         <div id="facets"></div>
         <button type="button" id="clear-all-facets" class="btn btn-xs disabled ">Clear All</button>
+        <!--    <hr id="facets-hr">
+                <input id="show-overlap" type="checkbox" name="show-overlap" value="4">&nbsp;Show only common documents
+    -->
     </fieldset>
 
     <fieldset>
@@ -423,16 +432,16 @@
         <input type="text" id="dup-value" readonly style="border:0; font-weight:bold;">
 
         <div id="dup-slider"></div>
-        <div id="hide-dups">
-            <input type="checkbox" name="hide-dups" value="4">&nbsp;Hide possible duplicates
-        </div>
+        <!--   <div id="hide-dups">
+               <input type="checkbox" name="hide-dups" value="4">&nbsp;Hide possible duplicates
+           </div>-->
     </fieldset>
 
- <!--   <fieldset>
-        <legend>Publication Date</legend>
-        <div id="pub-date"></div>
-        <button type="button" id="clear-all-dates" class="btn btn-xs ">Clear All</button>
-    </fieldset>-->
+    <!--   <fieldset>
+           <legend>Publication Date</legend>
+           <div id="pub-date"></div>
+           <button type="button" id="clear-all-dates" class="btn btn-xs ">Clear All</button>
+       </fieldset>-->
 </div>
 <!--
 <div id="results-right" class="col-md-10 column right-align">
@@ -455,36 +464,35 @@
 
 
 <div id="results-right" class="col-md-10 column  ">
+    <div class="row clearfix ">
 
-    <div id="metadata"></div>
+        <div id="metadata"></div>
 
-    <div id="query-builder-link"><a href="#" onclick="$('#show-corpus-terms').toggle();">Show/Hide Query Builder</a>
+        <div id="query-builder-link"><a href="#" onclick="$('#show-corpus-terms').toggle();">Show/Hide Query Builder</a>
+        </div>
+        <div id="show-corpus-terms">
+            <fieldset>
+                <legend>Build a query</legend>
+                <button type="button" id="clear-all-terms" class="btn btn-xs ">Clear All</button>
+                <div class="query-terms-area"><b>Terms (whole documents):</b>
+                    <span class="query-term-buttons" id="high-tf"></span></div>
+                <div class="query-terms-area"><b>Terms (document snippets):</b>
+                    <span class="query-term-buttons" id="high-snippettf"></span></div>
+                <div class="query-terms-area"><b>Bigrams:</b>
+                    <span class="query-term-buttons" id="high-bigrams"></span></div>
+                <div class="query-terms-area"><b>Trigrams:</b>
+                    <span class="query-term-buttons" id="high-trigrams"></span></div>
+                <div class="query-terms-area"><b>People:</b>
+                    <span class="query-term-buttons" id="high-entities-per"></span></div>
+                <div class="query-terms-area"><b>Places:</b>
+                    <span class="query-term-buttons" id="high-entities-loc"></span></div>
+                <div class="query-terms-area"><b>Organizations:</b>
+                    <span class="query-term-buttons" id="high-entities-org"></span></div>
+            </fieldset>
+        </div>
+        <div id="results">
+        </div>
     </div>
-    <div id="show-corpus-terms">
-        <fieldset>
-            <legend>Build a query</legend>
-            <button type="button" id="clear-all-terms" class="btn btn-xs ">Clear All</button>
-            <div class="query-terms-area"><b>Terms (whole documents):</b>
-                <span class="query-term-buttons" id="high-tf"></span></div>
-            <div class="query-terms-area"><b>Terms (document snippets):</b>
-                <span class="query-term-buttons" id="high-snippettf"></span></div>
-            <div class="query-terms-area"><b>Bigrams:</b>
-                <span class="query-term-buttons" id="high-bigrams"></span></div>
-            <div class="query-terms-area"><b>Trigrams:</b>
-                <span class="query-term-buttons" id="high-trigrams"></span></div>
-            <div class="query-terms-area"><b>People:</b>
-                <span class="query-term-buttons" id="high-entities-per"></span></div>
-            <div class="query-terms-area"><b>Places:</b>
-                <span class="query-term-buttons" id="high-entities-loc"></span></div>
-            <div class="query-terms-area"><b>Organizations:</b>
-                <span class="query-term-buttons" id="high-entities-org"></span></div>
-        </fieldset>
-    </div>
-    <div id="results">
-
-
-    </div>
-
     <div id="view-resource"></div>
     <div class="row clearfix ">
 

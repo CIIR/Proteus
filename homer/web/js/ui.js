@@ -11,11 +11,7 @@ var metadataDiv = $("#metadata");
 var viewResourceDiv = $("#view-resource");
 var progressDiv = $("#progress");
 var queryBox = $("#ui-search");
-var loginInfo = $("#ui-login-info");
-var relevanceLabels = ["terrible", "not relevant", "neutral", "slightly relevant", "highly relevant"];
-var relevanceLabelColorClasses = ["rel-label-terrible", "rel-label-not-relevant", "rel-label-neutral", "rel-label-slightly-relevant", "rel-label-highly-relevant"];
 
-var ratingsJSON = {"document": {}};
 var votingJSON = {"document": {}};
 
 // UI object/namespace
@@ -111,8 +107,6 @@ function getAve(ave, id) {
 
 }
 
-
-
 UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
 
     //console.debug("result name: " + result.name);
@@ -136,6 +130,7 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
 
     $("#" + result.name).data("metadata", result.meta);
     $("#" + result.name).data("kind", result.viewKind);
+    $("#" + result.name).data("new-labels", result.newLabels);
 
     // TODO ?? book specific - should be in internetArchive.js
     var docType = guessKind(result.name);
@@ -150,15 +145,15 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
     }
 
     resDiv.addClass('result-' + result.rank);
-    html = '<div class="result-dups-' + result.rank + '"</div>';
-
+    html = '';
     // if they search a subcorpus for just books with a blank query, "search pages" doesn't make sense
     if (result.viewKind == 'ia-books' && queryTerms.length > 0) {
-
         html += '<div  id="search-pages-link-' + result.name + '" class="search-pages-link" >'
         html += '<a href="#" onclick="UI.getPages(\'' + result.name + '\');"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show matching pages in this book...</a></div>';
         html += '<div id="page-results-' + result.name + '"></div>';
     }
+    html += '<div style="display: none;" class="result-dups-' + result.rank + '"></div>';
+
     $('#notes-' + result.name).after(html);
 
 };
@@ -344,10 +339,6 @@ UI.showPages = function(bookid) {
 
 }
 
-UI.toggleNotes = function(noteDivID) {
-    $('#' + noteDivID).toggle();
-}
-
 var init = true;
 
 
@@ -385,20 +376,6 @@ function setUpMouseEvents() {
 
 }
 
-UI.populateRatedDocuments = function() {
-
-    _.forEach(GLOBAL.ratedDocuments, function(rec) {
-        $("#ratedDocuments").prepend('<div class="query">&#8226;&nbsp;<a  onclick="">'
-                + rec.doc
-                + '</a><div>'
-                + rec.aveRating
-                + '</div>');
-
-    });
-
-}
-
-
 function bindCorpusMenuClick() {
 
     $("ul#corpus-list.dropdown-menu li a").off("click");
@@ -424,7 +401,6 @@ function setCorpus(corpus) {
     $("#active-corpus").find('.selection').val(corpus);
     document.cookie = "corpus=" + corpus + ";";
 }
-
 
 function hideSideBar() {
     $('#sidebar-button').attr("src", "images/sidebar_expand.png");
@@ -482,6 +458,31 @@ function handleNERHilightClick(that, type) {
 
 }
 
+UI.toggleNotes = function(noteDivID) {
+    $('#' + noteDivID).toggle();
+}
+
+UI.toggleDups = function(clazz, rank) {
+    $('.' + clazz).toggle();
+    UI.setDupLinkHTML(rank);
+}
+
+UI.setDupLinkHTML = function(rank) {
+    var upOrDown = 'down';
+    var showOrHide = 'Show';
+
+    if ($(".result-dups-" + rank).is(":visible")){
+         upOrDown = 'up';
+         showOrHide = 'Hide';
+    }
+
+    var html = '<a href="#" onclick="UI.toggleDups(\'result-dups-' + rank + '\',' +  rank + ');">';
+    html += '<span class="glyphicon glyphicon-collapse-' + upOrDown + '"></span>';
+    html += '&nbsp;' + showOrHide + ' duplicates&nbsp;(' + $(".result-dups-" + rank + " .dup-result" ).length + ')&nbsp;<span class="fa fa-files-o"></span></a>'
+    $("#dup-parent-" + rank).html(html);
+
+}
+
 UI.showHideDups = function() {
     var el = $('#hide-dups input[type="checkbox"]:checked');
     if (el.length == 0) {
@@ -497,6 +498,25 @@ UI.enableSearchButtons = function(state){
     $('#facets input[type=checkbox]').attr('disabled',!state);
     $('#clear-all-facets').attr('disabled',!state);
 }
+/*
+
+UI.showOverlap = function( ){
+    if ($("#show-overlap").is(':checked')){
+        $(".result").hide();
+
+        $('.result').each(function () {
+            var ar = this.id;
+            //console.log($('#' + ar).data("newLabels"));
+            if (Object.keys($('#' + ar).data("newLabels")).length > 1){
+                $('#' + ar).show();
+            }
+        });
+    } else {
+        $(".result").show();
+    }
+};
+
+*/
 
 function clearQueryBuilder(){
     $("#query-builder-link").hide();

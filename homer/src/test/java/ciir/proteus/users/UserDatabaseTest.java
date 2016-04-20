@@ -1,7 +1,14 @@
 package ciir.proteus.users;
 
-import ciir.proteus.users.error.*;
-import org.junit.*;
+import ciir.proteus.users.error.BadSessionException;
+import ciir.proteus.users.error.BadUserException;
+import ciir.proteus.users.error.DBError;
+import ciir.proteus.users.error.DuplicateCorpus;
+import ciir.proteus.users.error.DuplicateUser;
+import ciir.proteus.users.error.NoTuplesAffected;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.lemurproject.galago.tupleflow.FileUtility;
 import org.lemurproject.galago.utility.FSUtil;
 import org.lemurproject.galago.utility.Parameters;
@@ -9,15 +16,26 @@ import org.lemurproject.galago.utility.Parameters;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author jfoley, michaelz
@@ -539,14 +557,18 @@ public class UserDatabaseTest {
 
   }
 
-
   @Test
   public void resourceRank2Test() throws DBError, SQLException {
 
-    db.register("user1");
-    db.register("user2");
+    String user1 = "user1";
+    String user2 = "user2";
+    Integer user1id = 1;
+    Integer user2id = 2;
 
-    Parameters p = db.login("user1");
+    db.register(user1);
+    db.register(user2);
+
+    Parameters p = db.login(user1);
     Credentials cred = new Credentials(p);
 
     db.createCorpus("test corpus 2", "user");
@@ -566,20 +588,50 @@ public class UserDatabaseTest {
     recs = labels.getAsList("labels");
     assertEquals(2, recs.size());
 
+    assertEquals(res1, recs.get(0).getString("name"));
+    assertEquals(subcorpus1.longValue(), recs.get(0).get("subcorpusid"));
+    assertEquals(user1, recs.get(0).getString("user"));
+
+    assertEquals(res1_pg1, recs.get(1).getString("name"));
+    assertEquals(subcorpus1.longValue(), recs.get(1).get("subcorpusid"));
+    assertEquals(user1, recs.get(1).getString("user"));
+
+    recs = labels.getAsList("newLabels");
+    assertEquals(1, recs.size());
+    p = recs.get(0).get(subcorpus1.toString(), Parameters.create());
+    assertEquals(p.get(user1id.toString()), user1);
+
     // test for corpus that doesn't have anything
     labels = db.getResourceRatings2(res1, corpus2);
     recs = labels.getAsList("labels");
     assertEquals(0, recs.size());
 
     // have a 2nd user rate the resource
-    p = db.login("user2");
+    p = db.login(user2);
     cred = new Credentials(p);
 
     db.addVoteForResource(cred, res1, corpus1, subcorpus1, queryid1);
-    labels = db.getResourceRatings2(res1,corpus1 );
+    labels = db.getResourceRatings2(res1, corpus1);
     recs = labels.getAsList("labels");
     assertEquals(3, recs.size());
 
+    assertEquals(res1, recs.get(0).getString("name"));
+    assertEquals(subcorpus1.longValue(), recs.get(0).get("subcorpusid"));
+    assertEquals(user1, recs.get(0).getString("user"));
+
+    assertEquals(res1_pg1, recs.get(1).getString("name"));
+    assertEquals(subcorpus1.longValue(), recs.get(1).get("subcorpusid"));
+    assertEquals(user1, recs.get(1).getString("user"));
+
+    assertEquals(res1, recs.get(2).getString("name"));
+    assertEquals(subcorpus1.longValue(), recs.get(2).get("subcorpusid"));
+    assertEquals(user2, recs.get(2).getString("user"));
+
+    recs = labels.getAsList("newLabels");
+    assertEquals(1, recs.size());
+    p = recs.get(0).get(subcorpus1.toString(), Parameters.create());
+    assertEquals(p.get(user1id.toString()), user1);
+    assertEquals(p.get(user2id.toString()), user2);
   }
 
   @Test
@@ -703,19 +755,27 @@ public class UserDatabaseTest {
     Integer query_2_id = db.insertQuery(null, corpus1, query_2, kind_1);
     db.addVoteForResource(cred, res4, corpus1, subcorpus1, query_2_id);
 
+    // add a note
+    Integer note_id = db.insertNote(cred, corpus1, res3, "{ \"name\": \"res_3\" }");
+
     results = db.getResourcesForCorpusByQuery(corpus1);
 
     assertEquals(results.size(), 1);
     queryList = results.getAsList("queries");
-    assertEquals(2, queryList.size());
+    assertEquals(3, queryList.size());
 
     query = queryList.get(0);
+    res = query.getAsList("resources");
+    assertEquals(1, res.size());
+    assertEquals(res3, res.get(0));
+
+    query = queryList.get(1);
     res = query.getAsList("resources");
     assertEquals(2, res.size());
     assertEquals(res1, res.get(0));
     assertEquals(res3, res.get(1));
 
-    query = queryList.get(1);
+    query = queryList.get(2);
     res = query.getAsList("resources");
     assertEquals(1, res.size());
     assertEquals(res4, res.get(0));
