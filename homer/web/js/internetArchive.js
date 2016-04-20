@@ -150,8 +150,8 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     })
 
     if (noteHTML.length > 0) {
-        html += '<a href="#" onclick="UI.toggleNotes(\'tmpnotes-' + result.name + '\');"><span class="fa fa-pencil"></span>&nbsp;Show/Hide notes</a></div>';
-        html += '<div id="tmpnotes-' + result.name + '"  style="display:none">' + noteHTML + '</div>';
+        html += '<a href="#" onclick="UI.toggleNotes(\'' + result.name + '\');"><span id="notes-link-' + result.name + '"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show notes&nbsp;</span><span class="fa fa-pencil"></span></a>';
+        html += '<div id="notes-div-' + result.name + '"  style="display:none">' + noteHTML + '</div>';
     }
 
     // show queries

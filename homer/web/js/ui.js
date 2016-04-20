@@ -459,7 +459,19 @@ function handleNERHilightClick(that, type) {
 }
 
 UI.toggleNotes = function(noteDivID) {
-    $('#' + noteDivID).toggle();
+
+
+    $('#notes-div-' + noteDivID).toggle();
+    var html = '';
+
+    if ($('#notes-div-' + noteDivID).is(":visible") == true){
+        html = '<span class="glyphicon glyphicon-collapse-up"></span>&nbsp;Hide notes&nbsp;</span>';
+    } else {
+        html = '<span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show notes&nbsp;</span>';
+    }
+
+    $("#notes-link-" + noteDivID).html(html);
+
 }
 
 UI.toggleDups = function(clazz, rank) {
