@@ -103,15 +103,6 @@ var doSearchRequest = function(args) {
         subcorpora.push(parseInt($(rec).attr("value")));
     })
 
-    // if they refreshed the page, subcorpora will be empty here, but
-    // we may have subcorpora on the URL, so check for that
-    if (!_.isUndefined(args.subcorpora)){
-        var sc = args.subcorpora.split(',');
-        _.forEach(sc, function(id) {
-            subcorpora.push(parseInt(id));
-        })
-    }
-
     // don't limit by subcorport IFF we're searching for pages within a book
     if (!_.isEmpty(subcorpora) && _.isUndefined(args.workingSetQuery)) {
         var subcorporaArgs = '{ "subcorpora":  ' + JSON.stringify(subcorpora) + '}';
@@ -120,14 +111,7 @@ var doSearchRequest = function(args) {
     // end temp
 
     // we could have args passed in esp if they're reusing an URL
-    if (_.isUndefined(args.labels)) {
-//        var labelList = getSelectedLabels();
-//
-//        if (!_.isEmpty(labelList)) {
-//            var labelArgs = '{ "labels":  ' + JSON.stringify(labelList) + '}';
-//            args = _.merge(args, JSON.parse(labelArgs));
-//        }
-    } else {
+    if (!_.isUndefined(args.labels)) {
         // format them correctly
         var labelArgs = '{ "labels":  ' + JSON.stringify(args.labels.split(",")) + '}';
         args.labels = "";
@@ -136,10 +120,7 @@ var doSearchRequest = function(args) {
 
     // if we didn't ask for more
     if (!args.skip || args.skip === 0) {
-        //Model.clearResults();
         clearModelResults(Model[args.kind])
-
-   //     displaySubcorporaFacets();
         clearSubcorpusFoundDocCount();
         UI.clearResults();
         // don't update the URL if we're getting pages for a book
@@ -217,7 +198,7 @@ function getTermHTMl(term, count, classes) {
 
 }
 function calcPixelSize(count) {
-   return Math.max(12, Math.min(50, Math.round(Math.sqrt(count))));
+    return Math.max(12, Math.min(50, Math.round(Math.sqrt(count))));
 }
 
 var onSearchSuccess = function(data) {
@@ -236,16 +217,12 @@ var onSearchSuccess = function(data) {
     var userID = getCookie("userid");
     $("#more").html(""); // clear progress animation
 
-   $("#show-corpus-terms").hide();
-
+    $("#show-corpus-terms").hide();
 
     // show query builder if they searched the corpus OR have a sub-corpus selected
-    if (getSubcorporaElements().length > 0){//(getSubcorporaElements().length > 0 || data.request.action == "search-corpus") && _.isUndefined(data.totalTF) == false) {
+    if (getSubcorporaElements().length > 0) {
 
-//    $("#show-corpus-terms").show();
         $("#query-builder-link").show();
-
-
 
         _.forEach(data.totalTF, function(t) {
             $("#high-tf").append(getTermHTMl(t.term, t.count, ''));
@@ -288,12 +265,6 @@ var onSearchSuccess = function(data) {
         result.kind = data.request.kind;
         result.rank = rank++;
 
-        ratingsJSON.document[result.name] = {};
-        // Loop through ratings
-        _.forEach(result.ratings, function(rating) {
-            ratingsJSON.document[result.name][rating.user] = rating.rating;
-        });
-
         // TODO ??? duplicate code - we do this in a couple places - should probably just call updateRatings() (with a better name)
         votingJSON.document[result.name] = {};
         // Loop through ratings
@@ -313,16 +284,16 @@ var onSearchSuccess = function(data) {
 
             // the labels are found using "LIKE <resource-name>%" so we are getting pages & notes
             // for a book. Make sure we're dealing with the current document.
-            if (rec.name == result.name){
+            if (rec.name == result.name) {
                 docSubcorpus.add(rec.subcorpusid);
             }
         });
 
         // loop through the set and add ONE for each label found for the current doc
-        docSubcorpus.forEach(function(value){
+        docSubcorpus.forEach(function(value) {
             // keep track of how many documents per subcorpus are returned
-            if (foundDocCount.has(value)){
-                foundDocCount.set(value, foundDocCount.get(value) + 1 );
+            if (foundDocCount.has(value)) {
+                foundDocCount.set(value, foundDocCount.get(value) + 1);
             } else {
                 foundDocCount.set(value, 1);
             }
@@ -388,8 +359,6 @@ var onSearchSuccess = function(data) {
         renderDups(savedData);
     }
 
-    //  printMatrix(conf, count)
-
     if (data.request.n > data.results.length) {
         UI.showProgress("No more results for '" + data.request.q + "'");
     }
@@ -422,7 +391,6 @@ function renderDups(data) {
     // ???? temp matrix for visualizing scores/duplicates
     var docScores = Array.apply(null, Array(count)).map(Number.prototype.valueOf, 0);
 
-
     for (i = 0; i < count; i += 1) {
         conf[i] = Array.apply(null, Array(count)).map(Number.prototype.valueOf, 0);
         docScores[i] = Array.apply(null, Array(count)).map(Number.prototype.valueOf, 0);
@@ -448,19 +416,11 @@ function renderDups(data) {
 
     var minConfidence = $("#dup-slider").slider("value");
 
-    // ??? tmp - print out scores for docs and dup confidence
-    //    console.log("rank\tscore\ttop_dup_conf\tidx");
-    //    for (i = 0; i < count; i += 1) {
-    //        m = _.max(conf[i])
-    //        midx = ' ';
-    //        if (m > 0){
-    //            midx = (1+conf[i].indexOf(m))
-    //        }
-    //        console.log((i+1) + "\t" + data.results[i].score + "\t" + m + "\t" + midx);
-    //    }
     // using a greedy algorithm, ANY doc that has a non-zero confidence is
     // considered a duplicate of the document at that rank (row number).
     // The slider can be used to remove low confidence values
+    var parentSet = new Set();
+
     for (row = 0; row < count; row += 1) {
         var doneRow = false;
         while (doneRow == false) {
@@ -492,19 +452,21 @@ function renderDups(data) {
             ignoreCol.add(col);
 
             moveDocument(data, row, col, m);
+            parentSet.add(row);
         }
     }
 
     UI.showHideDups();
 
-    // printMatrix(docScores, count)
+    // go through all the docs that have duplicates and add the "show/hide dup" link
+    parentSet.forEach(function(rank) {
+        rank += 1;
+        UI.setDupLinkHTML(rank);
+    });
 
 }
 
-
 function moveDocument(data, parentIdx, dupIdx, confidence) {
-
-    //console.log("\tmoving " + dupIdx + " under " + parentIdx);
 
     var name = jqEsc(data.results[dupIdx].name);
 
@@ -516,9 +478,13 @@ function moveDocument(data, parentIdx, dupIdx, confidence) {
     // get the html for the dup - note we don't use "html()" because we want the outer <div> too.
     var dupHTML = $("#" + name).get(0).outerHTML;
     $("#" + name).get(0).outerHTML = '';
-    // append it to the first doc
 
-    $(dupHTML).insertAfter($(".result-" + (parentIdx + 1)))
+    parentIdx += 1;
+    if ($("#dup-parent-" + parentIdx).length == 0) {
+        $('<div id="dup-parent-' + parentIdx + '"></div>').insertBefore($(".result-dups-" + parentIdx))
+    }
+
+    $(".result-dups-" + parentIdx).html($(".result-dups-" + parentIdx).html() + dupHTML);
 
 }
 
@@ -1098,7 +1064,6 @@ var updateNoteDiv = function(bookid, pgnum) {
 
     var id = getBookID(bookid, pgnum);
     var labelHTML = '<div id="notes-' + id + '" class="resource-labels">' + displayLabels(id) + '</div>';
-
 
     var pghtml = '<div id="' + noteid + '" class="book-text col-md-5 column left-align">' + $(pb).html() + labelHTML + '</div>' +
             '<div id="' + noteid + '-page-image" class="page-image col-md-5 column left-align"><br><a href="#" onclick="getPageImage(\'' +

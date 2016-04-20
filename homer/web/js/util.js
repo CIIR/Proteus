@@ -584,59 +584,20 @@ function selectElementContents(el) {
     sel.addRange(range);
 }
 
-
-var mzSelect = function(that, entType) {
-
-    console.log(that);
-
-//    var event = new MouseEvent('mousedown', {
-//        'view': window,
-//        'bubbles': true,
-//        'cancelable': true
-//    });
-    //document.getElementById("David-link").fireEvent("ondblclick")
-//    $("#David-link").focus();
-//    $("#David-link").select();
-
-
-    //  var el = document.getElementById("David-link");
-//    var el = document.getElementById("David-link");
-    selectElementContents((that));
-    // el.dispatchEvent(event);
-
-
-}
 function addEntitySearchLinks() {
 
     // convert entities to search links
 
-//    $(".per-ent").each(function () {
-////        var val = $(this).html();
-////        $(this).html('<a target="#"  >' + val + '</a>');
-////        $("#David-link").mouseup(function(){
-////            mzSelect()
-////        })
-//     //  $(this).html('<a target="#" id="' + val + '-link" onclick="mzSelect(this);">' + val + '</a>');
-//        //  $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('person', val, 'ia-books') + '\'>' + val + '</a>');
-//    })
     $(".per-ent").bind("mouseup", function() {
-        mzSelect(this, 'PER')
+        selectElementContents(this)
     })
-//    $(".org-ent").each(function () {
-////        var val = $(this).html();
-////        $(this).html('<a target="#"  >' + val + '</a>');
-//    //    $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('organization', val, 'ia-books') + '\'>' + val + '</a>');
-//    })
+
     $(".org-ent").bind("mouseup", function() {
-        mzSelect(this, 'ORG')
+        selectElementContents(this)
     })
-//    $(".loc-ent").each(function () {
-////        var val = $(this).html();
-////        $(this).html('<a target="#"  >' + val + '</a>');
-//    //    $(this).html('<a target="_BLANK" href=\'' + buildSearchLink('location', val, 'ia-books') + '\'>' + val + '</a>');
-//    })
+
     $(".loc-ent").bind("mouseup", function() {
-        mzSelect(this, 'LOC')
+        selectElementContents(this)
     })
 }
 

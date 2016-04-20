@@ -1,8 +1,9 @@
+/* add some padding so the relevance judgements can be seen for the first result
 #results{
-    /* add some padding so the relevance judgements can be seen for the first result */
+
     padding-top: 30px;
 }
-
+*/
 #results-left {
     background-color: white;
     border-right: 1px solid #888;
@@ -27,6 +28,12 @@
 .snippet {
     padding: 2pt;
     color: #666;
+    font-size: smaller;
+}
+.author {
+    padding: 2pt;
+    color: #666;
+    font-size: smaller;
 }
 
 .hili {
@@ -115,18 +122,17 @@
     text-align: right;
 }
 
-.result {
-    /*border-bottom: 1px solid grey;*/
-    padding : 20pt;
+.preview {
+    padding: 5pt;
 }
 
-.result .preview {
-    padding: 10pt;
+.result {
+    padding: 5pt;
 }
 
 img.ia-thumbnail {
-    width: 100px;
-    height: 120px;
+    width: 80px;
+    height: 100px;
 }
 
 .result .rank {
@@ -285,7 +291,7 @@ body {
     background-color: aliceblue !important;
 }
 .page-result{
-    margin-left: 50px;
+    margin-left: 25px;
 }
 .note-result:hover{
     background-color: lemonchiffon !important;
@@ -494,6 +500,10 @@ body {
     text-align: left;
 }
 
+.note-table {
+    width: 100%;
+}
+
 #loading-msg{
     background-color: yellow;
     text-align: center;
@@ -616,7 +626,7 @@ body {
 
 .resource-labels{
     background-color: lightgrey;
-    padding : 5px;
+    padding : 2px;
     border-radius: 5px;
 }
 
@@ -636,6 +646,8 @@ body {
 
 .label-button {
     margin : 2px;
+    padding: 2px 5px;
+
 }
 
 .check-mark:before {
@@ -664,14 +676,14 @@ body {
 /* based on http://stackoverflow.com/questions/19774653/css3-for-html5-legend-inside-fieldset */
 fieldset  {
     font-family: sans-serif;
-    border: 5px solid #1F497D;
+    border: 5px solid #009;
    /* background: #ddd;*/
     border-radius: 15px;
     padding: 10px;
     margin-top: 15px;
 }
  fieldset legend {
-    background: #1F497D;
+    background: #009;
     color: #fff;
     padding: 2px 5px ;
 /* font-size: 32px; */
@@ -741,7 +753,7 @@ border-radius: 5px;
 #facets-hr {
     margin-top: 5px;
     margin-bottom: 5px;
-    border-top: 1px solid #1F497D;
+    border-top: 1px solid #009;
 }
 
 ::-ms-clear {

@@ -8,14 +8,7 @@
  */
 
 var GLOBAL = {
-    uniqTypes: [], allTags: [], users: {}, userComments: [], corpora: [],
-    ratedDocuments: [
-        {"doc": "westindiesincana1916grea", "aveRating": 3},
-        {"doc": "sirfrancisdrakeh04mayn_75", "aveRating": 1.5},
-        {"doc": "westindiesincana1916grea_18", "aveRating": 5},
-        {"doc": "obeahwitchcraft00bellgoog_197", "aveRating": 4.5},
-        {"doc": "obeahwitchcraft00bellgoog", "aveRating": 3}
-    ]
+    uniqTypes: [], allTags: [], users: {}, userComments: [], corpora: []
 };
 
 // the JSON of the application state
