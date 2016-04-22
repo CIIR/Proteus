@@ -750,7 +750,7 @@ border-radius: 5px;
     padding: 10px;
 }
 
-#facets-hr {
+.facets-hr {
     margin-top: 5px;
     margin-bottom: 5px;
     border-top: 1px solid #009;

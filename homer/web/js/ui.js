@@ -505,12 +505,23 @@ UI.showHideDups = function() {
     }
 }
 
+UI.onClickSubcorpus = function() {
+
+    UI.onClickSearchButton();
+}
 
 UI.enableSearchButtons = function(state){
     $('input[name=search-kind]').attr('disabled',!state);
     $('#facets input[type=checkbox]').attr('disabled',!state);
     $('#clear-all-facets').attr('disabled',!state);
+    $('#show-overlap').attr('disabled',!state);
+    // only enable the overlap button if at least on subcorpus is selected
+    if (getSubcorporaElements().length == 0){
+        $('#show-overlap').attr('checked',false);
+        $('#show-overlap').attr('disabled',true);
+    }
 }
+
 /*
 
 UI.showOverlap = function( ){
@@ -519,8 +530,8 @@ UI.showOverlap = function( ){
 
         $('.result').each(function () {
             var ar = this.id;
-            //console.log($('#' + ar).data("newLabels"));
-            if (Object.keys($('#' + ar).data("newLabels")).length > 1){
+
+            if (Object.keys($('#' + ar).data("new-labels")).length > 1){
                 $('#' + ar).show();
             }
         });
@@ -528,8 +539,9 @@ UI.showOverlap = function( ){
         $(".result").show();
     }
 };
-
 */
+
+
 
 function clearQueryBuilder(){
     $("#query-builder-link").hide();

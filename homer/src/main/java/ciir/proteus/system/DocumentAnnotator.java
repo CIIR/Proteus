@@ -62,6 +62,7 @@ public class DocumentAnnotator {
     boolean metadata = reqp.get("metadata", true);
     boolean getTags = reqp.get("tags", false);
     boolean getRatings = reqp.get("ratings", false);
+    boolean overlapOnly = reqp.get("overlapOnly", false);
     int numEntities = (int) reqp.get("top_k_entities", 0);
     int corpusID = (int) reqp.get("corpus", -1);
 
@@ -108,7 +109,16 @@ public class DocumentAnnotator {
       if (doc == null) {
         continue;
       }
+
+      // modified getResourcRatings to get labels.
+      Parameters labels = system.userdb.getResourceRatings2(doc.name, corpusID);
+      // "overlap" is a document that is in more than one subcorpus
+      if (overlapOnly && labels.get("newLabels", Parameters.create()).size() < 2){
+        continue;
+      }
+
       Parameters docp = Parameters.create();
+      docp.copyFrom(labels);
 
       List<String> snippetTerms = new ArrayList<String>();
 
@@ -209,11 +219,6 @@ public class DocumentAnnotator {
         ratings = system.userdb.getResourceRatings(doc.name, corpusID);
         docp.copyFrom(ratings);
       }
-
-      // modified getResourcRatings to get labels.
-      Parameters labels = Parameters.create();
-      labels = system.userdb.getResourceRatings2(doc.name, corpusID);
-      docp.copyFrom(labels);
 
       // get any notes
       // TODO : pass a flag indicating if we want to get notes

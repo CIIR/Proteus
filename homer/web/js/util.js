@@ -746,9 +746,10 @@ function displaySubcorporaFacets() {
     if (!_.isUndefined(urlParams["subcorpora"])) {
         array = urlParams["subcorpora"].split(',');// $.map(getSubcorporaElements(), function(c){return c.value; })
     }
+    if (!_.isUndefined(urlParams["overlapOnly"])) {
+        $('#show-overlap').attr('checked',urlParams["overlapOnly"]);
+    }
 
-//    console.log('saved subcorpra: ' + array);
-//    console.log('url: ' + urlParams["subcorpora"]);
     // 1st check ensures we have an entry for subcorpora, 2nd check makes sure there is data,
     // 3rd check is just a safety - I manually cleared out the localstorage and the page would
     // say "Uncaught SyntaxError: Unexpected end of input" because it was trying to parse an
@@ -764,7 +765,7 @@ function displaySubcorporaFacets() {
                 checked = 'checked';
             }
             // TODO ??? really should be doing the append() thing here rather than building an HTML string.
-            html += '<input type="checkbox" onclick="UI.onClickSearchButton();" name="facets" value="' + r.id + '" ' + checked + ' />&nbsp;' + r.name;
+            html += '<input type="checkbox" onclick="UI.onClickSubcorpus();" name="facets" value="' + r.id + '" ' + checked + ' />&nbsp;' + r.name;
             html += ' (<span class="num-docs-retrieved-for-subcorpus" id="' + r.id + '-subcorpus-num-found">0</span>/' + r.count + ')<br>';
         });
     }

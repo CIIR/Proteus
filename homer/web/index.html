@@ -118,11 +118,11 @@
             $("#hide-dups").on("click", function () {
                 UI.showHideDups();
             })
-/*
+
             $("#show-overlap").on("click", function () {
-                UI.showOverlap();
+                UI.onClickSearchButton();
+                //UI.showOverlap();
             })
-*/
 
 
             $("#dup-slider").slider({
@@ -261,6 +261,7 @@
 
             $("#clear-all-facets").on('click', function () {
                 getSubcorporaElements().removeAttr('checked');
+                $('#show-overlap').removeAttr('checked');
                 UI.onClickSearchButton();
             });
             $("#clear-all-dates").on('click', function () {
@@ -405,12 +406,11 @@
     <fieldset>
         <legend>Refine by</legend>
         <div id="search-rb"></div>
-        <hr id="facets-hr">
+        <hr class="facets-hr">
         <div id="facets"></div>
         <button type="button" id="clear-all-facets" class="btn btn-xs disabled ">Clear All</button>
-        <!--    <hr id="facets-hr">
-                <input id="show-overlap" type="checkbox" name="show-overlap" value="4">&nbsp;Show only common documents
-    -->
+            <hr class="facets-hr">
+                <input id="show-overlap" type="checkbox" name="show-overlap" value="4">&nbsp;Show only shared results
     </fieldset>
 
     <fieldset>

@@ -108,6 +108,12 @@ var doSearchRequest = function(args) {
         var subcorporaArgs = '{ "subcorpora":  ' + JSON.stringify(subcorpora) + '}';
         args = _.merge(args, JSON.parse(subcorporaArgs));
     }
+
+    args.overlapOnly = false;
+    if ($("#show-overlap").is(':checked')){
+        args.overlapOnly = true;
+    }
+
     // end temp
 
     // we could have args passed in esp if they're reusing an URL
@@ -470,6 +476,7 @@ function moveDocument(data, parentIdx, dupIdx, confidence) {
 
     var name = jqEsc(data.results[dupIdx].name);
 
+    var data = $("#" + name).data();
     $("#" + name + '-dup-confidence').html("    Duplicate confidence: " + confidence + "%")
 
     // dim out the 2nd one
@@ -486,6 +493,7 @@ function moveDocument(data, parentIdx, dupIdx, confidence) {
 
     $(".result-dups-" + parentIdx).html($(".result-dups-" + parentIdx).html() + dupHTML);
 
+    $("#" + name).data(data);
 }
 
 function printMatrix(conf, count) {
