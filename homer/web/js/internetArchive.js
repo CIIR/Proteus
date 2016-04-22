@@ -157,7 +157,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     // show queries
     var queries = [];
     _.each(result.queries.rows, function(query) {
-        queries.push('<a target="_BLANK" href="index.html?action=search&kind=' + query.kind + '&q=' + encodeURI(query.query) + '">' + query.query + '</a>');
+        queries.push('<a target="_BLANK" href="index.html?action=search&kind=' + query.kind + '&q=' + encodeURIComponent(query.query) + '">' + query.query + '</a>');
     })
     if (queries.length == 1) {
         html += '<div class="resource-query" >Found with query: ' + queries.toString() + '</div>';
