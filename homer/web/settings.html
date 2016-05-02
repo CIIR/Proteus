@@ -31,6 +31,26 @@
                 $("#user-num-entities").val(num_entities);
             }
 
+            if (settings.show_dups == true) {
+                $('#show-dup-settings input[type="checkbox"]').attr('checked', true)
+            }
+
+            if (settings.show_notes == true) {
+                $('#show-note-settings input[type="checkbox"]').attr('checked', true)
+            }
+
+            if (settings.show_found_with_query == true) {
+                $('#show-found-with-query-settings input[type="checkbox"]').attr('checked', true)
+            }
+
+            if (settings.show_unigrams == true) {
+                $('#show-unigram-settings input[type="checkbox"]').attr('checked', true)
+            }
+
+            if (settings.use_query_builder == true) {
+                $('#use-query-builder-settings input[type="checkbox"]').attr('checked', true)
+            }
+
             // populate the subcorpora (labels)
 
             var labels = localStorage["subcorpora"];
@@ -69,13 +89,13 @@
             _.each($("#subcorpora-list input"), function (l) {
 
                 // don't submit empty fields
-                if (l.value.toString().trim().length == 0){
+                if (l.value.toString().trim().length == 0) {
                     return;
                 }
-                if (innerjson.length != 0){
+                if (innerjson.length != 0) {
                     innerjson += ", ";
                 }
-                innerjson += '{ "name" : "' + l.value.replace(/\"/g, '\\\"') + '"' ;
+                innerjson += '{ "name" : "' + l.value.replace(/\"/g, '\\\"') + '"';
 
                 if (jQuery.isEmptyObject($(l).data()) == false) {
                     innerjson += ', "id" : ' + $(l).data().id;
@@ -84,7 +104,7 @@
             });
 
             json += innerjson + ']}';
-             console.log(json);
+            console.log(json);
             API.updateSubcorpora(JSON.parse(json), function (data) {
                 console.log("success")
                 localStorage["subcorpora"] = JSON.stringify(data.subcorpora);
@@ -123,22 +143,30 @@
             var action = getCookie("username");
             var userID = getCookie("userid");
             var userToken = getCookie("token");
-            var broadcastValues = {};
+            //            var broadcastValues = {};
+            //
+            //            $('input:checkbox.broadcast-msg').each(function () {
+            //                var value = "N";
+            //                if (this.checked) {
+            //                    value = "Y"
+            //                }
+            //                broadcastValues[$(this).val()] = value;
+            //            });
 
-            $('input:checkbox.broadcast-msg').each(function () {
-                var value = "N";
-                if (this.checked) {
-                    value = "Y"
-                }
-                broadcastValues[$(this).val()] = value;
-            });
+            var show_dups = $('#show-dup-settings input[type="checkbox"]').is(':checked')
+            var show_notes = $('#show-note-settings input[type="checkbox"]').is(':checked')
+            var show_found_with_query = $('#show-found-with-query-settings input[type="checkbox"]').is(':checked')
+            var show_unigrams = $('#show-unigram-settings input[type="checkbox"]').is(':checked')
+            var use_query_builder = $('#use-query-builder-settings input[type="checkbox"]').is(':checked')
 
-            var settings = {num_entities: num, broadcast: broadcastValues};
+            var settings = {num_entities: num, show_dups: show_dups, show_notes: show_notes,
+                show_found_with_query: show_found_with_query, show_unigrams: show_unigrams,
+                use_query_builder: use_query_builder};
             var args = {
                 user: action,
                 token: userToken,
                 userid: userID,
-                settings: {num_entities: num, broadcast: broadcastValues}
+                settings: settings
             };
             API.updateUserSettings(args, function () {
                 console.log("success")
@@ -156,14 +184,13 @@
 
             document.cookie = "settings=" + JSON.stringify(settings) + ";";
 
-
         }
 
 
     </script>
 </head>
 <body class="settings-body">
-<div class="container" >
+<div class="container">
     <div class="row">
         <form id="settings-form" class="form-horizontal" onsubmit="submitSettings(); return false;">
             <fieldset id="settings-container">
@@ -179,6 +206,22 @@
                     <div class="col-md-4">
                         <input id="user-num-entities" name="user-num-entities" placeholder=""
                                class="form-control input-md" required="" type="number" min="0">
+
+                        <div id="show-dup-settings">
+                            <input type="checkbox" name="auto-show-duplicates" value="test"/>Auto show duplicates&nbsp;
+                        </div>
+                        <div id="show-note-settings">
+                            <input type="checkbox" name="auto-show-notes" value="test"/>Auto show notes&nbsp;
+                        </div>
+                        <div id="show-found-with-query-settings">
+                            <input type="checkbox" name="show-found-with-query" value="test"/>Show found with queries&nbsp;
+                        </div>
+                        <div id="show-unigram-settings">
+                            <input type="checkbox" name="show-unigrams" value="test"/>Show single terms in query builder&nbsp;
+                        </div>
+                        <div id="use-query-builder-settings">
+                            <input type="checkbox" name="user-query-builder" value="test"/>Allow query builder&nbsp;
+                        </div>
                     </div>
                 </div>
                 <!--

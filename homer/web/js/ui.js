@@ -152,7 +152,11 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
         html += '<a href="#" onclick="UI.getPages(\'' + result.name + '\');"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show matching pages in this book...</a></div>';
         html += '<div id="page-results-' + result.name + '"></div>';
     }
-    html += '<div style="display: none;" class="result-dups-' + result.rank + '"></div>';
+    html += '<div ';
+    if (UI.settings.show_dups == false){
+        html += 'style="display: none;" ';
+    }
+    html += 'class="result-dups-' + result.rank + '"></div>';
 
     $('#notes-' + result.name).after(html);
 

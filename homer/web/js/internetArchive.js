@@ -150,20 +150,34 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     })
 
     if (noteHTML.length > 0) {
-        html += '<a href="#" onclick="UI.toggleNotes(\'' + result.name + '\');"><span id="notes-link-' + result.name + '"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show notes&nbsp;</span><span class="fa fa-pencil"></span></a>';
-        html += '<div id="notes-div-' + result.name + '"  style="display:none">' + noteHTML + '</div>';
+        html += '<a href="#" onclick="UI.toggleNotes(\'' + result.name + '\');"><span id="notes-link-' + result.name + '"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;';
+        if (UI.settings.show_notes == false){
+            html += 'Show';
+        } else {
+            html += 'Hide';
+        }
+        html += ' notes&nbsp;</span><span class="fa fa-pencil"></span></a>';
+        html += '<div id="notes-div-' + result.name + '"  ';
+        if (UI.settings.show_notes == false){
+            html += 'style="display:none"';
+        }
+        html += '>' + noteHTML + '</div>';
     }
 
     // show queries
-    var queries = [];
-    _.each(result.queries.rows, function(query) {
-        queries.push('<a target="_BLANK" href="index.html?action=search&kind=' + query.kind + '&q=' + encodeURIComponent(query.query) + '">' + query.query + '</a>');
-    })
-    if (queries.length == 1) {
-        html += '<div class="resource-query" >Found with query: ' + queries.toString() + '</div>';
-    }
-    if (queries.length > 1) {
-        html += '<div class="resource-query" >Found with queries: ' + queries.join(', ').toString() + '</div>';
+    if (UI.settings.show_found_with_query){
+
+        var queries = [];
+        _.each(result.queries.rows, function(query) {
+            queries.push('<a target="_BLANK" href="index.html?action=search&kind=' + query.kind + '&q=' + encodeURIComponent(query.query) + '">' + query.query + '</a>');
+        })
+        if (queries.length == 1) {
+            html += '<div class="resource-query" >Found with query: ' + queries.toString() + '</div>';
+        }
+        if (queries.length > 1) {
+            html += '<div class="resource-query" >Found with queries: ' + queries.join(', ').toString() + '</div>';
+        }
+
     }
 
     // show labels

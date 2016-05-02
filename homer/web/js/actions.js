@@ -79,13 +79,13 @@ var doSearchRequest = function(args) {
     disableAutoRetrieve(); // prevent double requests
 
     var tmpSettings = getCookie("settings");
-    var settings;
+ //   var settings;
     var numEntities = 5; // default
     if (tmpSettings != "") { // first time we don't have cookies
-        settings = JSON.parse(tmpSettings);
+        UI.settings = JSON.parse(tmpSettings);
 
-        if (!_.isUndefined(settings.num_entities)) {
-            numEntities = settings.num_entities;
+        if (!_.isUndefined(UI.settings.num_entities)) {
+            numEntities = UI.settings.num_entities;
         }
     }
     var defaultArgs = {
@@ -228,8 +228,16 @@ var onSearchSuccess = function(data) {
     // show query builder if they searched the corpus OR have a sub-corpus selected
     if (getSubcorporaElements().length > 0) {
 
-        $("#query-builder-link").show();
-
+        if (UI.settings.show_unigrams){
+            $("#high-tf").parent().show();
+            $("#high-snippettf").parent().show();
+        } else {
+            $("#high-tf").parent().hide();
+            $("#high-snippettf").parent().hide();
+        }
+        if (UI.settings.use_query_builder){
+            $("#query-builder-link").show();
+        }
         _.forEach(data.totalTF, function(t) {
             $("#high-tf").append(getTermHTMl(t.term, t.count, ''));
         })
