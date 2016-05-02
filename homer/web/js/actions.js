@@ -79,7 +79,7 @@ var doSearchRequest = function(args) {
     disableAutoRetrieve(); // prevent double requests
 
     var tmpSettings = getCookie("settings");
- //   var settings;
+    // get the settings and use defaults if needed..
     var numEntities = 5; // default
     if (tmpSettings != "") { // first time we don't have cookies
         UI.settings = JSON.parse(tmpSettings);
@@ -88,6 +88,8 @@ var doSearchRequest = function(args) {
             numEntities = UI.settings.num_entities;
         }
     }
+    UI.checkSettings();
+
     var defaultArgs = {
         n: 10,
         skip: 0,

@@ -545,6 +545,26 @@ UI.showOverlap = function( ){
 };
 */
 
+UI.checkSettings = function(){
+    // makse sure we have defaults
+    if (_.isUndefined(UI.settings.show_dups)) {
+        UI.settings.show_dups = false;
+    }
+    if (_.isUndefined(UI.settings.show_notes)) {
+        UI.settings.show_notes = false;
+    }
+    if (_.isUndefined(UI.settings.show_found_with_query)) {
+        UI.settings.show_found_with_query = false;
+    }
+    if (_.isUndefined(UI.settings.show_unigrams)) {
+        UI.settings.show_unigrams = false;
+    }
+    if (_.isUndefined(UI.settings.use_query_builder)) {
+        UI.settings.use_query_builder = true;
+    }
+
+    document.cookie = "settings=" + JSON.stringify(UI.settings) + ";";
+}
 
 
 function clearQueryBuilder(){
