@@ -342,7 +342,7 @@ var setUserRatingsHTML = function(res) {
     })
     var rating_html = '<span>';
     _.forEach(votes, function(val, key) {
-        rating_html += key + ': ' + val + '<br>';
+        rating_html += key + ': <b>' + val + '</b><br>';
     })
 
     rating_html += '</span>';
