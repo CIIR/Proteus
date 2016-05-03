@@ -253,6 +253,7 @@ var logIn = function(userName) {
             // update the type tags
             getAllTagsByUser();
             showSideBar();
+            removeURLParam("user");
             location.reload(true);
 
         }, function(req, status, err) {
