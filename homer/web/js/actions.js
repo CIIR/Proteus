@@ -112,7 +112,7 @@ var doSearchRequest = function(args) {
     }
 
     args.overlapOnly = false;
-    if ($("#show-overlap").is(':checked')){
+    if ($("#show-overlap").is(':checked')) {
         args.overlapOnly = true;
     }
 
@@ -230,14 +230,14 @@ var onSearchSuccess = function(data) {
     // show query builder if they searched the corpus OR have a sub-corpus selected
     if (getSubcorporaElements().length > 0) {
 
-        if (UI.settings.show_unigrams){
+        if (UI.settings.show_unigrams) {
             $("#high-tf").parent().show();
             $("#high-snippettf").parent().show();
         } else {
             $("#high-tf").parent().hide();
             $("#high-snippettf").parent().hide();
         }
-        if (UI.settings.use_query_builder){
+        if (UI.settings.use_query_builder) {
             $("#query-builder-link").show();
         }
         _.forEach(data.totalTF, function(t) {
@@ -401,7 +401,7 @@ function renderDups(data) {
     }
 
     // create a matrix that tells us how confident we are that two docs are duplicates
-    var count = uniqWords.length
+    var count = uniqWords.length // data.results.length;
 
     var conf = Array.apply(null, Array(count)).map(Number.prototype.valueOf, 0);
     // ???? temp matrix for visualizing scores/duplicates
@@ -486,26 +486,17 @@ function moveDocument(data, parentIdx, dupIdx, confidence) {
 
     var name = jqEsc(data.results[dupIdx].name);
 
-    var data = $("#" + name).data();
-    $("#" + name + '-dup-confidence').html("    Duplicate confidence: " + confidence + "%")
-
-    // dim out the 2nd one
+    // dim out the dup
     $("#" + name).addClass("dup-result")
-
-    // get the html for the dup - note we don't use "html()" because we want the outer <div> too.
-    var dupHTML = $("#" + name).get(0).outerHTML;
-    $("#" + name).get(0).outerHTML = '';
+    $("#" + name + '-dup-confidence').html("    Duplicate confidence: " + confidence + "%")
 
     parentIdx += 1;
     if ($("#dup-parent-" + parentIdx).length == 0) {
         $('<div id="dup-parent-' + parentIdx + '"></div>').insertBefore($(".result-dups-" + parentIdx))
     }
-
-    $(".result-dups-" + parentIdx).html($(".result-dups-" + parentIdx).html() + dupHTML);
-
-    $("#" + name).data(data);
+    var obj = $("#" + name);
+    obj.appendTo((".result-dups-" + parentIdx));
 }
-
 function printMatrix(conf, count) {
 
     var tmp = '';

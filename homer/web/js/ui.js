@@ -109,11 +109,14 @@ function getAve(ave, id) {
 
 UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
 
+    var name = result.name;
+    var id = jqEsc(result.name);
+
     //console.debug("result name: " + result.name);
     var renderer = getResultRenderer(result.viewKind); //added this line and 5 below make adding/subt elements in future easier
     var resDiv = $('<div>');
     resDiv.attr('class', 'result');
-    resDiv.attr('id', result.name);
+    resDiv.attr('id', name);
 
 
     // put it at the end unless we pass in where we want it to go
@@ -124,16 +127,16 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
     }
 
     if (isLoggedIn()) {
-        setVoteHTML(result.name);
-        setUserRatingsHTML(result.name);
+        setVoteHTML(name);
+        setUserRatingsHTML(name);
     }
 
-    $("#" + result.name).data("metadata", result.meta);
-    $("#" + result.name).data("kind", result.viewKind);
-    $("#" + result.name).data("new-labels", result.newLabels);
+    $("#" + id).data("metadata", result.meta);
+    $("#" + id).data("kind", result.viewKind);
+    $("#" + id).data("new-labels", result.newLabels);
 
     // TODO ?? book specific - should be in internetArchive.js
-    var docType = guessKind(result.name);
+    var docType = guessKind(name);
     if (docType == 'ia-books') {
         resDiv.addClass('book-result');
     }
@@ -148,9 +151,9 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
     html = '';
     // if they search a subcorpus for just books with a blank query, "search pages" doesn't make sense
     if (result.viewKind == 'ia-books' && queryTerms.length > 0) {
-        html += '<div  id="search-pages-link-' + result.name + '" class="search-pages-link" >'
-        html += '<a href="#" onclick="UI.getPages(\'' + result.name + '\');"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show matching pages in this book...</a></div>';
-        html += '<div id="page-results-' + result.name + '"></div>';
+        html += '<div  id="search-pages-link-' + name + '" class="search-pages-link" >'
+        html += '<a href="#" onclick="UI.getPages(\'' + name + '\');"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show matching pages in this book...</a></div>';
+        html += '<div id="page-results-' + name + '"></div>';
     }
     html += '<div ';
     if (UI.settings.show_dups == false){
@@ -158,7 +161,7 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
     }
     html += 'class="result-dups-' + result.rank + '"></div>';
 
-    $('#notes-' + result.name).after(html);
+    $('#notes-' + id).after(html);
 
 };
 
