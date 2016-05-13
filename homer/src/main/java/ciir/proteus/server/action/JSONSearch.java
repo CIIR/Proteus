@@ -134,6 +134,11 @@ public class JSONSearch implements JSONHandler {
         LogHelper.log(searchData, system);
 
         Parameters qp = Parameters.create();
+/*
+        if (resList.size() > 0){
+            qp.put("working", resList);
+        }
+*/
         qp.put("requested", numResults + skipResults);
 
         // setting this to false, otherwise #scale queries fail
@@ -169,7 +174,7 @@ public class JSONSearch implements JSONHandler {
 
         List<ScoredDocument> docs = null;
         // if we're searching using a working set
-        if (resList.isEmpty()) {
+        if ( resList.isEmpty()) {
             docs = ListUtil.drop(system.search(kind, pquery, qp), skipResults);
             if (!docs.isEmpty()) {
                 annotations = da.annotate(this.system, kind, docs, pquery, reqp);

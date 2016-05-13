@@ -5,12 +5,15 @@ import ciir.proteus.system.DocumentAnnotator;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.util.ListUtil;
+import ciir.proteus.util.QueryUtil;
 import ciir.proteus.util.logging.ClickLogHelper;
 import ciir.proteus.util.logging.LogHelper;
 import ciir.proteus.util.logging.ViewResourceLogData;
 import org.apache.logging.log4j.LogManager;
 import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
+import org.lemurproject.galago.core.retrieval.query.Node;
+import org.lemurproject.galago.core.retrieval.query.SimpleQuery;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
@@ -81,6 +84,15 @@ public class ViewResource implements JSONHandler {
     if (queryid != -1){
       query = system.userdb.getQuery(null, queryid);
       response.put("query", query);
+      // assume simple query language
+      Node tq = null;
+      try {
+        tq = SimpleQuery.parseTree(query);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      List<String> terms = QueryUtil.queryTerms(tq);
+      response.put("queryTerms", terms);
     }
 
     // get ratings

@@ -10,32 +10,27 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * @author jfoley.
+ * @author jfoley, michaelz
  */
 public class QueryUtil {
   /**
    * Quick, inline traversal to return all the text nodes in a Galago Query.
+   *
    * @param query parsed or transformed Galago query
    * @return a set of terms as a list
    */
   public static List<String> queryTerms(Node query) {
-    final HashSet<String> terms = new HashSet<>();
+    HashSet<String> terms = new HashSet<>();
 
-    walk(query, Parameters.create(), new BeforeTraversal() {
-      @Override
-      public void beforeNode(Node original, Parameters queryParameters) throws Exception {
-        if(isTextNode(original)) {
-          terms.add(original.getNodeParameters().getString("default"));
-        }
-      }
-    });
+    walk(query, Parameters.create(), new QueryTermTraversal(terms));
 
     return new ArrayList<>(terms);
   }
 
   /**
    * Walk over a query and set the preferred field accordingly.
-   * @param inputQuery a pre-transformed query
+   *
+   * @param inputQuery  a pre-transformed query
    * @param targetField the name of the field to send the query against
    */
   public static void setField(Node inputQuery, final String targetField) {
@@ -44,6 +39,7 @@ public class QueryUtil {
 
   /**
    * Some heuristics for finding "text" nodes.
+   *
    * @param node a Galago Node
    * @return true if node is terminal and operator matches
    */
@@ -53,8 +49,9 @@ public class QueryUtil {
 
   /**
    * Hide exception catching and Galago traversal API into this function.
-   * @param node the query
-   * @param qp any parameters you want to pass
+   *
+   * @param node      the query
+   * @param qp        any parameters you want to pass
    * @param traversal the traversal object / function
    * @return the modified node, if that's how you want to roll
    */
@@ -68,11 +65,53 @@ public class QueryUtil {
 
   /**
    * Neat abstract class to make inline syntax more fun; default behavior for afterNode implemented.
-   *
-   * TODO: move this into Galago core someday.
    */
-  public static abstract class BeforeTraversal extends Traversal {
+  public static class QueryTermTraversal extends Traversal {
+    boolean ordered = false;
+    boolean extents = false;
+    HashSet<String> terms = new HashSet<>();
+
+    QueryTermTraversal(HashSet<String> terms) {
+      this.terms = terms;
+    }
+
     @Override
-    public Node afterNode(Node original, Parameters queryParameters) throws Exception { return original; }
+    public void beforeNode(Node original, Parameters queryParameters) throws Exception {
+
+      // check if we're at a leaf node
+      if (original.numChildren() > 0) {
+        return;
+      }
+
+      ordered = original.getParent().getOperator().equals("ordered");
+      extents = original.getNodeParameters().get("part", "??").equals("extents");
+
+      List<Node> children = original.getParent().getInternalNodes();
+      StringBuilder tmp = new StringBuilder();
+      for (Node n : children) {
+
+        if (!isTextNode(n) || extents) {
+          continue;
+        }
+        if (ordered) {
+          if (tmp.length() > 0) {
+            tmp.append(" ");
+          }
+          tmp.append(n.getNodeParameters().getString("default"));
+
+        } else {
+          terms.add(n.getNodeParameters().getString("default"));
+        }
+      }
+      if (tmp.length() > 0) {
+        terms.add(tmp.toString());
+      }
+    }
+
+    @Override
+    public Node afterNode(Node original, Parameters queryParameters) throws Exception {
+      return original;
+    }
+
   }
 }

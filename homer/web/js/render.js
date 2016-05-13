@@ -26,7 +26,7 @@ resultRenderers["default"] = function(queryTerms, result, resDiv) {
         html += '<tr>';
         html += '<td>&nbsp;</td>';
         html += '<td class="snippet" colspan=2> ...' +
-                highlightText(queryTerms, result.snippet, '<span class="hili">', '</span>') +
+                highlightText(queryTerms, result.snippet, true) +
                 '... </td>';
         html += '</tr>';
     }
@@ -57,10 +57,10 @@ Render.makeViewLink = function(id, kind, label, rank) {
 };
 
 Render.getPagePreviewURL = function(url, title, queryTerms, rank) {
-    return '<a class="fancybox" href="' + url + '" >' + highlightText(queryTerms, title, '<span class="hili">', '</span>', 'title') + '</a>';
+    return '<a class="fancybox" href="' + url + '" >' + highlightText(queryTerms, title, true) + '</a>';
 }
 Render.getDocumentURL = function(url, title, queryTerms, rank, bImage) {
-    var html =  '<a href="' + url + '" onmousedown="return rwt(this,' + rank + ')" target="_blank">' + highlightText(queryTerms, title, '<span class="hili">', '</span>', 'title');
+    var html =  '<a href="' + url + '" onmousedown="return rwt(this,' + rank + ')" target="_blank">' + highlightText(queryTerms, title, true);
     html +=  '&nbsp;<span class="fa fa-external-link '
     if (bImage == true) {
         html += ' overimage ';

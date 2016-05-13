@@ -39,15 +39,12 @@ $.timeoutQueue = {
     }
 };
 
-var pageHeight = 0;
-var MAX_PAGE_HEIGHT = 2000;
-var MIN_PAGE_HEIGHT = 500;
-
 // this is the div we'll attach the annotation filter to.
 var noteFilterDiv = $("#metadata");
 // div for the annotation side bar
 var noteSideBarDiv = $("#note-side-bar");
 
+var queryTerms = [];
 
 var page = {
     previous: -1,
@@ -112,7 +109,7 @@ var doSearchRequest = function(args) {
     }
 
     args.overlapOnly = false;
-    if ($("#show-overlap").is(':checked')) {
+    if ($("#show-overlap").is(':checked')){
         args.overlapOnly = true;
     }
 
@@ -230,14 +227,14 @@ var onSearchSuccess = function(data) {
     // show query builder if they searched the corpus OR have a sub-corpus selected
     if (getSubcorporaElements().length > 0) {
 
-        if (UI.settings.show_unigrams) {
+        if (UI.settings.show_unigrams){
             $("#high-tf").parent().show();
             $("#high-snippettf").parent().show();
         } else {
             $("#high-tf").parent().hide();
             $("#high-snippettf").parent().hide();
         }
-        if (UI.settings.use_query_builder) {
+        if (UI.settings.use_query_builder){
             $("#query-builder-link").show();
         }
         _.forEach(data.totalTF, function(t) {
@@ -494,7 +491,7 @@ function moveDocument(data, parentIdx, dupIdx, confidence) {
     if ($("#dup-parent-" + parentIdx).length == 0) {
         $('<div id="dup-parent-' + parentIdx + '"></div>').insertBefore($(".result-dups-" + parentIdx))
     }
-    var obj = $("#" + name);
+    var obj =  $("#" + name) ;
     obj.appendTo((".result-dups-" + parentIdx));
 }
 function printMatrix(conf, count) {
@@ -520,13 +517,13 @@ var renderBookPageHTML = function(text, pageID, pageNum, el) {
     var pgTxt = text;
     var id = getBookID(pageID, pageNum);
 
-    var labelHTML = '<div id="notes-' + id + '" class="resource-labels">' + displayLabels(id) + '</div>';
+    var labelHTML = '<div id="notes-' + id + '" class="resource-labels">' + displayLabels(id) + '</div>' +
+            '<div left-align" ><span id="' + id + '-user-ratings-w-names"></span></div> <hr>';
 
     el.html('<div class="book-page row clearfix ">' +
-            '<div class="col-md-2 column left-align" ><span id="' + id + '-user-ratings-w-names"></span></div>' +
-            '<div id="' + getNotesID(pageID, pageNum) + '" class="book-text col-md-4 column left-align">' + pgTxt + labelHTML + '</div>' +
-            '<div  class="page-image col-md-4 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img src="' + pgImage + '"></a></div>' +
-            '</div>');
+    '<div id="' + getNotesID(pageID, pageNum) + '" class="book-text col-md-6 column left-align">' + pgTxt + labelHTML + '</div>' +
+    '<div  class="page-image col-md-4 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img src="' + pgImage + '"></a></div>' +
+    '</div>');
 
     setUserRatingsHTML(id);
     setVoteHTML(id);
@@ -571,16 +568,7 @@ var viewPrevPageSuccess = function(args) {
         var elid = "page-" + args.request.page_id + "_" + args.request.page_num;
         $(".book-page:first").before('<div id="' + elid + '"></div>');
 
-        renderBookPageHTML(args.text, args.request.page_id, args.request.page_num, $("#" + elid));
-
-        // ??? whole issue with this is that we don't know where to render the page in the
-        // DOM, why not put in a placeholder THEN renderBookPageHTML can  do the substitution?????
-
-
-        if ($(".book-page:first").height() > pageHeight && $(".book-page:first").height() < MAX_PAGE_HEIGHT) {
-            pageHeight = $(".book-page:first").height();
-        }
-        $(".page-image").height(pageHeight);
+        renderBookPageHTML(highlightText(queryTerms, args.text, false), args.request.page_id, args.request.page_num, $("#" + elid));
 
     }
     page.previous -= 1;
@@ -640,8 +628,8 @@ Annotator.Plugin.NoteEvent = function(element, reorderAll) {
                     noteFilterDiv.trigger("noteUpdate");
                     noteSideBarDiv.trigger("noteViewerDeleteteEventName", annotation);
                 })
-                // these events are triggered from the note side bar and
-                // are forwarded to the page.
+            // these events are triggered from the note side bar and
+            // are forwarded to the page.
                 .subscribe("myannotationUpdated", function(annotation) {
                     that.annotator.updateAnnotation(annotation);
                 })
@@ -783,12 +771,8 @@ var viewNextPageSuccess = function(args) {
 
         // find the last instance of the "book-page" class and append to that:
         $(".book-page:last").after('<div id="' + elid + '"></div>');
-        var html = renderBookPageHTML(args.text, args.request.page_id, args.request.page_num, $("#" + elid));
+        var html = renderBookPageHTML(highlightText(queryTerms, args.text, false), args.request.page_id, args.request.page_num, $("#" + elid));
 
-        if ($(".book-page:last").height() > pageHeight && $(".book-page:last").height() < MAX_PAGE_HEIGHT) {
-            pageHeight = $(".book-page:last").height();
-        }
-        $(".page-image").height(pageHeight);
     }
     page.next += 1;
     setPageNavigation(args.request.page_id);
@@ -896,11 +880,11 @@ var onViewPageSuccess = function(args) {
     var elid = "page-" + args.request.id;
     $("#book-pages").html('<div id="' + elid + '"></div>');
 
-    html += renderBookPageHTML(args.text, identifier, pageNum, $("#" + elid));
-
-    // base the page size on the first page
-    pageHeight = Math.max(MIN_PAGE_HEIGHT, $(".book-text").height());
-    $(".page-image").height(pageHeight);
+    queryTerms = [];
+    if (!_.isUndefined(args.queryTerms)){
+        queryTerms = args.queryTerms;
+    }
+    html +=   renderBookPageHTML(highlightText(queryTerms, args.text, false), identifier, pageNum, $("#" + elid));
 
     //  viewResourceDiv.html(html);
     setPageNavigation(pageID);
@@ -923,7 +907,7 @@ var onViewPageSuccess = function(args) {
             if ($(note).length) {
 
                 $('#results-right').animate({
-                    scrollTop: $(note).offset().top - 80
+                    scrollTop: $(note).offset().top - 100
                 }, 2000);
 
             } else {

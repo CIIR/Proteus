@@ -93,6 +93,7 @@ public class H2Database implements UserDatabase {
     try {
       conn = getConnection();
       // NOTE: H2 will automatically create an index on any foreign keys.
+
       conn.createStatement().executeUpdate("create table IF NOT EXISTS users (ID BIGINT NOT NULL IDENTITY, EMAIL VARCHAR(" + Users.UserEmailMaxLength + ") NOT NULL, settings VARCHAR(200) NOT NULL DEFAULT '{ \"num_entities\" : 10 }', PRIMARY KEY (ID))");
       conn.createStatement().executeUpdate("create unique index IF NOT EXISTS user_uniq_email_idx on users(email)");
 

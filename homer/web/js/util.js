@@ -102,7 +102,7 @@ var getCookie = function(cname) {
 var getUser = function() {
     return getCookie("username")
 }
-var highlightText = function(queryTerms, text, beforeTag, afterTag, stripPunctuation) {
+var highlightText = function(queryTerms, text, stripPunctuation) {
 
     if (_.isUndefined(stripPunctuation)) {
         stripPunctuation = true;
@@ -120,14 +120,14 @@ var highlightText = function(queryTerms, text, beforeTag, afterTag, stripPunctua
         text = text.toString().replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g, "");
     }
 
-    var words = text.split(/\s/);
+    // inspired by: http://jsfiddle.net/FutureWebDev/HfS7e/
+    _.each(queryTerms, function(term){
+        var query = new RegExp("(\\b" + term + "\\b)", "gim");
+        text = text.replace(query, '<span class="hili">$1</span>');
+    });
 
-    return _(words).map(function(word) {
-        if (_.contains(queryTerms, word.toLowerCase())) {
-            return beforeTag + word + afterTag;
-        }
-        return word;
-    }).join(' ');
+    return text;
+
 };
 
 
@@ -820,6 +820,10 @@ function labelClick(that, subcorpus_id, res, kind) {
         console.log("voted!")
         var delta = 0;
         if (action == "add") {
+            if (_.isUndefined(votingJSON.document[res])) {
+                votingJSON.document[res] = {};
+            }
+
             if (_.isUndefined(votingJSON.document[res][userName])) {
                 votingJSON.document[res][userName] = {};
             }

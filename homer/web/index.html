@@ -138,7 +138,7 @@
                     // that would get cleared out.
                     resultsDiv = $("#results");
                     UI.clearResults();
-                    UI.appendResults(Model[savedData.request.kind].queryTerms, savedData.results);
+                    UI.appendResults(Model[savedData.request.kind].queryTerms, savedData.results, savedData.queryid);
                     renderDups(savedData);
                 },
                 slide: function (event, ui) {

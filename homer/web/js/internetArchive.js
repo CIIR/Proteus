@@ -119,7 +119,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
 
     if (snippet) {
         html += '<tr><td class="snippet" colspan="3"> ...';
-        html += highlightText(queryTerms, snippet, '<span class="hili">', '</span>');
+        html += highlightText(queryTerms, snippet, false);
         html += '... </td></tr>';
 
         // only get uniq word if we haven't seen it before - this will be used later
@@ -145,7 +145,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
         noteHTML += '<div class="resource-notes" ><a target="_blank" href="../view.html?kind=ia-pages&action=view&id=' + note.uri + '&noteid=' + note.id + '"><b>';
         // remove any <br> tags, they make the note look odd in the results list
         noteHTML += note.user.split('@')[0] + ' : <i>' + note.text.replace(/<br>/g, " ") + '</i></b> : ';
-        noteHTML += highlightText(queryTerms, note.quote.replace(/<br>/g, " "), '<span class="hili">', '</span>');
+        noteHTML += highlightText(queryTerms, note.quote.replace(/<br>/g, " "),   false);
         noteHTML += '</a></div>';
     })
 
@@ -214,7 +214,7 @@ var renderNoteResult = function(queryTerms, result, resDiv) {
     if (snippet) {
         html += '<td class="snippet">';
         html += '<div  ><a target="_blank" href="../view.html?kind=ia-pages&action=view&id=' + idParts[0] + '_' + idParts[1] + '&noteid=' + idParts[2] + '">';
-        html += highlightText(queryTerms, snippet, '<span class="hili">', '</span>', false); // last param says not to strip out punctuation
+        html += highlightText(queryTerms, snippet, false); // last param says not to strip out punctuation
         html += '</a></td>';
     }
     html += '<td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td>' + '</tr>';

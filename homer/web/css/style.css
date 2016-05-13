@@ -448,15 +448,6 @@ body {
     display:block;
 }
 
-#view-nav-top{
-    padding-bottom: 20px;
-    display: block;
-}
-
-#view-nav-bottom{
-    padding-top: 20px;
-    display: block;
-}
 
 #ui-go-settings{
     float: right;
@@ -765,4 +756,8 @@ border-radius: 5px;
     pointer-events: auto;
     cursor: pointer;
     color: grey;
+}
+span-highlight{
+    background-color: yellow;
+    font-weight: bold;
 }
