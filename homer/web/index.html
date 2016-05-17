@@ -269,7 +269,7 @@
                 _.forEach($('span.term-check-mark'), function (t) {
                     $(t).removeClass("term-check-mark");
                 });
-                $("#ui-search").val('');
+                $("#query-builder-query").html('');
             });
 
             if (!_.isUndefined(localStorage["pub-years"])) {
@@ -471,7 +471,7 @@
         <div id="show-corpus-terms">
             <fieldset>
                 <legend>Build a query</legend>
-                <button type="button" id="clear-all-terms" class="btn btn-xs ">Clear All</button>
+                <button type="button" id="clear-all-terms" class="btn btn-xs ">Clear All</button><span id="query-builder-query"></span>
                 <div class="query-terms-area"><b>Terms (whole documents):</b>
                     <span class="query-term-buttons" id="high-tf"></span></div>
                 <div class="query-terms-area"><b>Terms (document snippets):</b>
