@@ -908,7 +908,7 @@ function termClick(that) {
 
     })
 
-    $("#ui-search").val(query);
+    $("#query-builder-query").html('<a target="_BLANK" href="index.html?action=search&kind=all&q=' + encodeURI(query) + '">' + query + '</a>');
 }
 
 function labelClickComment(that, subcorpus_id) {
