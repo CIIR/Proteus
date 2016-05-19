@@ -560,10 +560,10 @@ UI.checkSettings = function(){
         UI.settings.show_found_with_query = false;
     }
     if (_.isUndefined(UI.settings.show_unigrams)) {
-        UI.settings.show_unigrams = false;
+        UI.settings.show_unigrams = true;
     }
     if (_.isUndefined(UI.settings.use_query_builder)) {
-        UI.settings.use_query_builder = true;
+        UI.settings.use_query_builder = false;
     }
 
     document.cookie = "settings=" + JSON.stringify(UI.settings) + ";";
