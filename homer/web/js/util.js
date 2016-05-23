@@ -103,6 +103,9 @@ var getUser = function() {
     return getCookie("username")
 }
 var highlightText = function(queryTerms, text, stripPunctuation) {
+    if (_.isUndefined(text)) {
+        return;
+    }
 
     if (_.isUndefined(stripPunctuation)) {
         stripPunctuation = true;
