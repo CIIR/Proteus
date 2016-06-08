@@ -279,48 +279,6 @@ public class lsfstageexecutor extends CheckpointedStageExecutor {
 	    System.out.print(" " + path1);
 	}
 	System.out.print("'\n");
-	
-        // // Create the fill a DRMAA job template.
-        // JobTemplate template = session.createJobTemplate();
-        // template.setJobName("galago-" + stageName + "-" + i);
-        // template.setRemoteCommand(command);
-        // template.setArgs(Arrays.asList(arguments));
-        // template.setOutputPath(":" + temporary + File.separator
-        //         + "stdout");
-        // template.setErrorPath(":" + temporary + File.separator
-        //         + "stderr");
-
-        // // If the user wants the jobs submitted to a particular
-        // // queue, set that here.
-        // if (jobPaths.size() == 1) {
-        //   // if there's only one job - long queue
-        //   if (nativeSpecification_combined.length() > 0) {
-        //     template.setNativeSpecification(nativeSpecification_combined);
-        //   }
-        // } else {
-        //   // otherwise use the short queue
-        //   if (nativeSpecification_each.length() > 0) {
-        //     template.setNativeSpecification(nativeSpecification_each);
-        //   }
-        // }
-
-        // // Run the job.
-        // String id = session.runJob(template);
-        // int status = session.getJobProgramStatus(id);
-        // if (status == Session.FAILED) {
-        //   System.err.println("ERROR: Job failed! [" + stageName
-        //           + "-" + i + "]");
-        // }
-
-        // // Keep track of the job id.
-        // jobs.add(id);
-        // jobCheckpoints.put(id, new File(jobPaths.get(i) + ".complete"));
-
-        // startTimes.put(id, System.currentTimeMillis()); // for tracking
-
-        // // Clean up.
-        // session.deleteJobTemplate(template);
-
     } catch (Exception e) {
 	System.err.println("Problems submitting jobs: " + e.getMessage());
 	return new DRMAAResult(stageName, jobs, jobCheckpoints, null, e);
