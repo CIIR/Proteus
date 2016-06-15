@@ -38,7 +38,7 @@ public class ViewResource implements JSONHandler {
   }
 
   @Override
-  public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DBError {
+  public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DBError, IOException {
     assert(reqp.getString("action").equals("view"));
     String docId = reqp.getString("id");
     if(!reqp.isString("kind")) {
@@ -104,6 +104,12 @@ public class ViewResource implements JSONHandler {
     Parameters labels = Parameters.create();
     labels = system.userdb.getResourceRatings2(doc.name, reqp.getInt("corpusID"));
     response.copyFrom(labels);
+
+    // get any notes associated with the book
+    String bookid = doc.name.split("_")[0];
+    Parameters notes = Parameters.create();
+    notes = system.userdb.getNotesForBook(bookid, reqp.getInt("corpusID"));
+    response.put("bookNotes", notes);
 
     return response;
   }

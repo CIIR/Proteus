@@ -125,6 +125,8 @@ var highlightText = function(queryTerms, text, stripPunctuation) {
 
     // inspired by: http://jsfiddle.net/FutureWebDev/HfS7e/
     _.each(queryTerms, function(term){
+  //      var query = new RegExp("(\\b" + term + "\\b)", "gim");
+        // \b(\w+(?![^<>]*>))\b
         var query = new RegExp("(\\b" + term + "\\b)", "gim");
         text = text.replace(query, '<span class="hili">$1</span>');
     });

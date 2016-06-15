@@ -48,15 +48,15 @@ UI.generateButtons = function() {
             // see if we're the default button - unless there's already a "kind" on the URL. If they're
             // clicking on an entity it'll re-trigger this logic and we want to keep the current "kind" we
             // do not want to rest the search button to be the default
-           if ((!_.isUndefined(currentKind) && currentKind == kind) || (_.isUndefined(currentKind) && kind === UI.defaultKind)) {
-               $('#search-rb input[value=' + kind + ']').attr('checked',true);
-               $("#search-rb").click(function() {
-                   UI.onClickSearchButton(spec.kind, spec.button);
-               });
+            if ((!_.isUndefined(currentKind) && currentKind == kind) || (_.isUndefined(currentKind) && kind === UI.defaultKind)) {
+                $('#search-rb input[value=' + kind + ']').attr('checked', true);
+                $("#search-rb").click(function() {
+                    UI.onClickSearchButton(spec.kind, spec.button);
+                });
             }
 
         });
-     });
+    });
 
 };
 
@@ -86,7 +86,7 @@ UI.getQuery = function() {
 UI.setQuery = function(q) {
     queryBox.val(q);
     // show the "x" if there is something in the search input (helpful if they refresh)
-    if (q != ''){
+    if (q != '') {
         $('.form-control-clear').toggleClass('hidden', false);
     }
 };
@@ -156,7 +156,7 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
         html += '<div id="page-results-' + name + '"></div>';
     }
     html += '<div ';
-    if (UI.settings.show_dups == false){
+    if (UI.settings.show_dups == false) {
         html += 'style="display: none;" ';
     }
     html += 'class="result-dups-' + result.rank + '"></div>';
@@ -167,7 +167,6 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
 
 UI.appendResults = function(queryTerms, results, queryid) {
 
-    //UI.showProgress("Ajax response received!");
     _(results).forEach(function(result) {
         UI.renderSingleResult(result, queryTerms, false, queryid);
     });
@@ -471,7 +470,7 @@ UI.toggleNotes = function(noteDivID) {
     $('#notes-div-' + noteDivID).toggle();
     var html = '';
 
-    if ($('#notes-div-' + noteDivID).is(":visible") == true){
+    if ($('#notes-div-' + noteDivID).is(":visible") == true) {
         html = '<span class="glyphicon glyphicon-collapse-up"></span>&nbsp;Hide notes&nbsp;</span>';
     } else {
         html = '<span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show notes&nbsp;</span>';
@@ -491,14 +490,14 @@ UI.setDupLinkHTML = function(rank) {
     var upOrDown = 'down';
     var showOrHide = 'Show';
 
-    if ($(".result-dups-" + rank).is(":visible")){
-         upOrDown = 'up';
-         showOrHide = 'Hide';
+    if ($(".result-dups-" + rank).is(":visible")) {
+        upOrDown = 'up';
+        showOrHide = 'Hide';
     }
 
-    var html = '<a href="#" onclick="UI.toggleDups(\'result-dups-' + rank + '\',' +  rank + ');">';
+    var html = '<a href="#" onclick="UI.toggleDups(\'result-dups-' + rank + '\',' + rank + ');">';
     html += '<span class="glyphicon glyphicon-collapse-' + upOrDown + '"></span>';
-    html += '&nbsp;' + showOrHide + ' duplicates&nbsp;(' + $(".result-dups-" + rank + " .dup-result" ).length + ')&nbsp;<span class="fa fa-files-o"></span></a>'
+    html += '&nbsp;' + showOrHide + ' duplicates&nbsp;(' + $(".result-dups-" + rank + " .dup-result").length + ')&nbsp;<span class="fa fa-files-o"></span></a>'
     $("#dup-parent-" + rank).html(html);
 
 }
@@ -517,38 +516,38 @@ UI.onClickSubcorpus = function() {
     UI.onClickSearchButton();
 }
 
-UI.enableSearchButtons = function(state){
-    $('input[name=search-kind]').attr('disabled',!state);
-    $('#facets input[type=checkbox]').attr('disabled',!state);
-    $('#clear-all-facets').attr('disabled',!state);
-    $('#show-overlap').attr('disabled',!state);
+UI.enableSearchButtons = function(state) {
+    $('input[name=search-kind]').attr('disabled', !state);
+    $('#facets input[type=checkbox]').attr('disabled', !state);
+    $('#clear-all-facets').attr('disabled', !state);
+    $('#show-overlap').attr('disabled', !state);
     // only enable the overlap button if at least on subcorpus is selected
-    if (getSubcorporaElements().length == 0){
-        $('#show-overlap').attr('checked',false);
-        $('#show-overlap').attr('disabled',true);
+    if (getSubcorporaElements().length == 0) {
+        $('#show-overlap').attr('checked', false);
+        $('#show-overlap').attr('disabled', true);
     }
 }
 
 /*
+ 
+ UI.showOverlap = function( ){
+ if ($("#show-overlap").is(':checked')){
+ $(".result").hide();
+ 
+ $('.result').each(function () {
+ var ar = this.id;
+ 
+ if (Object.keys($('#' + ar).data("new-labels")).length > 1){
+ $('#' + ar).show();
+ }
+ });
+ } else {
+ $(".result").show();
+ }
+ };
+ */
 
-UI.showOverlap = function( ){
-    if ($("#show-overlap").is(':checked')){
-        $(".result").hide();
-
-        $('.result').each(function () {
-            var ar = this.id;
-
-            if (Object.keys($('#' + ar).data("new-labels")).length > 1){
-                $('#' + ar).show();
-            }
-        });
-    } else {
-        $(".result").show();
-    }
-};
-*/
-
-UI.checkSettings = function(){
+UI.checkSettings = function() {
     // makse sure we have defaults
     if (_.isUndefined(UI.settings.show_dups)) {
         UI.settings.show_dups = false;
@@ -570,7 +569,7 @@ UI.checkSettings = function(){
 }
 
 
-function clearQueryBuilder(){
+function clearQueryBuilder() {
     $("#query-builder-link").hide();
     $("#show-corpus-terms").hide();
     $(".query-term-buttons").html(''); // clear any prior terms

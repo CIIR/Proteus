@@ -24,7 +24,7 @@ Annotator.Plugin.ProteusAnnotationFilter = (function (superClass) {
 
   ProteusAnnotationFilter.prototype.options = {
 
-    searchArea: '#results-right',
+    searchArea: '#ocr-results-right',
     appendTo: 'body',
     filters: [],
     addAnnotationFilter: true,

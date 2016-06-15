@@ -98,6 +98,8 @@ public class DocumentAnnotator {
     for (String field : noteFields) {
       tagTokenizer.addField(field);
     }
+    tagTokenizer.addField("div");
+
 
     // result data
     ArrayList<Parameters> resultData = new ArrayList<>(results.size());
@@ -149,6 +151,33 @@ public class DocumentAnnotator {
         snippetTerms = ListUtil.slice(doc.terms, snippetBegin, snippetEnd);
         String snippet = (Utility.join(snippetTerms, " "));
 
+        // If this is a book, find the page within the book that the
+        // snippet is on via the start offset of the snippet. There is no
+        // harm calling this on non-books, it'll just return an empty string.
+        // TODO - should do a binary search for this
+        /// for now, we'll just do a brain dead search for the page that contains the snippet.
+
+        // for books, snippets can cross pages so we'll use the page that contains the largest
+        // part of the snippet.
+        String pg ="";
+        // page breaks are <div> tags
+        for (Tag t : doc.tags){
+          if (t.name.equals("div")){
+
+            if ( snippetBegin <= t.end ){
+              Integer termsOnPage = t.end - snippetBegin;
+              Integer termsOnNextPage = snippetEnd - t.end;
+              if (termsOnNextPage > termsOnPage){
+                continue; // use the next page
+              }
+              pg = t.attributes.get("page");
+              break;
+            }
+
+          }
+        }
+
+        docp.put("snippetPage", pg);
         docp.put("snippet", snippet);
 
       } // end if snippet

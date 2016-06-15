@@ -6,15 +6,6 @@
  *
  */
 
-
-var bookImage = function(archiveId) {
-    return pageImage(archiveId, "0");
-}
-
-var bookThumbnail = function(archiveId) {
-    return pageThumbnail(archiveId, "0");
-}
-
 var pageImage = function(archiveId, pageNum) {
     return "http://www.archive.org/download/" + encodeURIComponent(archiveId) + "/page/n" + pageNum + ".jpg";
 };
@@ -23,11 +14,15 @@ var pageThumbnail = function(archiveId, pageNum) {
     return "http://www.archive.org/download/" + encodeURIComponent(archiveId) + "/page/n" + pageNum + "_thumb.jpg";
 };
 
-//console.log("Defining table, renderResult=" + renderResult);
+var archiveViewerURL = function(archiveId, pageNum) {
+    return 'https://archive.org/stream/' + archiveId + '#page/n' + pageNum + '/mode/2up';
+};
+
 var renderResult = function(queryTerms, result, resDiv, queryid) {
 
     var name = result.meta.title || result.meta.TEI || result.name;
     var identifier = result.name.split('_')[0];
+    var docid = result.name;
     var snippet = result.snippet;
     var pageNum = result.name.split('_')[1];
     var iaURL = result.meta["identifier-access"];
@@ -38,13 +33,18 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     }
     var pgImage = iaURL;
     var kind = 'ia-books'; // default
+
+    // if this is a book result - show the front page as the thumbnail but the links will
+    // go to the max passage page.
+
     var thumbnail = '<img class="ia-thumbnail" src="' + pageThumbnail(identifier, pageNum) + '"/>';
+
     var previewImage = Render.getDocumentURL(pgImage, thumbnail, queryTerms, result.rank, true);
 
     if (!_.isUndefined(pageNum)) {
         kind = 'ia-pages';
         // if page result - make the link go to the page
-        nameLink = Render.getDocumentURL('https://archive.org/stream/' + identifier + '#page/n' + pageNum + '/mode/2up', name, queryTerms, result.rank);
+        nameLink = Render.getDocumentURL(archiveViewerURL(identifier, pageNum), name, queryTerms, result.rank);
 
         // MCZ : removing page number for now as it does not match up with
         // the physical page number shown on the page
@@ -59,6 +59,10 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
                 return renderNoteResult(queryTerms, result, resDiv);
             }
         }
+    }
+    if (kind == 'ia-books' && !_.isUndefined(result.snippetPage) ){
+        docid = identifier + "_" + result.snippetPage;
+        nameLink = Render.getDocumentURL(archiveViewerURL(identifier, result.snippetPage), name, queryTerms, result.rank);
     }
 
     var tmphtml = '';
@@ -95,26 +99,16 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
         });
     } // end if we have entities
 
-
-    // var func = "recordSwipe('" + result.name + "', $('#" + result.name + "').data('metadata'),$('#" + result.name + "').data('kind'),"
-    var html =
-            '<table>' +
-            '<tr>';
-    //    }
+    var html =  '<table><tr>';
 
     html += '<td class="preview" rowspan="3">' + previewImage + '</td>' +
-            '<td class="name">' + nameLink + '&nbsp;(<a target="_blank" href="view.html?kind=' + kind + '&action=view&id=' + result.name + '&queryid=' + queryid + '">view OCR</a>)&nbsp;'
+            '<td class="name">' + nameLink + '&nbsp;(<a target="_blank" href="view.html?kind=ia-pages&action=view&id=' + docid + '&queryid=' + queryid + '">view OCR</a>)&nbsp;'
 
     // store the ratings with names but keep it hidden, we'll use this on hover to display the users and
     // their ratings on the left hand side of the screen.
     html += '<span id="' + result.name + '-user-ratings"></span><span  style="display:none" id="' + result.name + '-user-ratings-w-names"></span>';
-
     html += '<span class="highlight" id="' + result.name + '-dup-confidence"></span>';
-
-    html += '</td></div></td>' +
-            '<td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td>'; // + '&nbsp;&nbsp;&nbsp;score: ' + Math.exp(result.score) + '</td> ' +
-    '</tr>';
-
+    html += '</td></div></td><td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td></tr>';
     html += '<tr  class="author" ><td>' + result.meta.creator + '&nbsp;•&nbsp;published: ' + result.meta.date + '</td></tr>';
 
     if (snippet) {
@@ -131,13 +125,8 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
 
     } // end if snippet
 
-    //    html += '<tr><td>Search pages in this book...</td></tr>';
-
     html += '</table>';
     html += tmphtml;
-    //    if (result.tags) {
-    //        html += UI.renderTags(result);
-    //    }
 
     // show notes
     var noteHTML = '';
@@ -177,13 +166,11 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
         if (queries.length > 1) {
             html += '<div class="resource-query" >Found with queries: ' + queries.join(', ').toString() + '</div>';
         }
-
     }
 
     // show labels
     // TODO change notes to labels or subcorpus
     html += '<div id="notes-' + result.name + '" class="resource-labels" >' + displayLabels(result.name) + '</div>';
-
 
     resDiv.html(html);
 

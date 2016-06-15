@@ -115,6 +115,8 @@ public interface UserDatabase {
 
     public Parameters getNotesForCorpus(Integer corpusID) throws DBError, IOException;
 
+    public Parameters getNotesForBook(String bookID, Integer corpusID) throws DBError, IOException;
+
     public String getQuery(Credentials creds, Integer queryID) throws DBError;
 
     public Integer insertQuery(Credentials creds, Integer corpusID, String query, String kind) throws DBError;

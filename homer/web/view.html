@@ -76,6 +76,7 @@
         <script src="js/ProteusAnnotationFilter.js"></script>
         <script src="js/annotator_viewer.js"></script>
 
+
         <script>
 
             var showSideBarFlag = true;
@@ -91,14 +92,29 @@
 
                 // if not logged in, hide the user info
                 if (isLoggedIn() == false) {
+                    $("body").css("cursor", "default");
                     document.write('<a href="index.html">Please log in first</a>');
                     return;
                 }
 
                 $(".fancybox").fancybox();
 
-               // $("#corpus-name").html("Corpus: " + getCookie("corpus"));
                 getResourcesForCorpus();
+
+                $.fn.is_on_screen = function(){
+                    var bounds = this.position();
+                    if (bounds.top < 0){
+                        return false;
+                    }
+                    var win = $("#ocr-results-right");
+
+                    if ( bounds.top  < win.height()){
+                        return true;
+                    }
+
+                    return false;
+
+                };
 
             });
 
@@ -141,7 +157,7 @@
 
         </div>
 
-        <div id="results-right" class="col-md-10 column right-align">
+        <div id="ocr-results-right" class="col-md-10 column right-align">
             <div id="metadata"></div>
             <div id="note-side-bar"></div>
             <div id="view-resource">
@@ -159,7 +175,7 @@
         <script src="js/ui.js"></script>
         <script src="js/actions.js"></script>
         <script src="js/main.js"></script>
-
+        <!--<script src="js/jquery.appear.js"></script>-->
 
     </body>
 </html>

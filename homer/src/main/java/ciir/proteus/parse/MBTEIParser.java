@@ -34,7 +34,7 @@ public abstract class MBTEIParser extends DocumentStreamParser {
   protected XMLStreamReader xml;
   protected final DocumentSplit split;
   protected Map<String, String> metadata;
-  private int pageIndex = -1;
+  private Integer pageIndex = -1;
 
   abstract public Document nextDocument() throws IOException;
 
@@ -254,7 +254,11 @@ public abstract class MBTEIParser extends DocumentStreamParser {
           }
         } else if ("pb".equals(tag)) {
 
-          pageIndex++;
+          String pgno = xml.getAttributeValue(null, "n");
+
+         pageIndex++;
+//           pageIndex = Integer.parseInt(pgno);
+//          System.out.println("Page: " + pgno + " : " +  pageIndex.toString());
           if (!empty) {
             break;
           }

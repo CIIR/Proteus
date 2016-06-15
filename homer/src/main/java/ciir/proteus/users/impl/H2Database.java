@@ -1276,6 +1276,44 @@ public class H2Database implements UserDatabase {
   }
 
   @Override
+  public Parameters getNotesForBook(String bookID, Integer corpusID) throws DBError, IOException {
+
+    Integer noteCount = 0;
+    Parameters rows = Parameters.create();
+    List<Parameters> notes = new ArrayList<>();
+
+    Connection conn = null;
+    try {
+      conn = getConnection();
+
+      PreparedStatement sql = conn.prepareStatement("SELECT DISTINCT resource FROM notes WHERE resource LIKE CONCAT(?, '\\_%') AND corpus_id = ?");
+
+      sql.setString(1, bookID );
+      sql.setInt(2, corpusID);
+
+      ResultSet tuples = sql.executeQuery();
+      while (tuples.next()) {
+        noteCount++;
+        Parameters pg = Parameters.create();
+        pg.set("page", tuples.getString(1));
+        notes.add(pg);
+      }
+      tuples.close();
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } finally {
+      attemptClose(conn);
+    }
+
+    Parameters results = Parameters.create();
+    results.put("rows", notes);
+    results.put("total", noteCount);
+
+    return results;
+  }
+
+  @Override
   public void deleteNote(Credentials creds, Integer id, Integer corpusID) throws DBError {
     //checkSession(creds);
 

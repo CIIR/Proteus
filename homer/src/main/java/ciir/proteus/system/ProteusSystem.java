@@ -14,6 +14,7 @@ import org.lemurproject.galago.core.retrieval.RetrievalFactory;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.core.retrieval.processing.MaxPassageFinder;
 import org.lemurproject.galago.core.retrieval.query.Node;
+import org.lemurproject.galago.core.tokenize.Tokenizer;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.File;
@@ -120,7 +121,11 @@ public class ProteusSystem {
       docOpts.text = text;
       docOpts.tokenize = text;
       docOpts.metadata = metadata;
-      return getRetrieval(kind).getDocuments(names, docOpts);
+      Retrieval r =  getRetrieval(kind); //
+      TagTokenizer t = (TagTokenizer) r.getTokenizer();// .getDocuments(names, docOpts);
+      t.addField("div");
+
+      return r.getDocuments(names, docOpts);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

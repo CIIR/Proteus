@@ -77,7 +77,7 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
     that = this
     // only load the panel once
     if (($("#annotations-panel").length == 0)) {
-      $("#results-right").append(this.createAnnotationPanel());
+      $("#ocr-results-right").append(this.createAnnotationPanel());
       $(".container-anotacions").toggle();
       $("#annotations-panel").click(function (event) {
         $(".container-anotacions").toggle("slide");
@@ -117,7 +117,7 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
       return a.id;
     });
 
-    console.log("number of annotations: " + annotations.length)
+    //console.log("number of annotations: " + annotations.length)
     // put the notes back
     _.forEach(annotations, function (a) {
       that.createReferenceAnnotation(a);
@@ -394,7 +394,7 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
         elOffset = $element.offset();
         $("#annotation-" + annotation.id).children(".annotator-marginviewer-quote").toggle();
 
-        var area = $('#results-right');
+        var area = $('#ocr-results-right');
         area.animate({
           scrollTop: $("span[data-annotation-id=" + annotation.id + "]").offset().top - 60 - (area.offset().top - area.scrollTop())
         }, 150);

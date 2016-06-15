@@ -59,6 +59,9 @@
     <script src="js/acmdl.js"></script>
     <script src="js/tag-it.js" type="text/javascript" charset="utf-8"></script>
 
+    <script src="js/logging.js"></script>
+    <script src="js/socket.io.js"></script>
+
     <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="css/style.css" type="text/css"/>
 
@@ -300,6 +303,39 @@
                 lastChecked = this;
             });
 
+            <!-- ----------------------------------------------------- -->
+            var host = 'localhost'
+
+            var socket = io.connect(host + ':' + 9092);
+
+            socket.on('connect', function () {
+                output('<span class="connect-msg">Client has connected to the server!</span>');
+            });
+
+            socket.on('ProteusEvent', function (data) {
+
+                var msg = convertJSONtoHTML(data.message)
+                output(msg);
+
+                // check if we're displaying this type of message
+//                showHideUser();
+//                hideMsgs();
+
+            });
+
+            socket.on('disconnect', function () {
+                output('<span class="disconnect-msg">The client has disconnected!</span>');
+            });
+
+            function sendDisconnect() {
+                socket.disconnect();
+            }
+
+            function output(message) {
+
+                var element = $("<div>" + message + "</div>");
+                $('#activity').prepend(element);
+            }
         });</script>
 
 
@@ -434,6 +470,7 @@
                <input type="checkbox" name="hide-dups" value="4">&nbsp;Hide possible duplicates
            </div>-->
     </fieldset>
+
 
     <!--   <fieldset>
            <legend>Publication Date</legend>

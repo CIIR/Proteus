@@ -70,3 +70,17 @@ person  {
 .book-text{
     padding-left: 30px;
 }
+
+.page-place-holder {
+    padding-top: 200px;
+    padding-bottom: 200px;
+}
+#ocr-results-right {
+
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    overflow-y: scroll;
+
+}

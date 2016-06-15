@@ -667,10 +667,10 @@ public class UserDatabaseTest {
     results = db.getResourcesForCorpus(cred.userid, corpus1, -1, -1) ;
     assertArrayEquals(new String[]{res1, res3}, results.toArray());
 
-    results = db.getResourcesForCorpus( cred.userid, corpus1, 2, 1) ;
+    results = db.getResourcesForCorpus(cred.userid, corpus1, 2, 1) ;
     assertArrayEquals(new String[]{res3}, results.toArray());
 
-    results = db.getResourcesForCorpus( cred.userid, corpus1, 20, 10) ;
+    results = db.getResourcesForCorpus(cred.userid, corpus1, 20, 10) ;
     assertEquals(0, results.toArray().length);
 
     results = db.getResourcesForCorpus( cred.userid, corpus2, -1, -1) ;
@@ -683,7 +683,7 @@ public class UserDatabaseTest {
     assertArrayEquals(new String[]{res1, res3}, results.toArray());
 
     // now give it a non-zero so it'll be returned
-    db.addVoteForResource(cred, res2, corpus1,  subcorpus1, queryid1);
+    db.addVoteForResource(cred, res2, corpus1, subcorpus1, queryid1);
 
     results = db.getResourcesForCorpus( cred.userid, corpus1, -1, -1) ;
     assertArrayEquals(new String[]{res1, res2, res3}, results.toArray());
@@ -845,6 +845,67 @@ public class UserDatabaseTest {
     arr = notes.getAsList("rows");
 
     assertTrue(arr.contains(data_abc));
+
+  }
+
+
+  @Test
+  public void getNotesForBookTest() throws DBError, IOException, SQLException {
+    String user = "new-user";
+    db.register(user);
+    Parameters p = db.login(user);
+
+    Credentials cred = new Credentials(p);
+
+    db.createCorpus("a", "user");
+    db.createCorpus("b", "user");
+    Integer corpus1 = 1;
+    Integer corpus2 = 2;
+
+    // no notes for a book
+    Parameters notes = db.getNotesForBook("i do not exist", corpus1);
+    assertEquals(0, notes.get("total", -1));
+
+    // add notes for a book
+    String resource = "res1";
+    Integer id = db.insertNote(cred, corpus1, resource + "_1", "{ \"data\": \"a\" }");
+    assertEquals(id.longValue(), 1L);
+    id = db.insertNote(cred, corpus1, resource + "_1", "{ \"data\": \"b\" }");
+    // add another note for this book
+    id = db.insertNote(cred, corpus1, resource + "_5", "{ \"data\": \"c\" }");
+
+    // add a resource that tests that we escapte the '_' in the SQL "like" statement
+    // so it does not act like a wild card.
+    id = db.insertNote(cred, corpus1, resource + "12", "{ \"data\": \"nomatch\" }");
+
+    // add note for a different book
+    String resource2 = "res2";
+    id = db.insertNote(cred, corpus1, resource2 + "_1", "{ \"data\": \"d\" }");
+
+    notes = db.getNotesForBook(resource, corpus1);
+    assertEquals(2, notes.get("total", -1));
+    List<Parameters> arr = notes.getAsList("rows");
+
+    // we can't be sure of the order, so check all
+    Parameters data_a = Parameters.create();
+    data_a.put("page", resource + "_1");
+    Parameters data_c = Parameters.create();
+    data_c.put("page", resource + "_5");
+    Parameters data_d = Parameters.create();
+    data_d.put("page", resource2 + "_1");
+
+    assertTrue(arr.contains(data_a));
+    assertTrue(arr.contains(data_c));
+
+    // check for same book, different corpus
+    notes = db.getNotesForBook(resource, corpus2);
+    assertEquals(0, notes.get("total", -1));
+
+    // check different book
+    notes = db.getNotesForBook(resource2, corpus1);
+    assertEquals(1, notes.get("total", -1));
+    arr = notes.getAsList("rows");
+    assertTrue(arr.contains(data_d));
 
   }
 

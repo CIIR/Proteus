@@ -53,6 +53,11 @@ body {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
   text-align: center;
   margin: 0 auto;
+
+    /* MCZ changed/added so the scroll bar is not obscured*/
+    left: -97px !important;
+    height: 40px !important;
+
 }
 
  .annotator-hl-errata {
@@ -110,10 +115,12 @@ body {
 .annotations-list-uoc {
     position: fixed;
     top: 7em;
-    right: 1em;
     height:95%;
     z-index: 100;
-
+    /* MCZ changed/added so the scroll bar is not obscured
+    right: 1em;
+    */
+    right: 18px;
 }
 
 .label-compartit {
@@ -133,7 +140,27 @@ body {
     background-color: #666666;
     color: #FFFFFF;
     font-size: 11px;
-    font-weight: bold; 
+    font-weight: bold;
+
+    /* MCZ added */
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    transform: rotate(90deg);
+
+    /* also accepts left, right, top, bottom coordinates; not required, but a good idea for styling */
+    -webkit-transform-origin: 50% 50%;
+    -moz-transform-origin: 50% 50%;
+    -ms-transform-origin: 50% 50%;
+    -o-transform-origin: 50% 50%;
+    transform-origin: 50% 50%;
+
+    /* Should be unset in IE9+ I think. */
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+    text-align: center;
+    margin: 0 auto;
+
 }
 
 .label-counter-alert {

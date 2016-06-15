@@ -82,7 +82,7 @@ var doActionRequest = function(args) {
         var corpus = getCookie("corpus");
         var corpusID = getCorpusID(corpus);
         args = _.merge(args, {'corpusID': corpusID});
-        disableAutoRetrieve();
+        //disableAutoRetrieve();
         return doViewRequest(args);
     }
     if (!action) {
