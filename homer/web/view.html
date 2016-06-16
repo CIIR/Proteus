@@ -150,6 +150,12 @@
                 <input  type="checkbox" id="cb-loc" value="loc" onclick="handleNERHilightClick(this, 'location');" /><span id="cb-loc-label"> Places</span><br />
             </div>
                 </fieldset>
+            <fieldset  >
+                <legend>Metadata</legend>
+                <input  type="checkbox" id="cb-metadata" value="N" onclick="UI.showHideMetadata();" /><span >Hide metadata</span><br />
+                <hr class="facets-hr">
+                <div id="book-metadata"></div>
+            </fieldset>
 
             <div id="sidebar-notes"></div>
             <input checked type="checkbox" id="cb-group-res-by-query" value="Y" onclick=" getResourcesForCorpus(this);" /><span > Group by query</span><br />
@@ -158,7 +164,7 @@
         </div>
 
         <div id="ocr-results-right" class="col-md-10 column right-align">
-            <div id="metadata"></div>
+
             <div id="note-side-bar"></div>
             <div id="view-resource">
                 <div  class="row clearfix btn" id="view-nav-top"></div>

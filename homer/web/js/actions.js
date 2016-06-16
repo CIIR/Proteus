@@ -744,7 +744,12 @@ var onViewPageSuccess = function (args) {
   var pageNum = id.split('_')[1];
 
   UI.clearError();
-  metadataDiv.hide();
+
+  if (metadataDiv.html().length == 0){
+    _(args.metadata).forIn(function(val, key) {
+      metadataDiv.append('<span class="metadata-field"><b>' + key + '</b> : ' + val + '</span><br>')
+    });
+  }
 
   if (!_.isUndefined(args.queryTerms)) {
     queryTerms = args.queryTerms;
