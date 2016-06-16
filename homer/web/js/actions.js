@@ -732,7 +732,11 @@ var onViewPageSuccess = function (args) {
 
   if (args.found == false) {
     $(pageElement).removeClass("page-place-holder");
-    $(pageElement).html(''); // clear out placeholder text
+    // when the user scrolls up and the page is blank, without the
+    // "blank page" indicator, it looks like you're stuck on a page,
+    // especially if there are more than one blank page in a row. The
+    // start of book fieldseminarofbi00hous is a good example of this.
+    $(pageElement).html('blank page');
     return;
   }
   //console.log("Page count: " + args.metadata.imagecount);
