@@ -90,4 +90,7 @@ person  {
     margin:auto;
     display:block;
     box-shadow: 10px 10px 5px #888888;
+    border: thin;
+    border-color: lightgrey;
+    border-style: solid;
 }
