@@ -243,6 +243,9 @@ Annotator.Plugin.Filter = (function(superClass) {
       current = active.eq(offset);
     }
     annotation = current.data('annotation');
+    if (_.isUndefined(annotation)){
+      return this;
+    }
     index = active.index(current[0]);
     next = active.filter(":" + operator + "(" + index + ")").not(annotation.highlights).eq(resetOffset);
     if (!next.length) {

@@ -40,7 +40,7 @@ $.timeoutQueue = {
 };
 
 // this is the div we'll attach the annotation filter to.
-var noteFilterDiv = $("#metadata");
+var noteFilterDiv = $("#note-filter");
 // div for the annotation side bar
 var noteSideBarDiv = $("#note-side-bar");
 
