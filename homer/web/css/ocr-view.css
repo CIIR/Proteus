@@ -83,3 +83,11 @@ person  {
     right: 0;
     overflow-y: scroll;
 }
+
+.page-image img{
+    max-width:100%;
+    max-height:100%;
+    margin:auto;
+    display:block;
+    box-shadow: 10px 10px 5px #888888;
+}

@@ -441,12 +441,6 @@ body {
 .book-text{
     font-size: larger;
 }
-.page-image img{
-    max-width:100%;
-    max-height:100%;
-    margin:auto;
-    display:block;
-}
 
 
 #ui-go-settings{
