@@ -155,7 +155,8 @@ Annotator.Plugin.Filter = (function(superClass) {
       for (i = 0, len = ref.length; i < len; i++) {
         annotation = ref[i];
         property = annotation[filter.property];
-        if (filter.isFiltered(input, property)) {
+        // MCZ - made search case insensitive
+        if (filter.isFiltered(input.toLowerCase(), property.toLowerCase())) {
           filter.annotations.push(annotation);
         }
       }
