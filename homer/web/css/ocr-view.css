@@ -107,11 +107,14 @@ person  {
 }
 
 .ocr-page-thumbnail{
-    padding-bottom: 10px;
+    margin-bottom: 10px;
     display: block;
-    margin: 0 auto;
 }
 
 .ocr-page-thumbnail:hover {
     cursor: hand;
+    border: solid;
+    border-color: #009;
+    width: 90px;
+    height: 110px;
 }
