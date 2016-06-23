@@ -408,26 +408,61 @@ function setCorpus(corpus) {
     document.cookie = "corpus=" + corpus + ";";
 }
 
+
 function hideSideBar() {
-    $('#sidebar-button').attr("src", "images/sidebar_expand.png");
+//    console.log("hide side bar")
+//    console.log("before: " + $("#ocr-results-right").scrollTop())
+//    start = $("#ocr-results-right")[0].scrollHeight
     $("#results-left").hide();
+// $("#ocr-results-right").removeClass("col-md-10");
+//    $("#ocr-results-right").addClass("col-md-12");
+////       $(".page-image").removeClass("col-md-4");
+////    $(".page-image").addClass("col-md-6");
+//
+//    $(".page-text").removeClass("col-md-6");
+//    $(".page-text").addClass("col-md-8");
+//
+    $('#sidebar-button').attr("src", "images/sidebar_expand.png");
+
     $("#results-right").removeClass("col-md-10");
     $("#results-right").addClass("col-md-12");
+
     showSideBarFlag = false;
     p = getURLParams();
     p = _.merge(p, {'showSideBar': '0'});
     pushURLParams(p);
+//    console.log("after: " + $("#ocr-results-right").scrollTop())
+//    diff = (start - $("#ocr-results-right")[0].scrollHeight  )
+//    console.log("diff : " + diff)
+// // $("#ocr-results-right").scrollTop($("#ocr-results-right").scrollTop() - diff)
 }
 function showSideBar() {
-    $('#sidebar-button').attr("src", "images/sidebar_shrink.png");
+//    start = $("#ocr-results-right")[0].scrollHeight
+//    console.log("Show side bar")
+//    console.log("before: " + $("#ocr-results-right").scrollTop())
     $("#results-left").show();
-    showSideBarFlag = true;
+//
+//    $("#ocr-results-right").removeClass("col-md-12");
+//    $("#ocr-results-right").addClass("col-md-10");
+////    $(".page-image").removeClass("col-md-6");
+////    $(".page-image").addClass("col-md-4");
+//    $(".page-text").removeClass("col-md-8");
+//    $(".page-text").addClass("col-md-6");
+
+    $('#sidebar-button').attr("src", "images/sidebar_shrink.png");
+
+
     $("#results-right").removeClass("col-md-12");
     $("#results-right").addClass("col-md-10");
 
+    showSideBarFlag = true;
     p = getURLParams();
     p = _.merge(p, {'showSideBar': '1'});
     pushURLParams(p);
+//    console.log("after: " + $("#ocr-results-right").scrollTop())
+//    diff = (start - $("#ocr-results-right")[0].scrollHeight)
+//    console.log("diff : " + diff)
+//  //  $("#ocr-results-right").scrollTop($("#ocr-results-right").scrollTop() - diff)
 }
 $('#sidebar-button').click(function() {
     if (showSideBarFlag == true) {

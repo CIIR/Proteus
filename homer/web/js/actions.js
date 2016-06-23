@@ -511,17 +511,16 @@ function printMatrix(conf, count) {
   }
   console.log(tmp);
 }
-var renderBookPageHTML = function (text, pageID, pageNum, el) {
-  var pgImage = pageImage(pageID, pageNum);
-  var pgTxt = text;
-  var id = getBookID(pageID, pageNum);
+var renderBookPageHTML = function (text, id, el) {
+  var pgImage = pageImage(id);
 
   var labelHTML = '<div id="notes-' + id + '" class="resource-labels">' + displayLabels(id) + '</div>' +
           '<div left-align" ><span id="' + id + '-user-ratings-w-names"></span></div> <hr>';
 
+  // bootstrap grid columns should sum to 12
   el.html('<div class="book-page row clearfix ">' +
-  '<div id="' + getNotesID(pageID, pageNum) + '" class="book-text col-md-6 column left-align">' + pgTxt + labelHTML + '</div>' +
-  '<div class="page-image col-md-4 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img id="pg-image-' + id + '" src="' + pgImage + '"></a></div>' +
+  '<div id="' + getNotesID(id) + '" class="book-text col-md-6 column left-align">' + text + labelHTML + '</div>' +
+  '<div class="page-image col-md-6 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img id="pg-image-' + id + '" src="' + pgImage + '"></a></div>' +
   '</div>');
 
   $("#pg-image-" + id).load(function(){
@@ -618,9 +617,9 @@ Annotator.Plugin.NoteEvent = function (element, reorderAll) {
 
 var firstTime = true;
 
-var initBookAnnotationLogic = function (pageID, pageNum, reorder) {
+var initBookAnnotationLogic = function (id, reorder) {
 
-  var el = '#' + getNotesID(pageID, pageNum);
+  var el = '#' + getNotesID(id);
   initAnnotationLogic(el, reorder);
 
 };
@@ -739,9 +738,6 @@ var onViewPageSuccess = function (args) {
     $(pageElement).html('blank page');
     return;
   }
-  //console.log("Page count: " + args.metadata.imagecount);
-  var identifier = id.split('_')[0];
-  var pageNum = id.split('_')[1];
 
   UI.clearError();
 
@@ -757,13 +753,24 @@ var onViewPageSuccess = function (args) {
 
   // only insert placeholders first time
   if (_.isUndefined(firstPageID)) {
+
     for (i = 0; i < parseInt(args.metadata.imagecount); i += 1) {
-      $("#book-pages").append('<div class="page-place-holder" id="page-' + args.metadata.identifier + "_" + i + '">Page Placeholder</div>');
+      var pid = args.metadata.identifier + "_" + i;
+      $("#book-pages").append('<div class="page-place-holder" id="page-' + pid + '">Page Placeholder</div>');
+
+      // if we're visible, load the thumbnail, else a placeholder
+      $("#page-thumbnails").append('<img id="thumbnail-' + pid + '" class="ia-thumbnail ocr-page-thumbnail image-not-loaded" src="../images/thumb.png" onclick="scrollToPage(\'' + pid + '\');">');
+
+      var el = $("#thumbnail-" + pid);
+      if (el.is_on_screen($("#page-thumbnails"))){
+        el.attr('src', pageThumbnail(pid));
+        el.removeClass("image-not-loaded");
+      }
     }
   }
 
   $(pageElement).html("Fetching page...")
-  renderBookPageHTML(highlightText(queryTerms, args.text, false), identifier, pageNum, $(pageElement));
+  renderBookPageHTML(highlightText(queryTerms, args.text, false), id, $(pageElement));
   doneLoadingPageText(id);
 
   var urlParams = getURLParams();
@@ -789,7 +796,7 @@ var onViewPageSuccess = function (args) {
 
   $(pageElement).removeClass("page-place-holder");
 
-  var el = "#" + getNotesID(identifier, pageNum);
+  var el = "#" + getNotesID(id);
 
   // event handler for when the notes on a page are done loading.
   $(el).bind("annotationsLoaded", function () {
@@ -798,152 +805,11 @@ var onViewPageSuccess = function (args) {
     $(el).unbind("annotationsLoaded");
   });
 
-  initBookAnnotationLogic(identifier, pageNum, true);
+  initBookAnnotationLogic(id, true);
 
   addEntitySearchLinks();
 
   UI.showProgress("");
-
-};
-
-/*
-var onViewBookSuccess = function (args) {
-
-  UI.clearError();
-  metadataDiv.hide();
-
-  var metaHtml = '';
-  metaHtml += ' <table>';
-  _(args.metadata).forIn(function (val, key) {
-    metaHtml += '<tr>';
-    metaHtml += '<td>' + key + '</td>';
-    metaHtml += '<td>' + val + '</td>';
-    metaHtml += '</tr>';
-  });
-  metaHtml += '</table></div>';
-  metadataDiv.html(metaHtml);
-
-  var html = '<a href="#" class="show-hide-metadata" onclick="UI.showHideMetadata();">Show Metadata</a>';
-
-  html += args.text;
-
-  viewResourceDiv.html(html);
-  viewResourceDiv.show();
-  processTags();
-
-  var corpus = getCookie("corpus");
-  if (!isLoggedIn() || corpus == "")
-    return;
-
-  // go through the book and insert an ID attribute so we can share the notes across
-  // both books and pages.
-  var pageBreaks = $(".page-break");
-  $(".page-break").addClass("book-page row clearfix ");
-
-  var id = args.request.id;
-
-  // if we have a "noteid" parameter, load that note first and
-  // scroll to it. All the other notes will load in the background
-  // via timeouts so the UI doesn't lock up when loading large books.
-  var urlParams = getURLParams();
-  var pgNum = urlParams["pgno"];
-  if (_.isUndefined(pgNum)) {
-    pgNum = -1;
-  }
-
-  // add the annotation widget to the page with the note
-  updateNoteDiv(id, pgNum);
-  initBookAnnotationLogic(id, pgNum);
-  el = "#" + getNotesID(id, pgNum);
-
-  if (!_.isUndefined(urlParams["noteid"])) {
-    // scroll to the note once all notes for that page are loaded.
-    $(el).bind("annotationsLoaded", function () {
-
-      var note = '.annotator-hl[data-annotation-id="' + urlParams["noteid"] + '"]';
-
-      if ($(note).length) {
-
-        $('#results-right').animate({
-          scrollTop: $(note).offset().top - 80
-        }, 2000);
-
-      } else {
-        alert("Couldn't find that note, perhaps it was deleted?")
-      }
-
-      // remove the notid from the URL so we don't re-trigger
-      removeURLParam("noteid");
-
-      // unbind once we're done
-      $(el).unbind("annotationsLoaded");
-    });
-
-  } // end if we have a noteid
-
-  // create a place were we can display the status
-  $(".navbar").append('<div id="loading-msg"></div>');
-
-  // now get any notes for all other pages
-  _.forEach(pageBreaks, function (pb) {
-
-    var currentPg = $(pb).attr("page");
-
-    // don't re-do the page we may have done above
-    if (currentPg == pgNum) {
-      return;
-    }
-
-    updateNoteDiv(id, currentPg);
-
-    //        $.timeoutQueue.add(function() {
-    //            $("#loading-msg").html("loading notes for page " + currentPg);
-    //            initBookAnnotationLogic(id, currentPg)
-    //        }, this);
-
-  });
-
-  // lastly... hide the progress message and hook up the Filter plugin
-  //    $.timeoutQueue.add(function() {
-  //        $("#loading-msg").hide();
-  //
-  //        // the stock Filter only searches within the HTML element
-  //        // it's attached to. Since we split books into pages and each
-  //        // page has its own annotator that won't work for us. So I
-  //        // extended the stock Filter and have it search for all
-  //        // annotations within the "searchArea" we pass in. Note that
-  //        // it's attached to an element that is NOT the searchArea, if was
-  //        // it would render the entire area read-only.
-  //        noteFilterDiv.annotator({
-  //            readOnly: true
-  //        });
-  //        noteFilterDiv.annotator('addPlugin', 'ProteusAnnotationFilter');
-  //        processTags()
-  //    }, this);
-  //
-  UI.showProgress("");
-  addEntitySearchLinks();
-};
-*/
-var updateNoteDiv = function (bookid, pgnum) {
-
-  var pgImage = pageImage(bookid, pgnum);
-  var noteid = getNotesID(bookid, pgnum);
-
-  var pb = '.page-break[page=' + pgnum + ']';
-
-  var id = getBookID(bookid, pgnum);
-  var labelHTML = '<div id="notes-' + id + '" class="resource-labels">' + displayLabels(id) + '</div>';
-
-  var pghtml = '<div id="' + noteid + '" class="book-text col-md-5 column left-align">' + $(pb).html() + labelHTML + '</div>' +
-          '<div id="' + noteid + '-page-image" class="page-image col-md-5 column left-align"><br><a href="#" onclick="getPageImage(\'' +
-          noteid + '-page-image\',\'' + pgImage + '\');" >View the actual page</a></div>';
-  $(pb).html(pghtml);
-};
-
-var getPageImage = function (id, imgURL) {
-
-  $('#' + id).html('<br><a class="fancybox" href="' + imgURL + '" ><img src="' + imgURL + '"></a>')
 
 };
 
@@ -1002,7 +868,7 @@ function setScrollBinding() {
     clearTimeout($.data(this, 'scrollTimer'));
     $.data(this, 'scrollTimer', setTimeout(function () {
       _.forEach($('.page-place-holder'), function (t) {
-        if ($(t).is_on_screen()) {
+        if ($(t).is_on_screen($("#ocr-results-right"))) {
           // We could use data() rather than splitting things
           var tmp = $(t).attr("id").split("page-")[1];
           doActionRequest({action: "view", id: tmp, kind: "ia-pages", queryid: -1});
@@ -1010,11 +876,27 @@ function setScrollBinding() {
       });
     }, 250));
   });
+
+  // add binding for thumbnails
+  $("#page-thumbnails").scroll(function () { // bind window scroll event
+    clearTimeout($.data(this, 'scrollTimer2'));
+    $.data(this, 'scrollTimer2', setTimeout(function () {
+      _.forEach($('.image-not-loaded'), function (t) {
+        if ($(t).is_on_screen($("#page-thumbnails"))) {
+          // We could use data() rather than splitting things
+          var tmp = $(t).attr("id").split("thumbnail-")[1];
+          $("#thumbnail-" + tmp).attr('src', pageThumbnail(tmp));
+          $("#thumbnail-" + tmp).removeClass("image-not-loaded");
+        }
+      });
+    }, 250));
+  });
+
 }
 
 function scrollToPage(pageid){
-  console.log('Scrolling to: #page-' + pageid);
   var p = $('#page-' + pageid);
+  // scroll to the image, if it's not loaded, the "scroll" event will load it.
   $("#ocr-results-right").scrollTop($("#ocr-results-right").scrollTop() + p.offset().top - 100);
 }
 
@@ -1086,4 +968,3 @@ function incrmentDoneCount(id){
   }
 
 }
-

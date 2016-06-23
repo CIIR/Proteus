@@ -299,15 +299,10 @@ String.prototype.capitalizeEachWord = function() {
     });
 };
 
-function getNotesID(pageid, pagenum) {
-    return 'notes-' + getBookID(pageid, pagenum);
+function getNotesID(id) {
+    return 'notes-' + id;
 }
-function getBookID(pageid, pagenum) {
-    if (!_.isUndefined(pagenum) && parseInt(pagenum) >= 0)
-        return pageid + '_' + pagenum;
-    else
-        return pageid;
-}
+
 // temp func - using "resource rating" to track swipe left/right
 
 

@@ -84,13 +84,34 @@ person  {
     overflow-y: scroll;
 }
 
+
+
 .page-image img{
-    max-width:100%;
-    max-height:100%;
+    max-width:75%;
+    max-height:75%;
     margin:auto;
     display:block;
     box-shadow: 10px 10px 5px #888888;
     border: thin;
     border-color: lightgrey;
     border-style: solid;
+}
+
+#page-thumbnails{
+    background-color: lightgray;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    overflow-y: scroll;
+}
+
+.ocr-page-thumbnail{
+    padding-bottom: 10px;
+    display: block;
+    margin: 0 auto;
+}
+
+.ocr-page-thumbnail:hover {
+    cursor: hand;
 }

@@ -163,8 +163,7 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
     if (type == 'delete') {
       // MCZ - we need to use the annotator specific for that note
       var current_annotation = item.data('annotation');
-      var parts = current_annotation.uri.split("_")
-      var el = "#" + getNotesID(parts[0], parts[1]);
+      var el = "#" + getNotesID(current_annotation.uri);
       $(el).trigger("myannotationDeleted", current_annotation)
       this.onAnnotationDeleted(current_annotation)
       return;// this.annotator.deleteAnnotation(item.data('annotation'));
@@ -227,9 +226,7 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
     $('#' + anotation_reference).data('annotation', current_annotation);
 
     // MCZ - we need to use the annotator specific for that note
-    var parts = current_annotation.uri.split("_")
-
-    var el = "#" + getNotesID(parts[0], parts[1]);
+    var el = "#" + getNotesID(current_annotation.uri);
 
     $(el).trigger("myannotationUpdated", current_annotation)
 

@@ -6,16 +6,19 @@
  *
  */
 
-var pageImage = function(archiveId, pageNum) {
-    return "http://www.archive.org/download/" + encodeURIComponent(archiveId) + "/page/n" + pageNum + ".jpg";
+var pageImage = function(pageid) {
+    var id = pageid.split("_");
+    return "http://www.archive.org/download/" + encodeURIComponent(id[0]) + "/page/n" + id[1] + ".jpg";
 };
 
-var pageThumbnail = function(archiveId, pageNum) {
-    return "http://www.archive.org/download/" + encodeURIComponent(archiveId) + "/page/n" + pageNum + "_thumb.jpg";
+var pageThumbnail = function(pageid) {
+    var id = pageid.split("_");
+    return "http://www.archive.org/download/" + encodeURIComponent(id[0]) + "/page/n" + id[1] + "_thumb.jpg";
 };
 
-var archiveViewerURL = function(archiveId, pageNum) {
-    return 'https://archive.org/stream/' + archiveId + '#page/n' + pageNum + '/mode/2up';
+var archiveViewerURL = function(pageid) {
+    var id = pageid.split("_");
+    return 'https://archive.org/stream/' + id[0] + '#page/n' + id[1] + '/mode/2up';
 };
 
 var renderResult = function(queryTerms, result, resDiv, queryid) {
@@ -37,19 +40,19 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     // if this is a book result - show the front page as the thumbnail but the links will
     // go to the max passage page.
 
-    var thumbnail = '<img class="ia-thumbnail" src="' + pageThumbnail(identifier, pageNum) + '"/>';
+    var thumbnail = '<img class="ia-thumbnail" src="' + pageThumbnail(result.name) + '"/>';
 
     var previewImage = Render.getDocumentURL(pgImage, thumbnail, queryTerms, result.rank, true);
 
     if (!_.isUndefined(pageNum)) {
         kind = 'ia-pages';
         // if page result - make the link go to the page
-        nameLink = Render.getDocumentURL(archiveViewerURL(identifier, pageNum), name, queryTerms, result.rank);
+        nameLink = Render.getDocumentURL(archiveViewerURL(result.name), name, queryTerms, result.rank);
 
         // MCZ : removing page number for now as it does not match up with
         // the physical page number shown on the page
         //name += ' pp. ' + pageNum;
-        pgImage = pageImage(identifier, pageNum);
+        pgImage = pageImage(result.name);
         previewImage = Render.getPagePreviewURL(pgImage, thumbnail, queryTerms, result.rank);
 
         // check if we're a note. Can either check metadata "docType" = "note" or there are two underscores
@@ -62,7 +65,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     }
     if (kind == 'ia-books' && !_.isUndefined(result.snippetPage) ){
         docid = identifier + "_" + result.snippetPage;
-        nameLink = Render.getDocumentURL(archiveViewerURL(identifier, result.snippetPage), name, queryTerms, result.rank);
+        nameLink = Render.getDocumentURL(archiveViewerURL(docid), name, queryTerms, result.rank);
     }
 
     var tmphtml = '';
