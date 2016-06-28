@@ -200,11 +200,11 @@ public abstract class TCPParser extends DocumentStreamParser {
 
         if ("fw".equals(tag)) {
           currentBuffer = bodyBuffer;
-        }
-
-        if ("lb".equals(tag)) {
+        } else if ("lb".equals(tag)) {
           currentBuffer.append("<br>");
-        }
+        } else if ("l".equals(tag)) {
+          currentBuffer.append("<br>");
+	}
 
         // since the books do NOT end with <pb> we need to "fake" that
         // so the last page number works
@@ -223,7 +223,9 @@ public abstract class TCPParser extends DocumentStreamParser {
 
         if ("fw".equals(tag)) {
           pagePart = xml.getAttributeValue(null, "place");
-          if (pagePart.equalsIgnoreCase("top")) {
+	  if (pagePart == null) {
+            currentBuffer = bodyBuffer;	      
+	  } else if (pagePart.equalsIgnoreCase("top")) {
             currentBuffer = headerBuffer;
           } else if (pagePart.equalsIgnoreCase("bottom")) {
             currentBuffer = footerBuffer;
