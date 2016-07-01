@@ -152,6 +152,9 @@ public abstract class TCPParser extends DocumentStreamParser {
         tagBuilder = null;
       }
     }
+    if ( metadata.get("author") != null ) {
+	metadata.put("creator", metadata.get("author"));
+    }
 
     return metadata;
   }

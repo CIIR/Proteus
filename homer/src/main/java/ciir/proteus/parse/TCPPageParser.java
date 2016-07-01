@@ -44,7 +44,15 @@ public class TCPPageParser extends TCPParser {
 	    pageText += "<archiveid tokenizetagcontent=\"false\">" + archiveId + "</archiveid>";
 	    page.text = pageText;
 	    page.name = archiveId + "_" + pageNumber;
-	    page.metadata = metadata;
+	    // page.metadata = metadata;
+	    page.metadata.put("title", metadata.get("title"));
+	    if ( metadata.get("author") != null )
+		page.metadata.put("creator", metadata.get("author"));
+	    if ( metadata.get("creator") != null )
+		page.metadata.put("creator", metadata.get("creator"));
+	    if ( metadata.get("date") != null )
+		page.metadata.put("date", metadata.get("date"));
+
 	    page.metadata.put("pageNumber", pageNumber);
 	    return page;
 	    

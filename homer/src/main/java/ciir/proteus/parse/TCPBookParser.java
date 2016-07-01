@@ -29,16 +29,20 @@ public class TCPBookParser extends TCPParser {
 
       StringBuilder wholeDocBuffer = new StringBuilder();
       String pg;
+      int pageCount = 0;
       while ((pg = nextPageText()) != null) {
         // indicate the page
         wholeDocBuffer.append("<div class=\"page-break\" page=\"" + getPageIndex() + "\">");
         wholeDocBuffer.append(pg);
         wholeDocBuffer.append("</div>");
+	++pageCount;
       }
 
       if (wholeDocBuffer.length() == 0) {
         return null;
       }
+
+      metadata.put("imagecount", "" + pageCount);
 
       Document doc = new Document();
 
@@ -48,7 +52,6 @@ public class TCPBookParser extends TCPParser {
       wholeDocBuffer.append("<archiveid tokenizetagcontent=\"false\">");
       wholeDocBuffer.append(archiveID);
       wholeDocBuffer.append("</archiveid>");
-
 
       doc.text = wholeDocBuffer.toString();
       doc.metadata = metadata;
