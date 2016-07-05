@@ -385,6 +385,8 @@ var onSearchSuccess = function (data) {
     UI.showProgress("No more results.");
   }
 
+  newHighlightText("#results",  data.queryTerms);
+
   setUpMouseEvents(); // TODO : only want to do this once
 
 };
@@ -526,6 +528,12 @@ var renderBookPageHTML = function (text, id, el) {
   $("#pg-image-" + id).load(function(){
     doneLoadingPageImage(id);
   });
+  // note we also consider the image "loaded" if there's an error.
+  // Without this, if the Internet Archive was down, we wouldn't
+  // see the page text.
+  $("#pg-image-" + id).on("error", function(){
+    doneLoadingPageImage(id);
+  });
 
   setUserRatingsHTML(id);
   setVoteHTML(id);
@@ -550,6 +558,7 @@ var doViewRequest = function (args) {
             $("body").css("cursor", "default");
           },
           function (req, status, err) {
+            console.log("Error in doViewRequest: " + err);
             UI.showError("ERROR: ``" + err + "``");
             throw err;
           });
@@ -722,6 +731,7 @@ var firstPageID = undefined;
 var queryTerms = [];
 var gScrollToNoteID = -1;
 var gScrollToPageID = -1;
+var gImageCont = -1;
 
 /** this gets called with the response from ViewResource */
 var onViewPageSuccess = function (args) {
@@ -741,6 +751,8 @@ var onViewPageSuccess = function (args) {
 
   UI.clearError();
 
+  gImageCont = args.metadata.imagecount;
+
   if (metadataDiv.html().length == 0){
     _(args.metadata).forIn(function(val, key) {
       metadataDiv.append('<span class="metadata-field"><b>' + key + '</b> : ' + val + '</span><br>')
@@ -759,9 +771,13 @@ var onViewPageSuccess = function (args) {
       $("#book-pages").append('<div class="page-place-holder" id="page-' + pid + '">Page Placeholder</div>');
 
       // if we're visible, load the thumbnail, else a placeholder
-      $("#page-thumbnails").append('<img id="thumbnail-' + pid + '" class="ia-thumbnail ocr-page-thumbnail image-not-loaded" src="../images/thumb.png" onclick="scrollToPage(\'' + pid + '\');">');
+      tmpHTML = '<div class="ocr-page-thumbnail center-align" id="thumbnail-' + pid + '">';
+      tmpHTML += '<img id="thumbnail-image-' + pid + '" class="ia-thumbnail  image-not-loaded" src="../images/thumb.png" onclick="scrollToPage(\'' + pid + '\');">';
+      tmpHTML += 'image ' + (i+1) + '/' + args.metadata.imagecount + '</div>'
 
-      var el = $("#thumbnail-" + pid);
+      $("#page-thumbnails").append(tmpHTML);
+// ??? don't think we need an id at the div level, can do "parent()?"
+      var el = $("#thumbnail-image-" + pid );
       if (el.is_on_screen($("#page-thumbnails"))){
         el.attr('src', pageThumbnail(pid));
         el.removeClass("image-not-loaded");
@@ -770,7 +786,10 @@ var onViewPageSuccess = function (args) {
   }
 
   $(pageElement).html("Fetching page...")
-  renderBookPageHTML(highlightText(queryTerms, args.text, false), id, $(pageElement));
+//  renderBookPageHTML(highlightText(queryTerms, args.text, false), id, $(pageElement));
+  renderBookPageHTML(args.text, id, $(pageElement));
+  newHighlightText(".book-text", queryTerms);
+
   doneLoadingPageText(id);
 
   var urlParams = getURLParams();
@@ -861,7 +880,6 @@ function submitCorpusDialog() {
 }
 
 function setScrollBinding() {
-
   // note we're using a timer here so we don't request too many pages at a time.
   // timer code based on: http://stackoverflow.com/questions/9144560/jquery-scroll-detect-when-user-stops-scrolling
   $("#ocr-results-right").scroll(function () { // bind window scroll event
@@ -884,9 +902,9 @@ function setScrollBinding() {
       _.forEach($('.image-not-loaded'), function (t) {
         if ($(t).is_on_screen($("#page-thumbnails"))) {
           // We could use data() rather than splitting things
-          var tmp = $(t).attr("id").split("thumbnail-")[1];
-          $("#thumbnail-" + tmp).attr('src', pageThumbnail(tmp));
-          $("#thumbnail-" + tmp).removeClass("image-not-loaded");
+          var tmp = $(t).attr("id").split("thumbnail-image-")[1];
+          $("#thumbnail-image-" + tmp ).attr('src', pageThumbnail(tmp));
+          $("#thumbnail-image-" + tmp ).removeClass("image-not-loaded");
         }
       });
     }, 250));
@@ -919,6 +937,7 @@ function doneLoadingPageText(id){
 function doneLoadingPageNotes(id){
   incrmentDoneCount(id)
 }
+
 
 function doneLoadingPageImage(id){
   incrmentDoneCount(id)
@@ -963,8 +982,123 @@ function incrmentDoneCount(id){
     $("#ocr-results-right").scrollTop($("#ocr-results-right").scrollTop() + offset - 100);
     gScrollToNoteID = -1;
     gScrollToPageID = -1;
-    setScrollBinding()
+    setScrollBinding();
     firstPageID = '';
   }
+
+}
+
+var doSearchWithinBookRequest = function (args) {
+
+  var defaultArgs = {
+    n: 10,
+    skip: 0,
+    snippets: true,
+    metadata: false
+  };
+
+
+  var userName = getCookie("username");
+
+  if (userName != "") {
+    var userToken = getCookie("token");
+    var userID = getCookie("userid");
+    var corpus = getCookie("corpus");
+    var corpusID = -1;
+    if (corpus.length == 0) {
+      alert("Please select a corpus!");
+      return;
+    } else {
+      corpusID = getCorpusID(corpus);
+    }
+    console.log("corpus: " + corpus + " id: " + corpusID);
+    var tagArgs = {
+      tags: false,
+      user: userName,
+      userid: userID,
+      token: userToken,
+      corpus: parseInt(corpusID),
+      corpusName: corpus
+    };
+    args = _.merge(args, tagArgs);
+  }
+  var actualArgs = _.merge(defaultArgs, args);
+
+  $("#page-thumbnails").scrollTop(0);
+  // remove any revious results
+  $("#book-search-results").html('');
+  $("#book-search-results").addClass("center-align");
+  $(".book-text").unmark();
+  $(".ocr-page-thumbnail").removeClass("ocr-page-result");
+
+  // only allow blank queries if we're searching a corpus or by label(s)
+  if ((!actualArgs.q || isBlank(actualArgs.q)) && (_.isEmpty(actualArgs.labels)) && (_.isUndefined(actualArgs.subcorpora) || actualArgs.subcorpora.length == 0)) {
+
+    showOCRErrorMsg("Query Is Blank");;
+      return;
+
+    }
+
+  $("body").css("cursor", "progress");
+  API.action(actualArgs, onSearchWithinBookSuccess, function (req, status, err) {
+    $("body").css("cursor", "default");
+
+    UI.showError("ERROR: ``" + err + "``");
+  //  UI.enableSearchButtons(true);
+
+    throw err;
+  });
+
+  return actualArgs;
+};
+
+var onSearchWithinBookSuccess = function (data) {
+
+  $("body").css("cursor", "default");
+
+  $("#page-thumbnails").scrollTop(0);
+
+  queryTerms = data.queryTerms;
+
+  if (data.results.length == 0){
+    showOCRErrorMsg("No Results Found");
+    return;
+  }
+
+  _.forEach(data.results, function(result){
+
+    // add the class to the existing page in the thumbnail list
+   $("#thumbnail-" + result.name).addClass("ocr-page-result");
+
+    // append results so pages matching the search are at the top.
+
+    var offset = 0;
+    if (!_.isUndefined(gImageCont) && gImageCont > -1){
+      offset = 1;
+    }
+
+    tmpHTML = '<div  class="ocr-page-thumbnail ocr-page-result center-align" >';
+    tmpHTML += '<img id="thumbnail-' + result.name + '" class="ia-thumbnail  " src="' + pageThumbnail(result.name) + '" onclick="scrollToPage(\'' + result.name + '\');">';
+    tmpHTML += 'rank: ' + result.rank + '<br>image ' + (parseInt(result.name.split("_")[1]) + offset) + '/' + gImageCont + '</div>'
+
+    $("#book-search-results").append(tmpHTML);
+
+  });
+
+  $("#book-search-results").append('<hr class="facets-hr hr-tmp">');
+
+
+  newHighlightText(".book-text",queryTerms);
+
+}
+
+function showOCRErrorMsg(text){
+
+  $("#ocr-error").html(text)
+  $("#ocr-error").fadeIn();
+
+  setTimeout(function () {
+    $("#ocr-error").fadeOut();
+  }, 5000);
 
 }

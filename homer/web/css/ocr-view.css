@@ -64,7 +64,7 @@ person  {
 #ocr-body-view{
     margin: 0;
     overflow-y: hidden;
-    padding-bottom: 55px;
+    padding-bottom: 60px;
 }
 
 .book-text{
@@ -84,8 +84,6 @@ person  {
     overflow-y: scroll;
 }
 
-
-
 .page-image img{
     max-width:75%;
     max-height:75%;
@@ -104,17 +102,53 @@ person  {
     bottom: 0;
     right: 0;
     overflow-y: scroll;
+    padding-left: 0px !important;
+    padding-right: 20px !important;
+
 }
 
 .ocr-page-thumbnail{
-    margin-bottom: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 3px;
+    padding-top: 5px;
+
     display: block;
+    width: 100%;
+    /* having a border the same color as the
+     * background prevents the image from "jumping"
+     * when we hover over it.
+     */
+    border-color: lightgrey;
+    border-style: solid;
+    border-radius: 5px;
 }
 
 .ocr-page-thumbnail:hover {
     cursor: hand;
     border: solid;
     border-color: #009;
-    width: 90px;
-    height: 110px;
+    border-radius: 5px;
+}
+
+.ocr-page-result{
+    border: solid ;
+    border-color: gold !important;
+    border-radius: 5px;
+}
+
+.ocr-page-result:hover {
+    cursor: hand;
+    border: solid;
+    background-color: #009;
+    color: white;
+}
+
+.hr-tmp{
+    padding-left: 20px;
+}
+
+mark{
+    font-weight: bold;
+    color: black;
 }

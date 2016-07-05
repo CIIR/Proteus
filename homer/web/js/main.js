@@ -74,6 +74,7 @@ UI.setReadyHandler(function() {
  * This main "action-request" delegates to other things. Notice how retrieval requests disappear into actions.js early.
  */
 var doActionRequest = function(args) {
+
     var action = args.action;
     if (action == "search") {
         return doSearchRequest(args);

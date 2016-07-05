@@ -416,8 +416,8 @@ function hideSideBar() {
     $("#results-left").hide();
 // $("#ocr-results-right").removeClass("col-md-10");
 //    $("#ocr-results-right").addClass("col-md-12");
-////       $(".page-image").removeClass("col-md-4");
-////    $(".page-image").addClass("col-md-6");
+//       $(".page-image").removeClass("col-md-4");
+//    $(".page-image").addClass("col-md-6");
 //
 //    $(".page-text").removeClass("col-md-6");
 //    $(".page-text").addClass("col-md-8");
@@ -616,4 +616,14 @@ function clearQueryBuilder() {
     $("#high-entities-loc").html('');
     $("#high-entities-org").html('');
     $("#query-builder-query").html('');
+}
+
+UI.searchWithinBook = function(bookid) {
+
+    var terms = (UI.getQuery().trim()).toLowerCase();
+    var setQuery = 'archiveid:' + bookid;
+
+    // pass in a query to restrict the search to just this book.
+    doSearchWithinBookRequest({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery: setQuery});
+
 }

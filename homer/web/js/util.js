@@ -102,36 +102,32 @@ var getCookie = function(cname) {
 var getUser = function() {
     return getCookie("username")
 }
-var highlightText = function(queryTerms, text, stripPunctuation) {
-    if (_.isUndefined(text)) {
+
+// the "exclude" option is so we don't highlight terms in the label buttons.
+var singleTermHightlightOptions = { "exclude": [".resource-labels *"], "element": "span", "className" : "hili"};
+var nGramTermHightlightOptions = { "exclude": [".resource-labels *"], "element": "span", "className" : "hili", "separateWordSearch" : false};
+var newHighlightText = function(selector, queryTerms) {
+    if (_.isUndefined(queryTerms) || queryTerms.length == 0) {
         return;
     }
 
-    if (_.isUndefined(stripPunctuation)) {
-        stripPunctuation = true;
+    var singleTerms = [];
+    var nGramTerms = [];
+
+    _.forEach(queryTerms, function(term){
+        if (term.includes(" ")){
+            nGramTerms.push(term);
+        } else {
+            singleTerms.push(term);
+        }
+    })
+
+    if (singleTerms.length > 0){
+        $(selector).mark(singleTerms, singleTermHightlightOptions);
     }
-    // there are situations where the "text" is actually an image such
-    // as a thumbnail so skip those.
-    if (text.toString().substring(0, 4) == "<img")
-        return text;
-
-    // remove any punctuation. For papers the authors are listed
-    // spearated by semicolons.
-    // Note we use toString(), because if a string like "2014" is passed
-    // in, JS will think it's a numeric datatype.
-    if (stripPunctuation) {
-        text = text.toString().replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+    if (nGramTerms.length > 0){
+        $(selector).mark(nGramTerms, nGramTermHightlightOptions);
     }
-
-    // inspired by: http://jsfiddle.net/FutureWebDev/HfS7e/
-    _.each(queryTerms, function(term){
-  //      var query = new RegExp("(\\b" + term + "\\b)", "gim");
-        // \b(\w+(?![^<>]*>))\b
-        var query = new RegExp("(\\b" + term + "\\b)", "gim");
-        text = text.replace(query, '<span class="hili">$1</span>');
-    });
-
-    return text;
 
 };
 

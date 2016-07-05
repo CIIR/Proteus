@@ -39,6 +39,7 @@
 .hili {
     color: black;
     font-weight: bold;
+    background: yellow;
 }
 
 #parsedQuery {
@@ -583,6 +584,9 @@ body {
 
 .left-align{
     text-align: left;
+}
+.center-align{
+    text-align: center;
 }
 
 .search-pages-link {

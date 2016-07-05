@@ -331,7 +331,7 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
 
     var annotation_layer = '<div  class="annotations-list-uoc" style="background-color:#ddd;"><div id="annotations-panel">'
             + '<span class="rotate" title="View annotations" style="padding:5px;background-color:#ddd;position: absolute; '
-            + 'top:10em;left: -50px; width: 155px; height: 110px;cursor:pointer">View annotations<span class="label-counter" '
+            + 'top:20em;left: -50px; width: 155px; height: 110px;cursor:pointer">View annotations<span class="label-counter" '
             + 'style="padding:0.2em 0.3em;float:right" id="count-anotations">0</span></span></div><div id="anotacions-uoc-panel" style="height:80%">'
             + '<ul class="container-anotacions"><li class="filter-panel">' + checboxes + '</li></ul></div></div>';
 
