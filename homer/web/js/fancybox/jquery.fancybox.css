@@ -106,6 +106,15 @@
 	cursor: pointer;
 	z-index: 8040;
 }
+#rotate_button {
+	position: absolute;
+	bottom: -18px;
+	left: -18px;
+	width: 36px;
+	height: 36px;
+	cursor: pointer;
+	z-index: 8040;
+}
 
 .fancybox-nav {
 	position: absolute;

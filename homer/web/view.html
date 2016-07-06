@@ -103,7 +103,42 @@
                 return;
             }
 
-            $(".fancybox").fancybox();
+            $(".fancybox").fancybox({
+                // from: http://stackoverflow.com/questions/24747957/image-rotation-with-fancybox
+                // image from: https://cdn0.iconfinder.com/data/icons/super-mono-sticker/icons/button-rotate-cw_sticker.png
+                afterShow: function() {
+                    var click = 0, deg;
+                    $('.fancybox-inner')
+                            .append('<img id="rotate_button" src="../images/button-rotate-cw_sticker.png" title="Rotate 90° CW">')
+                            .on('click', '#rotate_button', function() {
+                                click = (++click % 4 === 0) ? 0 : click;
+                                deg = 90 * click;
+                                $('.fancybox-wrap').css('transform', 'rotate(' + deg + 'deg)');
+                                $('#rotate_button').css('transform', 'rotate(-' + deg + 'deg)');
+
+                                // move the close button and rotate the label
+                                switch (deg) {
+                                    case 90:
+                             //           $('.fancybox-close').css('transform', 'translate(-' + $('.fancybox-wrap').width() + 'px, 0px)');
+                                        $('.fancybox-title').find('span.child').css('transform', 'translate(' + ($('.fancybox-wrap').width() / 2 + $('.fancybox-title').height() / 2 + 8) + 'px, -' + ($('.fancybox-wrap').height() / 2) + 'px) rotate(-' + deg + 'deg)');
+                                        break;
+                                    case 180:
+                                    //    $('.fancybox-close').css('transform', 'translate(-' + $('.fancybox-wrap').width() + 'px, ' + $('.fancybox-wrap').height() + 'px)');
+                                        $('.fancybox-title').find('span.child').css('transform', 'translate(0px, -'+ ($('.fancybox-wrap').height() + $('.fancybox-title').height() + 16) +'px) rotate(-' + deg + 'deg)');
+                                        break;
+                                    case 270:
+                                  //      $('.fancybox-close').css('transform', 'translate(0px, ' + $('.fancybox-wrap').height() + 'px)');
+                                        $('.fancybox-title').find('span.child').css('transform', 'translate(-' + ($('.fancybox-wrap').width() / 2 + $('.fancybox-title').height() / 2 + 8) + 'px, -' + ($('.fancybox-wrap').height() / 2) + 'px) rotate(-' + deg + 'deg)');
+                                        break;
+                                    case 0:
+                                    case 360:
+                                    default:
+                            //            $('.fancybox-close').css('transform', 'translate(0px, 0px)');
+                                        $('.fancybox-title').find('span.child').css('transform', 'translate(0px, 0px) rotate(0deg)');
+                                }
+                            });
+                }
+            });
 
             getResourcesForCorpus();
 
