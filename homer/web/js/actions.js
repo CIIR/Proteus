@@ -787,7 +787,7 @@ var onViewPageSuccess2 = function (args) {
 
       // if we're visible, load the thumbnail, else a placeholder
       tmpHTML = '<div class="ocr-page-thumbnail center-align" id="thumbnail-' + pid + '">';
-      tmpHTML += '<img id="thumbnail-image-' + pid + '" class="ia-thumbnail  image-not-loaded" src="../images/thumb.png" onclick="scrollToPage(\'' + pid + '\');">';
+      tmpHTML += '<img id="thumbnail-image-' + pid + '" class="ia-thumbnail  image-not-loaded" src="../images/thumb.png" onclick="scrollToPage(\'' + pid + '\');"><br>';
 
       var txt = ' ';
       if (!_.isUndefined(bookReader) && bookReader.pageNums[i] != null ) {
