@@ -147,7 +147,7 @@ var doSearchRequest = function (args) {
     } else {
       corpusID = getCorpusID(corpus);
     }
-    console.log("corpus: " + corpus + " id: " + corpusID);
+
     var tagArgs = {
       tags: false,
       user: userName,
@@ -544,6 +544,7 @@ var renderBookPageHTML = function (text, id, el) {
 
 var doViewRequest = function (args) {
   UI.showProgress("View request sent to server!");
+
   $("body").css("cursor", "progress");
   API.action(args,
           function (args) {
@@ -555,7 +556,8 @@ var doViewRequest = function (args) {
             } else {
               onViewBookSuccess(args);
             }
-            $("body").css("cursor", "default");
+
+
           },
           function (req, status, err) {
             console.log("Error in doViewRequest: " + err);
@@ -727,14 +729,25 @@ var initAnnotationLogic = function (element, reorder) {
 
 };
 
-var firstPageID = undefined;
+var gFirstPageID = undefined;
 var queryTerms = [];
 var gScrollToNoteID = -1;
 var gScrollToPageID = -1;
 var gImageCont = -1;
 
-/** this gets called with the response from ViewResource */
 var onViewPageSuccess = function (args) {
+
+  // only load the dynamically generated IA script once per book.
+  if (_.isUndefined(gFirstPageID)) {
+    var bookid = args.request.id.split("_")[0];
+    getInternetArchiveJS(bookid, function() { onViewPageSuccess2(args);});
+  } else {
+    onViewPageSuccess2(args);
+  }
+
+}
+/** this gets called with the response from ViewResource */
+var onViewPageSuccess2 = function (args) {
 
   var id = jqEsc(args.request.id);
   var pageElement = '#page-' + id;
@@ -746,6 +759,7 @@ var onViewPageSuccess = function (args) {
     // especially if there are more than one blank page in a row. The
     // start of book fieldseminarofbi00hous is a good example of this.
     $(pageElement).html('blank page');
+    $("body").css("cursor", "default");
     return;
   }
 
@@ -764,16 +778,26 @@ var onViewPageSuccess = function (args) {
   }
 
   // only insert placeholders first time
-  if (_.isUndefined(firstPageID)) {
+  if (_.isUndefined(gFirstPageID)) {
+
+    var bookReader = getBookReader();
 
     for (i = 0; i < parseInt(args.metadata.imagecount); i += 1) {
       var pid = args.metadata.identifier + "_" + i;
-      $("#book-pages").append('<div class="page-place-holder" id="page-' + pid + '">Page Placeholder</div>');
 
       // if we're visible, load the thumbnail, else a placeholder
       tmpHTML = '<div class="ocr-page-thumbnail center-align" id="thumbnail-' + pid + '">';
       tmpHTML += '<img id="thumbnail-image-' + pid + '" class="ia-thumbnail  image-not-loaded" src="../images/thumb.png" onclick="scrollToPage(\'' + pid + '\');">';
-      tmpHTML += 'image ' + (i+1) + '/' + args.metadata.imagecount + '</div>'
+
+      var txt = ' ';
+      if (!_.isUndefined(bookReader) && bookReader.pageNums[i] != null ) {
+        txt = ' ' + bookReader.pageNums[i] + ' ';
+        tmpHTML += 'page ' + bookReader.pageNums[i] + '</div>';
+      } else {
+        tmpHTML += 'image ' + (i+1) + '/' + args.metadata.imagecount + '</div>';
+      }
+
+      $("#book-pages").append('<div class="page-place-holder" id="page-' + pid + '">Page' + txt + 'Placeholder</div>');
 
       $("#page-thumbnails").append(tmpHTML);
 // ??? don't think we need an id at the div level, can do "parent()?"
@@ -794,8 +818,8 @@ var onViewPageSuccess = function (args) {
 
   var urlParams = getURLParams();
   // IFF this is the first page, we want to scroll to it when we're done loading any notes
-  if (_.isUndefined(firstPageID)) {
-    firstPageID = id;
+  if (_.isUndefined(gFirstPageID)) {
+    gFirstPageID = id;
     gScrollToPageID = id;
 
     if (!_.isUndefined(urlParams["noteid"])){
@@ -806,7 +830,7 @@ var onViewPageSuccess = function (args) {
     // so the right sidebar shows all notes for a book
     _.each(args.bookNotes.rows, function (note ) {
       // skip if we've already rendered this page
-      if (note.page != firstPageID){
+      if (note.page != gFirstPageID){
         doActionRequest({action: "view", id: note.page, kind: "ia-pages", queryid: -1});
       }
     });
@@ -829,6 +853,7 @@ var onViewPageSuccess = function (args) {
   addEntitySearchLinks();
 
   UI.showProgress("");
+  $("body").css("cursor", "default");
 
 };
 
@@ -945,7 +970,7 @@ function doneLoadingPageImage(id){
 
 function incrmentDoneCount(id){
   // we can skip all this IF the first page has been loaded
-  if (firstPageID == ''){
+  if (gFirstPageID == ''){
     return;
   }
   var p = $('#page-' + id);
@@ -983,7 +1008,7 @@ function incrmentDoneCount(id){
     gScrollToNoteID = -1;
     gScrollToPageID = -1;
     setScrollBinding();
-    firstPageID = '';
+    gFirstPageID = '';
   }
 
 }
@@ -1065,6 +1090,7 @@ var onSearchWithinBookSuccess = function (data) {
     return;
   }
 
+  var bookReader = getBookReader();
   _.forEach(data.results, function(result){
 
     // add the class to the existing page in the thumbnail list
@@ -1079,7 +1105,12 @@ var onSearchWithinBookSuccess = function (data) {
 
     tmpHTML = '<div  class="ocr-page-thumbnail ocr-page-result center-align" >';
     tmpHTML += '<img id="thumbnail-' + result.name + '" class="ia-thumbnail  " src="' + pageThumbnail(result.name) + '" onclick="scrollToPage(\'' + result.name + '\');">';
-    tmpHTML += 'rank: ' + result.rank + '<br>image ' + (parseInt(result.name.split("_")[1]) + offset) + '/' + gImageCont + '</div>'
+    var idx = parseInt(result.name.split("_")[1]);
+    if (!_.isUndefined(bookReader) && bookReader.pageNums[idx] != null ) {
+      tmpHTML += 'rank: ' + result.rank + '<br>page ' + bookReader.pageNums[idx]  + '</div>'
+    } else {
+      tmpHTML += 'rank: ' + result.rank + '<br>image ' + (idx + offset) + '/' + gImageCont + '</div>'
+    }
 
     $("#book-search-results").append(tmpHTML);
 
