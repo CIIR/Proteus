@@ -131,6 +131,13 @@ person  {
     border-radius: 5px;
 }
 
+.ocr-current-page {
+    cursor: hand;
+    border: solid;
+    border-radius: 5px;
+    border-color: orangered;
+}
+
 .ocr-page-result{
     border: solid ;
     border-color: gold !important;
@@ -152,3 +159,4 @@ mark{
     font-weight: bold;
     color: black;
 }
+
