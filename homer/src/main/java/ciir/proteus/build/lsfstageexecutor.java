@@ -283,7 +283,7 @@ public class lsfstageexecutor extends CheckpointedStageExecutor {
 	System.err.println("Problems submitting jobs: " + e.getMessage());
 	return new DRMAAResult(stageName, jobs, jobCheckpoints, null, e);
     }
-    
+
     return new DRMAAResult(stageName, jobs, jobCheckpoints, startTimes);
   }
 }

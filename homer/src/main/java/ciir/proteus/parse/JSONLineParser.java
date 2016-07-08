@@ -13,18 +13,18 @@ import java.util.regex.Pattern;
 
 /**
  * Parse one JSON record per line.
- * 
+ *
  * @author David Smith
  */
 public class JSONLineParser extends DocumentStreamParser {
-	
+
     BufferedReader reader;
-	
+
     public JSONLineParser(DocumentSplit split, Parameters p) throws FileNotFoundException, IOException {
 	super(split, p);
 	this.reader = getBufferedReader(split);
     }
-	
+
     public Document nextDocument() throws IOException {
 	String line;
 	if ( reader == null || (line = reader.readLine()) == null ) {
@@ -46,7 +46,7 @@ public class JSONLineParser extends DocumentStreamParser {
 
 	return doc;
     }
-    
+
     public void close() throws IOException {
 	if (this.reader != null) {
 	    this.reader.close();
