@@ -1074,12 +1074,8 @@ var doSearchWithinBookRequest = function(args) {
     }
     var actualArgs = _.merge(defaultArgs, args);
 
-    $("#page-thumbnails").scrollTop(0);
     // remove any revious results
-    $("#book-search-results").html('');
-    $("#book-search-results").addClass("center-align");
-    $(".book-text").unmark();
-    $(".ocr-page-thumbnail").removeClass("ocr-page-result");
+    clearOCRSearchResults();
 
     // only allow blank queries if we're searching a corpus or by label(s)
     if ((!actualArgs.q || isBlank(actualArgs.q)) && (_.isEmpty(actualArgs.labels)) && (_.isUndefined(actualArgs.subcorpora) || actualArgs.subcorpora.length == 0)) {

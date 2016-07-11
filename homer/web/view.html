@@ -96,7 +96,7 @@
                             .trigger('propertychange').focus();
                     $('#book-search-results').css("height", "0%");
                     $('#page-thumbnails').css("height", "100%");
-                    $("#book-search-results").html('');
+                    clearOCRSearchResults();
                 });
 
                 // code to add an "x" to the search input field from: https://www.thewebflash.com/clear-button-in-bootstrap-input-group-component/

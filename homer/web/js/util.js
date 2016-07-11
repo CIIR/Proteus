@@ -930,3 +930,10 @@ function getSubcorporaElements() {
 function jqEsc(myid) {
     return  myid.replace(/(:|\.|\[|\])/g, "\\$1");
 }
+
+function clearOCRSearchResults() {
+    $("#book-search-results").html('');
+    $("#book-search-results").addClass("center-align");
+    $(".book-text").unmark();
+    $(".ocr-page-thumbnail").removeClass("ocr-page-result");
+}
