@@ -954,7 +954,7 @@ function scrollThumbnailsToCurrentPage() {
             var id = $(t).parent().attr("id");
             var tmp = id.split("page-")[1];
             // scroll so the selected page is in the middle of the scroll area
-            var offset = $("#thumbnail-image-" + tmp).offset().top - (($("#page-thumbnails").height() + $("#thumbnail-image-" + tmp).height()) / 2);
+            var offset = $("#thumbnail-image-" + tmp).offset().top - (($("#page-thumbnails").height() + $("#thumbnail-image-" + tmp).height()) / 2) - $("#book-search-results").height();
             $("#thumbnail-image-" + tmp).addClass('ocr-current-page');
             $("#page-thumbnails").scrollTop($("#page-thumbnails").scrollTop() + offset);
             return false; // use first match
@@ -1134,15 +1134,13 @@ var onSearchWithinBookSuccess = function(data) {
         if (!_.isUndefined(bookReader) && bookReader.pageNums[idx] != null) {
             tmpHTML += 'rank: ' + result.rank + '<br>page ' + bookReader.pageNums[idx] + '</div>'
         } else {
-            tmpHTML += 'rank: ' + result.rank + '<br>image ' + (idx + offset) + '/' + gImageCont + '</div>'
+            tmpHTML += 'rank: ' + result.rank + '<br>image ' + (idx + offset)  + '</div>'
         }
-
+        $('#book-search-results').css("height", "25%");
+        $('#page-thumbnails').css("height", "75%");
         $("#book-search-results").append(tmpHTML);
 
     });
-
-    $("#book-search-results").append('<hr class="facets-hr hr-tmp">');
-
 
     newHighlightText(".book-text", queryTerms);
 

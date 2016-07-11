@@ -1,254 +1,277 @@
 ﻿<html>
-<head>
-    <!-- supply any functions that browsers like IE don't natively support-->
-    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6"></script>
+    <head>
+        <!-- supply any functions that browsers like IE don't natively support-->
+        <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6"></script>
 
-    <script>
-        // check if the browser supports local storage, we have to do this FIRST
-        // before any other JS stuff which could cause other issues and cause this
-        // to get skipped.
-        // from: http://diveintohtml5.info/detect.html#storage
-        function check() {
-            try {
-                return 'localStorage' in window && window['localStorage'] !== null;
-            } catch (e) {
-                return false;
-            }
-        }
-
-        if (check() == false) {
-            alert("You are using an old browser, please upgrade.");
-            document.execCommand("Stop"); // for IE
-            window.stop(); //works in all browsers but IE
-        }
-    </script>
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title id="proteus-title">Proteus: Document View</title>
-
-    <!-- Bootstrap -->
-    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-    <script src="js/jquery/2.0.3/jquery.min.js"></script>
-    <script src="js/lodash/2.4.1/lodash.min.js"></script>
-    <script src="js/history/1.8/native.history.min.js"></script>
-
-    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
-    <script src="js/jquery.cookie.js"></script>
-    <!-- scripts included here evaluate before the page loads -->
-    <script src="js/API.js"></script>
-    <script src="js/util.js"></script>
-    <script src="js/render.js"></script>
-    <script src="js/internetArchive.js"></script>
-    <script src="js/acmdl.js"></script>
-    <script src="js/tag-it.js" type="text/javascript" charset="utf-8"></script>
-
-
-    <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="css/style.css" type="text/css"/>
-    <link rel="stylesheet" href="css/ocr-view.css" type="text/css"/>
-    <link rel="stylesheet" href="css/annotation_viewer.css" type="text/css"/>
-
-    <!-- Add fancyBox -->
-    <link rel="stylesheet" href="js/fancybox/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen"/>
-    <script type="text/javascript" src="js/fancybox/jquery.fancybox.pack.js?v=2.1.5"></script>
-
-    <link rel="stylesheet" href="annotator-full.1.2.10/annotator.min.css" type="text/css" media="screen"/>
-
-    <script type="text/javascript" src="js/annotator.js"></script>
-    <script type="text/javascript" src="js/annotator.permissions.js"></script>
-    <script type="text/javascript" src="js/annotator.auth.js"></script>
-    <script type="text/javascript" src="js/annotator.store.js"></script>
-    <script type="text/javascript" src="js/annotator.filter.js"></script>
-
-
-    <script src="js/jquery.slimscroll.js"></script>
-    <script src="js/ProteusAnnotationFilter.js"></script>
-    <script src="js/annotator_viewer.js"></script>
-    <script src="js/jquery.mark.min.js"></script>
-    <script type="text/javascript" src="js/dummy-book-reader.js"></script>
-
-    <script>
-
-        var showSideBarFlag = true;
-
-        $(document).ready(function () {
-
-            $("#ocr-search-buttons").click(function () {
-                // get bookid from URL
-                var bookid = urlParams["id"].split("_")[0];
-                UI.searchWithinBook(bookid);
-            });
-            var urlParams = getURLParams();
-            var tmpShowSideBar = urlParams["showSideBar"];
-
-            if (urlParams["kind"] == 'article') {
-                $("#ocr-options").hide(); // we currently don't do NER or papers
-            }
-
-            // if not logged in, hide the user info
-            if (isLoggedIn() == false) {
-                $("body").css("cursor", "default");
-                document.write('<a href="index.html">Please log in first</a>');
-                return;
-            }
-
-            $(".fancybox").fancybox({
-                // from: http://stackoverflow.com/questions/24747957/image-rotation-with-fancybox
-                // image from: https://cdn0.iconfinder.com/data/icons/super-mono-sticker/icons/button-rotate-cw_sticker.png
-                afterShow: function() {
-                    var click = 0, deg;
-                    $('.fancybox-inner')
-                            .append('<img id="rotate_button" src="../images/button-rotate-cw_sticker.png" title="Rotate 90° CW">')
-                            .on('click', '#rotate_button', function() {
-                                click = (++click % 4 === 0) ? 0 : click;
-                                deg = 90 * click;
-                                $('.fancybox-wrap').css('transform', 'rotate(' + deg + 'deg)');
-                                $('#rotate_button').css('transform', 'rotate(-' + deg + 'deg)');
-
-                                // move the close button and rotate the label
-                                switch (deg) {
-                                    case 90:
-                             //           $('.fancybox-close').css('transform', 'translate(-' + $('.fancybox-wrap').width() + 'px, 0px)');
-                                        $('.fancybox-title').find('span.child').css('transform', 'translate(' + ($('.fancybox-wrap').width() / 2 + $('.fancybox-title').height() / 2 + 8) + 'px, -' + ($('.fancybox-wrap').height() / 2) + 'px) rotate(-' + deg + 'deg)');
-                                        break;
-                                    case 180:
-                                    //    $('.fancybox-close').css('transform', 'translate(-' + $('.fancybox-wrap').width() + 'px, ' + $('.fancybox-wrap').height() + 'px)');
-                                        $('.fancybox-title').find('span.child').css('transform', 'translate(0px, -'+ ($('.fancybox-wrap').height() + $('.fancybox-title').height() + 16) +'px) rotate(-' + deg + 'deg)');
-                                        break;
-                                    case 270:
-                                  //      $('.fancybox-close').css('transform', 'translate(0px, ' + $('.fancybox-wrap').height() + 'px)');
-                                        $('.fancybox-title').find('span.child').css('transform', 'translate(-' + ($('.fancybox-wrap').width() / 2 + $('.fancybox-title').height() / 2 + 8) + 'px, -' + ($('.fancybox-wrap').height() / 2) + 'px) rotate(-' + deg + 'deg)');
-                                        break;
-                                    case 0:
-                                    case 360:
-                                    default:
-                            //            $('.fancybox-close').css('transform', 'translate(0px, 0px)');
-                                        $('.fancybox-title').find('span.child').css('transform', 'translate(0px, 0px) rotate(0deg)');
-                                }
-                            });
-                }
-            });
-
-            getResourcesForCorpus();
-
-            $("#ui-search").keyup(function (evt) {
-                if (evt.keyCode == 13) {
-                    $(".default-search-button").click();
-                }
-            });
-
-            $.fn.is_on_screen = function (win) {
-                var bounds = this.position();
-                if (bounds.top < 0) {
+        <script>
+            // check if the browser supports local storage, we have to do this FIRST
+            // before any other JS stuff which could cause other issues and cause this
+            // to get skipped.
+            // from: http://diveintohtml5.info/detect.html#storage
+            function check() {
+                try {
+                    return 'localStorage' in window && window['localStorage'] !== null;
+                } catch (e) {
                     return false;
                 }
+            }
 
-                if (bounds.top < win.height()) {
-                    return true;
+            if (check() == false) {
+                alert("You are using an old browser, please upgrade.");
+                document.execCommand("Stop"); // for IE
+                window.stop(); //works in all browsers but IE
+            }
+        </script>
+
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title id="proteus-title">Proteus: Document View</title>
+
+        <!-- Bootstrap -->
+        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="js/jquery/2.0.3/jquery.min.js"></script>
+        <script src="js/lodash/2.4.1/lodash.min.js"></script>
+        <script src="js/history/1.8/native.history.min.js"></script>
+
+        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+        <script src="js/jquery.cookie.js"></script>
+        <!-- scripts included here evaluate before the page loads -->
+        <script src="js/API.js"></script>
+        <script src="js/util.js"></script>
+        <script src="js/render.js"></script>
+        <script src="js/internetArchive.js"></script>
+        <script src="js/acmdl.js"></script>
+        <script src="js/tag-it.js" type="text/javascript" charset="utf-8"></script>
+
+
+        <link href="css/jquery.tagit.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="css/ocr-view.css" type="text/css"/>
+        <link rel="stylesheet" href="css/annotation_viewer.css" type="text/css"/>
+
+        <!-- Add fancyBox -->
+        <link rel="stylesheet" href="js/fancybox/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen"/>
+        <script type="text/javascript" src="js/fancybox/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+        <link rel="stylesheet" href="annotator-full.1.2.10/annotator.min.css" type="text/css" media="screen"/>
+
+        <script type="text/javascript" src="js/annotator.js"></script>
+        <script type="text/javascript" src="js/annotator.permissions.js"></script>
+        <script type="text/javascript" src="js/annotator.auth.js"></script>
+        <script type="text/javascript" src="js/annotator.store.js"></script>
+        <script type="text/javascript" src="js/annotator.filter.js"></script>
+
+
+        <script src="js/jquery.slimscroll.js"></script>
+        <script src="js/ProteusAnnotationFilter.js"></script>
+        <script src="js/annotator_viewer.js"></script>
+        <script src="js/jquery.mark.min.js"></script>
+        <script type="text/javascript" src="js/dummy-book-reader.js"></script>
+        <script type="text/javascript" src="js/split.min.js"></script>
+
+        <script>
+
+            var showSideBarFlag = true;
+
+            $(document).ready(function() {
+
+                Split(['#book-search-results', '#page-thumbnails'], {
+                    sizes: [0, 100],
+                    minSize: [0, 100],
+                    direction: 'vertical'
+                });
+
+                $('.form-control-clear').click(function () {
+                    $(this).siblings('input[type="text"]').val('')
+                            .trigger('propertychange').focus();
+                    $('#book-search-results').css("height", "0%");
+                    $('#page-thumbnails').css("height", "100%");
+                    $("#book-search-results").html('');
+                });
+
+                // code to add an "x" to the search input field from: https://www.thewebflash.com/clear-button-in-bootstrap-input-group-component/
+                $('.has-clear input[type="text"]').on('input propertychange', function () {
+                    var $this = $(this);
+                    var visible = Boolean($this.val());
+                    $this.siblings('.form-control-clear').toggleClass('hidden', !visible);
+                }).trigger('propertychange');
+
+                $("#ocr-search-buttons").click(function() {
+                    // get bookid from URL
+                    var bookid = urlParams["id"].split("_")[0];
+                    UI.searchWithinBook(bookid);
+                });
+                var urlParams = getURLParams();
+                var tmpShowSideBar = urlParams["showSideBar"];
+
+                if (urlParams["kind"] == 'article') {
+                    $("#ocr-options").hide(); // we currently don't do NER or papers
                 }
-                return false;
-            };
-        });
 
-    </script>
+                // if not logged in, hide the user info
+                if (isLoggedIn() == false) {
+                    $("body").css("cursor", "default");
+                    document.write('<a href="index.html">Please log in first</a>');
+                    return;
+                }
 
-</head>
-<body id="ocr-body-view">
+                $(".fancybox").fancybox({
+                    // from: http://stackoverflow.com/questions/24747957/image-rotation-with-fancybox
+                    // image from: https://cdn0.iconfinder.com/data/icons/super-mono-sticker/icons/button-rotate-cw_sticker.png
+                    afterShow: function() {
+                        var click = 0, deg;
+                        $('.fancybox-inner')
+                                .append('<img id="rotate_button" src="../images/button-rotate-cw_sticker.png" title="Rotate 90° CW">')
+                                .on('click', '#rotate_button', function() {
+                                    click = (++click % 4 === 0) ? 0 : click;
+                                    deg = 90 * click;
+                                    $('.fancybox-wrap').css('transform', 'rotate(' + deg + 'deg)');
+                                    $('#rotate_button').css('transform', 'rotate(-' + deg + 'deg)');
 
-<nav class="navbar navbar-default navbar-static-top">
-    <div class="container-fluid " id="ui">
-        <div class="row clearfix">
-            <img id="sidebar-button" src="images/sidebar_expand.png"/>
+                                    // move the close button and rotate the label
+                                    switch (deg) {
+                                        case 90:
+                                            //           $('.fancybox-close').css('transform', 'translate(-' + $('.fancybox-wrap').width() + 'px, 0px)');
+                                            $('.fancybox-title').find('span.child').css('transform', 'translate(' + ($('.fancybox-wrap').width() / 2 + $('.fancybox-title').height() / 2 + 8) + 'px, -' + ($('.fancybox-wrap').height() / 2) + 'px) rotate(-' + deg + 'deg)');
+                                            break;
+                                        case 180:
+                                            //    $('.fancybox-close').css('transform', 'translate(-' + $('.fancybox-wrap').width() + 'px, ' + $('.fancybox-wrap').height() + 'px)');
+                                            $('.fancybox-title').find('span.child').css('transform', 'translate(0px, -' + ($('.fancybox-wrap').height() + $('.fancybox-title').height() + 16) + 'px) rotate(-' + deg + 'deg)');
+                                            break;
+                                        case 270:
+                                            //      $('.fancybox-close').css('transform', 'translate(0px, ' + $('.fancybox-wrap').height() + 'px)');
+                                            $('.fancybox-title').find('span.child').css('transform', 'translate(-' + ($('.fancybox-wrap').width() / 2 + $('.fancybox-title').height() / 2 + 8) + 'px, -' + ($('.fancybox-wrap').height() / 2) + 'px) rotate(-' + deg + 'deg)');
+                                            break;
+                                        case 0:
+                                        case 360:
+                                        default:
+                                            //            $('.fancybox-close').css('transform', 'translate(0px, 0px)');
+                                            $('.fancybox-title').find('span.child').css('transform', 'translate(0px, 0px) rotate(0deg)');
+                                    }
+                                });
+                    }
+                });
+
+                getResourcesForCorpus();
+
+                $("#ui-search").keyup(function(evt) {
+                    if (evt.keyCode == 13) {
+                        $(".default-search-button").click();
+                    }
+                });
+
+                $.fn.is_on_screen = function(win) {
+                    var bounds = this.position();
+                    if (bounds.top < 0) {
+                        return false;
+                    }
+
+                    if (bounds.top < win.offset().top + win.height()) {
+                        return true;
+                    }
+                    return false;
+                };
+            });
+
+        </script>
+
+    </head>
+    <body id="ocr-body-view">
+
+        <nav class="navbar navbar-default navbar-static-top">
+            <div class="container-fluid " id="ui">
+                <div class="row clearfix">
+                    <img id="sidebar-button" src="images/sidebar_expand.png"/>
                     <span class="col-md-4 column col-1-class header-link"> <div id="title"><a href="index.html"
                                                                                               target="_blank">Proteus</a>
-                    </div>
+                        </div>
                         <a href="https://github.com/CIIR/Proteus/issues/new" target="_blank">Report an issue or make a
                             suggestion</a>&nbsp;|&nbsp;</span>.
-            <div class="col-md-4 column right-align col-2-class">
-                <div class="input-group">
-                    <div class="form-group has-feedback has-clear">
-                        <input id="ui-search" type="text" placeholder="Search..." class="form-control">
-                        <span class="form-control-clear glyphicon glyphicon-remove-circle form-control-feedback hidden"></span>
-                    </div>
-  <span class="input-group-btn">
-        <button id="ocr-search-buttons" type="button" class="btn btn-default default-search-button"
-                tabindex="-1"><span class="glyphicon glyphicon-search"></span>&nbsp;<span
-                id="ocr-search-button-text">Search in this book</span></button>
+                    <div class="col-md-4 column right-align col-2-class">
+                        <div class="input-group">
+                            <div class="form-group has-feedback has-clear">
+                                <input id="ui-search" type="text" placeholder="Search..." class="form-control">
+                                <span class="form-control-clear glyphicon glyphicon-remove-circle form-control-feedback hidden"></span>
+                            </div>
+                            <span class="input-group-btn">
+                                <button id="ocr-search-buttons" type="button" class="btn btn-default default-search-button"
+                                        tabindex="-1"><span class="glyphicon glyphicon-search"></span>&nbsp;<span
+                                        id="ocr-search-button-text">Search in this book</span></button>
 
-  </span>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+        </nav>
+        <div id="ocr-error" class=" center-align alert alert-danger  " role="alert" style="display: none;"></div>
+        <div id="request"></div>
+
+        <div id="all-tags"></div>
+
+        <div id="results-left" class="col-md-2 column">
+
+            <fieldset>
+                <legend>Entity types</legend>
+                <div id="ocr-options">
+                    <input type="checkbox" id="cb-per" value="per" onclick="handleNERHilightClick(this, 'person');"/><span
+                        id="cb-per-label"> People</span><br/>
+                    <input type="checkbox" id="cb-org" value="org" onclick="handleNERHilightClick(this, 'organization');"/><span
+                        id="cb-org-label"> Organizations</span><br/>
+                    <input type="checkbox" id="cb-loc" value="loc" onclick="handleNERHilightClick(this, 'location');"/><span
+                        id="cb-loc-label"> Places</span><br/>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Metadata</legend>
+                <input type="checkbox" id="cb-metadata" value="N"
+                       onclick="UI.showHideMetadata();"/><span>Hide metadata</span><br/>
+                <hr class="facets-hr">
+                <div id="book-metadata"></div>
+            </fieldset>
+
+            <div id="sidebar-notes"></div>
+            <input checked type="checkbox" id="cb-group-res-by-query" value="Y" onclick=" getResourcesForCorpus(this);"/><span> Group by query</span><br/>
+
+            <div id="corpus-docs"></div>
+
         </div>
-    </div>
 
-</nav>
-<div id="ocr-error" class=" center-align alert alert-danger  " role="alert" style="display: none;"></div>
-<div id="request"></div>
-
-<div id="all-tags"></div>
-
-<div id="results-left" class="col-md-2 column">
-
-    <fieldset>
-        <legend>Entity types</legend>
-        <div id="ocr-options">
-            <input type="checkbox" id="cb-per" value="per" onclick="handleNERHilightClick(this, 'person');"/><span
-                id="cb-per-label"> People</span><br/>
-            <input type="checkbox" id="cb-org" value="org" onclick="handleNERHilightClick(this, 'organization');"/><span
-                id="cb-org-label"> Organizations</span><br/>
-            <input type="checkbox" id="cb-loc" value="loc" onclick="handleNERHilightClick(this, 'location');"/><span
-                id="cb-loc-label"> Places</span><br/>
+        <div id="page-thumbnails-wrapper" class="col-md-1  column ">
+            <div id="book-search-results"></div>
+            <div id="page-thumbnails"></div>
         </div>
-    </fieldset>
-    <fieldset>
-        <legend>Metadata</legend>
-        <input type="checkbox" id="cb-metadata" value="N"
-               onclick="UI.showHideMetadata();"/><span>Hide metadata</span><br/>
-        <hr class="facets-hr">
-        <div id="book-metadata"></div>
-    </fieldset>
+        <div id="ocr-results-right" class="col-md-9 column right-align">
 
-    <div id="sidebar-notes"></div>
-    <input checked type="checkbox" id="cb-group-res-by-query" value="Y" onclick=" getResourcesForCorpus(this);"/><span> Group by query</span><br/>
+            <div id="note-filter"></div>
+            <div id="note-side-bar"></div>
+            <div id="view-resource">
+                <div class="row clearfix btn" id="view-nav-top"></div>
+                <div id="book-pages"></div>
+                <div class="row clearfix btn" id="view-nav-bottom"></div>
+            </div>
 
-    <div id="corpus-docs"></div>
-
-</div>
-
-<div id="page-thumbnails" class="col-md-1  column ">
-    <div id="book-search-results"></div>
-</div>
-<div id="ocr-results-right" class="col-md-9 column right-align">
-
-    <div id="note-filter"></div>
-    <div id="note-side-bar"></div>
-    <div id="view-resource">
-        <div class="row clearfix btn" id="view-nav-top"></div>
-        <div id="book-pages"></div>
-        <div class="row clearfix btn" id="view-nav-bottom"></div>
-    </div>
-
-</div>
+        </div>
 
 
-<!-- scripts included here evaluate after the page loads -->
-<!-- Include all compiled plugins (below), or include individual files as needed -->
-<script src="bootstrap/js/bootstrap.min.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/actions.js"></script>
-<script src="js/main.js"></script>
-<!--<script src="js/jquery.appear.js"></script>-->
+        <!-- scripts included here evaluate after the page loads -->
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="bootstrap/js/bootstrap.min.js"></script>
+        <script src="js/ui.js"></script>
+        <script src="js/actions.js"></script>
+        <script src="js/main.js"></script>
+        <!--<script src="js/jquery.appear.js"></script>-->
 
-</body>
+    </body>
 </html>
