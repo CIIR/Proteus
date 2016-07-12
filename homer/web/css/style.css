@@ -132,7 +132,7 @@
 }
 
 img.ia-thumbnail {
-    width: 80px;
+   /* width: 80px; */
     height: 100px;
 }
 
@@ -204,17 +204,11 @@ img.ia-thumbnail {
     margin-bottom: 0;
 }
 
-#sidebar-button {
+.sidebar-button-img {
     position: fixed;
     bottom: 0px;
     left: 0px;
-
-    /*
-    color: white;
-    font-weight: bold;
-    */
     cursor: pointer; cursor: hand;
-
 }
 
 /* override FancyTree CSS */

@@ -1125,12 +1125,12 @@ var onSearchWithinBookSuccess = function(data) {
         }
 
         tmpHTML = '<div  class="ocr-page-thumbnail ocr-page-result center-align" >';
-        tmpHTML += '<img id="thumbnail-' + result.name + '" class="ia-thumbnail  " src="' + pageThumbnail(result.name) + '" onclick="scrollToPage(\'' + result.name + '\');">';
+        tmpHTML += '<img id="thumbnail-' + result.name + '" class="ia-thumbnail  " src="' + pageThumbnail(result.name) + '" onclick="scrollToPage(\'' + result.name + '\');"><br>';
         var idx = parseInt(result.name.split("_")[1]);
         if (!_.isUndefined(bookReader) && bookReader.pageNums[idx] != null) {
-            tmpHTML += 'rank: ' + result.rank + '<br>page ' + bookReader.pageNums[idx] + '</div>'
+            tmpHTML += 'rank ' + result.rank + ' : page ' + bookReader.pageNums[idx] + '</div>'
         } else {
-            tmpHTML += 'rank: ' + result.rank + '<br>image ' + (idx + offset)  + '</div>'
+            tmpHTML += 'rank ' + result.rank + ' : image ' + (idx + offset)  + '</div>'
         }
         $('#book-search-results').css("height", "25%");
         $('#page-thumbnails').css("height", "75%");

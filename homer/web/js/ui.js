@@ -410,18 +410,7 @@ function setCorpus(corpus) {
 
 
 function hideSideBar() {
-//    console.log("hide side bar")
-//    console.log("before: " + $("#ocr-results-right").scrollTop())
-//    start = $("#ocr-results-right")[0].scrollHeight
     $("#results-left").hide();
-// $("#ocr-results-right").removeClass("col-md-10");
-//    $("#ocr-results-right").addClass("col-md-12");
-//       $(".page-image").removeClass("col-md-4");
-//    $(".page-image").addClass("col-md-6");
-//
-//    $(".page-text").removeClass("col-md-6");
-//    $(".page-text").addClass("col-md-8");
-//
     $('#sidebar-button').attr("src", "images/sidebar_expand.png");
 
     $("#results-right").removeClass("col-md-10");
@@ -431,26 +420,11 @@ function hideSideBar() {
     p = getURLParams();
     p = _.merge(p, {'showSideBar': '0'});
     pushURLParams(p);
-//    console.log("after: " + $("#ocr-results-right").scrollTop())
-//    diff = (start - $("#ocr-results-right")[0].scrollHeight  )
-//    console.log("diff : " + diff)
-// // $("#ocr-results-right").scrollTop($("#ocr-results-right").scrollTop() - diff)
+
 }
 function showSideBar() {
-//    start = $("#ocr-results-right")[0].scrollHeight
-//    console.log("Show side bar")
-//    console.log("before: " + $("#ocr-results-right").scrollTop())
     $("#results-left").show();
-//
-//    $("#ocr-results-right").removeClass("col-md-12");
-//    $("#ocr-results-right").addClass("col-md-10");
-////    $(".page-image").removeClass("col-md-6");
-////    $(".page-image").addClass("col-md-4");
-//    $(".page-text").removeClass("col-md-8");
-//    $(".page-text").addClass("col-md-6");
-
     $('#sidebar-button').attr("src", "images/sidebar_shrink.png");
-
 
     $("#results-right").removeClass("col-md-12");
     $("#results-right").addClass("col-md-10");
@@ -459,11 +433,38 @@ function showSideBar() {
     p = getURLParams();
     p = _.merge(p, {'showSideBar': '1'});
     pushURLParams(p);
-//    console.log("after: " + $("#ocr-results-right").scrollTop())
-//    diff = (start - $("#ocr-results-right")[0].scrollHeight)
-//    console.log("diff : " + diff)
-//  //  $("#ocr-results-right").scrollTop($("#ocr-results-right").scrollTop() - diff)
 }
+
+
+function hideOCRSideBar() {
+     $("#results-left").hide();
+    $("#ocr-results-right").removeClass("col-md-9");
+    $("#ocr-results-right").addClass("col-md-11");
+
+    $('#ocr-sidebar-button').attr("src", "images/sidebar_expand.png");
+
+    showSideBarFlag = false;
+
+    // when the OCR text is longer than the page image, showing/hiding
+    // the side bar can result in the book "jumping" to a different
+    // page. So we'll make sure we go back to the page we were viewing.
+    scrollToPage($(".ocr-current-page").attr("id").split("thumbnail-image-")[1]);
+
+}
+function showOCRSideBar() {
+    $("#results-left").show();
+
+    $("#ocr-results-right").removeClass("col-md-11");
+    $("#ocr-results-right").addClass("col-md-9");
+
+    $('#ocr-sidebar-button').attr("src", "images/sidebar_shrink.png");
+
+    showSideBarFlag = true;
+
+    scrollToPage($(".ocr-current-page").attr("id").split("thumbnail-image-")[1]);
+
+}
+
 $('#sidebar-button').click(function() {
     if (showSideBarFlag == true) {
         hideSideBar();
@@ -471,6 +472,16 @@ $('#sidebar-button').click(function() {
         showSideBar();
     }
 });
+
+
+$('#ocr-sidebar-button').click(function() {
+    if (showSideBarFlag == true) {
+        hideOCRSideBar();
+    } else {
+        showOCRSideBar();
+    }
+});
+
 
 
 UI.appendToCorpusList = function(corpusName) {
