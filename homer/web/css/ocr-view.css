@@ -158,6 +158,10 @@ person  {
     border-radius: 5px;
 }
 
+#book-search-results a{
+    color: black;
+}
+
 .ocr-page-result:hover {
     cursor: hand;
     border: solid;

@@ -85,13 +85,15 @@
 
             $(document).ready(function() {
 
+
+
                 Split(['#book-search-results', '#page-thumbnails'], {
                     sizes: [0, 100],
                     minSize: [0, 100],
                     direction: 'vertical'
                 });
 
-                $('.form-control-clear').click(function () {
+                $('.form-control-clear').click(function() {
                     $(this).siblings('input[type="text"]').val('')
                             .trigger('propertychange').focus();
                     $('#book-search-results').css("height", "0%");
@@ -100,7 +102,7 @@
                 });
 
                 // code to add an "x" to the search input field from: https://www.thewebflash.com/clear-button-in-bootstrap-input-group-component/
-                $('.has-clear input[type="text"]').on('input propertychange', function () {
+                $('.has-clear input[type="text"]').on('input propertychange', function() {
                     var $this = $(this);
                     var visible = Boolean($this.val());
                     $this.siblings('.form-control-clear').toggleClass('hidden', !visible);

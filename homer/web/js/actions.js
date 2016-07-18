@@ -1130,15 +1130,19 @@ var onSearchWithinBookSuccess = function(data) {
         if (!_.isUndefined(bookReader) && bookReader.pageNums[idx] != null) {
             tmpHTML += 'rank ' + result.rank + ' : page ' + bookReader.pageNums[idx] + '</div>'
         } else {
-            tmpHTML += 'rank ' + result.rank + ' : image ' + (idx + offset)  + '</div>'
+            tmpHTML += 'rank ' + result.rank + ' : image ' + (idx + offset) + '</div>'
         }
         $('#book-search-results').css("height", "25%");
         $('#page-thumbnails').css("height", "75%");
-        $("#book-search-results").append(tmpHTML);
-
+        $("#book-search-results").append('<a data-toggle="tooltip" title="' + result.snippet + '" id="title-' + result.name + '" href="#"  >' + tmpHTML + '</a>');
     });
 
-    newHighlightText(".book-text", queryTerms);
+    $('[data-toggle="tooltip"]').tooltip({container: 'body', placement: 'right'})
+    $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function() {
+        newHighlightText('.tooltip-inner', queryTerms)
+    })
+
+    newHighlightText(".book-text", queryTerms)
 
 }
 
