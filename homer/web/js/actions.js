@@ -1132,10 +1132,11 @@ var onSearchWithinBookSuccess = function(data) {
         } else {
             tmpHTML += 'rank ' + result.rank + ' : image ' + (idx + offset) + '</div>'
         }
-        $('#book-search-results').css("height", "25%");
-        $('#page-thumbnails').css("height", "75%");
         $("#book-search-results").append('<a data-toggle="tooltip" title="' + result.snippet + '" id="title-' + result.name + '" href="#"  >' + tmpHTML + '</a>');
     });
+
+    $('#book-search-results').css("height", 'calc(33% - ' + (gGutterSize / 2) + 'px)');
+    $('#page-thumbnails').css("height", 'calc(67% - ' + (gGutterSize / 2) + 'px)');
 
     $('[data-toggle="tooltip"]').tooltip({container: 'body', placement: 'right'})
     $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function() {
