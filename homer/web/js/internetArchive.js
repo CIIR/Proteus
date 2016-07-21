@@ -235,6 +235,22 @@ var doActionSearchPages = function(args) {
     UI.showError("Unknown action `" + action + "'");
 };
 
+
+function getInternetArchiveMetadata(bookid, args, callback){
+
+    $.getJSON('http://archive.org/metadata/' + bookid + '/metadata')
+            .done(function (json) {
+                args.metadata = json.result;
+                callback();
+            })
+            .fail(function (jqxhr, textStatus, error ) {
+                var err = textStatus + ", " + error;
+                alert("Something went wrong getting the metadata from archive.org: " + err);
+                console.log( "Request Failed: " + err );
+            });
+
+}
+
 resultRenderers["ia-books"] = renderResult;
 resultRenderers["ia-pages"] = renderResult;
 resultRenderers["ia-all"] = renderResult;

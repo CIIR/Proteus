@@ -732,16 +732,29 @@ var gFirstPageID = undefined;
 var queryTerms = [];
 var gScrollToNoteID = -1;
 var gScrollToPageID = -1;
-var gImageCont = -1;
+var gMetadata = undefined;
 
 var onViewPageSuccess = function(args) {
 
     // only load the dynamically generated IA script once per book.
     if (_.isUndefined(gFirstPageID)) {
         var bookid = args.request.id.split("_")[0];
-        getInternetArchiveJS(bookid, function() {
+
+        // if the metadata was not returned, get it from the internet archive.
+        // Note that we're using a global to store the metadata so we don't
+        // have to look up the book level metadata for every page request.
+        if (_.isUndefined(args.metadata) || _.isEmpty(args.metadata)){
+            getInternetArchiveMetadata(bookid, args, function(){
+                gMetadata = args.metadata;
+                getInternetArchiveJS(bookid, function() {
+                    onViewPageSuccess2(args);
+                });
+            });
+        } else {
+            gMetadata = args.metadata;
             onViewPageSuccess2(args);
-        });
+        }
+
     } else {
         onViewPageSuccess2(args);
     }
@@ -766,10 +779,8 @@ var onViewPageSuccess2 = function(args) {
 
     UI.clearError();
 
-    gImageCont = args.metadata.imagecount;
-
     if (metadataDiv.html().length == 0) {
-        _(args.metadata).forIn(function(val, key) {
+        _(gMetadata).forIn(function(val, key) {
             metadataDiv.append('<span class="metadata-field"><b>' + key + '</b> : ' + val + '</span><br>')
         });
     }
@@ -783,8 +794,8 @@ var onViewPageSuccess2 = function(args) {
 
         var bookReader = getBookReader();
 
-        for (i = 0; i < parseInt(args.metadata.imagecount); i += 1) {
-            var pid = args.metadata.identifier + "_" + i;
+        for (i = 0; i < parseInt(gMetadata.imagecount); i += 1) {
+            var pid = gMetadata.identifier + "_" + i;
 
             // if we're visible, load the thumbnail, else a placeholder
             tmpHTML = '<div class="ocr-page-thumbnail center-align" id="thumbnail-' + pid + '">';
@@ -795,7 +806,7 @@ var onViewPageSuccess2 = function(args) {
                 txt = ' ' + bookReader.pageNums[i] + ' ';
                 tmpHTML += 'page ' + bookReader.pageNums[i] + '</div>';
             } else {
-                tmpHTML += 'image ' + (i + 1) + '/' + args.metadata.imagecount + '</div>';
+                tmpHTML += 'image ' + (i + 1) + '/' + gMetadata.imagecount + '</div>';
             }
 
             $("#book-pages").append('<div class="page-place-holder" id="page-' + pid + '">Page' + txt + 'Placeholder</div>');
@@ -1119,18 +1130,14 @@ var onSearchWithinBookSuccess = function(data) {
 
         // append results so pages matching the search are at the top.
 
-        var offset = 0;
-        if (!_.isUndefined(gImageCont) && gImageCont > -1) {
-            offset = 1;
-        }
-
         tmpHTML = '<div  class="ocr-page-thumbnail ocr-page-result center-align" >';
         tmpHTML += '<img id="thumbnail-' + result.name + '" class="ia-thumbnail  " src="' + pageThumbnail(result.name) + '" onclick="scrollToPage(\'' + result.name + '\');"><br>';
         var idx = parseInt(result.name.split("_")[1]);
         if (!_.isUndefined(bookReader) && bookReader.pageNums[idx] != null) {
             tmpHTML += 'rank ' + result.rank + ' : page ' + bookReader.pageNums[idx] + '</div>'
         } else {
-            tmpHTML += 'rank ' + result.rank + ' : image ' + (idx + offset) + '</div>'
+            // add one because normal humans don't start counting at zero.
+            tmpHTML += 'rank ' + result.rank + ' : image ' + (idx + 1) + '</div>'
         }
         $("#book-search-results").append('<a data-toggle="tooltip" title="' + result.snippet + '" id="title-' + result.name + '" href="#"  >' + tmpHTML + '</a>');
     });
