@@ -126,6 +126,20 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
         $(prependTo).after(renderer(queryTerms, result, resDiv, queryid));
     }
 
+    // TODO this is IA (book) specific
+    // if we don't have metadata, get it from the internet archive
+    if (_.isUndefined(result.meta) || _.isEmpty(result.meta)){
+        var args = {};
+        var identifier = id.split('_')[0];
+        getInternetArchiveMetadata(identifier, args, function( ){
+
+            // populate any missing data
+            $("." + identifier + "-meta-name").html(args.metadata.title || args.metadata.TEI || result.name)
+            $("." + identifier + "-meta-author").html(args.metadata.creator)
+            $("." + identifier + "-meta-published").html(args.metadata.date)
+        });
+    }
+
     if (isLoggedIn()) {
         setVoteHTML(name);
         setUserRatingsHTML(name);
@@ -439,7 +453,7 @@ function showSideBar() {
 function hideOCRSideBar() {
      $("#results-left").hide();
     $("#ocr-results-right").removeClass("col-md-9");
-    $("#ocr-results-right").addClass("col-md-11");
+    $("#ocr-results-right").addClass("col-md-10");
 
     $('#ocr-sidebar-button').attr("src", "images/sidebar_expand.png");
 

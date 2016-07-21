@@ -753,3 +753,7 @@ span-highlight{
     background-color: yellow;
     font-weight: bold;
 }
+
+.result-table{
+    width: 100%
+}
