@@ -453,7 +453,7 @@ function showSideBar() {
 function hideOCRSideBar() {
      $("#results-left").hide();
     $("#ocr-results-right").removeClass("col-md-9");
-    $("#ocr-results-right").addClass("col-md-10");
+    $("#ocr-results-right").addClass("col-md-11");
 
     $('#ocr-sidebar-button').attr("src", "images/sidebar_expand.png");
 
