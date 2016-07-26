@@ -962,15 +962,22 @@ function scrollThumbnailsToCurrentPage() {
             $(".ia-thumbnail").removeClass('ocr-current-page');
 
             // We could use data() rather than splitting things
-            var id = $(t).parent().attr("id");
-            var tmp = id.split("page-")[1];
+            var id = $(t).parent().attr("id").split("page-")[1];
             // scroll so the selected page is in the middle of the scroll area
-            var offset = $("#thumbnail-image-" + tmp).offset().top - (($("#page-thumbnails").height() + $("#thumbnail-image-" + tmp).height()) / 2) - $("#book-search-results").height();
-            $("#thumbnail-image-" + tmp).addClass('ocr-current-page');
-            $("#page-thumbnails").scrollTop($("#page-thumbnails").scrollTop() + offset);
+            scrollThumbnailsToPage(id);
             return false; // use first match
         }
     });
+}
+
+function scrollThumbnailsToPage(id) {
+
+    $(".ia-thumbnail").removeClass('ocr-current-page');
+    // scroll so the selected page is in the middle of the scroll area
+    var offset = $("#thumbnail-image-" + id).offset().top - (($("#page-thumbnails").height() + $("#thumbnail-image-" + id).height()) / 2) - $("#book-search-results").height();
+    $("#thumbnail-image-" + id).addClass('ocr-current-page');
+    $("#page-thumbnails").scrollTop($("#page-thumbnails").scrollTop() + offset);
+
 }
 
 function scrollToPage(pageid) {
@@ -1033,9 +1040,14 @@ function incrmentDoneCount(id) {
         // see if we're scrolling to a page or a note
         var offset = 0;
         if (gScrollToNoteID != -1) {
-            offset = $('.annotator-hl[data-annotation-id="' + gScrollToNoteID + '"]').offset().top;
+
+            scrollThumbnailsToPage(id);
+
             // remove the noteid so we don't keep jumping to it.
             removeURLParam("noteid");
+
+            offset = $('.annotator-hl[data-annotation-id="' + gScrollToNoteID + '"]').offset().top;
+
         } else if (gScrollToPageID != -1) {
             offset = $('#page-' + gScrollToPageID).offset().top;
         }
