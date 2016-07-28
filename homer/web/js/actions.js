@@ -514,7 +514,7 @@ function printMatrix(conf, count) {
     console.log(tmp);
 }
 var renderBookPageHTML = function(text, id, el) {
-    var pgImage = pageImage(id);
+    var pgImage = pageImage(id, gMetadata);
 
     var labelHTML = '<div id="notes-' + id + '" class="resource-labels">' + displayLabels(id) + '</div>' +
             '<div left-align" ><span id="' + id + '-user-ratings-w-names"></span></div> <hr>';
@@ -815,7 +815,7 @@ var onViewPageSuccess2 = function(args) {
             // ??? don't think we need an id at the div level, can do "parent()?"
             var el = $("#thumbnail-image-" + pid);
             if (el.is_on_screen($("#page-thumbnails"))) {
-                el.attr('src', pageThumbnail(pid));
+                el.attr('src', pageThumbnail(pid, gMetadata));
                 el.removeClass("image-not-loaded");
             }
         }
@@ -944,7 +944,7 @@ function setScrollBinding() {
                 if ($(t).is_on_screen($("#page-thumbnails"))) {
                     // We could use data() rather than splitting things
                     var tmp = $(t).attr("id").split("thumbnail-image-")[1];
-                    $("#thumbnail-image-" + tmp).attr('src', pageThumbnail(tmp));
+                    $("#thumbnail-image-" + tmp).attr('src', pageThumbnail(tmp, gMetadata));
                     $("#thumbnail-image-" + tmp).removeClass("image-not-loaded");
                 }
             });
@@ -1143,7 +1143,7 @@ var onSearchWithinBookSuccess = function(data) {
         // append results so pages matching the search are at the top.
 
         tmpHTML = '<div  class="ocr-page-thumbnail ocr-page-result center-align" >';
-        tmpHTML += '<img id="thumbnail-' + result.name + '" class="ia-thumbnail  " src="' + pageThumbnail(result.name) + '" onclick="scrollToPage(\'' + result.name + '\');"><br>';
+        tmpHTML += '<img id="thumbnail-' + result.name + '" class="ia-thumbnail  " src="' + pageThumbnail(result.name, result.meta) + '" onclick="scrollToPage(\'' + result.name + '\');"><br>';
         var idx = parseInt(result.name.split("_")[1]);
         if (!_.isUndefined(bookReader) && bookReader.pageNums[idx] != null) {
             tmpHTML += 'rank ' + result.rank + ' : page ' + bookReader.pageNums[idx] + '</div>'

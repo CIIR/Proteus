@@ -6,19 +6,37 @@
  *
  */
 
-var pageImage = function(pageid) {
-    var id = pageid.split("_");
-    return "http://www.archive.org/download/" + encodeURIComponent(id[0]) + "/page/n" + id[1] + ".jpg";
+var pageImage = function(pageid, meta) {
+    if ( meta.page_image ) {
+	return meta.page_image;
+    } else if ( meta['identifier-access'] != undefined ) {
+	var id = pageid.split("_");
+	return "http://www.archive.org/download/" + encodeURIComponent(id[0]) + "/page/n" + id[1] + ".jpg";
+    } else {
+	return 'images/thumb.png';
+    }
 };
 
-var pageThumbnail = function(pageid) {
-    var id = pageid.split("_");
-    return "http://www.archive.org/download/" + encodeURIComponent(id[0]) + "/page/n" + id[1] + "_thumb.jpg";
+var pageThumbnail = function(pageid, meta) {
+    if ( meta.page_thumb ) {
+	return meta.page_thumb;
+    } else if ( meta['identifier-access'] != undefined ) {
+	var id = pageid.split("_");
+	return "http://www.archive.org/download/" + encodeURIComponent(id[0]) + "/page/n" + id[1] + "_thumb.jpg";
+    } else {
+	return 'images/thumb.png';
+    }
 };
 
-var archiveViewerURL = function(pageid) {
-    var id = pageid.split("_");
-    return 'https://archive.org/stream/' + id[0] + '#page/n' + id[1] + '/mode/2up';
+var archiveViewerURL = function(pageid, meta) {
+    if ( meta.page_access ) {
+	return meta.page_access;
+    } else if ( meta['identifier-access'] != undefined ) {
+	var id = pageid.split("_");
+	return 'https://archive.org/stream/' + id[0] + '#page/n' + id[1] + '/mode/2up';
+    } else {
+	return '';
+    }
 };
 
 var renderResult = function(queryTerms, result, resDiv, queryid) {
@@ -28,7 +46,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     var docid = result.name;
     var snippet = result.snippet;
     var pageNum = result.name.split('_')[1];
-    var iaURL = result.meta["identifier-access"];
+    var iaURL = result.meta["identifier-access"] || result.meta.book_access;
     var nameLink = '';
 
     if (iaURL) {
@@ -40,19 +58,19 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     // if this is a book result - show the front page as the thumbnail but the links will
     // go to the max passage page.
 
-    var thumbnail = '<img class="ia-thumbnail" src="' + pageThumbnail(result.name) + '"/>';
+    var thumbnail = '<img class="ia-thumbnail" src="' + pageThumbnail(result.name, result.meta) + '"/>';
 
     var previewImage = Render.getDocumentURL(pgImage, thumbnail, queryTerms, result.rank, identifier, true);
 
     if (!_.isUndefined(pageNum)) {
         kind = 'ia-pages';
         // if page result - make the link go to the page
-        nameLink = Render.getDocumentURL(archiveViewerURL(result.name), name, queryTerms, result.rank, identifier);
+        nameLink = Render.getDocumentURL(archiveViewerURL(result.name, result.meta), name, queryTerms, result.rank, identifier);
 
         // MCZ : removing page number for now as it does not match up with
         // the physical page number shown on the page
         //name += ' pp. ' + pageNum;
-        pgImage = pageImage(result.name);
+        pgImage = pageImage(result.name, result.meta);
         previewImage = Render.getPagePreviewURL(pgImage, thumbnail, queryTerms, result.rank);
 
         // check if we're a note. Can either check metadata "docType" = "note" or there are two underscores
@@ -65,7 +83,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     }
     if (kind == 'ia-books' && !_.isUndefined(result.snippetPage) ){
         docid = identifier + "_" + result.snippetPage;
-        nameLink = Render.getDocumentURL(archiveViewerURL(docid), name, queryTerms, result.rank, identifier);
+        nameLink = Render.getDocumentURL(archiveViewerURL(docid, result.meta), name, queryTerms, result.rank, identifier);
     }
 
     var tmphtml = '';
