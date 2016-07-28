@@ -291,10 +291,10 @@ UI.toggleMyTags = function() {
     }
     var ele = $("#my-tags-container");
     if (ele.is(":visible")) {
-        $("#toggle-my-tags-img").attr("src", "/images/down_arrows.png");
+        $("#toggle-my-tags-img").attr("src", "images/down_arrows.png");
         ele.hide();
     } else {
-        $("#toggle-my-tags-img").attr("src", "/images/up_arrows.png");
+        $("#toggle-my-tags-img").attr("src", "images/up_arrows.png");
         ele.show();
     }
     $("#toggle-my-tags-img").show();

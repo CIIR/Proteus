@@ -174,7 +174,7 @@ var doSearchRequest = function(args) {
         UI.enableSearchButtons(true);
         return;
     }
-    $("#more").html('<img src="/images/more-loader.gif"\>');
+    $("#more").html('<img src="images/more-loader.gif"\>');
 
     Model[args.kind].request = actualArgs;
     console.log(Model[args.kind].request);
