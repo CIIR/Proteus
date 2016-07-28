@@ -32,7 +32,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     var nameLink = '';
 
     if (iaURL) {
-        nameLink = Render.getDocumentURL(iaURL, name, queryTerms, result.rank);
+        nameLink = Render.getDocumentURL(iaURL, name, queryTerms, result.rank, identifier);
     }
     var pgImage = iaURL;
     var kind = 'ia-books'; // default
@@ -42,12 +42,12 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
 
     var thumbnail = '<img class="ia-thumbnail" src="' + pageThumbnail(result.name) + '"/>';
 
-    var previewImage = Render.getDocumentURL(pgImage, thumbnail, queryTerms, result.rank, true);
+    var previewImage = Render.getDocumentURL(pgImage, thumbnail, queryTerms, result.rank, identifier, true);
 
     if (!_.isUndefined(pageNum)) {
         kind = 'ia-pages';
         // if page result - make the link go to the page
-        nameLink = Render.getDocumentURL(archiveViewerURL(result.name), name, queryTerms, result.rank);
+        nameLink = Render.getDocumentURL(archiveViewerURL(result.name), name, queryTerms, result.rank, identifier);
 
         // MCZ : removing page number for now as it does not match up with
         // the physical page number shown on the page
@@ -65,7 +65,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     }
     if (kind == 'ia-books' && !_.isUndefined(result.snippetPage) ){
         docid = identifier + "_" + result.snippetPage;
-        nameLink = Render.getDocumentURL(archiveViewerURL(docid), name, queryTerms, result.rank);
+        nameLink = Render.getDocumentURL(archiveViewerURL(docid), name, queryTerms, result.rank, identifier);
     }
 
     var tmphtml = '';
@@ -102,7 +102,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
         });
     } // end if we have entities
 
-    var html =  '<table><tr>';
+    var html =  '<table class="result-table"><tr>';
 
     html += '<td class="preview" rowspan="3">' + previewImage + '</td>' +
             '<td class="name">' + nameLink + '&nbsp;(<a target="_blank" href="view.html?kind=ia-pages&action=view&id=' + docid + '&queryid=' + queryid + '">view OCR</a>)&nbsp;'
@@ -112,7 +112,8 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     html += '<span id="' + result.name + '-user-ratings"></span><span  style="display:none" id="' + result.name + '-user-ratings-w-names"></span>';
     html += '<span class="highlight" id="' + result.name + '-dup-confidence"></span>';
     html += '</td></div></td><td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td></tr>';
-    html += '<tr  class="author" ><td>' + result.meta.creator + '&nbsp;•&nbsp;published: ' + result.meta.date + '</td></tr>';
+    html += '<tr class="author"><td><span class="' + identifier + '-meta-author" >' + result.meta.creator ;
+    html += '</span>&nbsp;•&nbsp;published: <span class="' + identifier + '-meta-published">' + result.meta.date + '</span></td></tr>';
 
     if (snippet) {
         html += '<tr><td class="snippet" colspan="3"> ...';
@@ -177,6 +178,8 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
 
     resDiv.html(html);
 
+
+
     return resDiv;
 
 };
@@ -234,6 +237,36 @@ var doActionSearchPages = function(args) {
     }
     UI.showError("Unknown action `" + action + "'");
 };
+
+// This function is used if metadata is not returned with the results.
+// Since we could have muliiple pages for the same book returned, we
+// don't want to get metadata we already know, so we'll keep track of
+// books we've already seen.
+
+var bookMetadata = new Map();
+
+function getInternetArchiveMetadata(bookid, args, callback){
+
+    if (bookMetadata.has(bookid)){
+        console.log("I've seen this book before!!!!!");
+        args.metadata = bookMetadata.get(bookid);
+        callback();
+        return;
+    }
+
+    $.getJSON('http://archive.org/metadata/' + bookid + '/metadata')
+            .done(function (json) {
+                args.metadata = json.result;
+                bookMetadata.set(bookid, args.metadata);
+                callback();
+            })
+            .fail(function (jqxhr, textStatus, error ) {
+                var err = textStatus + ", " + error;
+                alert("Something went wrong getting the metadata from archive.org: " + err);
+                console.log( "Request Failed: " + err );
+            });
+
+}
 
 resultRenderers["ia-books"] = renderResult;
 resultRenderers["ia-pages"] = renderResult;

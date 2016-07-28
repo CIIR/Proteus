@@ -97,7 +97,6 @@ person  {
 
 #page-thumbnails{
     background-color: lightgray;
-    height: 100%;
     top: 0;
     bottom: 0;
     right: 0;
@@ -107,7 +106,7 @@ person  {
 
 }
 #page-thumbnails-wrapper {
-
+    height: 100%;
     padding-left: 0px !important;
 }
 #book-search-results{
@@ -158,6 +157,10 @@ person  {
     border-radius: 5px;
 }
 
+#book-search-results a{
+    color: black;
+}
+
 .ocr-page-result:hover {
     cursor: hand;
     border: solid;
@@ -176,7 +179,6 @@ mark{
 
 .gutter {
     background-color: #eee;
-
     background-repeat: no-repeat;
     background-position: 50%;
 }
@@ -184,4 +186,12 @@ mark{
 .gutter.gutter-vertical {
     background-image: url('../images/grips/horizontal.png');
     cursor: ns-resize;
+}
+.split {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+
+    overflow-y: auto;
+    overflow-x: hidden;
 }
