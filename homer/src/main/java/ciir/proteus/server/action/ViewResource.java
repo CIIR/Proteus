@@ -1,24 +1,19 @@
 package ciir.proteus.server.action;
 
 import ciir.proteus.server.HTTPError;
-import ciir.proteus.system.DocumentAnnotator;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
-import ciir.proteus.util.ListUtil;
 import ciir.proteus.util.QueryUtil;
 import ciir.proteus.util.logging.ClickLogHelper;
 import ciir.proteus.util.logging.LogHelper;
 import ciir.proteus.util.logging.ViewResourceLogData;
 import org.apache.logging.log4j.LogManager;
 import org.lemurproject.galago.core.parse.Document;
-import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.SimpleQuery;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -66,6 +61,9 @@ public class ViewResource implements JSONHandler {
       return response;
     }
     response.put("found", true);
+
+    Parameters noteParams = system.getConfig().get("notes", Parameters.create());
+    response.put("fields", noteParams.getAsList("noteFields", String.class));
 
     ViewResourceLogData logData = new ViewResourceLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
     logData.setDocIDs(docId);

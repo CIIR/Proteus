@@ -733,11 +733,20 @@ var queryTerms = [];
 var gScrollToNoteID = -1;
 var gScrollToPageID = -1;
 var gMetadata = undefined;
+var gFields = [];
 
 var onViewPageSuccess = function(args) {
 
     // only load the dynamically generated IA script once per book.
     if (_.isUndefined(gFirstPageID)) {
+
+        gFields = args.fields;
+        _.each(gFields, function(field){
+            $("#ocr-options").append('<input type="checkbox" id="cb-' + field + '" value="' + field
+                + '" onclick="handleNERHilightClick(this, \'' + field + '\');"/><span id="cb-'
+                + field + '-label"> ' + field + '</span><br/>');
+        });
+
         var bookid = args.request.id.split("_")[0];
 
         // if the metadata was not returned, get it from the internet archive.
@@ -867,26 +876,30 @@ var onViewPageSuccess2 = function(args) {
     UI.showProgress("");
     $("body").css("cursor", "default");
     scrollThumbnailsToCurrentPage()
+
+    // Anything beyond basic CSS doesn't really like being applied
+    // to a field tag like <PERSON>, so we'll convert the fields to spans
+    // and apply the CSS to classes for the field.
+    _.each(gFields, function(field) {
+        $(field).each(function () {
+            $(this).replaceWith('<span class="' + field + '-class" >' + $(this).html() + '</span>');
+        });
+    });
+
 };
 
 var processTags = function() {
 
-    if (document.getElementById("cb-per").checked) {
-        $("person").removeClass("person-off")
-    } else {
-        $("person").addClass("person-off")
-    }
-    if (document.getElementById("cb-loc").checked) {
-        $("location").removeClass("location-off")
-    } else {
-        $("location").addClass("location-off")
-    }
-    if (document.getElementById("cb-org").checked) {
-        $("organization").removeClass("organization-off")
-    } else {
-        $("organization").addClass("organization-off")
-    }
-
+    _.each(gFields, function(field){
+        var el = $('.' + field + '-class');
+        if (document.getElementById("cb-" + field).checked) {
+            el.removeClass(field + "-off")
+            el.addClass(field + "-on")
+        } else {
+            el.addClass(field + "-off")
+            el.removeClass(field + "-on")
+        }
+    });
 };
 
 function submitCorpusDialog() {

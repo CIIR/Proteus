@@ -91,9 +91,9 @@ public class DocumentAnnotator {
     Map<String, Integer> totalBiGramTF = new HashMap<String, Integer>();
     Map<String, Integer> totalTriGramTF = new HashMap<String, Integer>();
 
-
     Parameters noteParams = system.getConfig().get("notes", Parameters.create());
     List<String> noteFields = noteParams.getAsList("noteFields", String.class);
+
     TagTokenizer tagTokenizer = new TagTokenizer();
     for (String field : noteFields) {
       tagTokenizer.addField(field);
@@ -442,6 +442,8 @@ public class DocumentAnnotator {
       // TODO ignnore for now
       ret.put("orgEntities", new ArrayList<Parameters>());
     }
+
+    ret.put("fields", noteFields);
 
     return ret;
   }

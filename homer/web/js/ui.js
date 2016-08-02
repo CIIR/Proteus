@@ -516,10 +516,14 @@ UI.updateCorpusListButton = function() {
 
 function handleNERHilightClick(that, type) {
 
+    var el = $('.' + type + '-class');
+
     if (that.checked == true) {
-        $(type).removeClass(type + "-off")
+        el.removeClass(type + "-off")
+        el.addClass(type + "-on")
     } else {
-        $(type).addClass(type + "-off")
+        el.addClass(type + "-off")
+        el.removeClass(type + "-on")
     }
 
 }

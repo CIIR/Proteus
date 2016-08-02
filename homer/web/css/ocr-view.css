@@ -1,10 +1,10 @@
 
-#cb-loc-label {
+#cb-location-label {
     color: white;
     background-color: saddlebrown;
 }
 
-location {
+.location-on{
     color: white;
     background-color: saddlebrown;
     opacity: 0.5;
@@ -16,12 +16,12 @@ location {
 
 }
 
-#cb-org-label {
+#cb-organization-label {
     color: white;
     background-color: slateblue;
 }
 
-organization {
+.organization-on {
     color: white;
     background-color: slateblue;
     opacity: 0.5;
@@ -32,12 +32,12 @@ organization {
     opacity: 1;
 }
 
-#cb-per-label{
+#cb-person-label{
     color: white;
     background-color: orangered;
 }
 
-person  {
+.person-on  {
     color: white;
     background-color: orangered;
     opacity: 0.5;
@@ -194,4 +194,66 @@ mark{
 
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+archiveid {
+    display: none;
+}
+
+#cb-poemline-label {
+     color: white;
+    background-color: saddlebrown;
+}
+
+.poemline-on {
+    color: white;
+    background-color: saddlebrown;
+    background-blend-mode:color-dodge;
+}
+.poemline-off{
+    color: black;
+    background-color: transparent;
+}
+
+/* since poems & recipes are per page, highlighting all the text is obnoxious, so we'll just
+ * use a vertical visual indicator on the left. Inspired by: https://css-tricks.com/snippets/css/multiple-borders/
+ */
+#cb-recipe-label {
+    color: white;
+    background-color: blue;
+}
+
+.recipe-on:before{
+    border-left: solid ;
+    border-color: blue ;
+    height: 100% !important;
+    content: " ";
+    position: absolute;
+    border-width: 5px;
+    z-index: -1;
+    left: -20px;
+}
+
+.recipe-off{
+    border-color: transparent;
+}
+
+#cb-poem-label {
+    color: white;
+    background-color: orange;
+}
+
+.poem-on:before{
+    border-left: solid ;
+    border-color: orange ;
+    position: absolute;
+    border-width: 5px;
+    z-index: -1;
+    height: 100% !important;
+    content: " ";
+    left: -10px;
+}
+
+.poem-off{
+    border-color: transparent;
 }
