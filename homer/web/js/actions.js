@@ -743,7 +743,7 @@ var onViewPageSuccess = function(args) {
         gFields = args.fields;
         _.each(gFields, function(field){
             $("#ocr-options").append('<input type="checkbox" id="cb-' + field + '" value="' + field
-                + '" onclick="handleNERHilightClick(this, \'' + field + '\');"/><span id="cb-'
+                + '" onclick="handleNERHilightClick(this, \'' + field + '\');" checked/><span id="cb-'
                 + field + '-label"> ' + field + '</span><br/>');
         });
 
