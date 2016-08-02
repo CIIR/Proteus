@@ -525,6 +525,15 @@ var renderBookPageHTML = function(text, id, el) {
             '<div class="page-image col-md-6 column left-align"><br>' + '<a class="fancybox" href="' + pgImage + '" ><img id="pg-image-' + id + '" src="' + pgImage + '"></a></div>' +
             '</div>');
 
+    // Anything beyond basic CSS doesn't really like being applied
+    // to a field tag like <PERSON>, so we'll convert the fields to spans
+    // and apply the CSS to classes for the field.
+    _.each(gFields, function(field) {
+        $(field).each(function () {
+            $(this).replaceWith('<span class="' + field + '-class" >' + $(this).html() + '</span>');
+        });
+    });
+
     $("#pg-image-" + id).load(function() {
         doneLoadingPageImage(id);
     });
@@ -876,15 +885,6 @@ var onViewPageSuccess2 = function(args) {
     UI.showProgress("");
     $("body").css("cursor", "default");
     scrollThumbnailsToCurrentPage()
-
-    // Anything beyond basic CSS doesn't really like being applied
-    // to a field tag like <PERSON>, so we'll convert the fields to spans
-    // and apply the CSS to classes for the field.
-    _.each(gFields, function(field) {
-        $(field).each(function () {
-            $(this).replaceWith('<span class="' + field + '-class" >' + $(this).html() + '</span>');
-        });
-    });
 
 };
 
