@@ -737,7 +737,6 @@ var initAnnotationLogic = function(element, reorder) {
 };
 
 var gFirstPageID = undefined;
-var queryTerms = [];
 var gScrollToNoteID = -1;
 var gScrollToPageID = -1;
 var gMetadata = undefined;
@@ -746,35 +745,40 @@ var gFields = [];
 var onViewPageSuccess = function(args) {
 
     // only load the dynamically generated IA script once per book.
-    if (_.isUndefined(gFirstPageID)) {
+    if (!_.isUndefined(gFirstPageID)) {
+        onViewPageSuccess2(args);
+        return;
+    }
 
-        gFields = args.fields;
-        _.each(gFields, function(field){
-            $("#ocr-options").append('<input type="checkbox" id="cb-' + field + '" value="' + field
-                + '" onclick="handleNERHilightClick(this, \'' + field + '\');" checked/><span id="cb-'
-                + field + '-label"> ' + field + '</span><br/>');
+    var bookid = parsePageID(args.request.id).id;
+
+    // if the metadata was not returned, get it from the internet archive.
+    // Note that we're using a global to store the metadata so we don't
+    // have to look up the book level metadata for every page request.
+    if (_.isUndefined(args.metadata) || _.isEmpty(args.metadata)){
+
+        getInternetArchiveMetadata(bookid, args, function(){
+            gMetadata = args.metadata;
+            getInternetArchiveJS(bookid, function() {
+                onViewPageSuccess2(args);
+            });
         });
 
-        var bookid = parsePageID(args.request.id).id;
-
-        // if the metadata was not returned, get it from the internet archive.
-        // Note that we're using a global to store the metadata so we don't
-        // have to look up the book level metadata for every page request.
-        if (_.isUndefined(args.metadata) || _.isEmpty(args.metadata)){
-            getInternetArchiveMetadata(bookid, args, function(){
-                gMetadata = args.metadata;
-                getInternetArchiveJS(bookid, function() {
-                    onViewPageSuccess2(args);
-                });
-            });
-        } else {
-            gMetadata = args.metadata;
-            onViewPageSuccess2(args);
-        }
-
     } else {
-        onViewPageSuccess2(args);
+
+        gMetadata = args.metadata;
+        // we still want to get the javascrpt for the book so we may have page numbers
+        getInternetArchiveJS(bookid, function() {
+            onViewPageSuccess2(args);
+        });
     }
+
+    gFields = args.fields;
+    _.each(gFields, function(field){
+        $("#ocr-options").append('<input type="checkbox" id="cb-' + field + '" value="' + field
+        + '" onclick="handleNERHilightClick(this, \'' + field + '\');" checked/><span id="cb-'
+        + field + '-label"> ' + field + '</span><br/>');
+    });
 
 }
 /** this gets called with the response from ViewResource */
