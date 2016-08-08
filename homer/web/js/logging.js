@@ -47,17 +47,17 @@ JSONtoHTMLFunctions["RESULTS"] = function (data) {
 }
 
 var noteHTML = function(data, action){
-  var id = data.resource.split("_")
+  var id = parsePageID(data);
   // if there's only one part of the resource, assume it's a paper - because we currently only have one annotation
-  // object per paper whild books have one per page.
+  // object per paper while books have one per page.
   var html = logStart(data)  + ' ' + action + ' a note to document: ' + data.resource + ' note: "' + data.data.text + '"';
-  if (_.isUndefined(id[1])){
+  if (id.page.length == 0){
     return html
             + ' view: <a target="_blank" href="../view.html?kind=article&action=view&id=' +  data.resource + '&noteid=' + data.notePK + '">Article</a></div>'
   } else {
     return html
             + ' view: <a target="_blank" href="../view.html?kind=ia-pages&action=view&id=' +  data.resource + '&noteid=' + data.notePK + '">Page</a>, '
-            + '<a target="_blank"  href="../view.html?kind=ia-books&action=view&id=' + id[0] + '&pgno=' + id[1] + '&noteid=' + data.notePK + '">Book</a></div>'
+            + '<a target="_blank"  href="../view.html?kind=ia-books&action=view&id=' + id.id + '&pgno=' + id.page + '&noteid=' + data.notePK + '">Book</a></div>'
   }
 
 }

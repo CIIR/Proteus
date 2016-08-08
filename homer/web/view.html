@@ -117,7 +117,7 @@
 
                 $("#ocr-search-buttons").click(function() {
                     // get bookid from URL
-                    var bookid = urlParams["id"].split("_")[0];
+                    var bookid = parsePageID(urlParams["id"]).id;
                     UI.searchWithinBook(bookid);
                 });
                 var urlParams = getURLParams();

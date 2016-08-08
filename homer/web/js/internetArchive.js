@@ -7,27 +7,28 @@
  */
 
 var pageImage = function(pageid) {
-    var id = pageid.split("_");
-    return "http://www.archive.org/download/" + encodeURIComponent(id[0]) + "/page/n" + id[1] + ".jpg";
+    var id = parsePageID(pageid);
+    return "http://www.archive.org/download/" + encodeURIComponent(id.id) + "/page/n" + id.page + ".jpg";
 };
 
 var pageThumbnail = function(pageid) {
-    var id = pageid.split("_");
-    return "http://www.archive.org/download/" + encodeURIComponent(id[0]) + "/page/n" + id[1] + "_thumb.jpg";
+    var id = parsePageID(pageid);
+    return "http://www.archive.org/download/" + encodeURIComponent(id.id) + "/page/n" + id.page + "_thumb.jpg";
 };
 
 var archiveViewerURL = function(pageid) {
-    var id = pageid.split("_");
-    return 'https://archive.org/stream/' + id[0] + '#page/n' + id[1] + '/mode/2up';
+    var id = parsePageID(pageid);
+    return 'https://archive.org/stream/' + encodeURIComponent(id.id) + '#page/n' + id.page + '/mode/2up';
 };
 
 var renderResult = function(queryTerms, result, resDiv, queryid) {
 
     var name = result.meta.title || result.meta.TEI || result.name;
-    var identifier = result.name.split('_')[0];
+    var tmpid = parsePageID(result.name);
+    var identifier = tmpid.id;
+    var pageNum = tmpid.page;
     var docid = result.name;
     var snippet = result.snippet;
-    var pageNum = result.name.split('_')[1];
     var iaURL = result.meta["identifier-access"];
     var nameLink = '';
 
@@ -44,7 +45,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
 
     var previewImage = Render.getDocumentURL(pgImage, thumbnail, queryTerms, result.rank, identifier, true);
 
-    if (!_.isUndefined(pageNum)) {
+    if (!_.isUndefined(pageNum) && pageNum.length > 0) {
         kind = 'ia-pages';
         // if page result - make the link go to the page
         nameLink = Render.getDocumentURL(archiveViewerURL(result.name), name, queryTerms, result.rank, identifier);
@@ -238,18 +239,53 @@ var doActionSearchPages = function(args) {
     UI.showError("Unknown action `" + action + "'");
 };
 
+// We append he page number to the archive ID separated by an underscore.
+// While rare, there are some archive IDs that require a bit more than
+// a simple split('_') such as: poems___00wott_191
+// Since we do this a lot, we'll cache the archive IDs we've already done.
+
+var parsedPageCache = new Map();
+
+function parsePageID(pageid){
+
+    if (parsedPageCache.has(pageid)){
+        var cachedObj = parsedPageCache.get(pageid);
+        // this is just here for the unit test to make sure we're using the cache
+        cachedObj.cached = true;
+        return cachedObj;
+    }
+
+    var i = pageid.lastIndexOf('_');
+    // if no underscore is found, use the whole thing for the ID
+    if (i < 0){
+        i = pageid.length;
+    }
+    var page = pageid.substring(i + 1);
+    // saftey check, make sure the page number is really a number
+    if (isNaN(parseInt(page, 10))){
+        console.log("Error getting page number for: " + pageid);
+        page = '';
+    }
+    var obj = {};
+    obj.id = pageid.substring(0, i);
+    obj.page = page;
+    parsedPageCache.set(pageid, obj);
+    return obj;
+
+}
+
 // This function is used if metadata is not returned with the results.
-// Since we could have muliiple pages for the same book returned, we
+// Since we could have multiple pages for the same book returned, we
 // don't want to get metadata we already know, so we'll keep track of
 // books we've already seen.
 
-var bookMetadata = new Map();
+var bookMetadataCache = new Map();
 
 function getInternetArchiveMetadata(bookid, args, callback){
 
-    if (bookMetadata.has(bookid)){
+    if (bookMetadataCache.has(bookid)){
         console.log("I've seen this book before!!!!!");
-        args.metadata = bookMetadata.get(bookid);
+        args.metadata = bookMetadataCache.get(bookid);
         callback();
         return;
     }
@@ -257,7 +293,7 @@ function getInternetArchiveMetadata(bookid, args, callback){
     $.getJSON('http://archive.org/metadata/' + bookid + '/metadata')
             .done(function (json) {
                 args.metadata = json.result;
-                bookMetadata.set(bookid, args.metadata);
+                bookMetadataCache.set(bookid, args.metadata);
                 callback();
             })
             .fail(function (jqxhr, textStatus, error ) {
@@ -265,7 +301,19 @@ function getInternetArchiveMetadata(bookid, args, callback){
                 alert("Something went wrong getting the metadata from archive.org: " + err);
                 console.log( "Request Failed: " + err );
             });
+}
 
+function getOCLC(bookid){
+
+    var args = {};
+    // ??? don't always need to go to IA, should have it in index
+    getInternetArchiveMetadata(bookid, args, function(){
+        if (_.isUndefined(args.metadata['oclc-id'])) {
+            return null;
+        }
+
+        return args.metadata['oclc-id'];
+    });
 }
 
 resultRenderers["ia-books"] = renderResult;

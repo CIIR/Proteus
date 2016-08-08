@@ -157,8 +157,9 @@ UI.populateRecentSearches = function() {
                 var html = '';
                 for (i in results.rows) {
                     rec = results.rows[i];
-                    var identifier = rec.uri.split('_')[0];
-                    var pageNum = rec.uri.split('_')[1];
+                    var tmp = parsePageID(rec.uri);
+                    var identifier = tmp.id;
+                    var pageNum = tmp.page;
 
                     // strip the seconds/milliseconds from the date
                     var dt = rec.dttm.substring(0, rec.dttm.lastIndexOf(":"));

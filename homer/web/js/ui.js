@@ -130,7 +130,7 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
     // if we don't have metadata, get it from the internet archive
     if (_.isUndefined(result.meta) || _.isEmpty(result.meta)){
         var args = {};
-        var identifier = id.split('_')[0];
+        var identifier = parsePageID(id).id;
         getInternetArchiveMetadata(identifier, args, function( ){
 
             // populate any missing data
@@ -327,12 +327,15 @@ UI.showHideMetadata = function() {
 UI.getPages = function(bookid) {
 
     var terms = (UI.getQuery().trim()).toLowerCase();
-    var setQuery = 'archiveid:' + bookid;
+    // working set queries need to be in the normal Galago query language (not the
+    // simple query language) because there are some archive IDs would get
+    // tokenized and cause an issue. ex: poems___00wott
+    var setQuery = '#combine(#inside( #text:' + bookid + '() #field:archiveid() ))';
 
     $("#search-pages-link-" + bookid).html($("#search-pages-link-" + bookid).html() + '&nbsp;&nbsp;<img src="/images/more-loader.gif"\>');
 
     // pass in a query to restrict the search to just this book.
-    doActionSearchPages({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery: setQuery});
+    doActionSearchPages({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery: setQuery, archiveid: bookid});
 
 }
 
@@ -650,9 +653,12 @@ function clearQueryBuilder() {
 UI.searchWithinBook = function(bookid) {
 
     var terms = (UI.getQuery().trim()).toLowerCase();
-    var setQuery = 'archiveid:' + bookid;
+    // working set queries need to be in the normal Galago query language (not the
+    // simple query language) because there are some archive IDs would get
+    // tokenized and cause an issue. ex: poems___00wott
+    var setQuery = '#combine(#inside( #text:' + bookid + '() #field:archiveid() ))';
 
     // pass in a query to restrict the search to just this book.
-    doSearchWithinBookRequest({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery: setQuery});
+    doSearchWithinBookRequest({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery: setQuery, archiveid: bookid});
 
 }

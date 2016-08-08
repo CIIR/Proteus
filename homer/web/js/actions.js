@@ -69,8 +69,7 @@ var doSearchRequest = function(args) {
     if (_.isUndefined(args.workingSetQuery)) {
         resultsDiv = $("#results");
     } else {
-        // workingSetQuery is the is the archiveid field followed by the book, we just want the book id
-        resultsDiv = $("#page-results-" + args.workingSetQuery.split('archiveid:')[1]);
+        resultsDiv = $("#page-results-" + args.archiveid);
     }
 
     disableAutoRetrieve(); // prevent double requests
@@ -316,11 +315,11 @@ var onSearchSuccess = function(data) {
         // TODO ??? kind specific logic
         if (!_.isUndefined(data.request.workingSetQuery)) {
             // extract the book id
-            var bookid = result.name.split('_')[0];
-            var html = '<a href="#" onclick="UI.hidePages(\'' + bookid + '\');">';
+            var bookid = parsePageID(result.name);
+            var html = '<a href="#" onclick="UI.hidePages(\'' + bookid.id + '\');">';
             html += '<span class="glyphicon glyphicon-collapse-up"></span>&nbsp;Hide pages (' + data.results.length + ')</a>'
-            $("#search-pages-link-" + bookid).html(html)
-            $("#search-pages-link-" + bookid).data("num_results", data.results.length);
+            $("#search-pages-link-" + bookid.id).html(html)
+            $("#search-pages-link-" + bookid.id).data("num_results", data.results.length);
         }
 
         return result;
@@ -756,7 +755,7 @@ var onViewPageSuccess = function(args) {
                 + field + '-label"> ' + field + '</span><br/>');
         });
 
-        var bookid = args.request.id.split("_")[0];
+        var bookid = parsePageID(args.request.id).id;
 
         // if the metadata was not returned, get it from the internet archive.
         // Note that we're using a global to store the metadata so we don't
@@ -1157,7 +1156,7 @@ var onSearchWithinBookSuccess = function(data) {
 
         tmpHTML = '<div  class="ocr-page-thumbnail ocr-page-result center-align" >';
         tmpHTML += '<img id="thumbnail-' + result.name + '" class="ia-thumbnail  " src="' + pageThumbnail(result.name) + '" onclick="scrollToPage(\'' + result.name + '\');"><br>';
-        var idx = parseInt(result.name.split("_")[1]);
+        var idx = parseInt(parsePageID(result.name).page);
         if (!_.isUndefined(bookReader) && bookReader.pageNums[idx] != null) {
             tmpHTML += 'rank ' + result.rank + ' : page ' + bookReader.pageNums[idx] + '</div>'
         } else {
