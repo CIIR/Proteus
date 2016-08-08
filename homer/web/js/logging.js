@@ -47,7 +47,7 @@ JSONtoHTMLFunctions["RESULTS"] = function (data) {
 }
 
 var noteHTML = function(data, action){
-  var id = parsePageID(data);
+  var id = parsePageID(data.resource);
   // if there's only one part of the resource, assume it's a paper - because we currently only have one annotation
   // object per paper while books have one per page.
   var html = logStart(data)  + ' ' + action + ' a note to document: ' + data.resource + ' note: "' + data.data.text + '"';
