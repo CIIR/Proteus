@@ -252,17 +252,13 @@ var onSearchSuccess = function(data) {
             $("#high-trigrams").append(getTermHTMl(t.ngram, t.count, 'add-quote'));
         })
 
-        _.forEach(data.perEntities, function(t) {
-            $("#high-entities-per").append(getTermHTMl(t.entity, t.count, 'entity person'));
-        })
-
-        _.forEach(data.locEntities, function(t) {
-            $("#high-entities-loc").append(getTermHTMl(t.entity, t.count, 'entity location'));
-        })
-
-        _.forEach(data.orgEntities, function(t) {
-            $("#high-entities-org").append(getTermHTMl(t.entity, t.count, 'entity organization'));
-        })
+        _.forEach(data.fields, function(field){
+            var html = '<div class="query-terms-area"><b>' + field.capitalizeEachWord() +': </b>';
+            _.forEach(data[field + 'Entities'], function(t) {
+                html += getTermHTMl(t.entity, t.count, 'entity ' + field);
+            });
+            $("#high-entity-fields").append(html + '</div>');
+        });
 
     } // end if show query builder
 

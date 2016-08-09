@@ -644,9 +644,7 @@ function clearQueryBuilder() {
     $("#high-snippettf").html('');
     $("#high-bigrams").html('');
     $("#high-trigrams").html('');
-    $("#high-entities-per").html('');
-    $("#high-entities-loc").html('');
-    $("#high-entities-org").html('');
+    $("#high-entity-fields").html('');
     $("#query-builder-query").html('');
 }
 

@@ -115,7 +115,7 @@ public class DocumentAnnotator {
       // modified getResourcRatings to get labels.
       Parameters labels = system.userdb.getResourceRatings2(doc.name, corpusID);
       // "overlap" is a document that is in more than one subcorpus
-      if (overlapOnly && labels.get("newLabels", Parameters.create()).size() < 2){
+      if (overlapOnly && labels.get("newLabels", Parameters.create()).size() < 2) {
         continue;
       }
 
@@ -159,15 +159,15 @@ public class DocumentAnnotator {
 
         // for books, snippets can cross pages so we'll use the page that contains the largest
         // part of the snippet.
-        String pg ="";
+        String pg = "";
         // page breaks are <div> tags
-        for (Tag t : doc.tags){
-          if (t.name.equals("div")){
+        for (Tag t : doc.tags) {
+          if (t.name.equals("div")) {
 
-            if ( snippetBegin <= t.end ){
+            if (snippetBegin <= t.end) {
               Integer termsOnPage = t.end - snippetBegin;
               Integer termsOnNextPage = snippetEnd - t.end;
-              if (termsOnNextPage > termsOnPage){
+              if (termsOnNextPage > termsOnPage) {
                 continue; // use the next page
               }
               pg = t.attributes.get("page");
@@ -375,74 +375,34 @@ public class DocumentAnnotator {
       Parameters p = Parameters.create();
       p.set(entType, parr);
       entList.add(p);
+
+      try {
+        List<Map.Entry<String, Integer>> entTopTen = allEntities.get(entType).entrySet().stream()
+                .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+                .limit(10)
+                .collect(Collectors.toList());
+
+        sum = entTopTen.stream().mapToDouble(entry -> entry.getValue()).sum();
+
+        ArrayList<Parameters> tmp1 = new ArrayList<>();
+        final Double finalSum2 = sum;
+
+
+        entTopTen.forEach((term -> {
+          final Parameters p1 = Parameters.create();
+          p1.put("entity", term.getKey());
+          p1.put("count", term.getValue());
+          p1.put("weight", term.getValue().floatValue() / finalSum2);
+          tmp1.add(p1);
+        }));
+        ret.put(entType + "Entities", tmp1);
+      } catch (Exception e) {
+        // TODO ignnore for now
+
+        ret.put(entType + "Entities", new ArrayList<Parameters>());
+      }
     }
-    
-    try {
-      List<Map.Entry<String, Integer>> entTopTen = allEntities.get("location").entrySet().stream()
-              .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-              .limit(10)
-              .collect(Collectors.toList());
-
-      sum = entTopTen.stream().mapToDouble(entry -> entry.getValue()).sum();
-
-      ArrayList<Parameters> tmp1 = new ArrayList<>();
-      final Double finalSum2 = sum;
-      entTopTen.forEach((term -> {
-        Parameters p = Parameters.create();
-        p.put("entity", term.getKey());
-        p.put("count", term.getValue());
-        p.put("weight", term.getValue().floatValue() / finalSum2);
-        tmp1.add(p);
-      }));
-      ret.put("locEntities", tmp1);
-    } catch (Exception e) {
-      // TODO ignnore for now
-
-      ret.put("locEntities", new ArrayList<Parameters>());
-    }
-    
-    try {
-      List<Map.Entry<String, Integer>> entTopTen = allEntities.get("person").entrySet().stream()
-              .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-              .limit(10)
-              .collect(Collectors.toList());
-      sum = entTopTen.stream().mapToDouble(entry -> entry.getValue()).sum();
-      ArrayList<Parameters> tmp2 = new ArrayList<>();
-      final Double finalSum = sum;
-      entTopTen.forEach((term -> {
-        Parameters p = Parameters.create();
-        p.put("entity", term.getKey());
-        p.put("count", term.getValue());
-        p.put("weight", term.getValue().floatValue() / finalSum);
-        tmp2.add(p);
-      }));
-      ret.put("perEntities", tmp2);
-    } catch (Exception e) {
-      // TODO ignnore for now
-      ret.put("perEntities", new ArrayList<Parameters>());
-    }
-
-    try {
-      List<Map.Entry<String, Integer>> entTopTen = allEntities.get("organization").entrySet().stream()
-              .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-              .limit(10)
-              .collect(Collectors.toList());
-      sum = entTopTen.stream().mapToDouble(entry -> entry.getValue()).sum();
-      ArrayList<Parameters> tmp2 = new ArrayList<>();
-      final Double finalSum = sum;
-      entTopTen.forEach((term -> {
-        Parameters p = Parameters.create();
-        p.put("entity", term.getKey());
-        p.put("count", term.getValue());
-        p.put("weight", term.getValue().floatValue() / finalSum);
-        tmp2.add(p);
-      }));
-      ret.put("orgEntities", tmp2);
-    } catch (Exception e) {
-      // TODO ignnore for now
-      ret.put("orgEntities", new ArrayList<Parameters>());
-    }
-
+ 
     ret.put("fields", noteFields);
 
     return ret;
