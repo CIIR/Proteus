@@ -49,3 +49,88 @@ QUnit.test( "Parse Internet Archive ID", function( assert ) {
   assert.equal("", obj.page);
 
 });
+
+QUnit.test( "Capitalize Each Word", function( assert ) {
+  var sentence = 'one two three';
+  assert.equal("One Two Three", sentence.capitalizeEachWord());
+
+  sentence = 'onE two tHree';
+  assert.equal("OnE Two THree", sentence.capitalizeEachWord());
+
+});
+
+QUnit.test( "Trim", function( assert ) {
+  var sentence = ' start';
+  assert.equal("start", sentence.trim());
+
+  sentence = 'end ';
+  assert.equal("end", sentence.trim());
+
+  sentence = '     start'; // multiple spaces
+  assert.equal("start", sentence.trim());
+
+  sentence = 'end    ';
+  assert.equal("end", sentence.trim());
+
+  sentence = ' both ';
+  assert.equal("both", sentence.trim());
+
+  sentence = '   both   ';
+  assert.equal("both", sentence.trim());
+
+  sentence = '\tstartTab';
+  assert.equal("startTab", sentence.trim());
+
+  sentence = 'endTab\t';
+  assert.equal("endTab", sentence.trim());
+
+  sentence = ' \t  mixed  \t '; // mixed tabs and spaces
+  assert.equal("mixed", sentence.trim());
+
+});
+
+QUnit.test( "Is Blank?", function( assert ) {
+  var sentence = ' start';
+
+  assert.notOk(isBlank(sentence));
+
+  sentence = 'end    ';
+  assert.equal(false, isBlank(sentence));
+
+  sentence = '     ';
+  assert.equal(true, isBlank(sentence));
+
+  sentence = '\t';
+  assert.equal(true, isBlank(sentence));
+
+  sentence = '  \t   ';
+  assert.equal(true, isBlank(sentence));
+
+  var empty;
+  assert.equal(true, isBlank(empty));
+
+  assert.equal(true, isBlank(undefined));
+
+});
+
+QUnit.test( "Guess Kind", function( assert ) {
+
+  var id = 123;
+  assert.equal('article', guessKind(id));
+
+  var id2 = '123';
+  assert.equal('article', guessKind(id2));
+
+  var id3 = "abc";
+  assert.equal('ia-books', guessKind(id3));
+
+  id3 = "abc_123";
+  assert.equal('ia-pages', guessKind(id3));
+
+  id3 = "abc_123_456";
+  assert.equal('ia-notes', guessKind(id3));
+
+  id3 = "abc_123_456_789";
+  assert.equal(undefined, guessKind(id3));
+  
+});
