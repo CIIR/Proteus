@@ -64,7 +64,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
             }
         }
     }
-    if (kind == 'ia-books' && !_.isUndefined(result.snippetPage) ){
+    if (kind == 'ia-books' && !_.isUndefined(result.snippetPage)) {
         docid = identifier + "_" + result.snippetPage;
         nameLink = Render.getDocumentURL(archiveViewerURL(docid), name, queryTerms, result.rank, identifier);
     }
@@ -103,7 +103,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
         });
     } // end if we have entities
 
-    var html =  '<table class="result-table"><tr>';
+    var html = '<table class="result-table"><tr>';
 
     html += '<td class="preview" rowspan="3">' + previewImage + '</td>' +
             '<td class="name">' + nameLink + '&nbsp;(<a target="_blank" href="view.html?kind=ia-pages&action=view&id=' + docid + '&queryid=' + queryid + '">view OCR</a>)&nbsp;'
@@ -113,12 +113,12 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     html += '<span id="' + result.name + '-user-ratings"></span><span  style="display:none" id="' + result.name + '-user-ratings-w-names"></span>';
     html += '<span class="highlight" id="' + result.name + '-dup-confidence"></span>';
     html += '</td></div></td><td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td></tr>';
-    html += '<tr class="author"><td><span class="' + identifier + '-meta-author" >' + result.meta.creator ;
+    html += '<tr class="author"><td><span class="' + identifier + '-meta-author" >' + result.meta.creator;
     html += '</span>&nbsp;•&nbsp;published: <span class="' + identifier + '-meta-published">' + result.meta.date + '</span></td></tr>';
 
     if (snippet) {
         html += '<tr><td class="snippet" colspan="3"> ...';
-        html +=  snippet ;
+        html += snippet;
         html += '... </td></tr>';
 
         // only get uniq word if we haven't seen it before - this will be used later
@@ -139,27 +139,27 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
         noteHTML += '<div class="resource-notes" ><a target="_blank" href="../view.html?kind=ia-pages&action=view&id=' + note.uri + '&noteid=' + note.id + '"><b>';
         // remove any <br> tags, they make the note look odd in the results list
         noteHTML += note.user.split('@')[0] + ' : <i>' + note.text.replace(/<br>/g, " ") + '</i></b> : ';
-        noteHTML += note.quote.replace(/<br>/g, " ") ;
+        noteHTML += note.quote.replace(/<br>/g, " ");
         noteHTML += '</a></div>';
     })
 
     if (noteHTML.length > 0) {
         html += '<a href="#" onclick="UI.toggleNotes(\'' + result.name + '\');"><span id="notes-link-' + result.name + '"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;';
-        if (UI.settings.show_notes == false){
+        if (UI.settings.show_notes == false) {
             html += 'Show';
         } else {
             html += 'Hide';
         }
         html += ' notes&nbsp;</span><span class="fa fa-pencil"></span></a>';
         html += '<div id="notes-div-' + result.name + '"  ';
-        if (UI.settings.show_notes == false){
+        if (UI.settings.show_notes == false) {
             html += 'style="display:none"';
         }
         html += '>' + noteHTML + '</div>';
     }
 
     // show queries
-    if (UI.settings.show_found_with_query){
+    if (UI.settings.show_found_with_query) {
 
         var queries = [];
         _.each(result.queries.rows, function(query) {
@@ -208,7 +208,7 @@ var renderNoteResult = function(queryTerms, result, resDiv) {
     if (snippet) {
         html += '<td class="snippet">';
         html += '<div  ><a target="_blank" href="../view.html?kind=ia-pages&action=view&id=' + idParts[0] + '_' + idParts[1] + '&noteid=' + idParts[2] + '">';
-        html +=  snippet ; // last param says not to strip out punctuation
+        html += snippet; // last param says not to strip out punctuation
         html += '</a></td>';
     }
     html += '<td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td>' + '</tr>';
@@ -246,25 +246,27 @@ var doActionSearchPages = function(args) {
 
 var parsedPageCache = new Map();
 
-function parsePageID(pageid){
+function parsePageID(pageid) {
 
-    if (parsedPageCache.has(pageid)){
+    if (parsedPageCache.has(pageid)) {
         var cachedObj = parsedPageCache.get(pageid);
         // this is just here for the unit test to make sure we're using the cache
         cachedObj.cached = true;
         return cachedObj;
     }
 
+    var page = '';
     var i = pageid.lastIndexOf('_');
     // if no underscore is found, use the whole thing for the ID
-    if (i < 0){
+    if (i < 0) {
         i = pageid.length;
-    }
-    var page = pageid.substring(i + 1);
-    // saftey check, make sure the page number is really a number
-    if (isNaN(parseInt(page, 10))){
-        console.log("Error getting page number for: " + pageid);
-        page = '';
+    } else {
+        page = pageid.substring(i + 1);
+        // saftey check, make sure the page number is really a number
+        if (isNaN(parseInt(page, 10))) {
+            console.log("Error getting page number for: " + pageid);
+            page = '';
+        }
     }
     var obj = {};
     obj.id = pageid.substring(0, i);
@@ -281,9 +283,9 @@ function parsePageID(pageid){
 
 var bookMetadataCache = new Map();
 
-function getInternetArchiveMetadata(bookid, args, callback){
+function getInternetArchiveMetadata(bookid, args, callback) {
 
-    if (bookMetadataCache.has(bookid)){
+    if (bookMetadataCache.has(bookid)) {
         console.log("I've seen this book before!!!!!");
         args.metadata = bookMetadataCache.get(bookid);
         callback();
@@ -291,23 +293,23 @@ function getInternetArchiveMetadata(bookid, args, callback){
     }
 
     $.getJSON('http://archive.org/metadata/' + bookid + '/metadata')
-            .done(function (json) {
+            .done(function(json) {
                 args.metadata = json.result;
                 bookMetadataCache.set(bookid, args.metadata);
                 callback();
             })
-            .fail(function (jqxhr, textStatus, error ) {
+            .fail(function(jqxhr, textStatus, error) {
                 var err = textStatus + ", " + error;
                 alert("Something went wrong getting the metadata from archive.org: " + err);
-                console.log( "Request Failed: " + err );
+                console.log("Request Failed: " + err);
             });
 }
 
-function getOCLC(bookid){
+function getOCLC(bookid) {
 
     var args = {};
     // ??? don't always need to go to IA, should have it in index
-    getInternetArchiveMetadata(bookid, args, function(){
+    getInternetArchiveMetadata(bookid, args, function() {
         if (_.isUndefined(args.metadata['oclc-id'])) {
             return null;
         }
