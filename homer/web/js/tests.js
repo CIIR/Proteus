@@ -20,33 +20,93 @@ QUnit.test( "JQuery Escape", function( assert ) {
 QUnit.test( "Parse Internet Archive ID", function( assert ) {
   var pageid = 'id_123';
   var obj = parsePageID(pageid);
-  assert.equal("id", obj.id);
-  assert.equal("123", obj.page);
-  assert.equal(123, obj.page);
+  assert.equal(obj.id, "id");
+  assert.equal(obj.page,"123");
+  assert.equal(obj.page,123);
+  assert.equal(obj.note,"");
 
   // make sure cache was updated and we use it
-  assert.equal(1, parsedPageCache.size);
-  assert.equal(obj, parsedPageCache.get(pageid));
+  assert.equal(parsedPageCache.size, 1);
+  assert.equal(parsedPageCache.get(pageid), obj);
   var newobj = parsePageID(pageid);
-  assert.equal(true, newobj.cached);
+  assert.equal(newobj.cached, true);
 
   // multiple underscores
   pageid = 'poems___00wott_191';
   obj = parsePageID(pageid);
-  assert.equal("poems___00wott", obj.id);
-  assert.equal("191", obj.page);
+  assert.equal(obj.id, "poems___00wott");
+  assert.equal(obj.page,"191");
+  assert.equal(obj.note,"");
 
   // no page number
   pageid = 'archiveid';
   obj = parsePageID(pageid);
-  assert.equal("archiveid", obj.id);
-  assert.equal("", obj.page);
+  assert.equal(obj.id, "archiveid");
+  assert.equal(obj.page,"");
+  assert.equal(obj.note,"");
 
   // NaN page number
   pageid = 'archiveid_foo';
   obj = parsePageID(pageid);
-  assert.equal("archiveid", obj.id);
-  assert.equal("", obj.page);
+  assert.equal(obj.id, pageid);
+  assert.equal(obj.page, "");
+  assert.equal(obj.note,"");
+
+  pageid = 'archiveid_123_foo';
+  obj = parsePageID(pageid);
+  assert.equal(obj.id, pageid);
+  assert.equal(obj.page, "");
+  assert.equal(obj.note,"");
+
+  pageid = 'archiveid_123xyz';
+  obj = parsePageID(pageid);
+  assert.equal(obj.id, pageid);
+  assert.equal(obj.page, "");
+  assert.equal(obj.note,"");
+
+  // id is a number
+  pageid = '123_456';
+  obj = parsePageID(pageid);
+  assert.equal(obj.id, "123");
+  assert.equal(obj.page, "456");
+  assert.equal(obj.note,"");
+
+  pageid = '123';
+  obj = parsePageID(pageid);
+  assert.equal(obj.id, "123");
+  assert.equal(obj.page, "");
+  assert.equal(obj.note,"");
+
+  // test note numbers
+  pageid = 'archiveid_123_456';
+  obj = parsePageID(pageid);
+  assert.equal(obj.id, "archiveid");
+  assert.equal(obj.page, "123");
+  assert.equal(obj.note,"456");
+
+  pageid = 'poems___00wott_191_23';
+  obj = parsePageID(pageid);
+  assert.equal(obj.id, "poems___00wott");
+  assert.equal(obj.page,"191");
+  assert.equal(obj.note,"23");
+
+  pageid = '123_456_789';
+  obj = parsePageID(pageid);
+  assert.equal(obj.id, "123");
+  assert.equal(obj.page,"456");
+  assert.equal(obj.note,"789");
+
+  pageid = '123_456_789_101112';
+  obj = parsePageID(pageid);
+  assert.equal(obj.id, "123_456");
+  assert.equal(obj.page,"789");
+  assert.equal(obj.note,"101112");
+
+  pageid = '123_456_789_101112x';
+  obj = parsePageID(pageid);
+  assert.equal(obj.id, "123_456_789_101112x");
+  assert.equal(obj.page,"");
+  assert.equal(obj.note,"");
 
 });
 
@@ -132,5 +192,49 @@ QUnit.test( "Guess Kind", function( assert ) {
 
   id3 = "abc_123_456_789";
   assert.equal(undefined, guessKind(id3));
-  
+
 });
+
+var invalidID = 'dyescoinencXXyclop00dyejiala';
+var validID = 'dyescoinencyclop00dyejiala';
+
+QUnit.test( "getInternetArchiveJS - Invalid ID", function( assert ) {
+
+  var done = assert.async();
+
+  // First call with invalid ID so book reader will be undefined.
+  getInternetArchiveJS(invalidID, function(){
+    assert.equal(true, _.isUndefined(getBookReader()));
+    done();
+  });
+
+});
+
+QUnit.test( "getInternetArchiveJS - valid ID", function( assert ) {
+
+  var done = assert.async();
+
+  // valid archive id
+  getInternetArchiveJS(validID, function(){
+    var tmpBR = getBookReader();
+    assert.equal(false, _.isUndefined(tmpBR));
+    assert.equal(validID, tmpBR.getBookID());
+    done();
+  });
+
+});
+
+QUnit.test( "getInternetArchiveJS - book id mismatch", function( assert ) {
+
+  var done = assert.async();
+
+  // invalid archive id - book reader should be the prior one
+  getInternetArchiveJS(invalidID, function(){
+    var tmpBR = getBookReader();
+    assert.equal(false, _.isUndefined(tmpBR));
+    assert.equal(validID, tmpBR.getBookID());
+    done();
+  });
+
+});
+

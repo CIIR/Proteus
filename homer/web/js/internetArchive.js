@@ -241,10 +241,12 @@ var doActionSearchPages = function(args) {
 
 // We append he page number to the archive ID separated by an underscore.
 // While rare, there are some archive IDs that require a bit more than
-// a simple split('_') such as: poems___00wott_191
+// a simple split('_') such as: poems___00wott_191.
+// We also can have note IDs so an ID could be: poems___00wott_191_56.
 // Since we do this a lot, we'll cache the archive IDs we've already done.
 
 var parsedPageCache = new Map();
+
 
 function parsePageID(pageid) {
 
@@ -255,22 +257,29 @@ function parsePageID(pageid) {
         return cachedObj;
     }
 
+    var parts = pageid.split('_');
+    var len = parts.length;
+    var isNumber = _.map(parts, function(p) {
+        return p.length > 0 && !isNaN(p);
+    });
+
     var page = '';
-    var i = pageid.lastIndexOf('_');
-    // if no underscore is found, use the whole thing for the ID
-    if (i < 0) {
-        i = pageid.length;
-    } else {
-        page = pageid.substring(i + 1);
-        // saftey check, make sure the page number is really a number
-        if (isNaN(parseInt(page, 10))) {
-            console.log("Error getting page number for: " + pageid);
-            page = '';
-        }
+    var note = '';
+
+    // see if we have 2 numbers
+    if (len > 2 && isNumber[len - 1] && isNumber[len - 2]) {
+        note = parts[len - 1];
+        page = parts[len - 2];
+        parts.splice(len - 2, 2); // remove note/page entries
+    } else if (len > 1 && isNumber[len - 1]) {
+        page = parts[len - 1];
+        parts.splice(len - 1, 1); // remove page entry
     }
+
     var obj = {};
-    obj.id = pageid.substring(0, i);
+    obj.id = parts.join('_');
     obj.page = page;
+    obj.note = note;
     parsedPageCache.set(pageid, obj);
     return obj;
 

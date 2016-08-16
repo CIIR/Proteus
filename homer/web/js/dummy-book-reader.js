@@ -9,19 +9,34 @@
 // which we use to access the page numbers.
 // We create the "br" variable here to avoid errors such as
 // "Uncaught ReferenceError: br is not defined" if the IA script fails for some reason.
-var br;
-function BookReader() {};
-BookReader.prototype.init = function() { return true;}
+var  br ;
+function BookReader() {}
+BookReader.prototype.init = function() { return true;};
+BookReader.prototype.getBookID = function() { return br.bookId;};
+BookReader.prototype.getPageNumber = function(idx) { return br.pageNums[idx];};
 
-function getBookReader() { return br;};
+
+function getBookReader() { return  br;}
 
 function getInternetArchiveJS(bookid, callback){
   // The URL in the script tag below is dynamically generated JavaScript that includes the book metadata and page image access functions.
   // The ia{number}.us.archive.org server for the book can and does change, so this URL should NOT be used for permanent access.
-  // Use the JSLocate URL below instead for stable access - it will find the item and redirect to the correct server
+  // Use the JSLocate URL below instead for stable access - it will find the item and redirect to the correct server.
+  // Note, the "fail" handler is only called in situations like when archive.org is unreachable, not in situations like
+  // when a bad id is passed in. In that case, JavaScript may be returned that causes an alert() or nothing is returned.
+  // Also note, this will ALWAYS call the callback, so the callback should check for things like the book reader
+  // being undefined.
 
   $.getScript('http://archive.org/bookreader/BookReaderJSLocate.php?id=' + bookid + '&subPrefix=' + bookid)
           .done(function (script, textStatus) {
+            var myBr =  getBookReader();
+            // since we can reach this even if a bad id is passed to the BookReaderJSLocate script, we'll
+            // check if the IDs match, if not, consider that an error.
+            if (_.isUndefined(myBr)) {
+              console.log('Error getting book reader, id should be: ' + bookid + ' but id is: undefined');
+            } else if (bookid != myBr.getBookID()) {
+              console.log('Error getting book reader, id should be: ' + bookid + ' but id is: ' + myBr.getBookID());
+            }
             callback();
           })
           .fail(function (jqxhr, settings, exception) {
