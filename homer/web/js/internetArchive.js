@@ -292,25 +292,28 @@ function parsePageID(pageid) {
 
 var bookMetadataCache = new Map();
 
-function getInternetArchiveMetadata(bookid, args, callback) {
+function getInternetArchiveMetadata(bookid, obj, callback) {
 
     if (bookMetadataCache.has(bookid)) {
         console.log("I've seen this book before!!!!!");
-        args.metadata = bookMetadataCache.get(bookid);
+        obj.metadata = bookMetadataCache.get(bookid);
+        // this is just here for the unit test to make sure we're using the cache
+        obj.metadata.cached = true;
         callback();
         return;
     }
 
     $.getJSON('http://archive.org/metadata/' + bookid + '/metadata')
             .done(function(json) {
-                args.metadata = json.result;
-                bookMetadataCache.set(bookid, args.metadata);
+                obj.metadata = json.result;
+                bookMetadataCache.set(bookid, json.result);
                 callback();
             })
             .fail(function(jqxhr, textStatus, error) {
                 var err = textStatus + ", " + error;
                 alert("Something went wrong getting the metadata from archive.org: " + err);
                 console.log("Request Failed: " + err);
+                callback();
             });
 }
 

@@ -2,6 +2,11 @@
  * Created by michaelz on 8/3/2016.
  */
 
+// override alert so this script can run without supervision.
+function alert(msg){
+  console.log(msg);
+}
+
 QUnit.module( "Utilities" );
 QUnit.test( "JQuery Escape", function( assert ) {
   var id = 'NothingSpecial';
@@ -238,3 +243,49 @@ QUnit.test( "getInternetArchiveJS - book id mismatch", function( assert ) {
 
 });
 
+
+QUnit.test( "getInternetArchiveMetadata - Invalid ID", function( assert ) {
+
+  var done = assert.async();
+
+  // First call with invalid ID so book reader will be undefined.
+  var data = {};
+  assert.equal(true, _.isUndefined(data.metadata));
+  getInternetArchiveMetadata(invalidID, data, function(){
+    assert.equal(true, _.isUndefined(data.metadata));
+    done();
+  });
+
+});
+
+QUnit.test( "getInternetArchiveMetadata - valid ID", function( assert ) {
+
+  var done = assert.async();
+
+  // valid archive id
+  var data = {};
+  assert.equal(true, _.isUndefined(data.metadata));
+  getInternetArchiveMetadata(validID, data, function(){
+    assert.equal(false, _.isUndefined(data.metadata));
+    assert.ok(_.size(data.metadata) > 0);
+    assert.equal(true, _.isUndefined(data.metadata.cached));
+    done();
+  });
+
+});
+
+QUnit.test( "getInternetArchiveMetadata - cached", function( assert ) {
+
+  var done = assert.async();
+
+  // valid archive id - should use cached value
+  var data = {};
+  assert.equal(true, _.isUndefined(data.metadata));
+  getInternetArchiveMetadata(validID, data, function(){
+    assert.equal(false, _.isUndefined(data.metadata));
+    assert.ok(_.size(data.metadata) > 0);
+    assert.equal(false, _.isUndefined(data.metadata.cached));
+    done();
+  });
+
+});
