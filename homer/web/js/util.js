@@ -104,8 +104,8 @@ var getUser = function() {
 }
 
 // the "exclude" option is so we don't highlight terms in the label buttons.
-var singleTermHightlightOptions = { "exclude": [".resource-labels *"], "element": "span", "className" : "hili"};
-var nGramTermHightlightOptions = { "exclude": [".resource-labels *"], "element": "span", "className" : "hili", "separateWordSearch" : false};
+var singleTermHightlightOptions = {"exclude": [".resource-labels *"], "element": "span", "className": "hili"};
+var nGramTermHightlightOptions = {"exclude": [".resource-labels *"], "element": "span", "className": "hili", "separateWordSearch": false};
 var newHighlightText = function(selector, queryTerms) {
     if (_.isUndefined(queryTerms) || queryTerms.length == 0) {
         return;
@@ -114,18 +114,18 @@ var newHighlightText = function(selector, queryTerms) {
     var singleTerms = [];
     var nGramTerms = [];
 
-    _.forEach(queryTerms, function(term){
-        if (term.includes(" ")){
+    _.forEach(queryTerms, function(term) {
+        if (term.includes(" ")) {
             nGramTerms.push(term);
         } else {
             singleTerms.push(term);
         }
     })
 
-    if (singleTerms.length > 0){
+    if (singleTerms.length > 0) {
         $(selector).mark(singleTerms, singleTermHightlightOptions);
     }
-    if (nGramTerms.length > 0){
+    if (nGramTerms.length > 0) {
         $(selector).mark(nGramTerms, nGramTermHightlightOptions);
     }
 
@@ -743,7 +743,7 @@ function displaySubcorporaFacets() {
         array = urlParams["subcorpora"].split(',');// $.map(getSubcorporaElements(), function(c){return c.value; })
     }
     if (!_.isUndefined(urlParams["overlapOnly"])) {
-        $('#show-overlap').attr('checked',urlParams["overlapOnly"]);
+        $('#show-overlap').attr('checked', urlParams["overlapOnly"]);
     }
 
     // 1st check ensures we have an entry for subcorpora, 2nd check makes sure there is data,
@@ -936,4 +936,31 @@ function clearOCRSearchResults() {
     $("#book-search-results").addClass("center-align");
     $(".book-text").unmark();
     $(".ocr-page-thumbnail").removeClass("ocr-page-result");
+}
+
+Array.prototype.naturalSortByField = function(p) {
+    return this.slice(0).sort(function(a, b) {
+        // MCZ:
+        // Code for naturalCompare() from: http://stackoverflow.com/questions/15478954/sort-array-elements-string-with-numbers-natural-sort.
+        // Modified to accept a parameter as seen in: http://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value-in-javascript
+        // Also added toString() so we can sort on numeric fields.
+        var ax = [], bx = [];
+
+        a[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) {
+            ax.push([$1 || Infinity, $2 || ""])
+        });
+        b[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) {
+            bx.push([$1 || Infinity, $2 || ""])
+        });
+
+        while (ax.length && bx.length) {
+            var an = ax.shift();
+            var bn = bx.shift();
+            var nn = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
+            if (nn)
+                return nn;
+        }
+        return ax.length - bx.length;
+    }
+    );
 }
