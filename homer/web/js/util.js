@@ -1027,24 +1027,28 @@ var archiveViewerURL = function(pageid) {
 };
 
 
-Array.prototype.naturalSortByField = function(p) {
-    return this.slice(0).sort( function(a, b){
-                // MCZ:
-                // Code for naturalCompare() from: http://stackoverflow.com/questions/15478954/sort-array-elements-string-with-numbers-natural-sort.
-                // Modified to accept a parameter as seen in: http://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value-in-javascript
-                // Also added toString() so we can sort on numeric fields.
-                var ax = [], bx = [];
+Object.defineProperty(Array.prototype, 'naturalSortByField', {
+    enumerable: false,
+    value: function(p) {
+        return this.slice(0).sort( function(a, b){
+                    // MCZ:
+                    // Code for naturalCompare() from: http://stackoverflow.com/questions/15478954/sort-array-elements-string-with-numbers-natural-sort.
+                    // Modified to accept a parameter as seen in: http://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value-in-javascript
+                    // Also added toString() so we can sort on numeric fields.
+                    var ax = [], bx = [];
 
-                a[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) { ax.push([$1 || Infinity, $2 || ""]) });
-                b[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) { bx.push([$1 || Infinity, $2 || ""]) });
+                    a[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) { ax.push([$1 || Infinity, $2 || ""]) });
+                    b[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) { bx.push([$1 || Infinity, $2 || ""]) });
 
-                while(ax.length && bx.length) {
-                    var an = ax.shift();
-                    var bn = bx.shift();
-                    var nn = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
-                    if(nn) return nn;
+                    while(ax.length && bx.length) {
+                        var an = ax.shift();
+                        var bn = bx.shift();
+                        var nn = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
+                        if(nn) return nn;
+                    }
+                    return ax.length - bx.length;
                 }
-                return ax.length - bx.length;
-            }
-    );
-}
+        );
+    }
+});
+
