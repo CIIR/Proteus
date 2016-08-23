@@ -221,7 +221,7 @@ td.metakey {
     margin-left: 2cm;
 }
 
-body {
+#body-index {
     margin: 0;
     overflow-y: hidden;
 }
@@ -756,4 +756,24 @@ span-highlight{
 
 .result-table{
     width: 100%
+}
+
+#bib-data{
+    font-family:  "Courier New", Courier, monospace;
+}
+
+#bib-body{
+    overflow-y:scroll;
+    overflow-x:scroll;
+    white-space:nowrap
+}
+
+.centered {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 15pt;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%)
 }

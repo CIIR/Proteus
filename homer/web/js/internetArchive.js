@@ -1,10 +1,3 @@
-/**
- * No other code should construct URLs or know about the internet archive in general,
- * so that we can generalize to the academic paper domain.
- *
- * URL format information for the Archive is at https://openlibrary.org/dev/docs/bookurls (as of March 2014)
- *
- */
 
 var pageImage = function(pageid) {
     var id = parsePageID(pageid);
@@ -14,11 +7,6 @@ var pageImage = function(pageid) {
 var pageThumbnail = function(pageid) {
     var id = parsePageID(pageid);
     return "http://www.archive.org/download/" + encodeURIComponent(id.id) + "/page/n" + id.page + "_thumb.jpg";
-};
-
-var archiveViewerURL = function(pageid) {
-    var id = parsePageID(pageid);
-    return 'https://archive.org/stream/' + encodeURIComponent(id.id) + '#page/n' + id.page + '/mode/2up';
 };
 
 var renderResult = function(queryTerms, result, resDiv, queryid) {
@@ -239,83 +227,7 @@ var doActionSearchPages = function(args) {
     UI.showError("Unknown action `" + action + "'");
 };
 
-// We append he page number to the archive ID separated by an underscore.
-// While rare, there are some archive IDs that require a bit more than
-// a simple split('_') such as: poems___00wott_191.
-// We also can have note IDs so an ID could be: poems___00wott_191_56.
-// Since we do this a lot, we'll cache the archive IDs we've already done.
 
-var parsedPageCache = new Map();
-
-
-function parsePageID(pageid) {
-
-    if (parsedPageCache.has(pageid)) {
-        var cachedObj = parsedPageCache.get(pageid);
-        // this is just here for the unit test to make sure we're using the cache
-        cachedObj.cached = true;
-        return cachedObj;
-    }
-
-    var parts = pageid.split('_');
-    var len = parts.length;
-    var isNumber = _.map(parts, function(p) {
-        return p.length > 0 && !isNaN(p);
-    });
-
-    var page = '';
-    var note = '';
-
-    // see if we have 2 numbers
-    if (len > 2 && isNumber[len - 1] && isNumber[len - 2]) {
-        note = parts[len - 1];
-        page = parts[len - 2];
-        parts.splice(len - 2, 2); // remove note/page entries
-    } else if (len > 1 && isNumber[len - 1]) {
-        page = parts[len - 1];
-        parts.splice(len - 1, 1); // remove page entry
-    }
-
-    var obj = {};
-    obj.id = parts.join('_');
-    obj.page = page;
-    obj.note = note;
-    parsedPageCache.set(pageid, obj);
-    return obj;
-
-}
-
-// This function is used if metadata is not returned with the results.
-// Since we could have multiple pages for the same book returned, we
-// don't want to get metadata we already know, so we'll keep track of
-// books we've already seen.
-
-var bookMetadataCache = new Map();
-
-function getInternetArchiveMetadata(bookid, obj, callback) {
-
-    if (bookMetadataCache.has(bookid)) {
-        console.log("I've seen this book before!!!!!");
-        obj.metadata = bookMetadataCache.get(bookid);
-        // this is just here for the unit test to make sure we're using the cache
-        obj.metadata.cached = true;
-        callback();
-        return;
-    }
-
-    $.getJSON('http://archive.org/metadata/' + bookid + '/metadata')
-            .done(function(json) {
-                obj.metadata = json.result;
-                bookMetadataCache.set(bookid, json.result);
-                callback();
-            })
-            .fail(function(jqxhr, textStatus, error) {
-                var err = textStatus + ", " + error;
-                alert("Something went wrong getting the metadata from archive.org: " + err);
-                console.log("Request Failed: " + err);
-                callback();
-            });
-}
 
 function getOCLC(bookid) {
 

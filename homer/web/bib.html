@@ -1,0 +1,74 @@
+﻿<html>
+<head>
+
+    <!-- supply any functions that browsers like IE don't natively support-->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6"></script>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title id="proteus-title">Proteus: Search</title>
+
+    <!-- Bootstrap -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <script src="js/jquery/2.0.3/jquery.min.js"></script>
+    <script src="js/lodash/2.4.1/lodash.min.js"></script>
+    <script src="js/history/1.8/native.history.min.js"></script>
+
+    <script src="js/jquery.cookie.js"></script>
+
+
+    <!-- scripts included here evaluate before the page loads -->
+    <script src="js/API.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/bib.js"></script>
+
+
+    <link rel="stylesheet" href="css/style.css" type="text/css"/>
+
+    <script type="text/javascript" src="js/dummy-book-reader.js"></script>
+
+    <script>
+
+        var showSideBarFlag = false;
+        var lastChecked = null;
+        $(document).ready(function () {
+
+            var urlParams = getURLParams();
+            if (_.isUndefined(urlParams['user']) && isLoggedIn() == false) {
+                window.location = "login.html";
+                return;
+            }
+
+            if (!_.isUndefined(urlParams['user']) && isLoggedIn() == false) {
+                logIn(urlParams['user']);
+            }
+
+        });</script>
+
+
+</head>
+<body id="bib-body">
+
+        <div id="bib-data"><span class="centered">Gathering data... <img src="/images/more-loader.gif"\></span></div>
+
+
+<!-- scripts included here evaluate after the page loads -->
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="js/ui.js"></script>
+<script src="js/actions.js"></script>
+<script src="js/main.js"></script>
+
+
+</body>
+
+</html>

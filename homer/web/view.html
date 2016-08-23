@@ -3,26 +3,6 @@
         <!-- supply any functions that browsers like IE don't natively support-->
         <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6"></script>
 
-        <script>
-            // check if the browser supports local storage, we have to do this FIRST
-            // before any other JS stuff which could cause other issues and cause this
-            // to get skipped.
-            // from: http://diveintohtml5.info/detect.html#storage
-            function check() {
-                try {
-                    return 'localStorage' in window && window['localStorage'] !== null;
-                } catch (e) {
-                    return false;
-                }
-            }
-
-            if (check() == false) {
-                alert("You are using an old browser, please upgrade.");
-                document.execCommand("Stop"); // for IE
-                window.stop(); //works in all browsers but IE
-            }
-        </script>
-
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -75,7 +55,7 @@
         <script type="text/javascript" src="js/annotator.auth.js"></script>
         <script type="text/javascript" src="js/annotator.store.js"></script>
         <script type="text/javascript" src="js/annotator.filter.js"></script>
-
+        <script type="text/javascript" src="js/annotator.noteevent.js"></script>
 
         <script src="js/jquery.slimscroll.js"></script>
         <script src="js/ProteusAnnotationFilter.js"></script>

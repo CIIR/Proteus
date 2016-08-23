@@ -19,16 +19,16 @@ var isBlank = function(str) {
 
 var pushURLParams = function(params) {
     var urlParams = "?" + _(params).map(function(vals, key) {
-        //console.log(key + ":" + vals);
-        // some values - like labels - can have multiple comma 
-        // separated value. If these are passed like "labels=a,b,c"
-        // they get interpreted as one value. So if there are multiples
-        // we'll pass multiple key/value pairs like: labels=a&labels=b&labels=c
-        return  _.map(vals.toString().split(","), function(val) {
-            //console.log("          " + key + ":" + val);
-            return encodeURIComponent(key) + "=" + encodeURIComponent(val);
-        }).join('&');
-    }).join('&');
+                //console.log(key + ":" + vals);
+                // some values - like labels - can have multiple comma
+                // separated value. If these are passed like "labels=a,b,c"
+                // they get interpreted as one value. So if there are multiples
+                // we'll pass multiple key/value pairs like: labels=a&labels=b&labels=c
+                return  _.map(vals.toString().split(","), function(val) {
+                    //console.log("          " + key + ":" + val);
+                    return encodeURIComponent(key) + "=" + encodeURIComponent(val);
+                }).join('&');
+            }).join('&');
 
     // if there are labels AND we don't have a "labelOwner" param, add the user that owns them
     if (!_.isUndefined(params.labels) && urlParams.indexOf("labelOwner") == -1) {
@@ -104,8 +104,8 @@ var getUser = function() {
 }
 
 // the "exclude" option is so we don't highlight terms in the label buttons.
-var singleTermHightlightOptions = {"exclude": [".resource-labels *"], "element": "span", "className": "hili"};
-var nGramTermHightlightOptions = {"exclude": [".resource-labels *"], "element": "span", "className": "hili", "separateWordSearch": false};
+var singleTermHightlightOptions = { "exclude": [".resource-labels *"], "element": "span", "className" : "hili"};
+var nGramTermHightlightOptions = { "exclude": [".resource-labels *"], "element": "span", "className" : "hili", "separateWordSearch" : false};
 var newHighlightText = function(selector, queryTerms) {
     if (_.isUndefined(queryTerms) || queryTerms.length == 0) {
         return;
@@ -114,18 +114,18 @@ var newHighlightText = function(selector, queryTerms) {
     var singleTerms = [];
     var nGramTerms = [];
 
-    _.forEach(queryTerms, function(term) {
-        if (term.includes(" ")) {
+    _.forEach(queryTerms, function(term){
+        if (term.includes(" ")){
             nGramTerms.push(term);
         } else {
             singleTerms.push(term);
         }
     })
 
-    if (singleTerms.length > 0) {
+    if (singleTerms.length > 0){
         $(selector).mark(singleTerms, singleTermHightlightOptions);
     }
-    if (nGramTerms.length > 0) {
+    if (nGramTerms.length > 0){
         $(selector).mark(nGramTerms, nGramTermHightlightOptions);
     }
 
@@ -184,7 +184,7 @@ function isLoggedIn() {
 
 
 function enableAutoRetrieve() {
-// TODO this needs to be for the "searched" kind - can't default to books
+    // TODO this needs to be for the "searched" kind - can't default to books
     $('#results-right').bind('scroll', function() {
 
         if ($(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight) {
@@ -218,14 +218,14 @@ function getCorpusID(corpusName) {
     // 10/2015 MCZ moving towards a tagging model so this will always
     // be "1" - the "umbrella" corpus
     return 1;
-//    // TODO: has to be a better way to do this - just brute force it for now...
-//    var corpora = JSON.parse(localStorage["corpora"]);
-//    var corpID = -1;
-//    _.forEach(corpora, function(c){
-//        if (c.name == corpusName)
-//            corpID = parseInt(c.id);
-//    });
-//    return corpID;
+    //    // TODO: has to be a better way to do this - just brute force it for now...
+    //    var corpora = JSON.parse(localStorage["corpora"]);
+    //    var corpID = -1;
+    //    _.forEach(corpora, function(c){
+    //        if (c.name == corpusName)
+    //            corpID = parseInt(c.id);
+    //    });
+    //    return corpID;
 }
 
 jsonp_handler = function(data)
@@ -257,12 +257,12 @@ function initImportantEntities() {
             $("#important-entities").html(html + "<br>" + ui.draggable[0].parentElement.nodeName + ": " + ui.draggable[0].outerHTML);
             // remove any classes
             $("#important-entities .mz-ner").removeClass();
-//
-//            API.callWikipedia(ui.draggable[0].textContent, function(data){
-//                console.log(JSON.stringify(data));
-//            }, function(){
-//                console.log("Failure");
-//            })
+            //
+            //            API.callWikipedia(ui.draggable[0].textContent, function(data){
+            //                console.log(JSON.stringify(data));
+            //            }, function(){
+            //                console.log("Failure");
+            //            })
 
 
             // the text we're taking the NER from is all lower case. The Wikipedia API will only capitalize the first
@@ -318,7 +318,7 @@ var setUserRatingsHTML = function(res) {
     });
 
 
-//    var rating_wo_names_html =   '<span>';
+    //    var rating_wo_names_html =   '<span>';
 
     // use a map to group who "voted" for a subcorpus
     var votes = {};
@@ -349,84 +349,84 @@ var setUserRatingsHTML = function(res) {
     $('#' + res + '-user-ratings-w-names').html(rating_html);
 
     //    if (_.isUndefined( ratingsJSON.document[res]) || _.isEmpty(ratingsJSON.document[res])) {
-//        return '';
-//    }
-//
-//    var rating_html =   '<span>';
-//    var rating_wo_names_html =   '<span>';
-//
-//    _.forEach(ratingsJSON.document[res], function (val, key) {
-//
-//        // ignore any zero ratings
-//        if (val  != 0){
-//            var user  = key.split("@")[0] ;
-//
-//            if (val == 1){
-//                rating_html += user + ' <span class="glyphicon glyphicon-ok"></span><br>'
-//                rating_wo_names_html +=   ' <span class="glyphicon glyphicon-ok"></span> '
-//            } else {
-//                rating_html += user + ' <span class="glyphicon glyphicon-remove"></span><br>'
-//                rating_wo_names_html +=  ' <span class="glyphicon glyphicon-remove"></span> '
-//            }
-//        }
-//    })
-//
-//    rating_html += '</span>';
-//    rating_wo_names_html += '</span>';
-//
-//    $('#' + res + '-user-ratings').html(rating_wo_names_html);
-//    $('#' + res + '-user-ratings-w-names').html(rating_html);
+    //        return '';
+    //    }
+    //
+    //    var rating_html =   '<span>';
+    //    var rating_wo_names_html =   '<span>';
+    //
+    //    _.forEach(ratingsJSON.document[res], function (val, key) {
+    //
+    //        // ignore any zero ratings
+    //        if (val  != 0){
+    //            var user  = key.split("@")[0] ;
+    //
+    //            if (val == 1){
+    //                rating_html += user + ' <span class="glyphicon glyphicon-ok"></span><br>'
+    //                rating_wo_names_html +=   ' <span class="glyphicon glyphicon-ok"></span> '
+    //            } else {
+    //                rating_html += user + ' <span class="glyphicon glyphicon-remove"></span><br>'
+    //                rating_wo_names_html +=  ' <span class="glyphicon glyphicon-remove"></span> '
+    //            }
+    //        }
+    //    })
+    //
+    //    rating_html += '</span>';
+    //    rating_wo_names_html += '</span>';
+    //
+    //    $('#' + res + '-user-ratings').html(rating_wo_names_html);
+    //    $('#' + res + '-user-ratings-w-names').html(rating_html);
 
 }
 
 var setVoteHTML = function(res) {
 
-//    var myRating = 0;
-//
-//    if (!_.isUndefined( ratingsJSON.document[res])) {
-//        myRating = ratingsJSON.document[res][getCookie("username").toLowerCase()];
-//    }
-//
-//    // see if we've rated this
-//    if (_.isUndefined(myRating)){
-//        myRating = 0;
-//    }
-//
-//    var vote_html =   '<div id="' + res + '-voting">';
-//
-//    var func = "recordSwipe('" + res + "', $('#" + res + "').data('kind'),"
-//    vote_html += '<span id="' + res + '-accept-button" onclick="' + func + ' 1);" class="glyphicon glyphicon-ok-circle accept ';
-//    if (myRating < 0){
-//        vote_html += ' grey ';
-//    }
-//
-//    vote_html += '"></span><span  id="' + res + '-reject-button" onclick="' + func + ' -1);" class="glyphicon glyphicon-remove-circle reject ';
-//    if (myRating > 0){
-//        vote_html += ' grey ';
-//    }
-//    vote_html += '"></span> </div> '   ;
-//
-//    $('#' + res + '-voting-buttons').html(vote_html);
-//
-//
-// //   var loc = jQuery.unique($(".loc"));
-//    var locs =  $(".loc") ;
-//
-//    var entHTML = '';
-//    var known = {};
-//    locs.each(function(loc){
-////    _.forEach(jQuery.unique($(".loc a")), function(loc){
-//
-//        console.log((loc) )
-//        entHTML += locs[loc].innerText
-//        entHTML +=  '<br>';
-////        $('#' + res + '-voting-buttons').after(loc);
-////        $('#' + res + '-voting-buttons').after('<br>');
-//
-//    })
-//
-////    $('#corpus-docs').after('');
-////    $('#corpus-docs').after(entHTML);
+    //    var myRating = 0;
+    //
+    //    if (!_.isUndefined( ratingsJSON.document[res])) {
+    //        myRating = ratingsJSON.document[res][getCookie("username").toLowerCase()];
+    //    }
+    //
+    //    // see if we've rated this
+    //    if (_.isUndefined(myRating)){
+    //        myRating = 0;
+    //    }
+    //
+    //    var vote_html =   '<div id="' + res + '-voting">';
+    //
+    //    var func = "recordSwipe('" + res + "', $('#" + res + "').data('kind'),"
+    //    vote_html += '<span id="' + res + '-accept-button" onclick="' + func + ' 1);" class="glyphicon glyphicon-ok-circle accept ';
+    //    if (myRating < 0){
+    //        vote_html += ' grey ';
+    //    }
+    //
+    //    vote_html += '"></span><span  id="' + res + '-reject-button" onclick="' + func + ' -1);" class="glyphicon glyphicon-remove-circle reject ';
+    //    if (myRating > 0){
+    //        vote_html += ' grey ';
+    //    }
+    //    vote_html += '"></span> </div> '   ;
+    //
+    //    $('#' + res + '-voting-buttons').html(vote_html);
+    //
+    //
+    // //   var loc = jQuery.unique($(".loc"));
+    //    var locs =  $(".loc") ;
+    //
+    //    var entHTML = '';
+    //    var known = {};
+    //    locs.each(function(loc){
+    ////    _.forEach(jQuery.unique($(".loc a")), function(loc){
+    //
+    //        console.log((loc) )
+    //        entHTML += locs[loc].innerText
+    //        entHTML +=  '<br>';
+    ////        $('#' + res + '-voting-buttons').after(loc);
+    ////        $('#' + res + '-voting-buttons').after('<br>');
+    //
+    //    })
+    //
+    ////    $('#corpus-docs').after('');
+    ////    $('#corpus-docs').after(entHTML);
 
 }
 
@@ -508,8 +508,8 @@ var getResourcesForCorpus = function(that) {
          var query_count = 0;
          $("#corpus-docs").append('<ul>Resources</ul>');
          for (i in data.queries) {
-         
-         
+
+
          for (j in data.queries[i].resources){
          var res = data.queries[i].resources[j];
          var id = 'q-' + query_count + '-' + res;
@@ -536,7 +536,7 @@ var getResourcesForCorpus = function(that) {
          }
          */
 
-//        $("#corpus-docs").html(html);
+        //        $("#corpus-docs").html(html);
 
     }, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
@@ -734,8 +734,8 @@ function displaySubcorporaFacets() {
 
     // TODO ??? should be it's own function
     // save the searh radio button state
-//    var kind = $('input[name=search-kind]:checked').val();
-//    console.log('saved kinds: ' + kind);
+    //    var kind = $('input[name=search-kind]:checked').val();
+    //    console.log('saved kinds: ' + kind);
     // save the check box state
     var array = [];
     var urlParams = getURLParams();
@@ -743,7 +743,7 @@ function displaySubcorporaFacets() {
         array = urlParams["subcorpora"].split(',');// $.map(getSubcorporaElements(), function(c){return c.value; })
     }
     if (!_.isUndefined(urlParams["overlapOnly"])) {
-        $('#show-overlap').attr('checked', urlParams["overlapOnly"]);
+        $('#show-overlap').attr('checked',urlParams["overlapOnly"]);
     }
 
     // 1st check ensures we have an entry for subcorpora, 2nd check makes sure there is data,
@@ -762,7 +762,8 @@ function displaySubcorporaFacets() {
             }
             // TODO ??? really should be doing the append() thing here rather than building an HTML string.
             html += '<input type="checkbox" onclick="UI.onClickSubcorpus();" name="facets" value="' + r.id + '" ' + checked + ' />&nbsp;' + r.name;
-            html += ' (<span class="num-docs-retrieved-for-subcorpus" id="' + r.id + '-subcorpus-num-found">0</span>/' + r.count + ')<br>';
+            html += ' (<span class="num-docs-retrieved-for-subcorpus" id="' + r.id + '-subcorpus-num-found">0</span>/' + r.count + ') <a target="_BLANK" href="./bib.html?q=&bib=true&action=search&kind=all&subcorpora=' + r.id + '"<span class="fa fa-download"></span></a><br>';
+            // TODO ?? don't pass things like bib on URL
         });
     }
 
@@ -938,29 +939,112 @@ function clearOCRSearchResults() {
     $(".ocr-page-thumbnail").removeClass("ocr-page-result");
 }
 
-Array.prototype.naturalSortByField = function(p) {
-    return this.slice(0).sort(function(a, b) {
-        // MCZ:
-        // Code for naturalCompare() from: http://stackoverflow.com/questions/15478954/sort-array-elements-string-with-numbers-natural-sort.
-        // Modified to accept a parameter as seen in: http://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value-in-javascript
-        // Also added toString() so we can sort on numeric fields.
-        var ax = [], bx = [];
 
-        a[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) {
-            ax.push([$1 || Infinity, $2 || ""])
-        });
-        b[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) {
-            bx.push([$1 || Infinity, $2 || ""])
-        });
+// We append he page number to the archive ID separated by an underscore.
+// While rare, there are some archive IDs that require a bit more than
+// a simple split('_') such as: poems___00wott_191.
+// We also can have note IDs so an ID could be: poems___00wott_191_56.
+// Since we do this a lot, we'll cache the archive IDs we've already done.
 
-        while (ax.length && bx.length) {
-            var an = ax.shift();
-            var bn = bx.shift();
-            var nn = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
-            if (nn)
-                return nn;
-        }
-        return ax.length - bx.length;
+var parsedPageCache = new Map();
+
+function parsePageID(pageid) {
+
+    if (parsedPageCache.has(pageid)) {
+        var cachedObj = parsedPageCache.get(pageid);
+        // this is just here for the unit test to make sure we're using the cache
+        cachedObj.cached = true;
+        return cachedObj;
     }
+
+    var parts = pageid.split('_');
+    var len = parts.length;
+    var isNumber = _.map(parts, function(p){ return p.length > 0 && !isNaN(p);});
+
+    var page = '';
+    var note = '';
+
+    // see if we have 2 numbers
+    if (len > 2 && isNumber[len - 1] && isNumber[len - 2]){
+        note = parts[len - 1];
+        page = parts[len - 2];
+        parts.splice(len - 2, 2); // remove note/page entries
+    } else if (len > 1 && isNumber[len - 1]){
+        page = parts[len - 1];
+        parts.splice(len - 1, 1); // remove page entry
+    }
+
+    var obj = {};
+    obj.id = parts.join('_');
+    obj.page = page;
+    obj.note = note;
+    parsedPageCache.set(pageid, obj);
+    return obj;
+
+}
+
+
+// This function is used if metadata is not returned with the results.
+// Since we could have multiple pages for the same book returned, we
+// don't want to get metadata we already know, so we'll keep track of
+// books we've already seen.
+
+var bookMetadataCache = new Map();
+
+function getInternetArchiveMetadata(bookid, obj, callback) {
+
+    if (bookMetadataCache.has(bookid)) {
+        console.log("I've seen this book before!!!!!");
+        obj.metadata = bookMetadataCache.get(bookid);
+        // this is just here for the unit test to make sure we're using the cache
+        obj.metadata.cached = true;
+        callback();
+        return;
+    }
+
+    $.getJSON('http://archive.org/metadata/' + bookid + '/metadata')
+            .done(function(json) {
+                obj.metadata = json.result;
+                bookMetadataCache.set(bookid, json.result);
+                callback();
+            })
+            .fail(function(jqxhr, textStatus, error) {
+                var err = textStatus + ", " + error;
+                alert("Something went wrong getting the metadata from archive.org: " + err);
+                console.log("Request Failed: " + err);
+                callback();
+            });
+}
+
+
+var archiveViewerURL = function(pageid) {
+    var id = parsePageID(pageid);
+    if (isBlank(id.page)){
+        return 'https://archive.org/stream/' + encodeURIComponent(id.id);
+    } else {
+        return 'https://archive.org/stream/' + encodeURIComponent(id.id) + '#page/n' + id.page + '/mode/1up';
+    }
+};
+
+
+Array.prototype.naturalSortByField = function(p) {
+    return this.slice(0).sort( function(a, b){
+                // MCZ:
+                // Code for naturalCompare() from: http://stackoverflow.com/questions/15478954/sort-array-elements-string-with-numbers-natural-sort.
+                // Modified to accept a parameter as seen in: http://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value-in-javascript
+                // Also added toString() so we can sort on numeric fields.
+                var ax = [], bx = [];
+
+                a[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) { ax.push([$1 || Infinity, $2 || ""]) });
+                b[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) { bx.push([$1 || Infinity, $2 || ""]) });
+
+                while(ax.length && bx.length) {
+                    var an = ax.shift();
+                    var bn = bx.shift();
+                    var nn = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
+                    if(nn) return nn;
+                }
+                return ax.length - bx.length;
+            }
     );
 }
