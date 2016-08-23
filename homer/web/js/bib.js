@@ -46,22 +46,16 @@ function bibGetBookReader(next) {
 function bibGetMetadata(next) {
 
   var id = parsePageID(this.name);
-  // it's possible that metadata was not returned, so we'll
-  // get it from archive.org
-  if (_.isUndefined(this.meta) || _.isEmpty(this.meta) || this.meta.docType == 'note') {
+  // we'll always get the metadata from archive.org because it may have been updated
+  // since the book was indexed and because for books with multiple authors (e.g. cu31924020438929)
+  // we currently (August 2016) only store one author in the metadata.
 
-    // TODO?? hsoul dnot have to know that this uses the hardcoded
-    // vfield "metadat" should pass in the field to use
-    var args = {};
-    var that = this;
-    getInternetArchiveMetadata(id.id, args, function () {
-      that.meta = args.metadata;
-      next();
-    });
-
-  } else {
+  var args = {};
+  var that = this;
+  getInternetArchiveMetadata(id.id, args, function () {
+    that.meta = args.metadata;
     next();
-  }
+  });
 
 }
 
