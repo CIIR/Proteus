@@ -8,6 +8,7 @@ function alert(msg){
 }
 
 QUnit.module( "Utilities" );
+/*
 QUnit.test( "JQuery Escape", function( assert ) {
   var id = 'NothingSpecial';
   var newid = jqEsc(id)
@@ -287,5 +288,35 @@ QUnit.test( "getInternetArchiveMetadata - cached", function( assert ) {
     assert.equal(false, _.isUndefined(data.metadata.cached));
     done();
   });
+});
+*/
+
+QUnit.test( "naturalSortByField", function( assert ) {
+
+  var records = [
+    {key: 'z', value: 1},
+    {key: 'abc', value: 2},
+    {key: 'a', value: 11},
+    {key: 'c_123', value: 10},
+    {key: 'c', value: 0}
+  ];
+
+  var sorted =  records.naturalSortByField("key");
+
+  assert.equal(records[2], sorted[0]);
+  assert.equal(records[1], sorted[1]);
+  assert.equal(records[4], sorted[2]);
+  assert.equal(records[3], sorted[3]);
+  assert.equal(records[0], sorted[4]);
+
+  sorted =  records.naturalSortByField("value");
+
+  assert.equal(records[4], sorted[0]);
+  assert.equal(records[0], sorted[1]);
+  assert.equal(records[1], sorted[2]);
+  assert.equal(records[3], sorted[3]);
+  assert.equal(records[2], sorted[4]);
 
 });
+
+
