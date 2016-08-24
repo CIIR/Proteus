@@ -86,11 +86,14 @@ function bibPrint() {
   }
 
   $("#bib-data").html('');
-  $("#bib-data").append('TYPE' + FIELD_SEP + 'TITLE'+ FIELD_SEP + 'ARCHIVE_ID'+ FIELD_SEP)
-  $("#bib-data").append('AUTHORS'+ FIELD_SEP + 'PUB_DATE'+ FIELD_SEP + 'PUBLISHER'+ FIELD_SEP)
-  $("#bib-data").append('LANG'+ FIELD_SEP + 'OCLC'+ FIELD_SEP + 'HATHI_ID'+ FIELD_SEP)
-  $("#bib-data").append('PAGE_NUM'+ FIELD_SEP + 'ARCHIVE_URL' + FIELD_SEP + 'MISC<br>')
+  var header = 'TYPE' + FIELD_SEP + 'TITLE' + FIELD_SEP + 'ARCHIVE_ID' + FIELD_SEP;
+  header += 'AUTHORS' + FIELD_SEP + 'PUB_DATE' + FIELD_SEP + 'PUBLISHER' + FIELD_SEP;
+  header += 'LANG' + FIELD_SEP + 'OCLC' + FIELD_SEP + 'HATHI_ID' + FIELD_SEP;
+  header += 'PAGE_NUM' + FIELD_SEP + 'ARCHIVE_URL' + FIELD_SEP + 'MISC';
 
+  $("#bib-data").append(header + '<br>');
+
+  var tsvText = header + '\n';
   gBibArray.forEach(function (rec) {
 
     var id = parsePageID(rec.name);
@@ -131,14 +134,41 @@ function bibPrint() {
     data += rec.realPage + FIELD_SEP;
 
     var url = archiveViewerURL(rec.name);
-    data += '<a href="' + url + '">' + url + '</a>'  + FIELD_SEP;
+    //data += '<a href="' + url + '">' + url + '</a>'  + FIELD_SEP;
+    data += url + FIELD_SEP;
 
     if (type == 'NOTE') {
-      data += rec.snippet.replace(/<br>/g, " ");
+      // strip out any html tags
+      data += rec.snippet.replace(/<(?:.|\n)*?>/gm, " ");
     }
 
     $("#bib-data").append(data + '<br>')
+    tsvText += data + '\n';
+
   });
+
+  // if the browser supports it, download the TSV file.
+  // Code from: http://stackoverflow.com/questions/3665115/create-a-file-in-memory-for-user-to-download-not-through-server
+  // This is not an ideal solution, there really is none client side. Ideally we could send the text to the server,
+  // write it out to a file then serve that file. Right now, I don't see the ROI for that.
+  try {
+    tsvText = tsvText.replace(/&nbsp;/g, '');
+    var tsvfile = window.document.createElement('a');
+    tsvfile.href = window.URL.createObjectURL(new Blob([tsvText], {type: 'text/tab-separated-values'}));
+
+    var p = getURLParams();
+    tsvfile.download = p['name'] + '.tsv';
+
+    // Append anchor to body.
+    document.body.appendChild(tsvfile)
+    tsvfile.click();
+
+    // Remove anchor from body.
+    document.body.removeChild(tsvfile)
+
+  } catch (e) {
+    console.log('Error creating TSV file: ' + e.toString());
+  }
 }
 
 function bibPrintUndefined(field) {
