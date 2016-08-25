@@ -99,6 +99,13 @@
                 if (!_.isUndefined(urlParams['user']) && isLoggedIn() == false) {
                     logIn(urlParams['user']);
                 }
+
+                var fields =  getCookie("fields");
+                $("#ocr-options").html('')
+                _.each(fields.split(','), function (field) {
+                    $("#ocr-options").append('<span> ' + field + '</span><br/>');
+                });
+
                 // code to add an "x" to the search input field from: https://www.thewebflash.com/clear-button-in-bootstrap-input-group-component/
                 $('.has-clear input[type="text"]').on('input propertychange', function() {
                     var $this = $(this);
@@ -446,7 +453,11 @@
                 <hr class="facets-hr">
                 <input id="show-overlap" type="checkbox" name="show-overlap" value="4">&nbsp;Show only shared results
             </fieldset>
-
+            <fieldset>
+                <legend>Entity types</legend>
+                <div id="ocr-options">
+                </div>
+            </fieldset>
             <fieldset>
                 <legend>Document labels</legend>
                 <div id="ratings"></div>

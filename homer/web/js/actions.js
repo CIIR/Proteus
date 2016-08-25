@@ -511,7 +511,7 @@ var renderBookPageHTML = function (text, id, el) {
   // Anything beyond basic CSS doesn't really like being applied
   // to a field tag like <PERSON>, so we'll convert the fields to spans
   // and apply the CSS to classes for the field.
-  _.each(gFields, function (field) {
+  _.each(getCookie("fields").split(','), function (field) {
     $(field).each(function () {
       $(this).replaceWith('<span class="' + field + '-class" >' + $(this).html() + '</span>');
     });
@@ -665,7 +665,6 @@ var gFirstPageID = undefined;
 var gScrollToNoteID = -1;
 var gScrollToPageID = -1;
 var gMetadata = undefined;
-var gFields = [];
 
 var onViewPageSuccess = function (args) {
 
@@ -698,8 +697,7 @@ var onViewPageSuccess = function (args) {
     });
   }
 
-  gFields = args.fields;
-  _.each(gFields, function (field) {
+  _.each(getCookie("fields").split(','), function (field) {
     $("#ocr-options").append('<input type="checkbox" id="cb-' + field + '" value="' + field
     + '" onclick="handleNERHilightClick(this, \'' + field + '\');" checked/><span id="cb-'
     + field + '-label"> ' + field + '</span><br/>');
@@ -818,7 +816,7 @@ var onViewPageSuccess2 = function (args) {
 
 var processTags = function () {
 
-  _.each(gFields, function (field) {
+  _.each(getCookie("fields").split(','), function (field) {
     var el = $('.' + field + '-class');
     if (document.getElementById("cb-" + field).checked) {
       el.removeClass(field + "-off")

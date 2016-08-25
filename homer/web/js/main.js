@@ -209,6 +209,9 @@ function buildSearchLink(entType, q, kind) {
     var query = entType + ':"' + q + '"';
     return "index.html?action=search&kind=" + kind + "&q=" + query;
 }
+
+
+
 var logIn = function(userName) {
     if (!userName)
         return;
@@ -221,9 +224,11 @@ var logIn = function(userName) {
     // means they're already registered (duplicate key error).
     var loginFunc = function() {
         API.login(args, function(data) {
+
             document.cookie = "username=" + userName + ";";
             document.cookie = "userid=" + data.userid + ";";
             document.cookie = "token=" + data.token + ";";
+            document.cookie = "fields=" + data.fields + ";";
             var settings = JSON.parse(data.settings);
 
             localStorage["corpora"] = JSON.stringify(data.corpora);
@@ -279,6 +284,7 @@ var logOut = function() {
         document.cookie = "token=;";
         document.cookie = "userid=;";
         document.cookie = "corpus=;";
+        document.cookie = "fields=;";
         // update the type tags
         getAllTagsByUser();
         // quick and dirty, trigger refresh to get rid of

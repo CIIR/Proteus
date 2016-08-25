@@ -9,6 +9,8 @@ import ciir.proteus.util.logging.LogHelper;
 import ciir.proteus.util.logging.LoginLogData;
 import org.lemurproject.galago.utility.Parameters;
 
+import java.util.List;
+
 /**
  * @author jfoley.
  */
@@ -39,6 +41,11 @@ public class LoginUser extends DBAction {
         if (system.getConfig().containsKey("broadcast")) {
             loginCreds.put("broadcast", system.getConfig().getMap("broadcast"));
         }
+
+        Parameters noteParams = system.getConfig().get("notes", Parameters.create());
+        List<String> noteFields = noteParams.getAsList("noteFields", String.class);
+        loginCreds.put("fields", noteFields);
+
         return loginCreds;
     }
 }
