@@ -543,27 +543,23 @@ var getResourcesForCorpus = function(that) {
         throw err;
     });
 
-
-
-
 };
 
 var guessKind = function(resourceName) {
 
-    // I'm not happy with this at all, but for now it'll work.
-
     if (isNaN(Number(resourceName))) {
         // assume Internet Archive resource
-        var parts = resourceName.split("_");
-        if (parts.length == 1) {
-            return 'ia-books';
+        var id = parsePageID(resourceName);
+
+        var type = 'ia-books';
+
+        if (!_.isEmpty(id.note)) {
+            type = 'ia-notes';
+        } else if (!_.isEmpty(id.page)) {
+            type = 'ia-pages';
         }
-        if (parts.length == 2) {
-            return 'ia-pages';
-        }
-        if (parts.length == 3) {
-            return 'ia-notes';
-        }
+
+        return type;
 
     } else {
         return "article"; // ACM paper

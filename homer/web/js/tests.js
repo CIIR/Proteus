@@ -196,8 +196,26 @@ QUnit.test("Guess Kind", function (assert) {
   id3 = "abc_123_456";
   assert.equal(guessKind(id3), 'ia-notes');
 
+  id3 = "poems___00wott";
+  assert.equal(guessKind(id3), 'ia-books');
+
+  id3 = "poems___00wott_191";
+  assert.equal(guessKind(id3), 'ia-pages');
+
+  id3 = "poems___00wott_191_1";
+  assert.equal(guessKind(id3), 'ia-notes');
+
   id3 = "abc_123_456_789";
-  assert.equal(guessKind(id3), undefined);
+  assert.equal(guessKind(id3), 'ia-notes');
+
+  id3 = "Quincy_Sun_1982_July-Dec";
+  assert.equal(guessKind(id3), 'ia-books');
+
+  id3 = "Quincy_Sun_1982_July-Dec_234";
+  assert.equal(guessKind(id3), 'ia-pages');
+
+  id3 = "Quincy_Sun_1982_July-Dec_234_99";
+  assert.equal(guessKind(id3), 'ia-notes');
 
 });
 
