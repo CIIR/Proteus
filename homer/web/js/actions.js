@@ -136,6 +136,9 @@ var doSearchRequest = function (args) {
     UI.enableSearchButtons(true);
     return;
   }
+
+  actualArgs.q = sanitizeQuery(actualArgs.q);
+
   $("#more").html('<img src="/images/more-loader.gif"\>');
 
   Model[args.kind].request = actualArgs;
@@ -145,7 +148,7 @@ var doSearchRequest = function (args) {
   API.action(actualArgs, onSearchSuccess, function (req, status, err) {
     UI.showError("ERROR: ``" + err + "``");
     UI.enableSearchButtons(true);
-
+    console.log(err);
     // set up the auto retrieve again
     enableAutoRetrieve();
     throw err;
@@ -1009,7 +1012,6 @@ var doSearchWithinBookRequest = function (args) {
     metadata: false
   };
 
-
   var userName = getCookie("username");
 
   if (userName != "") {
@@ -1047,13 +1049,16 @@ var doSearchWithinBookRequest = function (args) {
 
   }
 
+  actualArgs.q = sanitizeQuery(actualArgs.q);
+
   $("body").css("cursor", "progress");
   API.action(actualArgs, onSearchWithinBookSuccess, function (req, status, err) {
     $("body").css("cursor", "default");
 
     UI.showError("ERROR: ``" + err + "``");
     //  UI.enableSearchButtons(true);
-
+    showOCRErrorMsg(err);
+    console.log(err);
     throw err;
   });
 
@@ -1113,5 +1118,16 @@ function showOCRErrorMsg(text) {
   setTimeout(function () {
     $("#ocr-error").fadeOut();
   }, 5000);
+
+}
+
+function sanitizeQuery(q){
+  // a common issue when searching by field is putting a space between the colon and the term,
+  // so we'll silently correct that here. In the future we may want to do something like
+  // "Did you mean field:term? Showing those results." With a link under it
+  // to do the malformed search if they really want to.
+  q = q.replace(/:\s+/g, ':');
+  $("#ui-search").val(q);
+  return q;
 
 }
