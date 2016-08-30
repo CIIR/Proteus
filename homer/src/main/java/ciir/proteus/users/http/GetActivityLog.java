@@ -3,84 +3,102 @@ package ciir.proteus.users.http;
 import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
+import org.apache.logging.log4j.core.config.Configuration;
 import org.lemurproject.galago.utility.Parameters;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
 
 /**
  * @author michaelz.
  */
 public class GetActivityLog extends DBAction {
 
-    public GetActivityLog(ProteusSystem proteus) {
-        super(proteus);
-    }
+  private static final org.apache.logging.log4j.Logger activityLog = LogManager.getLogger("ProteusActvity");
 
-    @Override
-    public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DBError, IOException {
+  public GetActivityLog(ProteusSystem proteus) {
+    super(proteus);
+  }
 
-        List<String> fileList = new ArrayList<String>();
-        // code from: http://stackoverflow.com/questions/3008043/list-all-files-from-directories-and-subdirectories-in-java
-        try {
-            Path startPath = Paths.get("logs");
-            Files.walkFileTree(startPath, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult preVisitDirectory(Path dir,
-                                                         BasicFileAttributes attrs) {
-                    //System.out.println("Dir: " + dir.toString());
-                    return FileVisitResult.CONTINUE;
-                }
+  @Override
+  public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DBError, IOException {
 
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                    //System.out.println("File: " + file.toString());
-                    fileList.add(file.toString());
-                    return FileVisitResult.CONTINUE;
-                }
+    // Get the path the logs are written to.
+    // code to get logging config from: http://stackoverflow.com/questions/28222939/get-log4j2-log-file-location-to-write-to-directory-containing-a-date
+    LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+    Configuration config = ctx.getConfiguration();
+    RollingFileAppender techical = (RollingFileAppender) config.getAppender("RollingFile");
+    File dir = new File(techical.getFileName().replaceFirst("[^\\/]+$", ""));
 
-                @Override
-                public FileVisitResult visitFileFailed(Path file, IOException e) {
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
+    List<String> fileList = new ArrayList<String>();
+    // code from: http://stackoverflow.com/questions/3008043/list-all-files-from-directories-and-subdirectories-in-java
+    try {
+      Path startPath = Paths.get(dir.getPath());
+      Files.walkFileTree(startPath, new SimpleFileVisitor<Path>() {
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir,
+                                                 BasicFileAttributes attrs) {
+          //System.out.println("Dir: " + dir.toString());
+          return FileVisitResult.CONTINUE;
         }
 
-        // make sure we're in the correct order
-        Collections.sort(fileList);
-
-        Parameters events = Parameters.create();
-        StringBuilder sb = new StringBuilder();
-
-        for (String fp : fileList){
-
-            BufferedReader br = new BufferedReader(new FileReader(fp));
-            try {
-
-                String line = br.readLine();
-
-                while (line != null) {
-                    sb.append(line);
-                    sb.append(System.lineSeparator());
-                    line = br.readLine();
-                }
-
-            } finally {
-                br.close();
-            }
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+          //System.out.println("File: " + file.toString());
+          fileList.add(file.toString());
+          return FileVisitResult.CONTINUE;
         }
 
-        events.put("events", sb.toString());
-        return events;
+        @Override
+        public FileVisitResult visitFileFailed(Path file, IOException e) {
+          return FileVisitResult.CONTINUE;
+        }
+      });
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+
+    // make sure we're in the correct order
+    Collections.sort(fileList);
+
+    Parameters events = Parameters.create();
+    StringBuilder sb = new StringBuilder();
+
+    for (String fp : fileList) {
+
+      BufferedReader br = new BufferedReader(new FileReader(fp));
+      try {
+
+        String line = br.readLine();
+
+        while (line != null) {
+          sb.append(line);
+          sb.append(System.lineSeparator());
+          line = br.readLine();
+        }
+
+      } finally {
+        br.close();
+      }
+    }
+
+    events.put("events", sb.toString());
+    return events;
+  }
 }
