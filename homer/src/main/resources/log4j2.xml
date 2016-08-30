@@ -10,17 +10,19 @@
 				<TimeBasedTriggeringPolicy interval="1"/>
 			</Policies>
 		</RollingFile>
+<!-- MCZ - removing this because it is continuously appended to and never rotated.
 		<File name="File" fileName="proteus.log" immediateFlush="true" append="true">
 			<PatternLayout pattern="%d{yyy-MM-dd HH:mm:ss.SSS}\t%msg%n"/>
 		</File>
+-->
 	</Appenders>
 	<Loggers>
 		<!-- this is the tab separated log file -->
-		<Logger name="Proteus" level="all">
+		<!--<Logger name="Proteus" level="all">
 			<AppenderRef ref="File"/>
 		</Logger>
-		
-		<!-- this is the human readable (HTML) log file -->
+		-->
+		<!-- this is the JSON log file -->
 		<Logger name="ProteusActvity"  additivity="false" level="all">
 			<AppenderRef ref="RollingFile" />
 		</Logger>
