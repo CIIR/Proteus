@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title id="proteus-title">Proteus: Bibliography</title>
+    <title>Proteus: Bibliography</title>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -16,22 +16,23 @@
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-
     <script src="js/jquery/2.0.3/jquery.min.js"></script>
     <script src="js/lodash/2.4.1/lodash.min.js"></script>
     <script src="js/history/1.8/native.history.min.js"></script>
 
     <script src="js/jquery.cookie.js"></script>
 
-
     <!-- scripts included here evaluate before the page loads -->
     <script src="js/API.js"></script>
     <script src="js/util.js"></script>
     <script src="js/bib.js"></script>
 
-
     <link rel="stylesheet" href="css/style.css" type="text/css"/>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
 
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css" type="text/css"/>
+    <link rel="stylesheet" href="css/bib.css" type="text/css"/>
     <script type="text/javascript" src="js/dummy-book-reader.js"></script>
 
     <script>
@@ -50,21 +51,40 @@
                 logIn(urlParams['user']);
             }
 
-        });</script>
+            // make textareas fit the whole page
+            $(window).resize(function () {
+                $('.bib-container').css('padding-bottom', parseInt($('#bib-tabs').css("height")));
+            });
 
+            $(window).load(function () {
+                $('.bib-container').css('padding-bottom', parseInt($('#bib-tabs').css("height")));
+            });
+
+        });</script>
 
 </head>
 <body id="bib-body">
 
-        <div id="bib-data"><span class="centered">Gathering data... <img src="/images/more-loader.gif"\></span></div>
+<div id="bib-tabs" style="visibility: hidden;" class="panel with-nav-tabs panel-default">
+    <div class="panel-heading">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#bib-tsv">TSV</a></li>
+            <li><a data-toggle="tab" href="#bib-text">Text</a></li>
+        </ul>
+    </div>
+</div>
+<div class="tab-content">
+    <div id="bib-tsv" class="bib-container tab-pane fade in active"></div>
+    <div id="bib-text" class="bib-container tab-pane fade"></div>
+</div>
 
+<div id="bib-data"><span class="centered">Gathering data... <img src="/images/more-loader.gif" \></span></div>
 
 <!-- scripts included here evaluate after the page loads -->
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="js/ui.js"></script>
 <script src="js/actions.js"></script>
 <script src="js/main.js"></script>
-
 
 </body>
 

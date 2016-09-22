@@ -285,6 +285,21 @@ td.metakey {
 .page-result:hover{
     background-color: aliceblue !important;
 }
+
+.source-node{
+    stroke: black;
+    stroke-width: 2px;
+}
+
+.book-node{
+    fill: lavenderblush;
+
+}
+
+.page-node{
+    fill: aliceblue;
+}
+
 .page-result{
     margin-left: 25px;
 }
@@ -758,16 +773,6 @@ span-highlight{
     width: 100%
 }
 
-#bib-data{
-    font-family:  "Courier New", Courier, monospace;
-}
-
-#bib-body{
-    overflow-y:scroll;
-    overflow-x:scroll;
-    white-space:nowrap
-}
-
 .centered {
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
     font-size: 15pt;
@@ -776,4 +781,8 @@ span-highlight{
     left: 50%;
     margin-right: -50%;
     transform: translate(-50%, -50%)
+}
+
+div-entities {
+    display: none;
 }

@@ -85,14 +85,18 @@ function bibPrint() {
     return;
   }
 
+  var DELMITER = ':' + FIELD_SEP;
+  var NEWLINE = '&#13;&#10;';
+
+  $("#bib-tabs").css("visibility", "visible");
   $("#bib-data").html('');
   var header = 'TYPE' + FIELD_SEP + 'TITLE' + FIELD_SEP + 'ARCHIVE_ID' + FIELD_SEP;
   header += 'AUTHORS' + FIELD_SEP + 'PUB_DATE' + FIELD_SEP + 'PUBLISHER' + FIELD_SEP;
   header += 'LANG' + FIELD_SEP + 'OCLC' + FIELD_SEP + 'HATHI_ID' + FIELD_SEP;
   header += 'PAGE_NUM' + FIELD_SEP + 'ARCHIVE_URL' + FIELD_SEP + 'MISC';
 
-  $("#bib-data").append(header + '<br>');
-
+  var bibTSV = header + NEWLINE;
+  var bibText = '';
   var tsvText = header + '\n';
   gBibArray.forEach(function (rec) {
 
@@ -105,47 +109,65 @@ function bibPrint() {
     } else if (!_.isEmpty(id.page)) {
       type = 'PAGE';
     }
-    // our id
-    var data = ''; // rec.name + FIELD_SEP;
 
-    data += type + FIELD_SEP;
+    bibText += 'Type' + DELMITER + type + NEWLINE;
+    bibText += 'Title'  + DELMITER + (rec.meta.title || rec.meta.TEI || rec.name) + NEWLINE;
+    bibText +=  'Archive ID'  + DELMITER + id.id + NEWLINE;
+    bibText +=  'Author(s)'  + DELMITER +bibPrintUndefined(rec.meta.creator) + NEWLINE;
+    bibText +=  'Pub Date'  + DELMITER + bibPrintUndefined(rec.meta.date) + NEWLINE;
+    bibText +=  'Publisher'  + DELMITER +bibPrintUndefined(rec.meta.publisher) + NEWLINE;
+    bibText +=  'Language'  + DELMITER +bibPrintUndefined(rec.meta.language) + NEWLINE;
+    bibText +=  'OCLC ID'  + DELMITER +bibPrintUndefined(rec.meta['oclc-id']) + NEWLINE;
+    bibText +=  'Hathi Trust ID'  + DELMITER +bibPrintUndefined(rec.hathiId) + NEWLINE;
+    bibText +=  'Page #'  + DELMITER +rec.realPage + NEWLINE;
+
+    bibTSV += type + FIELD_SEP;
 
     // title
-    data += (rec.meta.title || rec.meta.TEI || rec.name) + FIELD_SEP;
+    bibTSV += (rec.meta.title || rec.meta.TEI || rec.name) + FIELD_SEP;
 
     // archive id
-    data += id.id + FIELD_SEP;
+    bibTSV += id.id + FIELD_SEP;
 
     // authors
-    data += bibPrintUndefined(rec.meta.creator) + FIELD_SEP;
+    bibTSV += bibPrintUndefined(rec.meta.creator) + FIELD_SEP;
 
     // publication date
-    data += bibPrintUndefined(rec.meta.date) + FIELD_SEP;
+    bibTSV += bibPrintUndefined(rec.meta.date) + FIELD_SEP;
 
-    data += bibPrintUndefined(rec.meta.publisher) + FIELD_SEP;
+    bibTSV += bibPrintUndefined(rec.meta.publisher) + FIELD_SEP;
 
-    data += bibPrintUndefined(rec.meta.language) + FIELD_SEP;
+    bibTSV += bibPrintUndefined(rec.meta.language) + FIELD_SEP;
 
-    data += bibPrintUndefined(rec.meta['oclc-id']) + FIELD_SEP;
+    bibTSV += bibPrintUndefined(rec.meta['oclc-id']) + FIELD_SEP;
 
     // Hathi Trust ID
-    data += bibPrintUndefined(rec.hathiId) + FIELD_SEP;
+    bibTSV += bibPrintUndefined(rec.hathiId) + FIELD_SEP;
 
-    data += rec.realPage + FIELD_SEP;
+    bibTSV += rec.realPage + FIELD_SEP;
 
     var url = archiveViewerURL(rec.name);
-    //data += '<a href="' + url + '">' + url + '</a>'  + FIELD_SEP;
-    data += url + FIELD_SEP;
+
+    bibTSV += url + FIELD_SEP;
+
+    bibText +=  'Link'  + DELMITER + url + NEWLINE;
 
     if (type == 'NOTE') {
       // strip out any html tags
-      data += rec.snippet.replace(/<(?:.|\n)*?>/gm, " ");
+      var note = rec.snippet.replace(/<(?:.|\n)*?>/gm, " ");
+      bibTSV += note ;
+      bibText += 'Note'  + DELMITER + note + NEWLINE;
     }
 
-    $("#bib-data").append(data + '<br>')
-    tsvText += data + '\n';
-
+    bibTSV += NEWLINE;
+    bibText += NEWLINE;
   });
+
+  // the "pre" is needed for newlines to be displayed when the text area is read only
+  $("#bib-tsv").append('<textarea  readonly="yes" style="white-space: pre;" class="bib-textarea">' + bibTSV + '</textarea>')
+  tsvText += bibTSV + '\n';
+
+  $("#bib-text").append('<textarea  readonly="yes" style="white-space: pre;" class="bib-textarea">' + bibText + '</textarea>')
 
   // if the browser supports it, download the TSV file.
   // Code from: http://stackoverflow.com/questions/3665115/create-a-file-in-memory-for-user-to-download-not-through-server
@@ -170,6 +192,7 @@ function bibPrint() {
     console.log('Error creating TSV file: ' + e.toString());
   }
 }
+
 
 function bibPrintUndefined(field) {
   if (_.isUndefined(field)) {
