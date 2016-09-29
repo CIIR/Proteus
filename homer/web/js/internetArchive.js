@@ -77,14 +77,14 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
         }
 
         var type;
-        _(result.entities).forEach(function(entKey) {
-            _(entKey).forIn(function(value, key) {
+        _.forEach(result.entities, function(entKey) {
+            _.forIn(entKey, function(value, key) {
                 type = key + "-entities";
                 tmphtml += '<div align="left"><' + type + '><b>' + key + ':</b> ';
-                _(value).forIn(function(rec, key2) {
-                    // TODO: whould use default kind not hard code
+                _.forEach(value, function(obj) {
+                    // TODO:  should use default kind not hard code
                     // add class="ui-widget-content mz-ner" to <ent> if we want drag-n-drop entities
-                    tmphtml += '<ent><a  href=\'' + buildSearchLink(key, rec.entity, currentKind) + '\'>' + rec.entity + '</a></ent> (' + rec.count + ')&nbsp;&#8226;&nbsp;';
+                    tmphtml += '<ent><a href=\'' + buildSearchLink(key, obj.entity, currentKind) + '\'>' + obj.entity + '</a></ent> (' + obj.count + ')&nbsp;&#8226;&nbsp;';
                 });
             });
             tmphtml += '</' + type + '></div>';
@@ -226,21 +226,6 @@ var doActionSearchPages = function(args) {
     }
     UI.showError("Unknown action `" + action + "'");
 };
-
-
-
-function getOCLC(bookid) {
-
-    var args = {};
-    // ??? don't always need to go to IA, should have it in index
-    getInternetArchiveMetadata(bookid, args, function() {
-        if (_.isUndefined(args.metadata['oclc-id'])) {
-            return null;
-        }
-
-        return args.metadata['oclc-id'];
-    });
-}
 
 resultRenderers["ia-books"] = renderResult;
 resultRenderers["ia-pages"] = renderResult;
