@@ -1,5 +1,4 @@
 /* Original source from: http://okfnlabs.org/wikipediajs/wikipedia.js */
-
 var WIKIPEDIA = function() {
   var my = {};
 
@@ -107,10 +106,10 @@ var WIKIPEDIA = function() {
   };
 
   // ### lookupProperty
-  // 
+  //
   // lookup a property value given a standard RDF/JSON property dictionary
   // e.g. something like ...
-  // 
+  //
   //       ...
   //       "http://dbpedia.org/property/regent": [
   //              {
@@ -132,7 +131,7 @@ var WIKIPEDIA = function() {
 
   // Extract a standard set of attributes (e.g. title, description, dates etc
   // etc) from rdfJson and the given subject uri (url) e.g.
-  // 
+  //
   //      extractSummary('http://dbpedia.org/resource/Rufus_Pollock', rdfJson object from dbpedia)
   my.extractSummary = function(subjectUri, rdfJson) {
     var properties = rdfJson[subjectUri];
@@ -140,6 +139,10 @@ var WIKIPEDIA = function() {
       if (attribs instanceof Array) {
         var out = [];
         for (var idx in attribs) {
+          // MCZ: added check to aviod issue with polyfill
+          if (!attribs.hasOwnProperty(idx)) {
+            continue;
+          }
           var _tmp = my._lookupProperty(properties, attribs[idx]);
           if (_tmp) {
             out.push(_tmp);
@@ -184,6 +187,10 @@ var WIKIPEDIA = function() {
     var types = [];
     var typeObjs = properties[typeUri];
     for(var idx in typeObjs) {
+      // MCZ: added check to aviod issue with polyfill
+      if (!typeObjs.hasOwnProperty(idx)) {
+        continue;
+      }
       var value = typeObjs[idx].value;
       // let's be selective
       // ignore yago and owl stuff
