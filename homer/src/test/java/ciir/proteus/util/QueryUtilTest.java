@@ -55,6 +55,18 @@ public class QueryUtilTest {
     assertEquals(1, terms.size());
     assertTrue(terms.contains("pan american union"));
 
+    // organization:"pan"
+    query = StructuredQuery.parse("#combine( #inside( #text:pan() #field:organization() ) )");
+    terms = QueryUtil.queryTerms(query);
+    assertEquals(1, terms.size());
+    assertTrue(terms.contains("pan"));
+
+    // organization:pan (no double quotes)
+    query = StructuredQuery.parse("#combine( #inside( #text:pan() #field:organization() ) )");
+    terms = QueryUtil.queryTerms(query);
+    assertEquals(1, terms.size());
+    assertTrue(terms.contains("pan"));
+
     // person:"charles" location:"new england"
     query = StructuredQuery.parse("#combine( #inside( #text:charles() #field:person() ) #inside( #ordered:1( #text:new() #text:england() ) #field:location() ) )");
     terms = QueryUtil.queryTerms(query);
@@ -77,6 +89,12 @@ public class QueryUtilTest {
     assertEquals(2, terms.size());
     assertTrue(terms.contains("charles"));
     assertTrue(terms.contains("new england"));
+
+    // field search using extents - single term. Prior versions were returning two terms: "location" and "england"
+    query = StructuredQuery.parse("#combine:w=1.0( #inside( #extents:england:part=postings.krovetz() #extents:location:part=extents() ) )");
+    terms = QueryUtil.queryTerms(query);
+    assertEquals(1, terms.size());
+    assertTrue(terms.contains("england"));
 
   }
 }

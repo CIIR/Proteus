@@ -83,12 +83,12 @@ public class QueryUtil {
         return;
       }
 
-      ordered = original.getParent().getOperator().equals("ordered");
-      extents = original.getNodeParameters().get("part", "??").equals("extents");
-
       List<Node> children = original.getParent().getInternalNodes();
       StringBuilder tmp = new StringBuilder();
       for (Node n : children) {
+
+        ordered = n.getParent().getOperator().equals("ordered");
+        extents = n.getNodeParameters().get("part", "??").equals("extents");
 
         if (!isTextNode(n) || extents) {
           continue;
