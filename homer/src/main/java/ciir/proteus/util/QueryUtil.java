@@ -3,14 +3,15 @@ package ciir.proteus.util;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.traversal.SetFieldTraversal;
 import org.lemurproject.galago.core.retrieval.traversal.Traversal;
+import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 /**
  * @author jfoley, michaelz
+ *         Oct-18-2016  MCZ Modified so query terms are returned in order.
  */
 public class QueryUtil {
   /**
@@ -20,11 +21,11 @@ public class QueryUtil {
    * @return a set of terms as a list
    */
   public static List<String> queryTerms(Node query) {
-    HashSet<String> terms = new HashSet<>();
+    ArrayList<String> terms = new ArrayList<>();
 
     walk(query, Parameters.create(), new QueryTermTraversal(terms));
 
-    return new ArrayList<>(terms);
+    return terms;
   }
 
   /**
@@ -69,47 +70,44 @@ public class QueryUtil {
   public static class QueryTermTraversal extends Traversal {
     boolean ordered = false;
     boolean extents = false;
-    HashSet<String> terms = new HashSet<>();
+    ArrayList<String> terms = new ArrayList<>();
+    ArrayList<String> orderedWindowTerms = new ArrayList<>();
 
-    QueryTermTraversal(HashSet<String> terms) {
+    QueryTermTraversal(ArrayList<String> terms) {
       this.terms = terms;
     }
 
     @Override
     public void beforeNode(Node original, Parameters queryParameters) throws Exception {
 
-      // check if we're at a leaf node
-      if (original.numChildren() > 0) {
-        return;
-      }
-
-      List<Node> children = original.getParent().getInternalNodes();
-      StringBuilder tmp = new StringBuilder();
-      for (Node n : children) {
-
-        ordered = n.getParent().getOperator().equals("ordered");
-        extents = n.getNodeParameters().get("part", "??").equals("extents");
-
-        if (!isTextNode(n) || extents) {
-          continue;
-        }
-        if (ordered) {
-          if (tmp.length() > 0) {
-            tmp.append(" ");
-          }
-          tmp.append(n.getNodeParameters().getString("default"));
-
-        } else {
-          terms.add(n.getNodeParameters().getString("default"));
-        }
-      }
-      if (tmp.length() > 0) {
-        terms.add(tmp.toString());
-      }
     }
 
     @Override
     public Node afterNode(Node original, Parameters queryParameters) throws Exception {
+
+      // check if we're at a leaf node
+      if (original.numChildren() > 0) {
+        // add any ordered window terms
+        if (orderedWindowTerms.size() > 0) {
+          terms.add(Utility.join(orderedWindowTerms, " "));
+          orderedWindowTerms = new ArrayList<>();
+        }
+        return original;
+      }
+
+      ordered = original.getParent().getOperator().equals("ordered");
+      extents = original.getNodeParameters().get("part", "??").equals("extents");
+
+      if (!isTextNode(original) || extents) {
+        return original;
+      }
+
+      if (ordered) {
+        orderedWindowTerms.add(original.getNodeParameters().getString("default"));
+      } else {
+        terms.add(original.getNodeParameters().getString("default"));
+      }
+
       return original;
     }
 
