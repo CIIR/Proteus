@@ -19,16 +19,16 @@ var isBlank = function(str) {
 
 var pushURLParams = function(params) {
     var urlParams = "?" + _(params).map(function(vals, key) {
-                //console.log(key + ":" + vals);
-                // some values - like labels - can have multiple comma
-                // separated value. If these are passed like "labels=a,b,c"
-                // they get interpreted as one value. So if there are multiples
-                // we'll pass multiple key/value pairs like: labels=a&labels=b&labels=c
-                return  _.map(vals.toString().split(","), function(val) {
-                    //console.log("          " + key + ":" + val);
-                    return encodeURIComponent(key) + "=" + encodeURIComponent(val);
-                }).join('&');
-            }).join('&');
+        //console.log(key + ":" + vals);
+        // some values - like labels - can have multiple comma
+        // separated value. If these are passed like "labels=a,b,c"
+        // they get interpreted as one value. So if there are multiples
+        // we'll pass multiple key/value pairs like: labels=a&labels=b&labels=c
+        return  _.map(vals.toString().split(","), function(val) {
+            //console.log("          " + key + ":" + val);
+            return encodeURIComponent(key) + "=" + encodeURIComponent(val);
+        }).join('&');
+    }).join('&');
 
     // if there are labels AND we don't have a "labelOwner" param, add the user that owns them
     if (!_.isUndefined(params.labels) && urlParams.indexOf("labelOwner") == -1) {
@@ -104,8 +104,8 @@ var getUser = function() {
 }
 
 // the "exclude" option is so we don't highlight terms in the label buttons.
-var singleTermHightlightOptions = { "exclude": [".resource-labels *"], "element": "span", "className" : "hili"};
-var nGramTermHightlightOptions = { "exclude": [".resource-labels *"], "element": "span", "className" : "hili", "separateWordSearch" : false};
+var singleTermHightlightOptions = {"exclude": [".resource-labels *"], "element": "span", "className": "hili"};
+var nGramTermHightlightOptions = {"exclude": [".resource-labels *"], "element": "span", "className": "hili", "separateWordSearch": false};
 var newHighlightText = function(selector, queryTerms) {
     if (_.isUndefined(queryTerms) || queryTerms.length == 0) {
         return;
@@ -114,18 +114,18 @@ var newHighlightText = function(selector, queryTerms) {
     var singleTerms = [];
     var nGramTerms = [];
 
-    _.forEach(queryTerms, function(term){
-        if (term.includes(" ")){
+    _.forEach(queryTerms, function(term) {
+        if (term.includes(" ")) {
             nGramTerms.push(term);
         } else {
             singleTerms.push(term);
         }
     })
 
-    if (singleTerms.length > 0){
+    if (singleTerms.length > 0) {
         $(selector).mark(singleTerms, singleTermHightlightOptions);
     }
-    if (nGramTerms.length > 0){
+    if (nGramTerms.length > 0) {
         $(selector).mark(nGramTerms, nGramTermHightlightOptions);
     }
 
@@ -485,7 +485,7 @@ var getResourcesForCorpus = function(that) {
             }
             for (j in data.queries[i].resources) {
                 var res = data.queries[i].resources[j];
-                var id = 'q-' + query_count + '-' + res;
+                var id = jqEsc('q-' + query_count + '-' + res);
                 var el = $("#" + id);
                 // see if we already have this resource listed
                 if (!_.isEmpty(el)) {
@@ -508,8 +508,8 @@ var getResourcesForCorpus = function(that) {
          var query_count = 0;
          $("#corpus-docs").append('<ul>Resources</ul>');
          for (i in data.queries) {
-
-
+         
+         
          for (j in data.queries[i].resources){
          var res = data.queries[i].resources[j];
          var id = 'q-' + query_count + '-' + res;
@@ -739,7 +739,7 @@ function displaySubcorporaFacets() {
         array = urlParams["subcorpora"].split(',');// $.map(getSubcorporaElements(), function(c){return c.value; })
     }
     if (!_.isUndefined(urlParams["overlapOnly"])) {
-        $('#show-overlap').attr('checked',urlParams["overlapOnly"]);
+        $('#show-overlap').attr('checked', urlParams["overlapOnly"]);
     }
 
     // 1st check ensures we have an entry for subcorpora, 2nd check makes sure there is data,
@@ -756,6 +756,7 @@ function displaySubcorporaFacets() {
             if ($.inArray(r.id.toString(), array) >= 0) {
                 checked = 'checked';
             }
+            subcorpusMap.set(r.id, r.name);
             // TODO ??? really should be doing the append() thing here rather than building an HTML string.
             html += '<input type="checkbox" onclick="UI.onClickSubcorpus();" name="facets" value="' + r.id + '" ' + checked + ' />&nbsp;' + r.name;
             html += ' (<span class="num-docs-retrieved-for-subcorpus" id="' + r.id + '-subcorpus-num-found">0</span>/' + r.count + ') ';
@@ -903,7 +904,7 @@ function termClick(that) {
 
     })
 
-    $("#query-builder-query").html('<a target="_BLANK" href="index.html?action=search&kind=all&q=' + encodeURI(query) + '">' + query + '</a>');
+    $("#query-builder-query").html('<a target="_blank" href="index.html?action=search&kind=all&q=' + encodeURI(query) + '">' + query + '</a>');
 }
 
 function labelClickComment(that, subcorpus_id) {
@@ -957,17 +958,19 @@ function parsePageID(pageid) {
 
     var parts = pageid.split('_');
     var len = parts.length;
-    var isNumber = _.map(parts, function(p){ return p.length > 0 && !isNaN(p);});
+    var isNumber = _.map(parts, function(p) {
+        return p.length > 0 && !isNaN(p);
+    });
 
     var page = '';
     var note = '';
 
     // see if we have 2 numbers
-    if (len > 2 && isNumber[len - 1] && isNumber[len - 2]){
+    if (len > 2 && isNumber[len - 1] && isNumber[len - 2]) {
         note = parts[len - 1];
         page = parts[len - 2];
         parts.splice(len - 2, 2); // remove note/page entries
-    } else if (len > 1 && isNumber[len - 1]){
+    } else if (len > 1 && isNumber[len - 1]) {
         page = parts[len - 1];
         parts.splice(len - 1, 1); // remove page entry
     }
@@ -1017,7 +1020,7 @@ function getInternetArchiveMetadata(bookid, obj, callback) {
 
 var archiveViewerURL = function(pageid) {
     var id = parsePageID(pageid);
-    if (isBlank(id.page)){
+    if (isBlank(id.page)) {
         return 'https://archive.org/stream/' + encodeURIComponent(id.id);
     } else {
         return 'https://archive.org/stream/' + encodeURIComponent(id.id) + '#page/n' + id.page + '/mode/1up';
@@ -1028,24 +1031,29 @@ var archiveViewerURL = function(pageid) {
 Object.defineProperty(Array.prototype, 'naturalSortByField', {
     enumerable: false,
     value: function(p) {
-        return this.slice(0).sort( function(a, b){
-                    // MCZ:
-                    // Code for naturalCompare() from: http://stackoverflow.com/questions/15478954/sort-array-elements-string-with-numbers-natural-sort.
-                    // Modified to accept a parameter as seen in: http://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value-in-javascript
-                    // Also added toString() so we can sort on numeric fields.
-                    var ax = [], bx = [];
+        return this.slice(0).sort(function(a, b) {
+            // MCZ:
+            // Code for naturalCompare() from: http://stackoverflow.com/questions/15478954/sort-array-elements-string-with-numbers-natural-sort.
+            // Modified to accept a parameter as seen in: http://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value-in-javascript
+            // Also added toString() so we can sort on numeric fields.
+            var ax = [], bx = [];
 
-                    a[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) { ax.push([$1 || Infinity, $2 || ""]) });
-                    b[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) { bx.push([$1 || Infinity, $2 || ""]) });
+            a[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) {
+                ax.push([$1 || Infinity, $2 || ""])
+            });
+            b[p].toString().replace(/(\d+)|(\D+)/g, function(_, $1, $2) {
+                bx.push([$1 || Infinity, $2 || ""])
+            });
 
-                    while(ax.length && bx.length) {
-                        var an = ax.shift();
-                        var bn = bx.shift();
-                        var nn = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
-                        if(nn) return nn;
-                    }
-                    return ax.length - bx.length;
-                }
+            while (ax.length && bx.length) {
+                var an = ax.shift();
+                var bn = bx.shift();
+                var nn = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
+                if (nn)
+                    return nn;
+            }
+            return ax.length - bx.length;
+        }
         );
     }
 });
