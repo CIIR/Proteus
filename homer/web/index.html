@@ -2,7 +2,7 @@
     <head>
 
         <!-- supply any functions that browsers like IE don't natively support-->
-        <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=es6"></script>
+        <script src="js/es6-shim.min.js"></script>
 
         <script>
 
@@ -100,9 +100,9 @@
                     logIn(urlParams['user']);
                 }
 
-                var fields =  getCookie("fields");
+                var fields = getCookie("fields");
                 $("#ocr-options").html('')
-                _.each(fields.split(','), function (field) {
+                _.each(fields.split(','), function(field) {
                     $("#ocr-options").append('<span> ' + field + '</span><br/>');
                 });
 
@@ -310,30 +310,26 @@
                     lastChecked = this;
                 });
 
-    <!-- ----------------------------------------------------- -->
+<!-- ----------------------------------------------------- -->
                 var host = 'localhost'
 
                 var socket = io.connect(host + ':' + 9092);
-
                 socket.on('connect', function() {
                     output('<span class="connect-msg">Client has connected to the server!</span>');
                 });
-
                 socket.on('ProteusEvent', function(data) {
 
                     var msg = convertJSONtoHTML(data.message)
                     output(msg);
 
                     // check if we're displaying this type of message
-    //                showHideUser();
-    //                hideMsgs();
+                    //                showHideUser();
+                    //                hideMsgs();
 
                 });
-
                 socket.on('disconnect', function() {
                     output('<span class="disconnect-msg">The client has disconnected!</span>');
                 });
-
                 function sendDisconnect() {
                     socket.disconnect();
                 }
@@ -483,11 +479,6 @@
             </fieldset>
 
 
-            <!--   <fieldset>
-                   <legend>Publication Date</legend>
-                   <div id="pub-date"></div>
-                   <button type="button" id="clear-all-dates" class="btn btn-xs ">Clear All</button>
-               </fieldset>-->
         </div>
         <!--
         <div id="results-right" class="col-md-10 column right-align">
@@ -528,7 +519,7 @@
                             <span class="query-term-buttons" id="high-bigrams"></span></div>
                         <div class="query-terms-area"><b>Trigrams:</b>
                             <span class="query-term-buttons" id="high-trigrams"></span></div>
-                        <div  id="high-entity-fields"></div>
+                        <div id="high-entity-fields"></div>
                     </fieldset>
                 </div>
                 <div id="results">
@@ -545,14 +536,12 @@
 
         </div>
 
-
         <!-- scripts included here evaluate after the page loads -->
         <!-- Include all compiled plugins (below), or include individual files as needed -->
         <script src="bootstrap/js/bootstrap.min.js"></script>
         <script src="js/ui.js"></script>
         <script src="js/actions.js"></script>
         <script src="js/main.js"></script>
-
 
     </body>
     <div id='overlay'></div>
