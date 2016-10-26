@@ -4,6 +4,14 @@
     background-color: saddlebrown;
 }
 
+.entity-node{
+    fill: white;
+    stroke-width: 5px;
+}
+.location-node{
+    stroke: saddlebrown;
+
+}
 .location-on{
     color: white;
     background-color: saddlebrown;
@@ -20,7 +28,10 @@
     color: white;
     background-color: slateblue;
 }
+.organization-node{
+    stroke: slateblue;
 
+}
 .organization-on {
     color: white;
     background-color: slateblue;
@@ -36,7 +47,10 @@
     color: white;
     background-color: orangered;
 }
+.person-node{
+    stroke: orangered;
 
+}
 .person-on  {
     color: white;
     background-color: orangered;

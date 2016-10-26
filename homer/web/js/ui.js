@@ -68,6 +68,13 @@ UI.clear = function() {
 UI.clearResults = function() {
     resultsDiv.html('');
     resultsDiv.show();
+
+    // clear previous results
+    var cardCount = $("[id^=entity-card-]").length;
+    for (i = cardCount -1; i >= 0; i--){
+        $('.my-slider').slick('slickRemove', i);
+    }
+    $("#external-results").hide();
 };
 UI.showProgress = function(str) {
     progressDiv.html(str);

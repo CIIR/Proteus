@@ -26,7 +26,8 @@
         </script>
 
         <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta http-equiv="X-UA-Compatible" content="IE=9" />
+
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title id="proteus-title">Proteus: Search</title>
 
@@ -44,6 +45,8 @@
         <script src="js/jquery/2.0.3/jquery.min.js"></script>
         <script src="js/lodash/2.4.1/lodash.min.js"></script>
         <script src="js/history/1.8/native.history.min.js"></script>
+
+        <script src="js/wikipedia.js"></script>
 
         <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
         <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
@@ -74,6 +77,8 @@
         <script type="text/javascript" src="js/annotator.filter.js"></script>
         <script src="js/jquery.mark.min.js"></script>
 
+        <link rel="stylesheet" href="slick/slick.css"/>
+
         <!-- Add fancyBox -->
         <link rel="stylesheet" href="js/fancybox/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen"/>
         <script type="text/javascript" src="js/fancybox/jquery.fancybox.pack.js?v=2.1.5"></script>
@@ -84,11 +89,14 @@
         <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet"
               integrity="sha256-k2/8zcNbxVIh5mnQ52A0r3a6jAgMGxFJFE2707UxGCk= sha512-ZV9KawG2Legkwp3nAlxLIVFudTauWuBpC10uEafMHYL0Sarrz5A7G79kXh5+5+woxQ5HM559XX2UZjMJ36Wplg=="
               crossorigin="anonymous">
+
         <script>
 
             var showSideBarFlag = true;
             var lastChecked = null;
             $(document).ready(function() {
+
+                $('.my-slider').slick({"adaptiveHeight": true});
 
                 var urlParams = getURLParams();
                 if (_.isUndefined(urlParams['user']) && isLoggedIn() == false) {
@@ -119,9 +127,7 @@
                     UI.onClickSearchButton();
                 });
 
-
                 $("#show-corpus-terms").hide();
-                $("#query-builder-link").hide();
 
                 $("#hide-dups").on("click", function() {
                     UI.showHideDups();
@@ -146,7 +152,8 @@
                         // "pages within a book" the "resultDiv" would be the pages so only
                         // that would get cleared out.
                         resultsDiv = $("#results");
-                        UI.clearResults();
+                        resultsDiv.html('');
+                        resultsDiv.show();
                         UI.appendResults(Model[savedData.request.kind].queryTerms, savedData.results, savedData.queryid);
                         renderDups(savedData);
                     },
@@ -157,47 +164,6 @@
                 });
                 $("#dup-value").val($("#dup-slider").slider("value"));
 
-                //                $(".droppable").droppable({
-                //                    tolerance: "touch",
-                //                    over: function (event, ui) {
-                //                        // $(this).css('background-color', 'yellow');
-                //                        $(this).css('visibility', 'visible');
-                //                        $("#accept-dropzone").css('visibility', 'visible');
-                //                        $("#reject-dropzone").css('visibility', 'visible');
-                //                    },
-                //                    out: function (event, ui) {
-                //                        //    $(this).css('background-color', '');
-                //                        $(this).css('visibility', 'hidden');
-                //                        $("#accept-dropzone").css('visibility', 'hidden');
-                //                        $("#reject-dropzone").css('visibility', 'hidden');
-                //                    },
-                //                    drop: function (event, ui) {
-                //
-                //                 //       ui.draggable.fadeOut();
-                //
-                //                        // ??? has to be a better way
-                //                        var res = ui.draggable[0].id
-                //                        console.log(res);
-                //
-                //                        $(".droppable").css('visibility', 'hidden');
-                //                        if ($(this).hasClass("reject")){
-                //                            console.log("Rejected!!!")
-                //                            $("#rejeted-docs").html($("#rejeted-docs").html() + '* ' +res  + '<br>')
-                //                            recordSwipe(res, $("#" + res).data("metadata"),$("#" + res).data("kind"), -1);
-                //                        }
-                //                        if ($(this).hasClass("accept")){
-                //                            console.log("Accepted!!!")
-                //                            $("#accpeted-docs").html($("#accpeted-docs").html() + '* ' + res + '<br>')
-                //                            recordSwipe(res, $("#" + res).data("metadata"), $("#" + res).data("kind"),1);
-                //                        }
-                //                        // get the next result...
-                //                        var prev = Model.request;
-                //                        prev.skip = Model.results.length;
-                //                        doSearchRequest(prev);
-                //                    }
-                //                });
-
-                // initImportantEntities();
                 UI.populateRecentSearches();
 
                 // !!! HACK to get scrollbars at the bottom working when zooming or resizing browser
@@ -223,14 +189,12 @@
                     submitCorpusDialog();
                 });
 
-
                 $("#accordion").accordion({
                     //       heightStyle: "fill",
                     collapsible: true
                 });
 
                 $(".fancybox").fancybox();
-
 
                 $("#overlay").hide();
                 $("#ui-search").keyup(function(evt) {
@@ -250,7 +214,6 @@
                     logIn(username);
                 });
 
-
                 var tmpShowSideBar = urlParams["showSideBar"];
 
                 // if not logged in, hide the user info
@@ -263,7 +226,6 @@
                 }
                 showSideBar();
                 enableAutoRetrieve();
-
 
                 displaySubcorporaFacets();
 
@@ -313,33 +275,46 @@
 <!-- ----------------------------------------------------- -->
                 var host = 'localhost'
 
-                var socket = io.connect(host + ':' + 9092);
-                socket.on('connect', function() {
-                    output('<span class="connect-msg">Client has connected to the server!</span>');
-                });
-                socket.on('ProteusEvent', function(data) {
+                try {
+                    var socket = io.connect(host + ':' + 9092);
 
-                    var msg = convertJSONtoHTML(data.message)
-                    output(msg);
+                    socket.on('connect', function() {
+                        output('<span class="connect-msg">Client has connected to the server!</span>');
+                    });
 
-                    // check if we're displaying this type of message
-                    //                showHideUser();
-                    //                hideMsgs();
+                    socket.on('ProteusEvent', function(data) {
 
-                });
-                socket.on('disconnect', function() {
-                    output('<span class="disconnect-msg">The client has disconnected!</span>');
-                });
-                function sendDisconnect() {
-                    socket.disconnect();
+                        var msg = convertJSONtoHTML(data.message)
+                        output(msg);
+
+                        // check if we're displaying this type of message
+                        //                showHideUser();
+                        //                hideMsgs();
+
+                    });
+
+                    socket.on('disconnect', function() {
+                        output('<span class="disconnect-msg">The client has disconnected!</span>');
+                    });
+
+                    function sendDisconnect() {
+                        socket.disconnect();
+                    }
+
+                    function output(message) {
+
+                        var element = $("<div>" + message + "</div>");
+                        $('#activity').prepend(element);
+                    }
+
+
+                } catch (err) {
+                    console.log("asfdasdfasdf")
                 }
 
-                function output(message) {
+            });
 
-                    var element = $("<div>" + message + "</div>");
-                    $('#activity').prepend(element);
-                }
-            });</script>
+        </script>
 
 
     </head>
@@ -372,7 +347,6 @@
 
                             </span>
                         </div>
-
 
                     </div>
 
@@ -429,16 +403,6 @@
         <div id="all-tags"></div>
 
         <div id="results-left" class="col-md-2 column">
-            <!--
-                 <div id="accordion">
-                     <h3>Recent Searches</h3>
-                     <div id="pastSearches"></div>
-                     <h3>Notes</h3>
-                     <div id="note-list"></div>
-        
-                 </div>
-            -->
-
 
             <fieldset>
                 <legend>Refine by</legend>
@@ -458,10 +422,7 @@
                 <legend>Document labels</legend>
                 <div id="ratings"></div>
             </fieldset>
-            <!--
-                     <div id="accpeted-docs" class="doc-list">Accepted<br></div>
-                     <div id="rejeted-docs" class="doc-list">Rejected<br></div>
-            -->
+
             <div id="tree">
                 <div id="empty-tree"></div>
             </div>
@@ -473,58 +434,44 @@
                 <input type="text" id="dup-value" readonly style="border:0; font-weight:bold;">
 
                 <div id="dup-slider"></div>
-                <!--   <div id="hide-dups">
-                       <input type="checkbox" name="hide-dups" value="4">&nbsp;Hide possible duplicates
-                   </div>-->
+
             </fieldset>
 
 
         </div>
-        <!--
-        <div id="results-right" class="col-md-10 column right-align">
-            <div id="metadata"></div>
-            <div id="results"></div>
-            <div id="view-resource">
-                <div  class="row clearfix btn" id="view-nav-top"></div>
-                <div id="book-pages"> </div>
-                <div class="row clearfix btn" id="view-nav-bottom"></div>
-            </div>
-            <div class="row clearfix ">
-        
-                <div id="more"></div>
-                <div id="footer">
-                    <div id="progress"></div>
-                </div>
-            </div>
-        </div>
-        -->
-
 
         <div id="results-right" class="col-md-10 column  ">
-            <div class="row clearfix ">
+            <!--<div class="row clearfix ">-->
 
-                <div id="metadata"></div>
+            <div id="metadata"></div>
 
-                <div id="query-builder-link"><a href="#" onclick="$('#show-corpus-terms').toggle();">Show/Hide Query Builder</a>
-                </div>
-                <div id="show-corpus-terms">
-                    <fieldset>
-                        <legend>Build a query</legend>
-                        <button type="button" id="clear-all-terms" class="btn btn-xs ">Clear All</button><span id="query-builder-query"></span>
-                        <div class="query-terms-area"><b>Terms (whole documents):</b>
-                            <span class="query-term-buttons" id="high-tf"></span></div>
-                        <div class="query-terms-area"><b>Terms (document snippets):</b>
-                            <span class="query-term-buttons" id="high-snippettf"></span></div>
-                        <div class="query-terms-area"><b>Bigrams:</b>
-                            <span class="query-term-buttons" id="high-bigrams"></span></div>
-                        <div class="query-terms-area"><b>Trigrams:</b>
-                            <span class="query-term-buttons" id="high-trigrams"></span></div>
-                        <div id="high-entity-fields"></div>
-                    </fieldset>
-                </div>
-                <div id="results">
-                </div>
+            <div id="query-builder-link"><a href="#" onclick="$('#show-corpus-terms').toggle();">Show/Hide Query Builder</a>
             </div>
+            <div id="show-corpus-terms">
+                <fieldset>
+                    <legend>Build a query</legend>
+                    <button type="button" id="clear-all-terms" class="btn btn-xs ">Clear All</button>
+                    <span id="query-builder-query"></span>
+
+                    <div class="query-terms-area"><b>Terms (whole documents):</b>
+                        <span class="query-term-buttons" id="high-tf"></span></div>
+                    <div class="query-terms-area"><b>Terms (document snippets):</b>
+                        <span class="query-term-buttons" id="high-snippettf"></span></div>
+                    <div class="query-terms-area"><b>Bigrams:</b>
+                        <span class="query-term-buttons" id="high-bigrams"></span></div>
+                    <div class="query-terms-area"><b>Trigrams:</b>
+                        <span class="query-term-buttons" id="high-trigrams"></span></div>
+                    <div id="high-entity-fields"></div>
+                </fieldset>
+            </div>
+
+            <div id="external-results" class="my-slider "></div>
+
+            <div class="results" style="display: none;"></div>
+            <div class="row clearfix ">
+                <div id="results"></div>
+            </div>
+
             <div id="view-resource"></div>
             <div class="row clearfix ">
 
@@ -542,6 +489,7 @@
         <script src="js/ui.js"></script>
         <script src="js/actions.js"></script>
         <script src="js/main.js"></script>
+        <script src="slick/slick.js"></script>
 
     </body>
     <div id='overlay'></div>
