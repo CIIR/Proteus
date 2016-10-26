@@ -59,7 +59,7 @@ var WIKIPEDIA = function() {
             }
             callback(out);
         }
-        my.getRawJson(url, onSuccess, error);
+ 
     };
 
     // ### _getDbpediaUrl
