@@ -13,7 +13,16 @@ var  br ;
 function BookReader() {}
 BookReader.prototype.init = function() { return true;};
 BookReader.prototype.getBookID = function() { return br.bookId;};
-BookReader.prototype.getPageNumber = function(idx) { return br.pageNums[idx];};
+// IA changed book reader around October 25th 2016. Updating to accomidate
+// the new code.
+BookReader.prototype.getPageNumber = function(idx) {
+  let pg = br.getPageNum(idx);
+  if (pg == null || pg.toString().startsWith('n')){
+    return null;
+  } else {
+    return pg;
+  }
+};
 
 
 function getBookReader() { return  br;}
@@ -40,7 +49,7 @@ function getInternetArchiveJS(bookid, callback){
             callback();
           })
           .fail(function (jqxhr, settings, exception) {
-            console.log(jqxhr.statusText + ' : ' + jqxhr.status);
+            console.error(jqxhr.statusText + ' : ' + jqxhr.status);
             callback();
           });
 
