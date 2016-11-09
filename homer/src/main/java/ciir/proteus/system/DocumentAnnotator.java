@@ -36,7 +36,6 @@ public class DocumentAnnotator {
   private Map<String, Integer> totalTF = null;
   private Map<String, Integer> snippetTF = null;
 
-  private Map<String, Map<Integer, Map<String, String>>> docTags = null;
   private Map<String, Map<String, Integer>> allEntities = null;
 
   private int snippetBegin = 0;
@@ -78,11 +77,6 @@ public class DocumentAnnotator {
     Map<String, Document> pulled = Collections.emptyMap();
     if (snippets || metadata) {
       pulled = system.getDocs(kind, names, metadata, snippets);
-    }
-
-    // if we need to get tags for these documents:
-    if (getTags) {
-      docTags = system.userdb.getAllTags(RetrievalUtil.names(results));
     }
 
     totalTF = new HashMap<String, Integer>();
@@ -236,11 +230,6 @@ public class DocumentAnnotator {
       if (metadata) {
         docp.put("meta", Parameters.parseMap(doc.metadata));
       }
-
-      // tags annotation
-      if (docTags != null && docTags.containsKey(sdoc.documentName)) {
-        docp.set("tags", getDocTags(sdoc.documentName));
-      } // end if we want tags
 
       // get any rankings of the document
       if (getRatings) {
@@ -402,7 +391,7 @@ public class DocumentAnnotator {
         ret.put(entType + "Entities", new ArrayList<Parameters>());
       }
     }
- 
+
     ret.put("fields", noteFields);
 
     return ret;
@@ -520,23 +509,6 @@ public class DocumentAnnotator {
     } // end loop through entities
 
     return entList;
-
-  }
-
-  private Parameters getDocTags(String docName) {
-
-    // get the tags for this resource
-
-    Parameters tmp = Parameters.create();
-    for (Map.Entry<Integer, Map<String, String>> entry : docTags.get(docName).entrySet()) {
-      Parameters userData = Parameters.create();
-      for (Map.Entry<String, String> ud : entry.getValue().entrySet()) {
-        userData.put(ud.getKey(), ud.getValue());
-      }
-      tmp.put(entry.getKey().toString(), userData);
-    }
-
-    return tmp;
 
   }
 

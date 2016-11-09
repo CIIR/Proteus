@@ -142,13 +142,13 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
 
             // populate any missing data
             $("." + identifier + "-meta-name").html(args.metadata.title || args.metadata.TEI || result.name)
-            $("." + identifier + "-meta-author").html(args.metadata.creator)
+            // using toString() because there can be more than one author.
+            $("." + identifier + "-meta-author").html(args.metadata.creator.toString())
             $("." + identifier + "-meta-published").html(args.metadata.date)
         });
     }
 
     if (isLoggedIn()) {
-        setVoteHTML(name);
         setUserRatingsHTML(name);
     }
 

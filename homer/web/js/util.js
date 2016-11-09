@@ -140,10 +140,6 @@ function NO_TYPE_CONST() {
     return "*";
 }
 
-function TREE_KEY_SEP() {
-    return "\t";
-}
-
 // users are allowed to enter labels w/o at TYPE, this is troublesome later when
 // we want to allow them to select type/values to filter/retrieval by/etc. So we'll store
 // them with a special "*" type, and as long as we don't display that, all the existing
@@ -377,57 +373,6 @@ var setUserRatingsHTML = function(res) {
     //
     //    $('#' + res + '-user-ratings').html(rating_wo_names_html);
     //    $('#' + res + '-user-ratings-w-names').html(rating_html);
-
-}
-
-var setVoteHTML = function(res) {
-
-    //    var myRating = 0;
-    //
-    //    if (!_.isUndefined( ratingsJSON.document[res])) {
-    //        myRating = ratingsJSON.document[res][getCookie("username").toLowerCase()];
-    //    }
-    //
-    //    // see if we've rated this
-    //    if (_.isUndefined(myRating)){
-    //        myRating = 0;
-    //    }
-    //
-    //    var vote_html =   '<div id="' + res + '-voting">';
-    //
-    //    var func = "recordSwipe('" + res + "', $('#" + res + "').data('kind'),"
-    //    vote_html += '<span id="' + res + '-accept-button" onclick="' + func + ' 1);" class="glyphicon glyphicon-ok-circle accept ';
-    //    if (myRating < 0){
-    //        vote_html += ' grey ';
-    //    }
-    //
-    //    vote_html += '"></span><span  id="' + res + '-reject-button" onclick="' + func + ' -1);" class="glyphicon glyphicon-remove-circle reject ';
-    //    if (myRating > 0){
-    //        vote_html += ' grey ';
-    //    }
-    //    vote_html += '"></span> </div> '   ;
-    //
-    //    $('#' + res + '-voting-buttons').html(vote_html);
-    //
-    //
-    // //   var loc = jQuery.unique($(".loc"));
-    //    var locs =  $(".loc") ;
-    //
-    //    var entHTML = '';
-    //    var known = {};
-    //    locs.each(function(loc){
-    ////    _.forEach(jQuery.unique($(".loc a")), function(loc){
-    //
-    //        console.log((loc) )
-    //        entHTML += locs[loc].innerText
-    //        entHTML +=  '<br>';
-    ////        $('#' + res + '-voting-buttons').after(loc);
-    ////        $('#' + res + '-voting-buttons').after('<br>');
-    //
-    //    })
-    //
-    ////    $('#corpus-docs').after('');
-    ////    $('#corpus-docs').after(entHTML);
 
 }
 

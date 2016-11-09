@@ -62,26 +62,6 @@ public interface UserDatabase {
 
     public void checkSession(Credentials creds) throws DBError;
 
-    public List<String> getTags(Credentials creds, String resource) throws DBError;
-
-    public Map<String, List<String>> getTags(Credentials creds, List<String> resources) throws DBError;
-
-    public Map<Integer, Map<String, String>> getAllTags(String resource) throws DBError;
-
-    public Map<String, Map<Integer, Map<String, String>>> getAllTags(List<String> resources) throws DBError;
-
-    public Map<String, Map<String, List<String>>> getAllTagsForResources(List<String> resources) throws DBError;
-
-    public void deleteTag(Credentials creds, String resource, String tag) throws DBError;
-
-    public void addTag(Credentials creds, String resource, String tag, Integer rating, String comment) throws DBError;
-
-    public void updateTag(Credentials creds, String resource, String tag, Integer rating, String comment) throws DBError;
-
-    public List<String> getResourcesForLabels(Integer userid, List<String> labels) throws DBError;
-
-    public List<String> getResourcesForLabels(Integer userid, List<String> labels, Integer numResults, Integer startIndex) throws DBError;
-
     public Map<String, String> getUsers() throws DBError;
 
     public Integer createCorpus(String corpus, String username) throws NoTuplesAffected, DuplicateCorpus, SQLException;

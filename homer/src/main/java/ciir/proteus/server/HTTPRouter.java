@@ -28,14 +28,9 @@ public class HTTPRouter implements WebHandler {
     private final JSONHandler search;
     private final JSONHandler viewResource;
     private final JSONHandler getKinds;
-    private final JSONHandler tags;
-    private final JSONHandler putTags;
-    private final JSONHandler updateTags;
-    private final JSONHandler deleteTags;
     private final JSONHandler login;
     private final JSONHandler logout;
     private final JSONHandler register;
-    private final JSONHandler resourcesforlabels;
     private final JSONHandler getUsers;
     private final JSONHandler createCorpus;
     private final JSONHandler updateUserSettings;
@@ -61,14 +56,9 @@ public class HTTPRouter implements WebHandler {
         search = new JSONSearch(proteus);
         viewResource = new ViewResource(proteus);
         getKinds = new GetKinds(proteus);
-        tags = new GetTags(proteus);
-        putTags = new PutTags(proteus);
-        updateTags = new UpdateTags(proteus);
-        deleteTags = new DeleteTags(proteus);
         login = new LoginUser(proteus);
         logout = new LogoutUser(proteus);
         register = new RegisterUser(proteus);
-        resourcesforlabels = new GetResourcesForLabels(proteus);
         getUsers = new GetUsers(proteus);
         createCorpus = new CreateCorpus(proteus);
         updateUserSettings = new UpdateUserSettings(proteus);
@@ -119,18 +109,8 @@ public class HTTPRouter implements WebHandler {
                 }
             } else if (GET && path.equals("/api/kinds")) {
                 handler = getKinds;
-            } else if (GET && path.equals("/api/tags")) {
-                handler = tags;
             } else if (GET && path.equals("/api/users")) {
                 handler = getUsers;
-            }else if (POST && path.equals("/api/alltags")) {
-                handler = tags;
-            } else if (POST && path.equals("/api/tags/create")) {
-              handler = putTags;
-            } else if (POST && path.equals("/api/tags/update")) {
-              handler = updateTags;
-            } else if (POST && path.equals("/api/tags/delete")) {
-                handler = deleteTags;
             } else if (POST && path.equals("/api/login")) {
                 handler = login;
             } else if (POST && path.equals("/api/logout")) {
@@ -141,8 +121,6 @@ public class HTTPRouter implements WebHandler {
                 handler = createCorpus;
             } else if (POST && path.equals("/api/updatesettings")) {
                 handler = updateUserSettings;
-            } else if (POST && path.equals("/api/resourcesforlabels")) {
-                handler = resourcesforlabels;
             }  else if (POST && path.equals("/api/updatesubcorpora")) {
                 handler = updateSubCorpora;
             }else if (POST && path.equals("/api/resourcesincorpus")) {

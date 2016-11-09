@@ -6,7 +6,7 @@
  * For now, includes talking to the proteus/homer server.
  *
  */
-
+var showSideBarFlag;
 var GLOBAL = {
     uniqTypes: [], allTags: [], users: {}, userComments: [], corpora: []
 };
@@ -36,10 +36,15 @@ var privateURLParams = _(["user", "token"]);
 
 var updateURL = function(request) {
 
-    if (showSideBarFlag) {
-        request = _.merge(request, {'showSideBar': '1'});
-    } else {
-        request = _.merge(request, {'showSideBar': '0'});
+    // TODO - showSideBar is defined lots of places and is of limited use except on the main index page.
+    if (!_.isUndefined(showSideBarFlag)) {
+
+        if (showSideBarFlag) {
+            request = _.merge(request, {'showSideBar': '1'});
+        } else {
+            request = _.merge(request, {'showSideBar': '0'});
+        }
+
     }
 
     pushURLParams(_.omit(request, privateURLParams));
@@ -61,7 +66,7 @@ UI.setReadyHandler(function() {
 
     UI.dispalyUserName();
 
-    if (params.action == "search"){// && (!isBlank(params.q) || !isBlank(params.labels))) {
+    if (params.action == "search") {// && (!isBlank(params.q) || !isBlank(params.labels))) {
         UI.setQuery(params.q);
         doActionRequest(params);
     } else if (params.action == "view") {
@@ -136,6 +141,14 @@ UI.onClickSearchButton = function() {
         $("#pastSearches").prepend('<div class="query">&#8226;&nbsp;<a onclick="tmpSearch( $(this), \'' + kind + '\')">' + terms + '</a>' + '&nbsp;(' + kind + ')<div class="xtmp"><img class="delimg" src=\'images/del.png\'/> </div>&nbsp;</div>');
     }
     doActionRequest({kind: kind, q: UI.getQuery(), action: "search"});
+};
+
+// TODO clone of onClickSearchButton - prob lots of dup code
+
+UI.onClickVizButton = function() {
+
+    console.log("clicked visualization  button!")
+    doActionRequest({kind: "all", q: "", action: "viz"});
 };
 
 UI.populateRecentSearches = function() {
@@ -256,8 +269,6 @@ var logIn = function(userName) {
 
             UI.updateCorpusListButton();
             UI.dispalyUserName();
-            // update the type tags
-            getAllTagsByUser();
             showSideBar();
             removeURLParam("user");
             location.reload(true);
@@ -285,8 +296,6 @@ var logOut = function() {
         document.cookie = "userid=;";
         document.cookie = "corpus=;";
         document.cookie = "fields=;";
-        // update the type tags
-        getAllTagsByUser();
         // quick and dirty, trigger refresh to get rid of
         // all the label stuff.
         location.reload(true);
@@ -300,74 +309,11 @@ var logOut = function() {
 
 };
 
-var addTag = function(tagText, resourceID, rating, comment) {
-    var userName = getCookie("username");
-    var userToken = getCookie("token");
-    var userID = getCookie("userid");
-
-    comment = comment.replace(/\n/g, "\\n");
-    var tmp = '{  "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "rating" : '
-            + rating + ', "comment" : "' + comment + '" ,"tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
-    console.log(tmp);
-    var args = JSON.parse(tmp);
-    API.createTags(args, null, function(req, status, err) {
-        UI.showError("ERROR: ``" + err + "``");
-        throw err;
-    });
-
-};
-
-
-var updateTag = function(tagText, resourceID, rating, comment) {
-    var userName = getCookie("username");
-    var userToken = getCookie("token");
-    var userID = getCookie("userid");
-
-    comment = comment.replace(/\n/g, "\\n");
-    var tmp = '{  "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "rating" : '
-            + rating + ', "comment" : "' + comment + '" ,"tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
-    console.log(tmp);
-    var args = JSON.parse(tmp);
-    API.updateTags(args, null, function(req, status, err) {
-        UI.showError("ERROR: ``" + err + "``");
-        throw err;
-    });
-
-};
-
-var deleteTag = function(tagText, resourceID) {
-    var userName = getCookie("username");
-    var userID = getCookie("userid");
-    var userToken = getCookie("token");
-
-    var tmp = '{ "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "tags": {"' + formatLabelForDatabase(tagText) + '": ["' + resourceID + '"]}}';
-    console.log(tmp);
-    var args = JSON.parse(tmp);
-    API.deleteTags(args, null, function(req, status, err) {
-        UI.showError("ERROR: ``" + err + "``");
-        throw err;
-    });
-
-};
-
 var getAllUsers = function() {
 
     if (!isLoggedIn()) {
         return;
     }
-    var userName = getCookie("username");
-    var userID = getCookie("userid");
-    var userToken = getCookie("token");
-
-    var tmp = '{ "userid": ' + userID + ', "user": "' + userName + '", "token" :"' + userToken + '", "labels":  ["*.newTag"]}';
-    console.log(tmp);
-    var args = JSON.parse(tmp);
-    API.getResourcesForLabels(args, function(data) {
-        var x = 2332;
-    }, function(req, status, err) {
-        UI.showError("ERROR: ``" + err + "``");
-        throw err;
-    });
 
     API.getUsers(null, function(data) {
 
@@ -375,82 +321,12 @@ var getAllUsers = function() {
             GLOBAL.users[key] = value;
         });
 
-        // we have the users/IDs, now get the tags
-        getAllTagsByUser();
-
     }, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
         throw err;
     });
 };
 
-// function to get all the tags for all users.
-var getAllTagsByUser = function() {
-
-    if (!isLoggedIn()) {
-        return;
-    }
-
-    var userName = getCookie("username");
-    var userID = getCookie("userid");
-    var userToken = getCookie("token");
-    var uniqType = [];
-
-    var args = {resource: ["%"], user: userName, userid: userID, token: userToken};
-    API.getAllTagsByUser(args, function(origresult) {
-
-        var keys = Object.keys(origresult);
-
-        GLOBAL.allTags = origresult[keys[0]];
-
-        console.log("tags: " + origresult);
-
-        // not the most efficient code in the world
-        for (user in GLOBAL.allTags) {
-            // labels are the keys in a map, the values are the rating and comment
-
-            tags = GLOBAL.allTags[user];
-            for (tag in tags) {
-                uniqType.push(tag.split(":")[0]);
-            }
-
-        }
-
-        GLOBAL.uniqTypes = _.uniq(uniqType);
-        var typeHTML = "";
-
-        if (typeof GLOBAL.allTags[userID] !== 'undefined') {
-            // get just our types
-            var myTypes = [];
-            tags = GLOBAL.allTags[userID];
-            for (tag in tags) {
-                var kv = tag.split(":");
-                myTypes.push(kv[0]);
-            }
-
-            var type;
-            var myUniq = _.uniq(myTypes);
-            //       UI.createLabelMultiselect(myUniq);
-            for (type in myUniq) {
-                // get the values just for this type
-                var myValues = [];
-                var tags = GLOBAL.allTags[userID];
-                for (tag in tags) {
-                    var kv = tag.split(":");
-
-                    if ((kv[0] === myUniq[type]) && (!_.isUndefined(kv[1]))) {
-                        myValues.push(kv[1]);
-                    }
-                }
-            }
-        }
-
-
-    }, function(req, status, err) {
-        UI.showError("ERROR: ``" + err + "``");
-        throw err;
-    });
-};
 
 var createNewCorpus = function(corpusName) {
 
