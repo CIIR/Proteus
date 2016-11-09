@@ -133,48 +133,6 @@ var newHighlightText = function(selector, queryTerms) {
 };
 
 
-// users have the ability to just type a value w/o a type,
-// in order to let them choose these, we need to "group" them
-// somehow, that's done with this "special" type.
-function NO_TYPE_CONST() {
-    return "*";
-}
-
-// users are allowed to enter labels w/o at TYPE, this is troublesome later when
-// we want to allow them to select type/values to filter/retrieval by/etc. So we'll store
-// them with a special "*" type, and as long as we don't display that, all the existing
-// code works nicely.
-// Also remove the rating
-function formatLabelForDatabase(origLabel) {
-
-    var labelWithoutRating = origLabel;
-
-    // if we have a rating, remove it
-    var idx = origLabel.lastIndexOf(" (");
-    if (idx > 0) {
-        labelWithoutRating = origLabel.substring(0, idx).trim();
-    }
-    if (labelWithoutRating.indexOf(":") === -1) {
-        return NO_TYPE_CONST() + ":" + labelWithoutRating;
-    }
-
-    return labelWithoutRating;
-}
-// when displaying tags, don't show the "*:" and display the
-// rating in a user friendly way
-function formatLabelForDispaly(origLabel, rating) {
-    var _rating = rating.toString().split(":");
-    if (_.isUndefined(_rating[0])) {
-        _rating = rating; // they didn't pass in colon sep values
-    }
-    if (origLabel.substring(0, 2) === NO_TYPE_CONST() + ":") {
-        var label = origLabel.split(":");
-        return  label[1] + " (" + _rating + ")";
-    }
-
-    return  origLabel + " (" + _rating + ")";
-
-}
 function isLoggedIn() {
     return (getCookie("username") !== "");
 }
