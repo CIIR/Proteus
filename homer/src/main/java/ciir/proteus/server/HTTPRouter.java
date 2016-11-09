@@ -34,7 +34,6 @@ public class HTTPRouter implements WebHandler {
     private final JSONHandler getUsers;
     private final JSONHandler createCorpus;
     private final JSONHandler updateUserSettings;
-    private final JSONHandler rateResource;
     private final JSONHandler insertNote;
     private final JSONHandler updateNote;
     private final JSONHandler deleteNote;
@@ -62,7 +61,6 @@ public class HTTPRouter implements WebHandler {
         getUsers = new GetUsers(proteus);
         createCorpus = new CreateCorpus(proteus);
         updateUserSettings = new UpdateUserSettings(proteus);
-        rateResource = new RateResource(proteus);
         insertNote = new InsertNote(proteus);
         updateNote = new UpdateNote(proteus);
         deleteNote = new DeleteNote(proteus);
@@ -125,8 +123,6 @@ public class HTTPRouter implements WebHandler {
                 handler = updateSubCorpora;
             }else if (POST && path.equals("/api/resourcesincorpus")) {
                 handler = getResourcesInCorpus;
-            } else if (POST && path.equals("/api/rateresource")) {
-                handler = rateResource;
             } else if (POST && path.equals("/api/resourcevote")) {
                 handler = resourceVote;
             }else if (POST && path.equals("/api/notehistory")) {

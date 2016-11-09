@@ -231,13 +231,6 @@ public class DocumentAnnotator {
         docp.put("meta", Parameters.parseMap(doc.metadata));
       }
 
-      // get any rankings of the document
-      if (getRatings) {
-        Parameters ratings = Parameters.create();
-        ratings = system.userdb.getResourceRatings(doc.name, corpusID);
-        docp.copyFrom(ratings);
-      }
-
       // get any notes
       // TODO : pass a flag indicating if we want to get notes
       Parameters tmpNotes = system.userdb.getNotesForResource(doc.name, corpusID);

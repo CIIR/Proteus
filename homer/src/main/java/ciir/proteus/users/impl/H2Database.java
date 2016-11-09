@@ -104,8 +104,6 @@ public class H2Database implements UserDatabase {
       conn.createStatement().executeUpdate("create table IF NOT EXISTS subcorpora (corpus_id BIGINT NOT NULL, ID BIGINT NOT NULL IDENTITY, subcorpus VARCHAR(200) NOT NULL, PRIMARY KEY (ID), foreign key (corpus_id) references corpora(id))");
       // ensure subcorpus names are unique
       conn.createStatement().executeUpdate("create unique index IF NOT EXISTS subcorpus_name_idx on subcorpora(subcorpus)");
-      conn.createStatement().executeUpdate("create table IF NOT EXISTS resource_ratings (USER_ID BIGINT NOT NULL, CORPUS_ID BIGINT NOT NULL, resource varchar(256) NOT NULL, rating int NOT NULL default 0, foreign key (user_id) references users(id), foreign key (corpus_id) references corpora(id))");
-      conn.createStatement().executeUpdate("create unique index IF NOT EXISTS resource_rating_idx on resource_ratings(user_id, corpus_id, resource)");
 
       conn.createStatement().executeUpdate("create sequence IF NOT EXISTS note_seq");
       conn.createStatement().executeUpdate("create table IF NOT EXISTS notes (ID BIGINT NOT NULL, CORPUS_ID BIGINT NOT NULL, resource VARCHAR(256) NOT NULL," +
@@ -581,109 +579,6 @@ public class H2Database implements UserDatabase {
     return results;
 
   }
-
-  public Parameters getResourceRatings(String resource, Integer corpusID) {
-
-    Parameters tmp = Parameters.create();
-    Parameters ave = Parameters.create();
-    List<Parameters> userRating = new ArrayList<>(0);
-
-    Integer count = 0;
-    Integer sum = 0;
-
-    Connection conn = null;
-    try {
-      conn = getConnection();
-
-      PreparedStatement sql = conn.prepareStatement("SELECT user_id, email, rating FROM resource_ratings, users WHERE resource=? AND users.id = resource_ratings.user_id AND rating != 0 AND corpus_id = ? ");
-
-      sql.setString(1, resource);
-      sql.setInt(2, corpusID);
-
-      ResultSet tuples = sql.executeQuery();
-      while (tuples.next()) {
-        count++;
-        Integer userid = tuples.getInt(1);
-        String user = tuples.getString(2);
-        Integer rating = tuples.getInt(3);
-        sum += rating;
-
-        Parameters p = Parameters.create();
-        p.set("userid", userid);
-        p.set("user", user);
-        p.set("rating", rating);
-        userRating.add(p);
-
-        //        ave.put("rating", sum / count);
-
-      }
-      tuples.close();
-
-    } catch (SQLException e) {
-      e.printStackTrace();
-    } finally {
-      attemptClose(conn);
-    }
-
-    Parameters results = Parameters.create();
-    results.put("ratings", userRating);
-    if (count == 0) {
-      results.put("aveRating", 0);
-    } else {
-      results.put("aveRating", sum / count);
-    }
-
-    return results;
-
-  }
-
-  public void upsertResourceRating(Credentials creds, String resource, Integer userID, Integer corpusID, Integer rating, Integer queryid) throws DBError {
-    checkSession(creds);
-
-    Connection conn = null;
-
-    try {
-      conn = getConnection();
-      PreparedStatement sql = conn.prepareStatement("INSERT INTO resource_ratings (user_id, corpus_id, resource, rating) VALUES(?, ?, ?, ?)");
-
-      sql.setInt(1, userID);
-      sql.setInt(2, corpusID);
-      sql.setString(3, resource);
-      sql.setInt(4, rating);
-
-      int numRows = sql.executeUpdate();
-
-      assert (numRows == 1);
-    } catch (SQLException e) {
-
-      // IFF duplicate key, try update
-      if (e.getErrorCode() == ErrorCode.DUPLICATE_KEY_1) {
-        try {
-          PreparedStatement sql = conn.prepareStatement("UPDATE resource_ratings SET rating = ? WHERE user_id = ? AND corpus_id = ? AND resource = ?");
-
-          sql.setInt(1, rating);
-          sql.setInt(2, userID);
-          sql.setInt(3, corpusID);
-          sql.setString(4, resource);
-
-          int numRows = sql.executeUpdate();
-
-          assert (numRows == 1);
-        } catch (SQLException eu) {
-          eu.printStackTrace();
-          throw new RuntimeException(eu);
-        }
-      } else {
-        e.printStackTrace();
-        throw new RuntimeException(e);
-      }
-    } finally {
-      // tie the resource the the query
-      insertQueryResourceXref(creds, resource, corpusID, queryid);
-      attemptClose(conn);
-    }
-  }
-
 
   // ??? want to include the query id in this - should probably drive the select from the query/resource xref.
   // ?? eihter way, think we're going to  have to return Parameters

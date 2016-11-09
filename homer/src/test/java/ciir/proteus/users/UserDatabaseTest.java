@@ -255,66 +255,6 @@ public class UserDatabaseTest {
   }
 
   @Test
-  public void resourceRankTest() throws DBError, SQLException {
-
-    db.register("user1");
-    db.register("user2");
-
-    Parameters p = db.login("user1");
-    Credentials cred = new Credentials(p);
-
-    db.createCorpus("test corpus 1", "user");
-    Integer corpus1 = 1;
-    Integer corpus2 = 2;
-    Integer queryid1 = 1;
-
-    String res1 = "resource1";
-
-    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4, queryid1);
-
-    Parameters ratings = db.getResourceRatings(res1, corpus1 );
-    assertEquals(ratings.get("aveRating", -1), 4);
-
-    // get ratings for that resource in a corpus which it hasn't been rated in
-    ratings = db.getResourceRatings(res1, corpus2 );
-    assertEquals(ratings.get("aveRating", -1), 0);
-    assertEquals(ratings.getAsList("ratings").size(), 0);
-
-    // test update of rating
-    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 2, queryid1);
-    ratings = db.getResourceRatings(res1, corpus1 );
-    assertEquals(ratings.get("aveRating", -1), 2);
-    assertEquals(ratings.getAsList("ratings").size(), 1);
-
-    // have a 2nd user rate the resource
-    p = db.login("user2");
-    cred = new Credentials(p);
-
-    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 4, queryid1);
-    ratings = db.getResourceRatings(res1,corpus1 );
-    assertEquals(ratings.get("aveRating", -1), 3);
-    assertEquals(ratings.getAsList("ratings").size(), 2);
-
-    // rate another resource, make sure it doesn't change this rating.
-    db.upsertResourceRating(cred, "different resource", cred.userid, corpus1, 4, queryid1);
-    ratings = db.getResourceRatings(res1, corpus1);
-    assertEquals(ratings.get("aveRating", -1), 3);
-    assertEquals(ratings.getAsList("ratings").size(), 2);
-
-    // update user2's rating to be zero - which should be ignored
-    db.upsertResourceRating(cred, res1, cred.userid, corpus1, 0, queryid1);
-    ratings = db.getResourceRatings(res1, corpus1);
-    assertEquals(ratings.get("aveRating", -1), 2);
-    assertEquals(ratings.getAsList("ratings").size(), 1);
-
-    // resource with no ratings
-    ratings = db.getResourceRatings("i don't exist", corpus1);
-    assertEquals(ratings.get("aveRating", -1), 0);
-    assertEquals(ratings.getAsList("ratings").size(), 0);
-
-  }
-
-  @Test
   public void resourceRank2Test() throws DBError, SQLException {
 
     String user1 = "user1";
@@ -487,9 +427,6 @@ public class UserDatabaseTest {
     Integer subcorpus1 = 1;
 
     Integer query_1_id = db.insertQuery(null, corpus1, query_1, kind_1);
-
-    //db.insertQueryResourceXref(null, res1, corpus1, query_1_id);
-    // TODO ^^^ should be private it's called inside upsertResourceRating - but that makes testing it stand alone kinda hard.
 
     db.addVoteForResource(cred, res1, corpus1, subcorpus1, query_1_id);
     db.addVoteForResource(cred, res3, corpus1, subcorpus1, query_1_id);

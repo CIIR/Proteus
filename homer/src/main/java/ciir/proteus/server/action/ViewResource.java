@@ -93,11 +93,6 @@ public class ViewResource implements JSONHandler {
       response.put("queryTerms", terms);
     }
 
-    // get ratings
-    Parameters ratings = Parameters.create();
-    ratings = system.userdb.getResourceRatings(doc.name, reqp.getInt("corpusID"));
-    response.copyFrom(ratings);
-
     // get labels.
     Parameters labels = Parameters.create();
     labels = system.userdb.getResourceRatings2(doc.name, reqp.getInt("corpusID"));

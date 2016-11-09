@@ -53,7 +53,6 @@ API.register = method("POST", "/api/register");
 API.getUsers = method("GET", "/api/users");
 API.newCorpus = method("POST", "/api/newcorpus");
 API.updateUserSettings = method("POST", "/api/updatesettings");
-API.rateResource = method("POST", "/api/rateresource");
 API.getNotes = method("POST", "/store/annotations/search");
 API.getNoteHistory = method("POST", "/api/notehistory");
 API.getActivityLog = method("POST", "/api/activitylog");

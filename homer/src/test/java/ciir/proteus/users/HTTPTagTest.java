@@ -89,25 +89,7 @@ public class HTTPTagTest {
     responseJSON = Parameters.parseString(response.body);
     assertTrue(responseJSON.isString("token"));
     assertNotNull(responseJSON.getString("token"));
-    int userid = (int) responseJSON.getLong("userid");
-    String token = responseJSON.getString("token");
-  }
 
-  @Test
-  public void testRateResource() throws NoTuplesAffected, DuplicateCorpus, IOException, SQLException {
-    Parameters creds = env.creds.toJSON();
-    Parameters put = Parameters.create();
-    put.copyFrom(creds);
-    env.proteus.userdb.createCorpus("test corpus 1", "user");
-
-    String res1 = "document1";
-    put.set("resource", res1);
-    put.set("rating", 2);
-    put.set("corpus", 1);
-    put.set("queryid", 1);
-    put.set("corpusName", "test corpus 1");
-
-    assertOK(HTTPUtil.postJSON(env.url, "/api/rateresource", put));
   }
 
   @Test

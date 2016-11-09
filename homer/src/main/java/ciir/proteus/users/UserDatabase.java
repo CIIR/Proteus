@@ -74,10 +74,7 @@ public interface UserDatabase {
 
     public void updateUserSettings(Credentials creds, String settings) throws DBError;
 
-    public Parameters getResourceRatings(String resource, Integer corpusID);
     public Parameters getResourceRatings2(String resource, Integer corpusID);
-
-    public void upsertResourceRating(Credentials creds, String resource, Integer userID, Integer corpusID, Integer rating, Integer queryid) throws DBError;
 
     public List<String> getResourcesForCorpus(Integer userid, Integer corpusID, Integer numResults, Integer startIndex) throws DBError;
 

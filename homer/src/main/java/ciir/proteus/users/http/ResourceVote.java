@@ -4,9 +4,6 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
-import ciir.proteus.util.logging.ClickLogHelper;
-import ciir.proteus.util.logging.LogHelper;
-import ciir.proteus.util.logging.RateResourceLogData;
 import org.lemurproject.galago.utility.Parameters;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,12 +34,6 @@ public class ResourceVote extends DBAction {
             throw new RuntimeException("unknown action for vote.");
         }
 
-        //        RateResourceLogData logData = new RateResourceLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", ""));
-//        logData.setCorpus(corpus);
-//        logData.setRating(rating);
-//        logData.setResource(res);
-//        logData.setCorpusName(reqp.getAsString("corpusName"));
-//        LogHelper.log(logData, system);
         // TODO ??? include queryid?
         return Parameters.create();
     }
