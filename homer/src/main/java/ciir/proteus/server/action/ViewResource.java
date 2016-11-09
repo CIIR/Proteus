@@ -95,7 +95,7 @@ public class ViewResource implements JSONHandler {
 
     // get labels.
     Parameters labels = Parameters.create();
-    labels = system.userdb.getResourceRatings2(doc.name, reqp.getInt("corpusID"));
+    labels = system.userdb.getResourceLabels(doc.name, reqp.getInt("corpusID"));
     response.copyFrom(labels);
 
     // get any notes associated with the book

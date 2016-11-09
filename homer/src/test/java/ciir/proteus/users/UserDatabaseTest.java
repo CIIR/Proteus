@@ -1,7 +1,5 @@
 package ciir.proteus.users;
 
-import ciir.proteus.users.error.BadSessionException;
-import ciir.proteus.users.error.BadUserException;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.users.error.DuplicateCorpus;
 import ciir.proteus.users.error.DuplicateUser;
@@ -21,8 +19,6 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -255,7 +251,7 @@ public class UserDatabaseTest {
   }
 
   @Test
-  public void resourceRank2Test() throws DBError, SQLException {
+  public void resourceLabelTest() throws DBError, SQLException {
 
     String user1 = "user1";
     String user2 = "user2";
@@ -280,7 +276,7 @@ public class UserDatabaseTest {
     db.addVoteForResource(cred, res1, corpus1, subcorpus1, queryid1);
     db.addVoteForResource(cred, res1_pg1, corpus1, subcorpus1, queryid1);
 
-    Parameters labels = db.getResourceRatings2(res1, corpus1);
+    Parameters labels = db.getResourceLabels(res1, corpus1);
     List<Parameters> recs = new ArrayList<Parameters>();
     recs = labels.getAsList("labels");
     assertEquals(2, recs.size());
@@ -299,7 +295,7 @@ public class UserDatabaseTest {
     assertEquals(p.get(user1id.toString()), user1);
 
     // test for corpus that doesn't have anything
-    labels = db.getResourceRatings2(res1, corpus2);
+    labels = db.getResourceLabels(res1, corpus2);
     recs = labels.getAsList("labels");
     assertEquals(0, recs.size());
 
@@ -308,7 +304,7 @@ public class UserDatabaseTest {
     cred = new Credentials(p);
 
     db.addVoteForResource(cred, res1, corpus1, subcorpus1, queryid1);
-    labels = db.getResourceRatings2(res1, corpus1);
+    labels = db.getResourceLabels(res1, corpus1);
     recs = labels.getAsList("labels");
     assertEquals(3, recs.size());
 

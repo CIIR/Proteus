@@ -107,7 +107,7 @@ public class DocumentAnnotator {
       }
 
       // modified getResourcRatings to get labels.
-      Parameters labels = system.userdb.getResourceRatings2(doc.name, corpusID);
+      Parameters labels = system.userdb.getResourceLabels(doc.name, corpusID);
       // "overlap" is a document that is in more than one subcorpus
       if (overlapOnly && labels.get("newLabels", Parameters.create()).size() < 2) {
         continue;

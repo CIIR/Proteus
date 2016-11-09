@@ -522,7 +522,7 @@ public class H2Database implements UserDatabase {
     }
   }
 
-  public Parameters getResourceRatings2(String resource, Integer corpusID) {
+  public Parameters getResourceLabels(String resource, Integer corpusID) {
 
     List<Parameters> userRating = new ArrayList<>(0);
     Parameters userLabels = Parameters.create();
