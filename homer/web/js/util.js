@@ -173,75 +173,6 @@ function getCorpusID(corpusName) {
     // 10/2015 MCZ moving towards a tagging model so this will always
     // be "1" - the "umbrella" corpus
     return 1;
-    //    // TODO: has to be a better way to do this - just brute force it for now...
-    //    var corpora = JSON.parse(localStorage["corpora"]);
-    //    var corpID = -1;
-    //    _.forEach(corpora, function(c){
-    //        if (c.name == corpusName)
-    //            corpID = parseInt(c.id);
-    //    });
-    //    return corpID;
-}
-
-jsonp_handler = function(data)
-{
-    console.log(data);
-    var html = $("#important-entities").html();
-    var wikipedia = '';
-
-
-    _.forEach(data.query.pages, function(pg) {
-        if (!_.isUndefined(pg.pageid)) {
-            wikipedia += ' <a target="_blank" href="https://en.wikipedia.org/wiki/' + pg.title + '">' + pg.title + '</a>';
-        }
-
-    });
-
-    if (wikipedia.length > 0)
-        $("#important-entities").html(html + " (" + wikipedia + ")");
-
-}
-
-function initImportantEntities() {
-    $("#important-entities").droppable({
-        drop: function(event, ui) {
-            $(this).css("background-color", "");
-            var html = $("#important-entities").html();
-            console.log(ui)
-            //    $("#important-entities").html(html + "<br>" + ui.draggable[0].parentElement.nodeName + ": " + ui.draggable[0].textContent);
-            $("#important-entities").html(html + "<br>" + ui.draggable[0].parentElement.nodeName + ": " + ui.draggable[0].outerHTML);
-            // remove any classes
-            $("#important-entities .mz-ner").removeClass();
-            //
-            //            API.callWikipedia(ui.draggable[0].textContent, function(data){
-            //                console.log(JSON.stringify(data));
-            //            }, function(){
-            //                console.log("Failure");
-            //            })
-
-
-            // the text we're taking the NER from is all lower case. The Wikipedia API will only capitalize the first
-            // word so we'll pass the original version and one with the first letter capitalized.
-
-            var query = encodeURI(ui.draggable[0].textContent) + "|" + encodeURI(ui.draggable[0].textContent.capitalizeEachWord());
-            var script = document.createElement('script');
-            script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&format=json&titles=' + query;
-
-            // script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&prop=images&imlimit=20&format=json&titles=' + encodeURI(ui.draggable[0].textContent);
-            //      script.src = 'http://en.wikipedia.org/w/api.php?action=query&callback=jsonp_handler&list=retrieval&limit=20&format=json&srsearch=' + encodeURI(ui.draggable[0].textContent);
-
-            document.head.appendChild(script);
-
-
-        },
-        over: function() {
-            $(this).css("background-color", "lightgrey");
-        },
-        out: function() {
-            $(this).css("background-color", "");
-        }
-
-    });
 }
 
 String.prototype.capitalizeEachWord = function() {
@@ -272,9 +203,6 @@ var setUserRatingsHTML = function(res) {
         id2name[r.id] = r.name;
     });
 
-
-    //    var rating_wo_names_html =   '<span>';
-
     // use a map to group who "voted" for a subcorpus
     var votes = {};
 
@@ -298,39 +226,7 @@ var setUserRatingsHTML = function(res) {
 
     rating_html += '</span>';
 
-    //  rating_wo_names_html += '</span>';
-
-    //   $('#' + res + '-user-ratings').html(rating_wo_names_html);
     $('#' + res + '-user-ratings-w-names').html(rating_html);
-
-    //    if (_.isUndefined( ratingsJSON.document[res]) || _.isEmpty(ratingsJSON.document[res])) {
-    //        return '';
-    //    }
-    //
-    //    var rating_html =   '<span>';
-    //    var rating_wo_names_html =   '<span>';
-    //
-    //    _.forEach(ratingsJSON.document[res], function (val, key) {
-    //
-    //        // ignore any zero ratings
-    //        if (val  != 0){
-    //            var user  = key.split("@")[0] ;
-    //
-    //            if (val == 1){
-    //                rating_html += user + ' <span class="glyphicon glyphicon-ok"></span><br>'
-    //                rating_wo_names_html +=   ' <span class="glyphicon glyphicon-ok"></span> '
-    //            } else {
-    //                rating_html += user + ' <span class="glyphicon glyphicon-remove"></span><br>'
-    //                rating_wo_names_html +=  ' <span class="glyphicon glyphicon-remove"></span> '
-    //            }
-    //        }
-    //    })
-    //
-    //    rating_html += '</span>';
-    //    rating_wo_names_html += '</span>';
-    //
-    //    $('#' + res + '-user-ratings').html(rating_wo_names_html);
-    //    $('#' + res + '-user-ratings-w-names').html(rating_html);
 
 }
 

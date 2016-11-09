@@ -1,15 +1,6 @@
 
 var API = {};
 
-
-var queryWikipedia = function(terms){
-
-    var safeTerms = encodeURI(terms);
-
-  return  method("GET", "http://en.wikipedia.org/w/api.php?action=query&prop=revisions&callback=jsonp_handler&format=json&prop=info&inprop=url&titles=" + terms);
-
-}
-
 // -- factory for generating API calls based on type and url
 var method = function(method, url, terms) {
 
