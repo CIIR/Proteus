@@ -106,14 +106,6 @@ UI.setQuery = function(q) {
  
  */
 
-function getAve(ave, id) {
-    var pct = (ave / 4) * 100;
-
-    var aveRating = '<span class="ui-state-hover ui-slider-handle ui-slider-ave ui-slider-horizontal proteus-rating " style="left: ' + pct.toFixed(0) + '%; "><span class=" ui-slider-tip">' + (ave - 2).toFixed(2) + '</span></span>';
-    $("#rating-" + id + " span:first").before(aveRating);
-
-}
-
 UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
 
     var name = result.name;
@@ -219,7 +211,7 @@ UI.dispalyUserName = function() {
     }
 };
 
- 
+
 UI.clearSelectedLabels = function() {
     var i = 0; // counter to get uniq elements
 
@@ -347,11 +339,11 @@ function setCorpus(corpus) {
 
 
 function hideSideBar() {
-    $("#results-left").hide();
+    $("#search-results-left").hide();
     $('#sidebar-button').attr("src", "images/sidebar_expand.png");
 
-    $("#results-right").removeClass("col-md-10");
-    $("#results-right").addClass("col-md-12");
+    $("#search-results-right").removeClass("col-md-10");
+    $("#search-results-right").addClass("col-md-12");
 
     showSideBarFlag = false;
     p = getURLParams();
@@ -360,11 +352,11 @@ function hideSideBar() {
 
 }
 function showSideBar() {
-    $("#results-left").show();
+    $("#search-results-left").show();
     $('#sidebar-button').attr("src", "images/sidebar_shrink.png");
 
-    $("#results-right").removeClass("col-md-12");
-    $("#results-right").addClass("col-md-10");
+    $("#search-results-right").removeClass("col-md-12");
+    $("#search-results-right").addClass("col-md-10");
 
     showSideBarFlag = true;
     p = getURLParams();
@@ -374,7 +366,7 @@ function showSideBar() {
 
 
 function hideOCRSideBar() {
-     $("#results-left").hide();
+     $("#ocr-results-left").hide();
     $("#ocr-results-right").removeClass("col-md-9");
     $("#ocr-results-right").addClass("col-md-11");
 
@@ -389,7 +381,7 @@ function hideOCRSideBar() {
 
 }
 function showOCRSideBar() {
-    $("#results-left").show();
+    $("#ocr-results-left").show();
 
     $("#ocr-results-right").removeClass("col-md-11");
     $("#ocr-results-right").addClass("col-md-9");

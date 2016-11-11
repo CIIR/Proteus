@@ -11,19 +11,21 @@ var pageThumbnail = function(pageid) {
 
 var renderResult = function(queryTerms, result, resDiv, queryid) {
 
+    // check if we're a note. Can either check metadata "docType" = "note"
+    if (!_.isUndefined(result.meta) && result.meta.docType == "note") {
+        return renderNoteResult(queryTerms, result, resDiv);
+    }
+
     var name = result.meta.title || result.meta.TEI || result.name;
     var tmpid = parsePageID(result.name);
     var identifier = tmpid.id;
     var pageNum = tmpid.page;
     var docid = result.name;
     var snippet = result.snippet;
-    var iaURL = result.meta["identifier-access"];
-    var nameLink = '';
+    var iaURL = 'http://www.archive.org/details/' + identifier;
 
-    if (iaURL) {
-        nameLink = Render.getDocumentURL(iaURL, name, queryTerms, result.rank, identifier);
-    }
-    var pgImage = iaURL;
+    var nameLink = Render.getDocumentURL(iaURL, name, result.rank, identifier);
+
     var kind = 'ia-books'; // default
 
     // if this is a book result - show the front page as the thumbnail but the links will
@@ -44,13 +46,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
         pgImage = pageImage(result.name);
         previewImage = Render.getPagePreviewURL(pgImage, thumbnail, queryTerms, result.rank);
 
-        // check if we're a note. Can either check metadata "docType" = "note" or there are two underscores
-        // TODO : this should be moved up
-        if (!_.isUndefined(result.meta)) {
-            if (result.meta.docType == "note") {
-                return renderNoteResult(queryTerms, result, resDiv);
-            }
-        }
+
     }
     if (kind == 'ia-books' && !_.isUndefined(result.snippetPage)) {
         docid = identifier + "_" + result.snippetPage;
@@ -70,7 +66,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
         var urlParams = getURLParams();
         var currentKind = urlParams["kind"];
         if (_.isUndefined(currentKind)) {
-            // we should be guarenteed to have a kind on the URL, but since
+            // we should be guaranteed to have a kind on the URL, but since
             // they can easily be changed, we'll take the kind from the search
             // result just in case.
             currentKind = kind;
@@ -93,27 +89,25 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
 
     var html = '<table class="result-table"><tr>';
 
-    html += '<td class="preview" rowspan="3">' + previewImage + '</td>' +
+    html += '<td class="result-img-preview" rowspan="3">' + previewImage + '</td>' +
             '<td class="name">' + nameLink + '&nbsp;(<a target="_blank" href="view.html?kind=ia-pages&action=view&id=' + docid + '&queryid=' + queryid + '">view OCR</a>)&nbsp;'
 
     // store the ratings with names but keep it hidden, we'll use this on hover to display the users and
     // their ratings on the left hand side of the screen.
     html += '<span id="' + result.name + '-user-ratings"></span><span  style="display:none" id="' + result.name + '-user-ratings-w-names"></span>';
-    html += '<span class="highlight" id="' + result.name + '-dup-confidence"></span>';
+    html += '<span class="dup-highlight" id="' + result.name + '-dup-confidence"></span>';
     html += '</td></div></td><td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td></tr>';
     html += '<tr class="author"><td><span class="' + identifier + '-meta-author" >' + result.meta.creator;
     html += '</span>&nbsp;•&nbsp;published: <span class="' + identifier + '-meta-published">' + result.meta.date + '</span></td></tr>';
 
     if (snippet) {
-        html += '<tr><td class="snippet" colspan="3"> ...';
-        html += snippet;
-        html += '... </td></tr>';
+        html += '<tr><td class="snippet" colspan="3"> ...' + snippet + '... </td></tr>';
 
-        // only get uniq word if we haven't seen it before - this will be used later
+        // only get unique words if we haven't seen it before - this will be used later
         // to find duplicate documents
         if (_.isUndefined(uniqWords[result.rank - 1])) {
-            var once = _.uniq(snippet.split(" "))
-            uniqWords.push((once))
+            var once = _.uniq(snippet.split(" "));
+            uniqWords.push(once);
         }
 
     } // end if snippet
@@ -147,11 +141,11 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     }
 
     // show queries
-    if (UI.settings.show_found_with_query) {
+    if (UI.settings.show_found_with_query && !_.isUndefined(result.queries)) {
 
         var queries = [];
         _.each(result.queries.rows, function(query) {
-            queries.push('<a target="_BLANK" href="index.html?action=search&kind=' + query.kind + '&q=' + encodeURIComponent(query.query) + '">' + query.query + '</a>');
+            queries.push('<a target="_blank" href="index.html?action=search&kind=' + query.kind + '&q=' + encodeURIComponent(query.query) + '">' + query.query + '</a>');
         })
         if (queries.length == 1) {
             html += '<div class="resource-query" >Found with query: ' + queries.toString() + '</div>';
@@ -167,8 +161,6 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
 
     resDiv.html(html);
 
-
-
     return resDiv;
 
 };
@@ -183,11 +175,8 @@ var renderNoteResult = function(queryTerms, result, resDiv) {
 
     var idParts = result.name.split('_');
 
-    var html =
-            '<table class="note-table">' +
-            '<tr>';
+    var html = '<table class="note-table"><tr><td class="name">' + name;
 
-    html += '<td class="name">' + name;
     // store the ratings with names but keep it hidden, we'll use this on hover to display the users and
     // their ratings on the left hand side of the screen.
     html += '<span id="' + result.name + '-user-ratings"></span><span  style="display:none" id="' + result.name + '-user-ratings-w-names"></span>';

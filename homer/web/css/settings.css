@@ -1,0 +1,15 @@
+/* CSS for the settings page */
+
+.settings-body{
+    overflow-y: auto;
+}
+#settings-container{
+    background-color: lightgray;
+    margin-top: 20px;
+}
+
+#subcorpora-container{
+    background-color: lightblue;
+    margin-top: 20px;
+}
+

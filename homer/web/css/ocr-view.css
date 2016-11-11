@@ -1,23 +1,36 @@
 
+#corpus-docs ul {
+    padding-left: 0 !important;
+    margin-left: 5px !important;
+}
+
+#corpus-docs li {
+    padding-left: 0 !important;
+    margin-left: 20px !important;
+}
+
+.entity-node {
+    fill: white;
+    stroke-width: 5px;
+}
+
 #cb-location-label {
     color: white;
     background-color: saddlebrown;
 }
 
-.entity-node{
-    fill: white;
-    stroke-width: 5px;
-}
-.location-node{
+.location-node {
     stroke: saddlebrown;
 
 }
-.location-on{
+
+.location-on {
     color: white;
     background-color: saddlebrown;
     opacity: 0.5;
 }
-.location-off{
+
+.location-off {
     color: saddlebrown;
     background-color: transparent;
     opacity: 1;
@@ -28,30 +41,35 @@
     color: white;
     background-color: slateblue;
 }
-.organization-node{
+
+.organization-node {
     stroke: slateblue;
 
 }
+
 .organization-on {
     color: white;
     background-color: slateblue;
     opacity: 0.5;
 }
+
 .organization-off {
     color: slateblue;
     background-color: transparent;
     opacity: 1;
 }
 
-#cb-person-label{
+#cb-person-label {
     color: white;
     background-color: orangered;
 }
-.person-node{
+
+.person-node {
     stroke: orangered;
 
 }
-.person-on  {
+
+.person-on {
     color: white;
     background-color: orangered;
     opacity: 0.5;
@@ -63,25 +81,28 @@
     opacity: 1;
 }
 
+.comment-labels button {
+    margin: 3px !important;
+}
 
-#view-nav-top{
+#view-nav-top {
     padding-bottom: 20px;
     display: block;
 }
 
-#view-nav-bottom{
+#view-nav-bottom {
     padding-top: 20px;
     padding-bottom: 10px;
     display: block;
 }
 
-#ocr-body-view{
+#ocr-body-view {
     margin: 0;
     overflow-y: hidden;
     padding-bottom: 60px;
 }
 
-.book-text{
+.book-text {
     padding-left: 30px;
 }
 
@@ -89,6 +110,17 @@
     padding-top: 200px;
     padding-bottom: 200px;
 }
+
+#ocr-results-left {
+    background-color: white;
+    border-right: 1px solid #888;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    overflow-y: scroll;
+}
+
 #ocr-results-right {
 
     height: 100%;
@@ -98,32 +130,32 @@
     overflow-y: scroll;
 }
 
-.page-image img{
-    max-width:75%;
-    max-height:75%;
-    margin:auto;
-    display:block;
+.page-image img {
+    max-width: 75%;
+    max-height: 75%;
+    margin: auto;
+    display: block;
     box-shadow: 10px 10px 5px #888888;
     border: thin;
     border-color: lightgrey;
     border-style: solid;
 }
 
-#page-thumbnails{
+#page-thumbnails {
     background-color: lightgray;
     top: 0;
     bottom: 0;
     right: 0;
     overflow-y: scroll;
-
     padding-right: 20px !important;
-
 }
+
 #page-thumbnails-wrapper {
     height: 100%;
     padding-left: 0px !important;
 }
-#book-search-results{
+
+#book-search-results {
     background-color: grey;
     height: 0%;
     top: 0;
@@ -134,12 +166,11 @@
     padding-right: 20px !important;
 }
 
-.ocr-page-thumbnail{
+.ocr-page-thumbnail {
     margin-left: 10px;
     margin-right: 10px;
     margin-top: 3px;
     padding-top: 5px;
-
     display: block;
     width: 100%;
     /* having a border the same color as the
@@ -165,13 +196,13 @@
     border-color: orangered;
 }
 
-.ocr-page-result{
-    border: solid ;
+.ocr-page-result {
+    border: solid;
     border-color: gold !important;
     border-radius: 5px;
 }
 
-#book-search-results a{
+#book-search-results a {
     color: black;
 }
 
@@ -180,15 +211,6 @@
     border: solid;
     background-color: #009;
     color: white;
-}
-
-.hr-tmp{
-    padding-left: 20px;
-}
-
-mark{
-    font-weight: bold;
-    color: black;
 }
 
 .gutter {
@@ -201,30 +223,34 @@ mark{
     background-image: url('../images/grips/horizontal.png');
     cursor: ns-resize;
 }
+
 .split {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-
     overflow-y: auto;
     overflow-x: hidden;
 }
 
+/* don't show the archive ID in the text */
 archiveid {
     display: none;
 }
 
+/* CSS for recipes and poems. This was for the Summer 2016 REU students */
+
 #cb-poemline-label {
-     color: white;
+    color: white;
     background-color: saddlebrown;
 }
 
 .poemline-on {
     color: white;
     background-color: saddlebrown;
-    background-blend-mode:color-dodge;
+    background-blend-mode: color-dodge;
 }
-.poemline-off{
+
+.poemline-off {
     color: black;
     background-color: transparent;
 }
@@ -237,9 +263,9 @@ archiveid {
     background-color: blue;
 }
 
-.recipe-on:before{
-    border-left: solid ;
-    border-color: blue ;
+.recipe-on:before {
+    border-left: solid;
+    border-color: blue;
     height: 100% !important;
     content: " ";
     position: absolute;
@@ -248,7 +274,7 @@ archiveid {
     left: -20px;
 }
 
-.recipe-off{
+.recipe-off {
     border-color: transparent;
 }
 
@@ -257,9 +283,9 @@ archiveid {
     background-color: orange;
 }
 
-.poem-on:before{
-    border-left: solid ;
-    border-color: orange ;
+.poem-on:before {
+    border-left: solid;
+    border-color: orange;
     position: absolute;
     border-width: 5px;
     z-index: -1;
@@ -268,6 +294,6 @@ archiveid {
     left: -10px;
 }
 
-.poem-off{
+.poem-off {
     border-color: transparent;
 }

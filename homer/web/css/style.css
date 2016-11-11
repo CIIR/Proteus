@@ -1,187 +1,19 @@
-/* add some padding so the relevance judgements can be seen for the first result
-#results{
-
-    padding-top: 30px;
-}
-*/
-#results-left {
-    background-color: white;
-    border-right: 1px solid #888;
-    height: 100%;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    overflow-y: scroll;
-
-}
-
-#results-right {
-
-    height: 100%;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    overflow-y: scroll;
-
-}
-
-.snippet {
-    padding: 2pt;
-    color: #666;
-    font-size: smaller;
-}
-.author {
-    padding: 2pt;
-    color: #666;
-    font-size: smaller;
-}
-
-.hili {
-    color: black;
-    font-weight: bold;
-    background: yellow;
-}
-
-#parsedQuery {
-    font-family: monospace;
-    display: none;
-}
-
-#request {
-    display: none;
-}
-
-#progress {
-    color: white;
-    text-align: right;
-    vertical-align: middle;
-    font-family: monospace;
-    display: inline;
-}
-
-#error {
-    color: white;
-    background-color: #a00;
-    font-weight: bold;
-    text-align: center;
-    display: none;
-    padding: 10pt;
-    margin: 0;
-}
-
-#footer {
-    margin: 0;
-    margin-top: 40pt;
-    padding: 10pt;
-    background-color: #009;
-    text-align: left;
-}
-
-#more {
-    text-align: center;
-}
-
-#ui {
-
-    margin: 0;
-    padding-bottom: 10pt;
-    padding-top: 10pt;
-    background-color: #009;
-
-}
-
-.header-font, #title a, #title {
-    float: left;
-    margin: 0;
-    vertical-align: middle;
-    padding-right: 20pt;
-    font-size: 20pt;
-    font-weight: bold;
-    height: 20pt;
-    color: white;
-    text-decoration: none;
-}
-
-
-#user-info, #ui-login-form {
-    text-align: right;
-
- /*   float: right; */
-    height: 20pt;
-    vertical-align: middle;
-}
-
-.login-form-text {
-    color: #fff;
-    text-align: right;
-    font-weight: bold;
-    vertical-align: middle;
-}
-
-
-#ui-go-logout {
-    text-align: right;
-}
-
-.preview {
-    padding: 5pt;
-}
-
-.result {
-    padding: 5pt;
-}
-
-img.ia-thumbnail {
-   /* width: 80px; */
-    height: 100px;
-}
-
-.result .rank {
-    color: grey;
-    padding-right: 10pt;
-}
-
-.result .name {
-}
-
-.result .score {
-    color: grey;
-    text-align: right;
-}
-
-.create-label-form {
-    background-color: yellow;
-    box-shadow: 10px 10px 5px #888888;
-    padding: 10px;
-    border: 2px solid gray;
-    margin: 0px;
-}
-
-.read-only-li {
-    background-color: red;
-}
-
-#tag-values {
-    background-color: dimgray;
-}
-
-.type-button {
-    margin: 2px 5px 2px 0;
-}
-
-/* styles for the drop down list by the retrieval edit box */
-.multiselect-item {
-    text-align: left;
-}
+/* generic CSS */
 
 .right-align {
     text-align: right;
 }
 
-#view-resource {
-    /* render any HTML with newlines */
-    /* white-space: pre; */
+.left-align{
     text-align: left;
+}
+.center-align{
+    text-align: center;
+}
+
+.navbar {
+    min-height: 32px !important;
+    margin-bottom: 0;
 }
 
 /* make navbar smaller (http://stackoverflow.com/questions/19576175/how-do-you-decrease-navbar-height-in-bootstrap-3) */
@@ -199,453 +31,11 @@ img.ia-thumbnail {
     cursor: pointer;
 }
 
-.navbar {
-    min-height: 32px !important;
-    margin-bottom: 0;
-}
-
 .sidebar-button-img {
     position: fixed;
-    bottom: 0px;
-    left: 0px;
-    cursor: pointer; cursor: hand;
-}
-
-/* override FancyTree CSS */
-ul.fancytree-container {
-    border: none;
-}
-
-td.metakey {
-    padding: 8px;
-    margin-left: 2cm;
-}
-
-#body-index {
-    margin: 0;
-    overflow-y: hidden;
-}
-
-.settings-body{
-    overflow-y: auto;
-}
-
-#body-view{
-    margin: 0;
-    overflow-y: hidden;
-    padding-bottom: 55px;
-}
-.label-details {
-    background-color: #dedede;
-    border: solid;
-    padding: 5px;
-    box-shadow: 10px 10px 5px #888888;
-    position: relative;
-    text-align: left;
-}
-
-#notes-field{
-    width:90%;
-}
-.notes-label {
-    vertical-align: top;
-}
-
-.label-details-wrapper {
-    z-index: 99999;
-    position: relative;
-}
-
-#overlay {
-    opacity: 0.4;
-    position: fixed;
-    top: 0;
+    bottom: 0;
     left: 0;
-    background-color: black;
-    width: 100%;
-    height: 100%;
-    z-index: 5000
-}
-
-.pageNavigation{
-    cursor: pointer; cursor: hand;
-}
-
-.pageThumbnail{
-    float: left;
-}
-
-.ocrPageText{
-    float: right;
-}
-
-.book-result:hover{
-    background-color: lavenderblush !important;
-}
-.page-result:hover{
-    background-color: aliceblue !important;
-}
-
-.source-node{
-    stroke: black;
-    stroke-width: 2px;
-}
-
-.book-node{
-    fill: lavenderblush;
-
-}
-
-.page-node{
-    fill: aliceblue;
-}
-
-.page-result{
-    margin-left: 25px;
-}
-.note-result:hover{
-    background-color: lemonchiffon !important;
-}
-/* enable scrollbars */
-#pastSearches{
-    height:30%;
-    overflow-y:scroll;
-    padding: 1em;
-}
-
-.xtmp{
-    float: right;
-    display: none;
-}
-
-.query:hover .xtmp {
-    display: block;
-}
-
-.query:hover {
-    background-color: lightcyan;
-    cursor: pointer; cursor: hand;
-}
-
-#ratings {
-    /*    border: solid;
-      padding: 1em;
-      margin-bottom: 1em;
-      margin-top: 1em;
-      overflow-y: visible;
-      border-radius: 5px;
-    text-align: right; */
-}
-
-#important-entities{
-    border: solid;
-    padding: 1em;
-    margin-bottom: 1em;
-    margin-top: 1em;
-    overflow-y: visible;
-    /*   text-align: right; */
-}
-
-
-.rating-user{
-    width: 40%;
-    display:inline-block;
-    text-align: right;
-    vertical-align: top;
-}
-.rating-value{
-    width: 60%;
-    display:inline-block;
-    text-align: left;
-    font-weight: bold;
-}
-#search-help{
-    padding-left: 15px;
-}
-
-.rating-left{
-    float: left;
-    unicode-bidi: bidi-override;
-    direction: rtl;
-    padding-right: 5px;
-}
-.rating-right{
-    float: left;
-
-}
-
-.slider-rating{
-    width: 400px;
-    font-size: small;
-}
-
-/* Original from: http://simeydotme.github.io/jQuery-ui-Slider-Pips/#styling-rainbow */
-.rainbow-slider {
-    background: linear-gradient(to right, red , yellow ,  green );
-    background-repeat: no-repeat;
-    background-size: cover;
-    border-radius: 30px;
-    border: none;
-    box-shadow: inset 0 0 0px 1px rgba(0, 0, 0, 0.18);
-    height: 10px; }
-
-.rainbow-slider .ui-slider-handle {
-    background: rgba(255, 255, 255, 0.21);
-    border-color: rgba(0, 0, 0, 0.56);
-    box-shadow: inset 0 0 2px 2px rgba(255, 255, 255, 0.89);
-    border-radius: 20px;
-}
-
-.rainbow-slider .ui-slider-handle.ui-state-hover,
-.rainbow-slider .ui-slider-handle:hover,
-.rainbow-slider .ui-slider-handle.ui-state-focus,
-.rainbow-slider .ui-slider-handle:focus,
-.rainbow-slider .ui-slider-handle.ui-state-active {
-    background: rgba(255, 255, 255, 0.21);
-}
-
-.rainbow-slider .ui-slider-pip .ui-slider-label {
-    width: 6em;
-    margin-left: -3em;
-}
-
-.rainbow-slider .ui-slider-pip .ui-slider-line {
-    top: 1px;
-}
-
-/* override some of the CSS for the average so we don't show the slider */
-.ui-slider-ave{
-    border: none !important;
-    box-shadow: none !important;
-    top: .3em !important;
-    background: none !important;
-}
-
-
-.Xrel-label {
-
-    font-weight: bold;
-    text-align: center;
-    border-radius: 30px;
-}
-.rel-label-terrible {
-     background-color: red;
-
- }
-.rel-label-not-relevant{
-    background-color: orange;
-
-}
-.rel-label-neutral{
-    background-color: yellow;
-
-}
-.rel-label-slightly-relevant{
-    background-color: limegreen ;
-
-}
-.rel-label-highly-relevant{
-    background-color: green;
-}
-
-.book-text{
-    font-size: larger;
-}
-
-
-#ui-go-settings{
-    float: right;
-}
-
-#settings-container{
-    background-color: lightgray;
-    margin-top: 20px;
-}
-
-#subcorpora-container{
-    background-color: lightblue;
-    margin-top: 20px;
-}
-
-/*
-.mz-ner{
-    margin-top: 5px;
-    margin-bottom: 5px;
-    padding: 1px;
-}
-
-#page-notes{
-    border: solid;
-    border-color: red;
-}
-
-
-#ocr-options{
-    border: solid;
-    border-color: purple;
-    padding: 5px;
-    margin-top: 5px;
-}
-*/
-.notes {
-    font-style: italic;
-}
-
-.note {
-    text-align: left;
-}
-
-.note-table {
-    width: 100%;
-}
-
-#loading-msg{
-    background-color: yellow;
-    text-align: center;
-}
-
-
-.acm-text {
-
-    white-space: pre-wrap;
-    /*font-family:  "Helvetica Neue",Helvetica,Arial,sans-serif;*/
-}
-/* we need to override the "pre-wrap" for acm-text */
-.annotator-editor, .annotator-viewer{
-    white-space: normal;
-}
-
-.hide-me{
-    dispaly: none;
-}
-
-
-.droppable {
-    z-index: 999;
-}
-.accept {
-    /*
-    width: 100px;
-    height: 100px;
-*/
-
-    color: green;
-    margin: 10px auto;
-    /*  float: right;
-    text-align: left;
-     visibility: hidden;
-       background: grey;  visibility: hidden; */
-}
-
-.grey {
-    color: grey !important;
-}
-
-.reject {
-    /*
-    width: 100px;
-    height: 100px;
-*/
-    color: red;
-    margin: 10px auto;
-    /*  float: left;
-    /*  background: grey;  visibility: hidden;
-      visibility: hidden;*/
-}
-
-.glyphicon.glyphicon-ok-circle {
-    font-size: 55px;
-}
-.glyphicon.glyphicon-ok-circle:hover {
-    font-size: 75px;
-    color: green !important;
     cursor: hand;
-}
-/*
-.glyphicon.glyphicon-remove-circle {
-    font-size: 55px;
-}
-
-.glyphicon.glyphicon-remove-circle:hover {
-    font-size: 75px;
-    color: red !important;
-    cursor: hand;
-}
-*/
-
-.glyphicon.glyphicon-ok {
-    color: green;
-}
-
-.glyphicon.glyphicon-remove {
-    color: red;
-}
-
-.doc-list{
-    border: solid;
-    border-color: #0000ee;
-    margin: 10px;
-}
-
-#tree {
-    visibility: hidden;
-}
-
-.left-align{
-    text-align: left;
-}
-.center-align{
-    text-align: center;
-}
-
-.search-pages-link {
-    text-align: left;
-    font-size: large;
-}
-
-#accept-dropzone-col, #reject-dropzone-col{
-    height: 100%;
-}
-#corpus-docs ul {
-    padding-left: 0px !important;
-    margin-left: 5px !important;
-}
-#corpus-docs li {
-    padding-left: 0px !important;
-    margin-left: 20px !important;
-}
-
-.header-link a, .header-link a:visited {
-    color: royalblue;
-}
-.header-link a:hover{
-     color: white;
- }
-
-.resource-labels{
-    background-color: lightgrey;
-    padding : 2px;
-    border-radius: 5px;
-}
-
-
-.resource-notes{
-    background-color: lemonchiffon;
-    padding : 5px;
-    border-radius: 5px;
-    margin : 5px;
-}
-
-.resource-query{
-    background-color: floralwhite;
-    padding : 5px;
-    border-radius: 5px;
-}
-
-.label-button {
-    margin : 2px;
-    padding: 2px 5px;
-
 }
 
 .check-mark:before {
@@ -662,100 +52,35 @@ td.metakey {
     padding-right: 5px;
 }
 
-
-
-.overimage {
-    z-index: 1000;
- position: relative;
-    top: -15px;
-}
-
-
-/* based on http://stackoverflow.com/questions/19774653/css3-for-html5-legend-inside-fieldset */
-fieldset  {
-    font-family: sans-serif;
-    border: 5px solid #009;
-   /* background: #ddd;*/
-    border-radius: 15px;
-    padding: 10px;
-    margin-top: 15px;
-}
- fieldset legend {
-    background: #009;
-    color: #fff;
-    padding: 2px 5px ;
-/* font-size: 32px; */
-    font-size: initial;
-border-radius: 5px;
-    box-shadow: 0 0 0 2px #ddd;
-    margin-left: 5px;
-    width: auto ;
-     margin-bottom: 0px;
-}
-
-.comment-labels button{
-    margin: 3px !important;
-}
-
-.highlight{
-    background-color: yellow;
+.hili {
+    color: black;
     font-weight: bold;
+    background: yellow;
 }
 
-.dup-result {
-    opacity: 0.5;
-    margin-left: 100px;
-}
-
-#dup-slider{
-    margin: 10px;
-}
-
-.button:hover.term {
-    background-color: cornflowerblue;
-    color:  white;
-
-}
-
-.button span.term-check-mark{
-    color: blueviolet;
-    font-weight: bold;
-}
-
-.term-check-mark:after {
-    font-family: "Glyphicons Halflings";
-    content:"\e013"; /* check mark */
-    color: blueviolet;
-    padding-left: 5px;
-}
-
-.query-terms-area{
+.resource-labels{
     background-color: lightgrey;
-    margin: 5px;
-    padding: 10px;
-    border-radius: 15px;
+    padding : 2px;
+    border-radius: 5px;
 }
 
-#query-builder-query{
-    background-color: lightblue;
-    margin: 5px;
-    padding: 10px;
-    border-radius: 15px;
+.header-link a, .header-link a:visited {
+    color: royalblue;
+}
+.header-link a:hover{
+    color: white;
 }
 
-#query-div{
-    margin: 5px;
-    padding: 10px;
-}
-
-.facets-hr {
-    margin-top: 5px;
-    margin-bottom: 5px;
-    border-top: 1px solid #009;
-}
-
-::-ms-clear {
-    display: none;
+.header-font, #title a, #title {
+    float: left;
+    margin: 0;
+    vertical-align: middle;
+    padding-right: 20pt;
+    font-size: 20pt;
+    font-weight: bold;
+    height: 20pt;
+    color: white;
+    text-decoration: none;
 }
 
 .form-control-clear {
@@ -764,15 +89,8 @@ border-radius: 5px;
     cursor: pointer;
     color: grey;
 }
-span-highlight{
-    background-color: yellow;
-    font-weight: bold;
-}
 
-.result-table{
-    width: 100%
-}
-
+/* center horizontally and vertically */
 .centered {
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
     font-size: 15pt;
@@ -783,6 +101,60 @@ span-highlight{
     transform: translate(-50%, -50%)
 }
 
-div-entities {
+#overlay {
+    opacity: 0.4;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: black;
+    width: 100%;
+    height: 100%;
+    z-index: 5000
+}
+
+/* based on http://stackoverflow.com/questions/19774653/css3-for-html5-legend-inside-fieldset */
+fieldset  {
+    font-family: sans-serif;
+    border: 5px solid #009;
+    border-radius: 15px;
+    padding: 10px;
+    margin-top: 15px;
+}
+fieldset legend {
+    background: #009;
+    color: #fff;
+    padding: 2px 5px ;
+    font-size: initial;
+    border-radius: 5px;
+    box-shadow: 0 0 0 2px #ddd;
+    margin-left: 5px;
+    width: auto ;
+    margin-bottom: 0;
+}
+
+/* thin horizontal line */
+.facets-hr {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-top: 1px solid #009;
+}
+
+::-ms-clear {
     display: none;
 }
+
+#ui {
+    margin: 0;
+    padding-bottom: 10pt;
+    padding-top: 10pt;
+    background-color: #009;
+}
+
+#view-resource {
+    text-align: left;
+}
+
+img.ia-thumbnail {
+    height: 100px;
+}
+

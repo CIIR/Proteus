@@ -583,8 +583,6 @@ var doViewRequest = function(args) {
                 } else {
                     onViewBookSuccess(args);
                 }
-
-
             },
             function(req, status, err) {
                 console.log("Error in doViewRequest: " + err);
@@ -1156,16 +1154,6 @@ function showOCRErrorMsg(text) {
 
 }
 
-function sanitizeQuery(q) {
-    // a common issue when searching by field is putting a space between the colon and the term,
-    // so we'll silently correct that here. In the future we may want to do something like
-    // "Did you mean field:term? Showing those results." With a link under it
-    // to do the malformed search if they really want to.
-    q = q.replace(/:\s+/g, ':');
-    $("#ui-search").val(q);
-    return q;
-
-}
 
 // display code inspired by: http://okfnlabs.org/wikipediajs/
 var entityCardHTML = '<div class="summary well summary-well">'

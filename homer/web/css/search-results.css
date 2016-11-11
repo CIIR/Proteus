@@ -1,0 +1,187 @@
+/* search results CSS */
+
+#search-results-left {
+    background-color: white;
+    border-right: 1px solid #888;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    overflow-y: scroll;
+}
+
+#search-results-right {
+
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    overflow-y: scroll;
+
+}
+
+.snippet {
+    padding: 2pt;
+    color: #666;
+    font-size: smaller;
+}
+
+.author {
+    padding: 2pt;
+    color: #666;
+    font-size: smaller;
+}
+
+.search-pages-link {
+    text-align: left;
+    font-size: large;
+}
+
+.resource-query {
+    background-color: floralwhite;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.resource-notes {
+    background-color: lemonchiffon;
+    padding: 5px;
+    border-radius: 5px;
+    margin: 5px;
+}
+
+.note-table {
+    width: 100%;
+}
+
+.overimage {
+    z-index: 1000;
+    position: relative;
+    top: -15px;
+}
+
+.dup-highlight {
+    background-color: yellow;
+    font-weight: bold;
+}
+
+.dup-result {
+    opacity: 0.5;
+    margin-left: 100px;
+}
+
+#dup-slider {
+    margin: 10px;
+}
+
+.result-table {
+    width: 100%
+}
+
+div-entities {
+    display: none;
+}
+
+#ui-go-logout {
+    text-align: right;
+}
+
+#progress {
+    color: white;
+    text-align: right;
+    vertical-align: middle;
+    font-family: monospace;
+    display: inline;
+}
+
+#error {
+    color: white;
+    background-color: #a00;
+    font-weight: bold;
+    text-align: center;
+    display: none;
+    padding: 10pt;
+    margin: 0;
+}
+
+#footer {
+    margin: 40pt 0 0;
+    padding: 10pt;
+    background-color: #009;
+    text-align: left;
+}
+
+#more {
+    text-align: center;
+}
+
+#user-info, #ui-login-form {
+    text-align: right;
+    height: 20pt;
+    vertical-align: middle;
+}
+
+.login-form-text {
+    color: #fff;
+    text-align: right;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+.result-img-preview {
+    padding: 5pt;
+}
+
+.result {
+    padding: 5pt;
+}
+
+.result .rank {
+    color: grey;
+    padding-right: 10pt;
+}
+
+.result .score {
+    color: grey;
+    text-align: right;
+}
+
+.label-button {
+    margin: 2px;
+    padding: 2px 5px;
+
+}
+
+#body-index {
+    margin: 0;
+    overflow-y: hidden;
+}
+
+.book-result:hover {
+    background-color: lavenderblush !important;
+}
+
+.page-result {
+    margin-left: 25px; /* slightly indent page results */
+}
+
+.page-result:hover {
+    background-color: aliceblue !important;
+}
+
+.note-result:hover {
+    background-color: lemonchiffon !important;
+}
+
+#search-help {
+    padding-left: 15px;
+}
+
+#ui-go-settings {
+    float: right;
+}
+
+/* don't show archive ID under search results */
+archiveid-entities {
+    display: none;
+}

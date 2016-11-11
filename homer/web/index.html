@@ -62,6 +62,8 @@
         <script src="js/socket.io.js"></script>
 
         <link rel="stylesheet" href="css/style.css" type="text/css"/>
+        <link rel="stylesheet" href="css/search-results.css" type="text/css"/>
+        <link rel="stylesheet" href="css/query-builder.css" type="text/css"/>
 
         <link rel="stylesheet" href="annotator-full.1.2.10/annotator.min.css" type="text/css" media="screen"/>
 
@@ -155,8 +157,6 @@
                     }
                 });
                 $("#dup-value").val($("#dup-slider").slider("value"));
-
-                UI.populateRecentSearches();
 
                 // !!! HACK to get scrollbars at the bottom working when zooming or resizing browser
                 // TODO: should be able to do this in CSS like I did for the navbar at the top: http://stackoverflow.com/questions/10336194/twitter-bootstrap-top-nav-bar-blocking-top-content-of-the-page
@@ -390,11 +390,10 @@
         </nav>
 
         <div id="error"></div>
-        <div id="request"></div>
 
         <div id="all-tags"></div>
 
-        <div id="results-left" class="col-md-2 column">
+        <div id="search-results-left" class="col-md-2 column">
 
             <fieldset>
                 <legend>Refine by</legend>
@@ -432,8 +431,7 @@
 
         </div>
 
-        <div id="results-right" class="col-md-10 column  ">
-            <!--<div class="row clearfix ">-->
+        <div id="search-results-right" class="col-md-10 column  ">
 
             <div id="metadata"></div>
 

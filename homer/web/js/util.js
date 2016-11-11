@@ -140,7 +140,7 @@ function isLoggedIn() {
 
 function enableAutoRetrieve() {
     // TODO this needs to be for the "searched" kind - can't default to books
-    $('#results-right').bind('scroll', function() {
+    $('#search-results-right').bind('scroll', function() {
 
         if ($(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight) {
 
@@ -153,7 +153,7 @@ function enableAutoRetrieve() {
 }
 
 function disableAutoRetrieve() {
-    $('#results-right').unbind('scroll');
+    $('#search-results-right').unbind('scroll');
 }
 
 // mimic Google's URL redirect
@@ -783,6 +783,17 @@ function parsePageID(pageid) {
 
 }
 
+
+function sanitizeQuery(q) {
+    // a common issue when searching by field is putting a space between the colon and the term,
+    // so we'll silently correct that here. In the future we may want to do something like
+    // "Did you mean field:term? Showing those results." With a link under it
+    // to do the malformed search if they really want to.
+    q = q.replace(/:\s+/g, ':');
+    $("#ui-search").val(q);
+    return q;
+
+}
 
 // This function is used if metadata is not returned with the results.
 // Since we could have multiple pages for the same book returned, we
