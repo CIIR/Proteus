@@ -27,10 +27,6 @@ var urlParams = getURLParams();
 if (!_.isUndefined(urlParams["kind"])) {
     gSearchedKind = urlParams["kind"];
 }
-//Model.clearResults = function() {
-//    Model.results = [];
-//    Model.query = "";
-//};
 
 var privateURLParams = _(["user", "token"]);
 
@@ -117,29 +113,7 @@ UI.onClickSearchButton = function() {
 //    });
 //    $("#search-button-text").html(text);
 
-    // is this a new retrieval?
-    var terms = _.escape(UI.getQuery().trim()).toLowerCase();
 
-    var tmp = [];
-    if (localStorage["pastSearches"] != null) {
-        tmp = JSON.parse(localStorage["pastSearches"]);
-    }
-    // check if it exists
-    var found = false;
-    _.forEach(tmp, function(rec) {
-        if (rec.kind == kind && rec.terms == terms) {
-            found = true;
-        }
-    });
-
-    if (found != true) {
-        tmp.push({terms: terms, kind: kind});
-        localStorage["pastSearches"] = JSON.stringify(tmp);
-        if (terms.length == 0) {
-            terms = SEARCH_FOR_EVERYTHING;
-        }
-        $("#pastSearches").prepend('<div class="query">&#8226;&nbsp;<a onclick="tmpSearch( $(this), \'' + kind + '\')">' + terms + '</a>' + '&nbsp;(' + kind + ')<div class="xtmp"><img class="delimg" src=\'images/del.png\'/> </div>&nbsp;</div>');
-    }
     doActionRequest({kind: kind, q: UI.getQuery(), action: "search"});
 };
 
@@ -151,53 +125,6 @@ UI.onClickVizButton = function() {
     doActionRequest({kind: "all", q: "", action: "viz"});
 };
 
-UI.populateRecentSearches = function() {
-
-    // TODO should be it's own function
-    var corpus = getCookie("corpus");
-    if (corpus == "") {
-        $("#pastSearches").html("");
-        $('#note-list').html("");
-        return;
-    }
-
-    var corpusID = getCorpusID(corpus);
-    var args = {corpus: corpusID};
-
-    API.getNoteHistory(args,
-            function(results) {
-
-                var html = '';
-                _.forEach(results.rows, function(rec) {
-                    var tmp = parsePageID(rec.uri);
-                    var identifier = tmp.id;
-                    var pageNum = tmp.page;
-
-                    // strip the seconds/milliseconds from the date
-                    var dt = rec.dttm.substring(0, rec.dttm.lastIndexOf(":"));
-                    var name = rec.user.toString();
-                    name = name.split("@")[0];
-
-                    html += '&#8226;&nbsp;' + dt + ' ' + name + ': <i>' + rec.text
-                            + '</i> view: <a target="_blank" href="view.html?kind=ia-pages&action=view&id=' + identifier + '&pgno=' + pageNum + '&noteid=' + rec.id + '">Page, </a>'
-                            + '<a target="_blank" href="view.html?kind=ia-books&action=view&id=' + identifier + '_' + pageNum + '&noteid=' + rec.id + '">Book</a><br>';
-
-                });
-                $('#note-list').html(html);
-            },
-            function() {
-                alert("error getting notes!")
-            });
-
-
-    if (localStorage["pastSearches"] == null) {
-        return;
-    }
-    $("#pastSearches").html("");
-    _.forEach(JSON.parse(localStorage["pastSearches"]), function(rec) {
-        $("#pastSearches").prepend('<div class="query">&#8226;&nbsp;<a onclick="tmpSearch( $(this), \'' + rec.kind + '\')">' + rec.terms + '</a>' + '&nbsp;(' + rec.kind + ')<div class="xtmp"><img class="delimg" src=\'images/del.png\'/> </div>&nbsp;</div>');
-    });
-}
 
 function tmpSearch(that, kind) {
     var query = that.text();
@@ -360,3 +287,4 @@ var createNewCorpus = function(corpusName) {
 
 // get all tags grouped by user on start up
 getAllUsers();
+// todo ? ??  should move this to documentReady?
