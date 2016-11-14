@@ -42,7 +42,7 @@ resultRenderers["article"] = function(queryTerms, result, resDiv) {
 
     if (proc != null) {
         html += '<tr>' +
-                '<td class="proc">Published in: ' + Render.getDocumentURL(url_proc, proc, queryTerms, result.rank) ;
+                '<td class="proc">Published in: ' + Render.getDocumentURL(url_proc, proc, result.rank) ;
         html += '&nbsp;' + highlightText(queryTerms, pubyear, '<span class="hili">', '</span>', 'pubyear');
         html += '</td></tr>';
     }
@@ -66,9 +66,7 @@ resultRenderers["article"] = function(queryTerms, result, resDiv) {
     }
 
     html = html + '</table>';
-    if (result.tags) {
-        html += UI.renderTags(result);
-    } // end if display tags
+
     resDiv.html(html);
     return resDiv;
     //return html;

@@ -41,11 +41,6 @@ resultRenderers["default"] = function(queryTerms, result, resDiv) {
     }
     html += '</table>';
 
-    if (result.tags) {
-        html += UI.renderTags(result);
-    } // end if display tags
-
-    //return html;
     resDiv.html(html);
     return resDiv;
 };
@@ -59,13 +54,19 @@ Render.makeViewLink = function(id, kind, label, rank) {
 Render.getPagePreviewURL = function(url, title, queryTerms, rank) {
     return '<a class="fancybox" href="' + url + '" >' +  title + '</a>';
 }
-Render.getDocumentURL = function(url, title, queryTerms, rank, id, bImage) {
+// todo ??? THIS IS getting called many times and inserting two "meta-name" classes which screws up when no metadta
+Render.getDocumentURL = function(url, title, rank, id ) {
+
     var html =  '<a href="' + url + '" onmousedown="return rwt(this,' + rank + ')" target="_blank"><span class="' + id + '-meta-name">' + title + '</span>' ;
-    html +=  '&nbsp;<span class="fa fa-external-link '
-    if (bImage == true) {
-        html += ' overimage ';
-    }
-    html += '"></span></span></a>';
+    html +=  '&nbsp;<span class="fa fa-external-link"></span></span></a>';
+    return html;
+
+}
+
+Render.getDocumentURL_tmp = function(url, title, rank) {
+
+    var html =  '<a href="' + url + '" onmousedown="return rwt(this,' + rank + ')" target="_blank"><span >' + title + '</span>' ;
+    html +=  '&nbsp;<span class="fa fa-external-link overimage"></span></span></a>';
     return html;
 
 }
