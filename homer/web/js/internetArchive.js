@@ -22,32 +22,20 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
   var pageNum = tmpid.page;
   var docid = result.name;
   var snippet = result.snippet;
-  var iaURL =  'http://www.archive.org/details/' + identifier;
-
-  var nameLink =  Render.getDocumentURL(iaURL, name, result.rank, identifier);
-
   var kind = 'ia-books'; // default
-
-  // if this is a book result - show the front page as the thumbnail but the links will
-  // go to the max passage page.
-
-  var thumbnail = '<img class="ia-thumbnail" src="' + pageThumbnail(result.name) + '"/>';
-
-  var previewImage = Render.getDocumentURL_tmp(iaURL, thumbnail, result.rank);
 
   if (!_.isUndefined(pageNum) && pageNum.length > 0) {
     kind = 'ia-pages';
-    // if page result - make the link go to the page
-    nameLink = Render.getDocumentURL(archiveViewerURL(result.name), name, result.rank, identifier);
-
-    previewImage = Render.getPagePreviewURL(pageImage(result.name), thumbnail, queryTerms, result.rank);
-
-
+    docid = result.name;
   }
   if (kind == 'ia-books' && !_.isUndefined(result.snippetPage)) {
     docid = identifier + "_" + result.snippetPage;
-    nameLink = Render.getDocumentURL(archiveViewerURL(docid), name, result.rank, identifier);
   }
+  var thumbnail = '<img class="ia-thumbnail" src="' + pageThumbnail(docid) + '"/>';
+  var previewImage = '<a class="fancybox" href="' + pageImage(docid) + '" >' +  thumbnail + '</a>';
+  var nameLink = '<a href="' + archiveViewerURL(docid) + '" onmousedown="return rwt(this,' +  result.rank;
+  nameLink += ')" target="_blank"><span class="' + identifier + '-meta-name">' + name + '</span>' ;
+  nameLink +=  '&nbsp;<span class="fa fa-external-link"></span></a>';
 
   var tmphtml = '';
 

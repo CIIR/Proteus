@@ -27,22 +27,23 @@ resultRenderers["article"] = function(queryTerms, result, resDiv) {
 
     var html = '<table>';
 
-    html += '<tr>' +
-            '<td class="title">' + Render.getDocumentURL(url_art, title, queryTerms, result.rank) + '&nbsp;(<a target="_blank" href="view.html?kind=article&action=view&id=' + result.name + '">view OCR</a>)&nbsp;';
-    for (r in result.ratings){
-        if (result.ratings[r].rating == 1){
-            html += '<span class="glyphicon glyphicon-ok"></span>'
-        } else {
-            html += '<span class="glyphicon glyphicon-remove"></span>'
-        }
-    }
-            '</td><td class="citation">Citation: ' + highlightText(queryTerms, citation, '<span class="hili">', '</span>') + '</td>' +
+    html += '<tr>';
+//            '<td class="title">' + Render.getDocumentURL(url_art, title, queryTerms, result.rank) + '&nbsp;(<a target="_blank" href="view.html?kind=article&action=view&id=' + result.name + '">view OCR</a>)&nbsp;';
+//    for (r in result.ratings){
+//        if (result.ratings[r].rating == 1){
+//            html += '<span class="glyphicon glyphicon-ok"></span>'
+//        } else {
+//            html += '<span class="glyphicon glyphicon-remove"></span>'
+//        }
+//    }
+    html += '</td><td class="citation">Citation: ' + highlightText(queryTerms, citation, '<span class="hili">', '</span>') + '</td>' +
             '<td class="score">' + result.score.toFixed(3) + ' r' + result.rank + '</td>' +
             '</tr>';
 
     if (proc != null) {
         html += '<tr>' +
-                '<td class="proc">Published in: ' + Render.getDocumentURL(url_proc, proc, result.rank) ;
+                '<td class="proc">Published in: <a href="' + url_proc + '" onmousedown="return rwt(this,' +  result.rank +
+                ')" target="_blank">' + title + '</a>';
         html += '&nbsp;' + highlightText(queryTerms, pubyear, '<span class="hili">', '</span>', 'pubyear');
         html += '</td></tr>';
     }
