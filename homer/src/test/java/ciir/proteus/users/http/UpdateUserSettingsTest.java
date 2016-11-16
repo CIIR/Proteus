@@ -2,10 +2,7 @@ package ciir.proteus.users.http;
 
 import ciir.proteus.server.HTTPError;
 import ciir.proteus.server.TestEnvironment;
-import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
-import ciir.proteus.users.error.DuplicateUser;
-import ciir.proteus.users.error.NoTuplesAffected;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -13,7 +10,6 @@ import org.lemurproject.galago.tupleflow.web.WebServerException;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
-import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -22,10 +18,10 @@ import static org.junit.Assert.*;
  */
 public class UpdateUserSettingsTest {
 
-    public static TestEnvironment env;
+    private static TestEnvironment env;
 
     @BeforeClass
-    public static void setup() throws IOException, WebServerException, NoTuplesAffected, DuplicateUser, Exception {
+    public static void setup() throws Exception {
         env = new TestEnvironment();
     }
 

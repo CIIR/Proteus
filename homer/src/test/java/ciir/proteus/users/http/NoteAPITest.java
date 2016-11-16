@@ -3,9 +3,6 @@ package ciir.proteus.users.http;
 import ciir.proteus.server.HTTPError;
 import ciir.proteus.server.TestEnvironment;
 import ciir.proteus.users.Credentials;
-import ciir.proteus.users.error.DBError;
-import ciir.proteus.users.error.DuplicateUser;
-import ciir.proteus.users.error.NoTuplesAffected;
 import ciir.proteus.util.MockHttpServletRequest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -14,8 +11,6 @@ import org.lemurproject.galago.tupleflow.web.WebServerException;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -28,10 +23,10 @@ import static org.junit.Assert.fail;
 
 public class NoteAPITest {
 
-    public static TestEnvironment env;
+    private static TestEnvironment env;
 
     @BeforeClass
-    public static void setup() throws IOException, WebServerException, NoTuplesAffected, DuplicateUser, Exception {
+    public static void setup() throws Exception {
         env = new TestEnvironment();
     }
 
@@ -118,7 +113,7 @@ public class NoteAPITest {
         notes = env.proteus.userdb.getNotesForResource(resource, corpus1);
         assertEquals(notes.get("total", -1), 0);
         arr = notes.getAsList("rows");
-        assertTrue(arr.size() == 0);
+        assertTrue(arr.isEmpty());
 
         // test that notes are retrieved if the resource is a number or string type
         resource = "123";

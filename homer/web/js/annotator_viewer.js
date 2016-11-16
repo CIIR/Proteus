@@ -74,7 +74,7 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
 
     AnnotatorViewer.__super__.constructor.apply(this, arguments);
 
-    that = this
+    that = this;
     // only load the panel once
     if (($("#annotations-panel").length == 0)) {
       $("#ocr-results-right").append(this.createAnnotationPanel());
@@ -86,9 +86,7 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
       $('#anotacions-uoc-panel').slimscroll({height: '97%'});
     }
 
-  };
-
-
+  }
   reOrderNotes = function(annotationElement){
     var highlights;
 
@@ -121,18 +119,18 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
     // put the notes back
     _.forEach(annotations, function (a) {
       that.createReferenceAnnotation(a);
-    })
+    });
 
     $('#count-anotations').text($(".container-anotacions").find('.annotator-marginviewer-element').length);
 
-  }
+  };
   AnnotatorViewer.prototype.pluginInit = function () {
 
     if (!Annotator.supported()) {
       return;
     }
 
-    var that = this
+    var that = this;
 
     this.annotator.subscribe("myannotationsLoaded", function (annotationElement) {
 
@@ -164,8 +162,8 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
       // MCZ - we need to use the annotator specific for that note
       var current_annotation = item.data('annotation');
       var el = "#" + getNotesID(current_annotation.uri);
-      $(el).trigger("myannotationDeleted", current_annotation)
-      this.onAnnotationDeleted(current_annotation)
+      $(el).trigger("myannotationDeleted", current_annotation);
+      this.onAnnotationDeleted(current_annotation);
       return;// this.annotator.deleteAnnotation(item.data('annotation'));
     }
     if (type == 'edit') { //We want to transform de div to a textarea
@@ -207,7 +205,7 @@ Annotator.Plugin.AnnotatorViewer = (function (_super) {
       extended_valid_elements: "",
       toolbar: "undo redo bold italic alignleft aligncenter alignright alignjustify | link image media"
     });
-  }
+  };
 
   //Event triggered when save the content of the annotation
   AnnotatorViewer.prototype.onSavePanel = function (event) {

@@ -3,7 +3,6 @@ package ciir.proteus.users;
 import ciir.proteus.server.HTTPError;
 import ciir.proteus.server.TestEnvironment;
 import ciir.proteus.users.error.DuplicateCorpus;
-import ciir.proteus.users.error.DuplicateUser;
 import ciir.proteus.users.error.NoTuplesAffected;
 import ciir.proteus.util.HTTPUtil;
 import org.junit.AfterClass;
@@ -13,22 +12,22 @@ import org.lemurproject.galago.utility.Parameters;
 import org.lemurproject.galago.tupleflow.web.WebServerException;
 
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 
 /**
  * @author jfoley, michaelz
  */
 public class HTTPTagTest {
 
-  public static TestEnvironment env;
+  private static TestEnvironment env;
 
   @BeforeClass
-  public static void setup() throws IOException, WebServerException, NoTuplesAffected, DuplicateUser, Exception {
+  public static void setup() throws Exception {
     env = new TestEnvironment();
   }
 
@@ -45,7 +44,7 @@ public class HTTPTagTest {
     return HTTPUtil.get(env.url, path, req);
   }
 
-  public static void assertOK(HTTPUtil.Response resp) {
+  private static void assertOK(HTTPUtil.Response resp) {
     assertEquals(200, resp.status);
     assertEquals("OK", resp.reason);
   }

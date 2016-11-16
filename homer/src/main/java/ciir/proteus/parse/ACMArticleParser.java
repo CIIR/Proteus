@@ -18,16 +18,16 @@ import java.util.regex.Pattern;
  * @author Jiepu Jiang
  * @version Apr 23, 2014
  */
-public class ACMArticleParser extends DocumentStreamParser {
+class ACMArticleParser extends DocumentStreamParser {
 	
-	BufferedReader reader;
+	private BufferedReader reader;
 	
-	public ACMArticleParser(DocumentSplit split, Parameters p) throws FileNotFoundException, IOException {
+	public ACMArticleParser(DocumentSplit split, Parameters p) throws IOException {
 		super(split, p);
 		this.reader = getBufferedReader(split);
 	}
 	
-	public String waitFor(String tag) throws IOException {
+	private String waitFor(String tag) throws IOException {
 		String line;
 
 		while ((line = reader.readLine()) != null) {
@@ -39,7 +39,7 @@ public class ACMArticleParser extends DocumentStreamParser {
 		return null;
 	}
 	
-	public String parseDocNumber() throws IOException {
+	private String parseDocNumber() throws IOException {
 		
 		String allText = waitFor("<DOCNO>");
 		if (allText == null) {

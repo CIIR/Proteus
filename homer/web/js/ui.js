@@ -133,9 +133,9 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
         getInternetArchiveMetadata(identifier, args, function( ){
 
             // populate any missing data
-            $("." + identifier + "-meta-name").html(args.metadata.title || args.metadata.TEI || result.name)
+            $("." + identifier + "-meta-name").html(args.metadata.title || args.metadata.TEI || result.name);
             // using toString() because there can be more than one author.
-            $("." + identifier + "-meta-author").html(args.metadata.creator.toString())
+            $("." + identifier + "-meta-author").html(args.metadata.creator.toString());
             $("." + identifier + "-meta-published").html(args.metadata.date)
         });
     }
@@ -164,7 +164,7 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
     html = '';
     // if they search a subcorpus for just books with a blank query, "search pages" doesn't make sense
     if (result.viewKind == 'ia-books' && queryTerms.length > 0) {
-        html += '<div  id="search-pages-link-' + name + '" class="search-pages-link" >'
+        html += '<div  id="search-pages-link-' + name + '" class="search-pages-link" >';
         html += '<a href="#" onclick="UI.getPages(\'' + name + '\');"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show matching pages in this book...</a></div>';
         html += '<div id="page-results-' + name + '"></div>';
     }
@@ -234,7 +234,7 @@ UI.showHideMetadata = function() {
         $(".facets-hr").show();
     }
 
-}
+};
 
 UI.getPages = function(bookid) {
 
@@ -249,7 +249,7 @@ UI.getPages = function(bookid) {
     // pass in a query to restrict the search to just this book.
     doActionSearchPages({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery: setQuery, archiveid: bookid});
 
-}
+};
 
 UI.hidePages = function(bookid) {
 
@@ -259,7 +259,7 @@ UI.hidePages = function(bookid) {
     html += '&nbsp;Show pages (' + $("#search-pages-link-" + bookid).data('num_results') + ')</a>';
 
     $("#search-pages-link-" + bookid).html(html)
-}
+};
 
 UI.showPages = function(bookid) {
 
@@ -272,7 +272,7 @@ UI.showPages = function(bookid) {
 
     $("#search-pages-link-" + bookid).html(html);
 
-}
+};
 
 var init = true;
 
@@ -316,7 +316,7 @@ function bindCorpusMenuClick() {
     $("ul#corpus-list.dropdown-menu li a").off("click");
     $("ul#corpus-list.dropdown-menu li a").on("click", function() {
 
-        console.log("clicked: " + $(this).text())
+        console.log("clicked: " + $(this).text());
         if ($(this).text() == "New...") {
             // clear out any old value
             $("#corpus-name").val("");
@@ -415,7 +415,7 @@ $('#ocr-sidebar-button').click(function() {
 
 UI.appendToCorpusList = function(corpusName) {
     $("#corpus-list-divider").before('<li><a href="#">' + corpusName + '</a></li>');
-}
+};
 
 UI.updateCorpusListButton = function() {
 
@@ -427,17 +427,17 @@ UI.updateCorpusListButton = function() {
         UI.appendToCorpusList(c.name);
     });
 
-}
+};
 
 function handleNERHilightClick(that, type) {
 
     var el = $('.' + type + '-class');
 
     if (that.checked == true) {
-        el.removeClass(type + "-off")
+        el.removeClass(type + "-off");
         el.addClass(type + "-on")
     } else {
-        el.addClass(type + "-off")
+        el.addClass(type + "-off");
         el.removeClass(type + "-on")
     }
 
@@ -457,12 +457,12 @@ UI.toggleNotes = function(noteDivID) {
 
     $("#notes-link-" + noteDivID).html(html);
 
-}
+};
 
 UI.toggleDups = function(clazz, rank) {
     $('.' + clazz).toggle();
     UI.setDupLinkHTML(rank);
-}
+};
 
 UI.setDupLinkHTML = function(rank) {
 
@@ -476,10 +476,10 @@ UI.setDupLinkHTML = function(rank) {
 
     var html = '<a href="#" onclick="UI.toggleDups(\'result-dups-' + rank + '\',' + rank + ');">';
     html += '<span class="glyphicon glyphicon-collapse-' + upOrDown + '"></span>';
-    html += '&nbsp;' + showOrHide + ' duplicates&nbsp;(' + $(".result-dups-" + rank + " .dup-result").length + ')&nbsp;<span class="fa fa-files-o"></span></a>'
+    html += '&nbsp;' + showOrHide + ' duplicates&nbsp;(' + $(".result-dups-" + rank + " .dup-result").length + ')&nbsp;<span class="fa fa-files-o"></span></a>';
     $("#dup-parent-" + rank).html(html);
 
-}
+};
 
 UI.showHideDups = function() {
     var el = $('#hide-dups input[type="checkbox"]:checked');
@@ -488,12 +488,12 @@ UI.showHideDups = function() {
     } else {
         $("#results .dup-result").hide("slow");
     }
-}
+};
 
 UI.onClickSubcorpus = function() {
 
     UI.onClickSearchButton();
-}
+};
 
 UI.enableSearchButtons = function(state) {
     $('input[name=search-kind]').attr('disabled', !state);
@@ -505,7 +505,7 @@ UI.enableSearchButtons = function(state) {
         $('#show-overlap').attr('checked', false);
         $('#show-overlap').attr('disabled', true);
     }
-}
+};
 
 /*
  
@@ -545,7 +545,7 @@ UI.checkSettings = function() {
     }
 
     document.cookie = "settings=" + JSON.stringify(UI.settings) + ";";
-}
+};
 
 
 function clearQueryBuilder() {
@@ -571,4 +571,4 @@ UI.searchWithinBook = function(bookid) {
     // pass in a query to restrict the search to just this book.
     doSearchWithinBookRequest({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery: setQuery, archiveid: bookid});
 
-}
+};

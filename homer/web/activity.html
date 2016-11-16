@@ -38,7 +38,7 @@
         function toggleAll(that){
 
             _.each(msgArr, function(m){
-                var el = $('input:checkbox.broadcast-msg-' + m)[0]
+                var el = $('input:checkbox.broadcast-msg-' + m)[0];
                 if (!_.isUndefined(el)) {
                     el.checked = that.checked;
                     showHideActivity(that, m)
@@ -51,9 +51,9 @@
 
             _.each(msgArr, function(m){
 
-                var el = $('input:checkbox.broadcast-msg-' + m)[0]
+                var el = $('input:checkbox.broadcast-msg-' + m)[0];
                 if (!_.isUndefined(el)) {
-                    var checked = el.checked
+                    var checked = el.checked;
                     if (!checked) {
                         hideMsg(m)
                     }
@@ -68,16 +68,15 @@
 
         function showHideUser(){
 
-            var txt = $("#filter-user")[0].value
+            var txt = $("#filter-user")[0].value;
             if (txt.length == 0){
                 $(".activity-row").show()
             } else {
-                $(".activity-row").hide()
+                $(".activity-row").hide();
                 $('[class*="user-' + txt + '"]').show()
             }
             hideMsgs()
-        };
-
+        }
         $(document).ready(function () {
 
             // make sure we're logged in
@@ -108,14 +107,14 @@
                 var msgs = JSON.parse(localStorage["messages"]);
                 for (msg in msgs) {
 
-                    msgArr.push(msgs[msg].toLowerCase())
+                    msgArr.push(msgs[msg].toLowerCase());
 
                     html += '<input onclick="showHideActivity(this, \'' + msgs[msg] + '\');" class="broadcast-msg-' + msgs[msg] + '" ' +
                     'type="checkbox" name="messages" value="' + msgs[msg] + '" checked /> ' + msgs[msg] + '&nbsp;';
                 }
 
                 html += '<input onclick="toggleAll(this);" type="checkbox" name="messages" value="toggle_all" checked />ALL&nbsp;';
-                html += ' | Filter by user: <input id="filter-user" type="text"  >'
+                html += ' | Filter by user: <input id="filter-user" type="text"  >';
                 $("#broadcast-chioces").html(html);
                 $("#filter-user").keyup(function(){
                     showHideUser()
@@ -149,7 +148,7 @@
 
             socket.on('ProteusEvent', function (data) {
 
-                var msg = convertJSONtoHTML(data.message)
+                var msg = convertJSONtoHTML(data.message);
                 output(msg);
 
                 // check if we're displaying this type of message

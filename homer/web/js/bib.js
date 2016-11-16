@@ -9,7 +9,7 @@
 // the order the information will be printed. So we'll save
 // the results ordered in an array so we can print them in
 // order when we are done.
-var gBibArray = new Array();
+var gBibArray = [];
 
 // when debugging, can use a visual character to see field separator
 var FIELD_SEP = '\t'; //'<span style="color:blue;font-size:150%;">•</span>';
@@ -164,10 +164,10 @@ function bibPrint() {
   });
 
   // the "pre" is needed for newlines to be displayed when the text area is read only
-  $("#bib-tsv").append('<textarea  readonly="yes" style="white-space: pre;" class="bib-textarea">' + bibTSV + '</textarea>')
+  $("#bib-tsv").append('<textarea  readonly="yes" style="white-space: pre;" class="bib-textarea">' + bibTSV + '</textarea>');
   tsvText += bibTSV + '\n';
 
-  $("#bib-text").append('<textarea  readonly="yes" style="white-space: pre;" class="bib-textarea">' + bibText + '</textarea>')
+  $("#bib-text").append('<textarea  readonly="yes" style="white-space: pre;" class="bib-textarea">' + bibText + '</textarea>');
 
   // if the browser supports it, download the TSV file.
   // Code from: http://stackoverflow.com/questions/3665115/create-a-file-in-memory-for-user-to-download-not-through-server
@@ -182,7 +182,7 @@ function bibPrint() {
     tsvfile.download = p['name'] + '.tsv';
 
     // Append anchor to body.
-    document.body.appendChild(tsvfile)
+    document.body.appendChild(tsvfile);
     tsvfile.click();
 
     // Remove anchor from body.

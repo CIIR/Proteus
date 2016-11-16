@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 public class JSONSearch implements JSONHandler {
 
   private final ProteusSystem system;
-  public static final Logger log = Logger.getLogger(JSONSearch.class.getName());
+  private static final Logger log = Logger.getLogger(JSONSearch.class.getName());
   private static final org.apache.logging.log4j.Logger proteusLog = LogManager.getLogger("Proteus");
 
   public JSONSearch(ProteusSystem sys) {
@@ -37,9 +37,9 @@ public class JSONSearch implements JSONHandler {
 
     String query = reqp.getAsString("q");
     String kind = reqp.get("kind", system.defaultKind);
-    int numResults = (int) reqp.get("n", 10);
-    int skipResults = (int) reqp.get("skip", 0);
-    int corpusid = (int) reqp.get("corpus", -1);
+    int numResults = reqp.get("n", 10);
+    int skipResults = reqp.get("skip", 0);
+    int corpusid = reqp.get("corpus", -1);
     String userid = reqp.get("userid", "-1");
     String action = reqp.get("action", "search");
     String corpusName = reqp.get("corpusName", "");

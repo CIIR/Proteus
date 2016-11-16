@@ -7,7 +7,7 @@
 function convertJSONtoHTML(jsonStr) {
 
   // the logs start with a timestamp, remove it
-  jsonStr = jsonStr.split("\t")[1]
+  jsonStr = jsonStr.split("\t")[1];
 
   // console.log( (jsonStr))
 
@@ -27,24 +27,24 @@ var JSONtoHTMLFunctions = {};
 
 var logStart = function (data) {
   return '<div class="activity-row activity-' + data.action.toLowerCase() + ' user-' + data.user + '">' + data.timestamp + ' ' + data.user + ' ';
-}
+};
 
 JSONtoHTMLFunctions["LOGIN"] = function (data) {
   return logStart(data)  + ' logged in.</div>';
-}
+};
 
 JSONtoHTMLFunctions["LOGOUT"] = function (data) {
   return logStart(data) + ' logged out.</div>'
-}
+};
 
 JSONtoHTMLFunctions["SEARCH"] = function (data) {
-  return logStart(data)  + ' searched: ' + data.enteredQuery + '</div>'
+  return logStart(data)  + ' searched: ' + data.enteredQuery + '</div>';
   // TODO add labels
-}
+};
 
 JSONtoHTMLFunctions["RESULTS"] = function (data) {
   return logStart(data)  + ' search results: ' + data.docIDs + '</div>'
-}
+};
 
 var noteHTML = function(data, action){
   var id = parsePageID(data.resource);
@@ -60,47 +60,47 @@ var noteHTML = function(data, action){
             + '<a target="_blank"  href="../view.html?kind=ia-books&action=view&id=' + id.id + '&pgno=' + id.page + '&noteid=' + data.notePK + '">Book</a></div>'
   }
 
-}
+};
 JSONtoHTMLFunctions["ADD-NOTE"] = function (data) {
   return noteHTML(data, "added");
-}
+};
 
 JSONtoHTMLFunctions["UPD-NOTE"] = function (data) {
   return noteHTML(data, "updated");
-}
+};
 
 JSONtoHTMLFunctions["DEL-NOTE"] = function (data) {
   return logStart(data)  + ' deleted a note from document: ' + data.resource + '</div>'
-}
+};
 
 JSONtoHTMLFunctions["ADD-TAG"] = function (data) {
   return logStart(data) + ' added a tag to document: ' + data.resource + ' tag: ' + data.tag + '</div>'
-}
+};
 
 JSONtoHTMLFunctions["UPD-TAG"] = function (data) {
   return logStart(data)  + ' updated a tag to document: ' + data.resource + ' tag: ' + data.tag + '</div>'
-}
+};
 
 JSONtoHTMLFunctions["DEL-TAG"] = function (data) {
   return logStart(data)  + ' deleted a tag from document: ' + data.resource + '</div>'
-}
+};
 
 JSONtoHTMLFunctions["RATE-RES"] = function (data) {
   return logStart(data)  + ' rated the document: ' + data.resource + ' a ' + data.rating + '</div>'
-}
+};
 
 JSONtoHTMLFunctions["VIEW-RES"] = function (data) {
   return ''
-}
+};
 JSONtoHTMLFunctions["REGISTER"] = function (data) {
   return ''
-}
+};
 JSONtoHTMLFunctions["CREATE-CORPUS"] = function (data) {
   return ''
-}
+};
 JSONtoHTMLFunctions["CLICK"] = function (data) {
   return ''
-}
+};
 
 
 

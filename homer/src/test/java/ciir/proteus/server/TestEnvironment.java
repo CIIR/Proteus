@@ -22,18 +22,17 @@ import static org.junit.Assert.assertNotNull;
  */
 public class TestEnvironment {
 
-    public HTTPRouter router;
     public WebServer server;
-    public File folder;
+    private File folder;
     public ProteusSystem proteus;
     public String url;
     public Credentials creds;
 
-    public TestEnvironment() throws IOException, WebServerException, NoTuplesAffected, DuplicateUser, Exception {
+    public TestEnvironment() throws Exception {
         folder = FileUtility.createTemporaryDirectory();
         proteus = new ProteusSystem(testParams(folder));
 
-        router = new HTTPRouter(proteus);
+        HTTPRouter router = new HTTPRouter(proteus);
 
         int port = Utility.getFreePort();
         server = WebServer.start(port, router);
@@ -51,7 +50,7 @@ public class TestEnvironment {
         creds = new Credentials(p);
     }
 
-    public static Parameters testParams(File tmpDir) {
+    private static Parameters testParams(File tmpDir) {
         String dbpath = tmpDir.getPath() + "/users";
         Parameters dbp = Parameters.create();
         dbp.set("path", dbpath);

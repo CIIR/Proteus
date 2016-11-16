@@ -42,7 +42,7 @@ public class HTTPUtil {
 
     // GET or POST form parameters handling
     if(contentType == null || "application/x-www-form-urlencoded".equals(contentType)) {
-      Map<String, String[]> asMap = (Map<String, String[]>) req.getParameterMap();
+      Map<String, String[]> asMap = req.getParameterMap();
 
       for (Map.Entry<String, String[]> kv : asMap.entrySet()) {
         String arg = kv.getKey();
@@ -72,7 +72,7 @@ public class HTTPUtil {
     return reqp;
   }
 
-  public static String encode(String data) {
+  private static String encode(String data) {
     try {
       return URLEncoder.encode(data, "UTF-8");
     } catch (UnsupportedEncodingException e) {
@@ -99,7 +99,7 @@ public class HTTPUtil {
     return parms;
   }
 
-  public static String encodeInURL(String url, Parameters p) {
+  private static String encodeInURL(String url, Parameters p) {
     StringBuilder urlb = new StringBuilder();
     urlb.append(url);
     char before = '?';

@@ -31,7 +31,7 @@ public class MBTEIBookParser extends MBTEIParser {
       String pg;
       while ((pg = nextPageText()) != null) {
         // indicate the page
-        wholeDocBuffer.append("<div class=\"page-break\" page=\"" + getPageIndex() + "\">");
+        wholeDocBuffer.append("<div class=\"page-break\" page=\"").append(getPageIndex()).append("\">");
         wholeDocBuffer.append(pg);
         wholeDocBuffer.append("</div>");
       }

@@ -7,9 +7,9 @@ import org.lemurproject.galago.utility.Parameters;
  */
 public class Credentials {
 
-    public String user;
-    public String token;
-    public Integer userid;
+    public final String user;
+    public final String token;
+    public final Integer userid;
 
     public Credentials(Parameters loginParam) {
         this.user = loginParam.getAsString("user");

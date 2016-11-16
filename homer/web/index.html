@@ -103,7 +103,7 @@
                 }
 
                 var fields = getCookie("fields");
-                $("#ocr-options").html('')
+                $("#ocr-options").html('');
                 _.each(fields.split(','), function(field) {
                     $("#ocr-options").append('<span> ' + field + '</span><br/>');
                 });
@@ -125,12 +125,12 @@
 
                 $("#hide-dups").on("click", function() {
                     UI.showHideDups();
-                })
+                });
 
                 $("#show-overlap").on("click", function() {
                     UI.onClickSearchButton();
                     //UI.showOverlap();
-                })
+                });
 
 
                 $("#dup-slider").slider({
@@ -175,7 +175,7 @@
                 // put focus on the name field when the modal box is shown
                 $('#newCorpusDialog').on('shown.bs.modal', function() {
                     $('#corpus-name').focus();
-                })
+                });
 
                 $('#newCorpusSave').click(function() {
                     submitCorpusDialog();
@@ -265,7 +265,7 @@
                 });
 
 <!-- ----------------------------------------------------- -->
-                var host = 'localhost'
+                var host = 'localhost';
 
                 try {
                     var socket = io.connect(host + ':' + 9092);
@@ -276,7 +276,7 @@
 
                     socket.on('ProteusEvent', function(data) {
 
-                        var msg = convertJSONtoHTML(data.message)
+                        var msg = convertJSONtoHTML(data.message);
                         output(msg);
 
                         // check if we're displaying this type of message

@@ -6,7 +6,7 @@ import java.security.SecureRandom;
  * @author jfoley.
  */
 public class Users {
-  public static final SecureRandom random = new SecureRandom();
+  private static final SecureRandom random = new SecureRandom();
   public static final int UserEmailMaxLength = 64;
   public static final int SessionIdLength = generateSessionId().length();
 

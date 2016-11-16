@@ -8,7 +8,6 @@ import ciir.proteus.users.error.NoTuplesAffected;
 import javax.servlet.http.HttpServletRequest;
 
 import ciir.proteus.util.logging.LogHelper;
-import ciir.proteus.util.logging.LoginLogData;
 import ciir.proteus.util.logging.RegisterLogData;
 import org.lemurproject.galago.utility.Parameters;
 

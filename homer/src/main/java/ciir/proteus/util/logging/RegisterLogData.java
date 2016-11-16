@@ -1,7 +1,5 @@
 package ciir.proteus.util.logging;
 
-import com.cedarsoftware.util.io.JsonWriter;
-
 /**
  * Created by michaelz on 7/8/2015.
  */

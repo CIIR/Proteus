@@ -16,7 +16,7 @@ public class UserDatabaseFactory {
         if ("H2Database".equals(impl)) {
             try {
                 return new H2Database(dbp);
-            } catch (SQLException ex) {
+            } catch (Exception ex) {
                 throw new Exception("Error creating H2 Database");
             }
         }

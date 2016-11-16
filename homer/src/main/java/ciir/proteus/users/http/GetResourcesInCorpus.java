@@ -1,17 +1,15 @@
 package ciir.proteus.users.http;
 
 import ciir.proteus.server.HTTPError;
-import ciir.proteus.system.DocumentAnnotator;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
 import org.lemurproject.galago.core.parse.Document;
-import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.utility.Parameters;
-
-import javax.print.Doc;
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -30,9 +28,7 @@ public class GetResourcesInCorpus extends DBAction {
     public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError {
 
         Credentials creds = Credentials.fromJSON(reqp);
-        int corpus = (int) reqp.get("corpus", -1);
-        int numResults = (int) reqp.get("n", -1);
-        int skipResults = (int) reqp.get("skip", 0);
+        int corpus = reqp.get("corpus", -1);
 
         log.info("GetResourcesInCorpus corpus=" + corpus);
         List<String> resList;
@@ -60,7 +56,6 @@ public class GetResourcesInCorpus extends DBAction {
                 }
             }
 
-//            Parameters response = Parameters.create();
             response.set("metadata", resources);
 
             return response;

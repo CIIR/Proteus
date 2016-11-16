@@ -1,10 +1,6 @@
 package ciir.proteus.build;
 
-import ciir.proteus.system.ProteusMain;
 import org.lemurproject.galago.core.tools.App;
-import org.lemurproject.galago.utility.tools.AppFunction;
-
-import java.io.File;
 
 /**
  * Pass through to Galago.

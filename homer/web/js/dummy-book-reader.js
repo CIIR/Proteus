@@ -13,7 +13,7 @@ var  br ;
 function BookReader() {}
 BookReader.prototype.init = function() { return true;};
 BookReader.prototype.getBookID = function() { return br.bookId;};
-// IA changed book reader around October 25th 2016. Updating to accomidate
+// IA changed book reader around October 25th 2016. Updating to accommodate
 // the new code.
 BookReader.prototype.getPageNumber = function(idx) {
   let pg = br.getPageNum(idx);

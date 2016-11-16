@@ -38,10 +38,10 @@ import static org.junit.Assert.fail;
  */
 public class UserDatabaseTest {
 
-  public static UserDatabase db;
-  public static File folder;
-  private static Logger log = Logger.getLogger("tests");
-  public static final int NumIterations = 10;
+  private static UserDatabase db;
+  private static File folder;
+  private static final Logger log = Logger.getLogger("tests");
+  private static final int NumIterations = 10;
 
   @Before
   public void setUp() throws Exception {
@@ -88,7 +88,7 @@ public class UserDatabaseTest {
     assertNotNull(p.get("token"));
     assertNotNull(p.get("userid"));
     assertEquals("usER1", p.get("user"));
-    List<Parameters> corpora = new ArrayList<Parameters>();
+    List<Parameters> corpora = new ArrayList<>();
     corpora = p.getAsList("corpora", Parameters.class);
     // MCZ: 10/2015 - there is always a default corpus
     assertEquals(1, corpora.size());
@@ -215,7 +215,7 @@ public class UserDatabaseTest {
     Parameters p = Parameters.create();
     p = db.getAllCorpora();
 
-    List<Parameters> corpora = new ArrayList<Parameters>();
+    List<Parameters> corpora = new ArrayList<>();
 
     corpora = p.getAsList("corpora", Parameters.class);
 
@@ -277,7 +277,7 @@ public class UserDatabaseTest {
     db.addVoteForResource(cred, res1_pg1, corpus1, subcorpus1, queryid1);
 
     Parameters labels = db.getResourceLabels(res1, corpus1);
-    List<Parameters> recs = new ArrayList<Parameters>();
+    List<Parameters> recs = new ArrayList<>();
     recs = labels.getAsList("labels");
     assertEquals(2, recs.size());
 
@@ -647,11 +647,11 @@ public class UserDatabaseTest {
     assertEquals("2", arr.get(2).get(resource, "?"));
 
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSSSSSSSS");
-    Date date = (Date)formatter.parse(arr.get(0).get("dttm", "?"));
+    Date date = formatter.parse(arr.get(0).get("dttm", "?"));
     long time1 = date.getTime();
-    date = (Date)formatter.parse(arr.get(1).get("dttm", "?"));
+    date = formatter.parse(arr.get(1).get("dttm", "?"));
     long time2 = date.getTime();
-    date = (Date)formatter.parse(arr.get(2).get("dttm", "?"));
+    date = formatter.parse(arr.get(2).get("dttm", "?"));
     long time3 = date.getTime();
 
     assertTrue(time1 > time2);
@@ -848,7 +848,7 @@ public class UserDatabaseTest {
 
     // insert two subcorpora
     Parameters sc = Parameters.create();
-    List<Parameters> plist = new ArrayList<Parameters>();
+    List<Parameters> plist = new ArrayList<>();
     sc.put("name", "sc1");
     plist.add(sc);
     sc = Parameters.create();
@@ -880,7 +880,7 @@ public class UserDatabaseTest {
     assertEquals("sc2", results.getString(1));
     id2 = results.getInt(2);
     count++;
-    assert(results.next() == false); // no more records
+    assert(!results.next()); // no more records
     assert (count == 2);
 
     // update the name of them
@@ -890,7 +890,7 @@ public class UserDatabaseTest {
 
     // insert two subcorpora
     sc = Parameters.create();
-    plist = new ArrayList<Parameters>();
+    plist = new ArrayList<>();
     sc.put("name", "z");
     sc.put("id", id1);
     plist.add(sc);
@@ -920,7 +920,7 @@ public class UserDatabaseTest {
     assertEquals("z", results.getString(1));
     assert(id1 == results.getInt(2));
     count++;
-    assert(results.next() == false); // no more records
+    assert(!results.next()); // no more records
     assert (count == 2);
 
 
@@ -941,7 +941,7 @@ public class UserDatabaseTest {
 
     // insert a subcorpus
     Parameters sc = Parameters.create();
-    List<Parameters> plist = new ArrayList<Parameters>();
+    List<Parameters> plist = new ArrayList<>();
     sc.put("name", "sc1");
     plist.add(sc);
     p.set("subcorpora", plist);

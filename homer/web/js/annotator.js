@@ -1340,7 +1340,7 @@ Annotator = (function(superClass) {
             console.log(range);
             console.log(range.commonAncestorContainer.parentElement);
             var content = range.cloneContents();
-            console.log(content)
+            console.log(content);
             if ($(range.commonAncestorContainer).hasClass('per-ent')) {
                 entType = 'person:';
             }
@@ -1377,7 +1377,7 @@ Annotator = (function(superClass) {
             console.log(range);
             console.log(range.commonAncestorContainer.parentElement);
             var content = range.cloneContents();
-            console.log(content)
+            console.log(content);
             if ($(range.commonAncestorContainer).hasClass('per-ent')) {
                 entType = 'person:';
             }
@@ -1644,7 +1644,7 @@ Annotator.Editor = (function(superClass) {
         focus: 'annotator-focus'
     };
 
-    Editor.prototype.html = "<div class=\"annotator-outer annotator-editor\">\n  <form class=\"annotator-widget\">\n    <ul class=\"annotator-listing\"></ul>\n"
+    Editor.prototype.html = "<div class=\"annotator-outer annotator-editor\">\n  <form class=\"annotator-widget\">\n    <ul class=\"annotator-listing\"></ul>\n";
     Editor.prototype.html += "<div class=\"annotator-controls\">\n   <a href=\"#cancel\" class=\"annotator-cancel\">" + _t('Cancel') + "</a>\n<a href=\"#save\" class=\"annotator-save annotator-focus\">" + _t('Save') + "</a>\n    </div>\n  </form>\n</div>";
 
     Editor.prototype.options = {};
@@ -1709,7 +1709,7 @@ Annotator.Editor = (function(superClass) {
         // put the label info in the annotation object so we have it
         // to insert into the DB
         // ??? on a NEW note, annotation.id is UNDEFINED
-        console.log(this.annotation.uri + '_' + this.annotation.id)
+        console.log(this.annotation.uri + '_' + this.annotation.id);
         var labels = this.element.find("button"); // TODO ??? should have a more descriptive class to select by
         this.annotation.subcorpusLabels = [];
         //console.log("button data:");
@@ -1719,7 +1719,7 @@ Annotator.Editor = (function(superClass) {
             if ($.hasData(b) && $.isEmptyObject($(b).data()) == false) {
                 tmp.push($(b).data());
             }
-        })
+        });
 
         this.publish('save', [this.annotation]);
 
@@ -2046,7 +2046,7 @@ LinkParser = (function() {
             if (match) {
                 results.push(d);
             } else {
-                continue;
+
             }
         }
         return results;
@@ -2115,3 +2115,4 @@ $(function() {
     Annotator.showNotification = notification.show;
     return Annotator.hideNotification = notification.hide;
 });
+

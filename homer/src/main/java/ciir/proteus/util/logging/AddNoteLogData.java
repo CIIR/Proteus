@@ -17,7 +17,7 @@ public class AddNoteLogData extends LogData {
     super(id, user, "ADD-NOTE");
   }
 
-  public AddNoteLogData(String id, String user, String action) {
+  AddNoteLogData(String id, String user, String action) {
     super(id, user, action);
   }
 

@@ -10,15 +10,15 @@ import org.apache.logging.log4j.LogManager;
 /**
  * @author jfoley.
  */
-public abstract class DBAction implements JSONHandler {
+abstract class DBAction implements JSONHandler {
 
-    protected static final Logger log = Logger.getLogger(DBAction.class.getName());
+    static final Logger log = Logger.getLogger(DBAction.class.getName());
     protected static final org.apache.logging.log4j.Logger proteusLog = LogManager.getLogger("Proteus");
 
-    public final UserDatabase userdb;
-    public final ProteusSystem system;
+    final UserDatabase userdb;
+    final ProteusSystem system;
 
-    public DBAction(ProteusSystem proteus) {
+    DBAction(ProteusSystem proteus) {
         system = proteus;
         this.userdb = proteus.userdb;
     }

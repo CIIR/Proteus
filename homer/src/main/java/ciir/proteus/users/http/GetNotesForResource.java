@@ -2,15 +2,11 @@ package ciir.proteus.users.http;
 
 import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
-import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
 import org.lemurproject.galago.utility.Parameters;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author michaelz.

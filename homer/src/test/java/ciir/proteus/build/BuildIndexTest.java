@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class BuildIndexTest {
 
-  public static List<ScoredDocument> runQuery(Retrieval r, String input) throws Exception {
+  private static List<ScoredDocument> runQuery(Retrieval r, String input) throws Exception {
     Parameters qp = Parameters.create();
     Node parsed = StructuredQuery.parse(input);
     Node ready = r.transformQuery(parsed, qp);

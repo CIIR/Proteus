@@ -14,7 +14,7 @@ import java.util.Map;
  * @author jfoley.
  */
 @Deprecated
-public class MBTEI {
+class MBTEI {
   public static String getArchiveIdentifier(DocumentSplit split, Map<String, String> metadata) {
     // MCZ see if we can get the internet archive ID from the metadata
     String archiveID = metadata.get("identifier");

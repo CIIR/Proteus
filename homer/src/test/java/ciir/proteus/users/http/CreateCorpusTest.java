@@ -4,19 +4,15 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.server.TestEnvironment;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
-import ciir.proteus.users.error.DuplicateUser;
-import ciir.proteus.users.error.NoTuplesAffected;
+import ciir.proteus.util.MockHttpServletRequest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.lemurproject.galago.tupleflow.web.WebServerException;
 import org.lemurproject.galago.utility.Parameters;
-import ciir.proteus.util.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -27,10 +23,10 @@ import static org.junit.Assert.fail;
  */
 public class CreateCorpusTest {
 
-    public static TestEnvironment env;
+    private static TestEnvironment env;
 
     @BeforeClass
-    public static void setup() throws IOException, WebServerException, NoTuplesAffected, DuplicateUser, Exception {
+    public static void setup() throws Exception {
         env = new TestEnvironment();
     }
 
@@ -62,7 +58,7 @@ public class CreateCorpusTest {
             fail(httpError.getMessage());
         }
 
-        List<Parameters> corpora = new ArrayList<Parameters>();
+        List<Parameters> corpora;
         p = env.proteus.userdb.getAllCorpora();
         corpora = p.getAsList("corpora", Parameters.class);
         // MCZ 10/2015 - there is always a default corpus with id = 1

@@ -9,5 +9,5 @@ import org.lemurproject.galago.utility.Parameters;
 
 public interface JSONHandler {
 
-    public abstract Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws Exception;
+    Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws Exception;
 }

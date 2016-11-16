@@ -38,7 +38,7 @@ public class H2Database implements UserDatabase {
 
   private ComboPooledDataSource cpds = null;
 
-  public H2Database(Parameters conf) throws SQLException {
+  public H2Database(Parameters conf) {
     System.setProperty("com.mchange.v2.log.MLog", "com.mchange.v2.log.FallbackMLog");
     System.setProperty("com.mchange.v2.log.FallbackMLog.DEFAULT_CUTOFF_LEVEL", "WARNING");
 
@@ -59,9 +59,9 @@ public class H2Database implements UserDatabase {
       cpds.setUser(dbuser);
       cpds.setPassword(dbpass);
       cpds.setAutoCommitOnClose(true); // without this - connections don't close unless you explicitly commit
-      cpds.setMaxPoolSize((int) conf.get("max_pool_size", 1000));
-      cpds.setInitialPoolSize((int) conf.get("initial_pool_size", 50));
-      cpds.setMaxStatementsPerConnection((int) conf.get("max_prepared_statements_per_connection", 10));  // allow for prepared statements
+      cpds.setMaxPoolSize(conf.get("max_pool_size", 1000));
+      cpds.setInitialPoolSize(conf.get("initial_pool_size", 50));
+      cpds.setMaxStatementsPerConnection(conf.get("max_prepared_statements_per_connection", 10));  // allow for prepared statements
 
       // create tables if needed
       initDB();
@@ -407,7 +407,6 @@ public class H2Database implements UserDatabase {
           System.err.println("Duplicate corpus: " + corpus);
           throw new DuplicateCorpus();
         }
-        ;
       }
 
       int numRows = conn.createStatement().executeUpdate("insert into corpora (corpus) values ('" + corpus + "')");
@@ -1213,7 +1212,7 @@ public class H2Database implements UserDatabase {
   }
 
   // "borrowed" from the C3P0 examples: http://sourceforge.net/projects/c3p0/files/c3p0-src/c3p0-0.9.2.1/
-  static void attemptClose(Connection o) {
+  private static void attemptClose(Connection o) {
     try {
       if (o != null) {
         o.close();

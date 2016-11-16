@@ -31,8 +31,7 @@ public class ClickLogHelper {
   static public List<String> extractDocID(List<?> list) {
 
     if (list == null || list.isEmpty()) {
-      List<String> emptyList = Collections.emptyList();
-      return emptyList;
+      return Collections.emptyList();
     }
     List<String> docs = new ArrayList<>();
 

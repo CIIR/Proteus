@@ -13,7 +13,6 @@ import org.lemurproject.galago.utility.StreamUtil;
 import java.io.File;
 import java.lang.reflect.Field;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class MBTEIPageParserTest {

@@ -26,7 +26,6 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
 
   if (!_.isUndefined(pageNum) && pageNum.length > 0) {
     kind = 'ia-pages';
-    docid = result.name;
   }
   if (kind == 'ia-books' && !_.isUndefined(result.snippetPage)) {
     docid = identifier + "_" + result.snippetPage;
@@ -74,7 +73,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
   var html = '<table class="result-table"><tr>';
 
   html += '<td class="result-img-preview" rowspan="3">' + previewImage + '</td>' +
-  '<td class="name">' + nameLink + '&nbsp;(<a target="_blank" href="view.html?kind=ia-pages&action=view&id=' + docid + '&queryid=' + queryid + '">view OCR</a>)&nbsp;'
+  '<td class="name">' + nameLink + '&nbsp;(<a target="_blank" href="view.html?kind=ia-pages&action=view&id=' + docid + '&queryid=' + queryid + '">view OCR</a>)&nbsp;';
 
   // store the ratings with names but keep it hidden, we'll use this on hover to display the users and
   // their ratings on the left hand side of the screen.
@@ -107,7 +106,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     noteHTML += note.user.split('@')[0] + ' : <i>' + note.text.replace(/<br>/g, " ") + '</i></b> : ';
     noteHTML += note.quote.replace(/<br>/g, " ");
     noteHTML += '</a></div>';
-  })
+  });
 
   if (noteHTML.length > 0) {
     html += '<a href="#" onclick="UI.toggleNotes(\'' + result.name + '\');"><span id="notes-link-' + result.name + '"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;';
@@ -130,7 +129,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
     var queries = [];
     _.each(result.queries.rows, function(query) {
       queries.push('<a target="_blank" href="index.html?action=search&kind=' + query.kind + '&q=' + encodeURIComponent(query.query) + '">' + query.query + '</a>');
-    })
+    });
     if (queries.length == 1) {
       html += '<div class="resource-query" >Found with query: ' + queries.toString() + '</div>';
     }

@@ -43,7 +43,7 @@ var WIKIPEDIA = function() {
                 url = r.responseURL.replace(/\/page\//, '/resource/');
             }
             my.getRawJson(url, onSuccess, error);
-        }
+        };
         r.send(null);
 
         function onSuccess(data) {
@@ -59,7 +59,7 @@ var WIKIPEDIA = function() {
             }
             callback(out);
         }
- 
+
     };
 
     // ### _getDbpediaUrl

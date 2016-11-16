@@ -29,8 +29,8 @@ public class ProteusSystem {
 
   public final String defaultKind;
   private final Parameters config;
-  public Map<String, Retrieval> kinds;
-  public MemoryIndex noteIndex = null;
+  public final Map<String, Retrieval> kinds;
+  private MemoryIndex noteIndex = null;
   public UserDatabase userdb;
   final private SocketIOServer broadcastServer;
 

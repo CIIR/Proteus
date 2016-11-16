@@ -1,24 +1,13 @@
 package ciir.proteus.users.http;
 
-import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
-import ciir.proteus.users.error.DBError;
 import ciir.proteus.util.logging.ClickLogHelper;
 import ciir.proteus.util.logging.LogHelper;
 import ciir.proteus.util.logging.UpdateNoteLogData;
-import org.lemurproject.galago.core.index.mem.FlushToDisk;
-import org.lemurproject.galago.core.index.mem.MemoryIndex;
-import org.lemurproject.galago.core.parse.Document;
-import org.lemurproject.galago.core.parse.Tag;
-import org.lemurproject.galago.core.parse.TagTokenizer;
-import org.lemurproject.galago.core.retrieval.Retrieval;
-import org.lemurproject.galago.core.retrieval.RetrievalFactory;
 import org.lemurproject.galago.utility.Parameters;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**

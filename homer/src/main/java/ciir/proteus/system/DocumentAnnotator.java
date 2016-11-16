@@ -62,8 +62,8 @@ public class DocumentAnnotator {
     boolean getTags = reqp.get("tags", false);
     boolean getRatings = reqp.get("ratings", false);
     boolean overlapOnly = reqp.get("overlapOnly", false);
-    int numEntities = (int) reqp.get("top_k_entities", 0);
-    int corpusID = (int) reqp.get("corpus", -1);
+    int numEntities = reqp.get("top_k_entities", 0);
+    int corpusID = reqp.get("corpus", -1);
 
     allEntities = new HashMap<String, Map<String, Integer>>();
     List<String> names = RetrievalUtil.names(results);

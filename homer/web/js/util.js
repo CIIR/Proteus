@@ -75,11 +75,11 @@ var removeURLParam = function(param) {
     var p = getURLParams();
 
     if (!_.isUndefined(p[param])) {
-        delete p[param]
+        delete p[param];
         pushURLParams(p);
     }
 
-}
+};
 
 // from: http://www.w3schools.com/js/js_cookies.asp
 var getCookie = function(cname) {
@@ -101,7 +101,7 @@ var getCookie = function(cname) {
 
 var getUser = function() {
     return getCookie("username")
-}
+};
 
 // the "exclude" option is so we don't highlight terms in the label buttons.
 var singleTermHightlightOptions = { "exclude": [".resource-labels *"], "element": "span", "className" : "hili"};
@@ -121,7 +121,7 @@ var newHighlightText = function(selector, queryTerms) {
         } else {
             singleTerms.push(term);
         }
-    })
+    });
 
     if (singleTerms.length > 0){
         $(selector).mark(singleTerms, singleTermHightlightOptions);
@@ -218,17 +218,17 @@ var setUserRatingsHTML = function(res) {
             }
         })
 
-    })
+    });
     var rating_html = '<span>';
     _.forEach(votes, function(val, key) {
         rating_html += key + ': <b>' + val + '</b><br>';
-    })
+    });
 
     rating_html += '</span>';
 
     $('#' + res + '-user-ratings-w-names').html(rating_html);
 
-}
+};
 
 var getResourcesForCorpus = function(that) {
 
@@ -382,11 +382,11 @@ function addEntitySearchLinks() {
 
     $(".per-ent").bind("mouseup", function() {
         selectElementContents(this)
-    })
+    });
 
     $(".org-ent").bind("mouseup", function() {
         selectElementContents(this)
-    })
+    });
 
     $(".loc-ent").bind("mouseup", function() {
         selectElementContents(this)
@@ -614,7 +614,7 @@ function labelClick(that, subcorpus_id, res, kind) {
     // TODO MCZ Horribly, HORRIBLY brain dead way of updating
     // subcorpus document counts. really needs to be revisited
     API.voteForResource(args, function() {
-        console.log("voted!")
+        console.log("voted!");
         var delta = 0;
         if (action == "add") {
             if (_.isUndefined(votingJSON.document[res])) {
@@ -679,7 +679,7 @@ function termClick(that) {
 
     // re-build the query
     // get all the spans with the "term-check-mark" class
-    var terms = $("span.term-check-mark")
+    var terms = $("span.term-check-mark");
 
     var query = '';
 
@@ -703,7 +703,7 @@ function termClick(that) {
             }
         }
 
-    })
+    });
 
     $("#query-builder-query").html('<a target="_blank" href="index.html?action=search&kind=all&q=' + encodeURI(query) + '">' + query + '</a>');
 }

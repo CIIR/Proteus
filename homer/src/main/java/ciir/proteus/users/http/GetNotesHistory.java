@@ -21,10 +21,7 @@ public class GetNotesHistory extends DBAction {
     public Parameters handle(String method, String path, Parameters reqp, HttpServletRequest req) throws HTTPError, DBError, IOException {
 
         Integer corpusid = reqp.get("corpus", -1);
-        Parameters notes = Parameters.create();
+        return userdb.getNotesForCorpus(corpusid);
 
-        notes = userdb.getNotesForCorpus(corpusid);
-
-        return notes;
     }
 }

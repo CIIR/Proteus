@@ -14,11 +14,11 @@ import java.util.logging.Logger;
 /**
  * @author jfoley
  */
-public class StaticContentHandler {
+class StaticContentHandler {
 
     private static final Logger log = Logger.getLogger(StaticContentHandler.class.getName());
-    public final List<File> baseDirs;
-    public final File defaultPath;
+    private final List<File> baseDirs;
+    private final File defaultPath;
 
     public StaticContentHandler(Parameters argp) {
         Parameters p = argp.getMap("content");
@@ -48,7 +48,7 @@ public class StaticContentHandler {
     /**
      * Make sure we don't leak files that aren't children of a base directory.
      */
-    public boolean isDescendentOf(File target, File dir) {
+    private boolean isDescendentOf(File target, File dir) {
         // return true if target is in some subfolder of dir
         File bottom = new File("/");
         while (true) {
@@ -64,7 +64,7 @@ public class StaticContentHandler {
     /**
      * Resolve a path by searching in the list of directories, in order.
      */
-    public File resolvePath(String path) {
+    private File resolvePath(String path) {
         for (File base : baseDirs) {
             File possible = new File(base, path);
             if (possible.exists()) {
@@ -87,7 +87,7 @@ public class StaticContentHandler {
         }
     }
 
-    String determineContentType(String path) {
+    private String determineContentType(String path) {
         int extensionIndex = path.lastIndexOf('.');
         String extension = path.substring(extensionIndex + 1);
 

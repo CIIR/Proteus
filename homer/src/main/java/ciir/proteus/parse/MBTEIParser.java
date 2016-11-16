@@ -21,24 +21,24 @@ import java.util.logging.Logger;
 /**
  * @author jfoley, michaelz
  */
-public abstract class MBTEIParser extends DocumentStreamParser {
+abstract class MBTEIParser extends DocumentStreamParser {
 
-  public static final Logger log = Logger.getLogger(MBTEIParser.class.getName());
-  public static final XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
+  static final Logger log = Logger.getLogger(MBTEIParser.class.getName());
+  private static final XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
   private final AbstractSequenceClassifier nerClassifier;
 
   static {
     xmlFactory.setProperty(XMLInputFactory.IS_COALESCING, true);
   }
 
-  protected XMLStreamReader xml;
-  protected final DocumentSplit split;
-  protected Map<String, String> metadata;
+  XMLStreamReader xml;
+  final DocumentSplit split;
+  Map<String, String> metadata;
   private Integer pageIndex = -1;
 
   abstract public Document nextDocument() throws IOException;
 
-  public MBTEIParser(DocumentSplit split, Parameters p) throws Exception {
+  MBTEIParser(DocumentSplit split, Parameters p) throws Exception {
     super(split, p);
 
     this.split = split;
@@ -64,7 +64,7 @@ public abstract class MBTEIParser extends DocumentStreamParser {
 
   }
 
-  public static String getArchiveIdentifier(DocumentSplit split, Map<String, String> metadata) {
+  static String getArchiveIdentifier(DocumentSplit split, Map<String, String> metadata) {
     // MCZ see if we can get the internet archive ID from the metadata
     String archiveID = metadata.get("identifier");
 
@@ -104,7 +104,7 @@ public abstract class MBTEIParser extends DocumentStreamParser {
     return cleaned.trim();
   }
 
-  public static Map<String, String> parseMetadata(XMLStreamReader xml) throws XMLStreamException {
+  static Map<String, String> parseMetadata(XMLStreamReader xml) throws XMLStreamException {
 
     Map<String, String> metadata = new HashMap<>();
 
@@ -158,7 +158,7 @@ public abstract class MBTEIParser extends DocumentStreamParser {
     return metadata;
   }
 
-  protected int getPageIndex() {
+  int getPageIndex() {
     // NOTE - we subtract 1 from th page number. the <pb> tags START
     // a page, but with the logic in nextPageText(), we hit the <pb> that starts the
     // NEXT page so we're one too many.
@@ -176,7 +176,7 @@ public abstract class MBTEIParser extends DocumentStreamParser {
     }
   }
 
-  protected String nextPageText() throws XMLStreamException {
+  String nextPageText() throws XMLStreamException {
     if (!xml.hasNext()) {
       return null;
     }
@@ -272,12 +272,11 @@ public abstract class MBTEIParser extends DocumentStreamParser {
 
     // put together the parts of the page
     String tmpPageText = headerBuffer.toString() + bodyBuffer.toString() + footerBuffer.toString();
-    String pageText = doNER(tmpPageText) + "<br>";    // add a <br> to visually indicate the end of a page
 
-    return pageText;
+    return doNER(tmpPageText) + "<br>";
   }
 
-  protected String doNER(String text) {
+  private String doNER(String text) {
 
     if (text.length() == 0) {
       return "";

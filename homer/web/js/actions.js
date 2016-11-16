@@ -63,9 +63,9 @@ var doSearchRequest = function(args) {
     var subcorpora = [];
     // TODO temp
     _.forEach(getSubcorporaElements(), function(rec) {
-        console.log($(rec).attr("value") + ' is checked')
+        console.log($(rec).attr("value") + ' is checked');
         subcorpora.push(parseInt($(rec).attr("value")));
-    })
+    });
 
     // don't limit by subcorport IFF we're searching for pages within a book
     if (!_.isEmpty(subcorpora) && _.isUndefined(args.workingSetQuery)) {
@@ -90,7 +90,7 @@ var doSearchRequest = function(args) {
 
     // if we didn't ask for more
     if (!args.skip || args.skip === 0) {
-        clearModelResults(Model[args.kind])
+        clearModelResults(Model[args.kind]);
         clearSubcorpusFoundDocCount();
         UI.clearResults();
         // don't update the URL if we're getting pages for a book
@@ -246,7 +246,7 @@ var onSearchSuccess = function(data) {
                 maxCount = t.count;
                 maxTerm = t.term;
             }
-        })
+        });
 
         _.forEach(data.bigrams, function(t) {
             $("#high-bigrams").append(getTermHTMl(t.ngram, t.count, 'add-quote'));
@@ -254,7 +254,7 @@ var onSearchSuccess = function(data) {
                 maxCount = t.count;
                 maxTerm = t.ngram;
             }
-        })
+        });
 
         _.forEach(data.trigrams, function(t) {
             $("#high-trigrams").append(getTermHTMl(t.ngram, t.count, 'add-quote'));
@@ -262,7 +262,7 @@ var onSearchSuccess = function(data) {
                 maxCount = t.count;
                 maxTerm = t.ngram;
             }
-        })
+        });
 
         _.forEach(data.fields, function(field) {
             var html = '<div class="query-terms-area"><b>' + field.capitalizeEachWord() + ': </b>';
@@ -338,8 +338,8 @@ var onSearchSuccess = function(data) {
         if (!_.isUndefined(data.request.workingSetQuery)) {
 
             var html = '<a href="#" onclick="UI.hidePages(\'' + bookid.id + '\');">';
-            html += '<span class="glyphicon glyphicon-collapse-up"></span>&nbsp;Hide pages (' + data.results.length + ')</a>'
-            $("#search-pages-link-" + bookid.id).html(html)
+            html += '<span class="glyphicon glyphicon-collapse-up"></span>&nbsp;Hide pages (' + data.results.length + ')</a>';
+            $("#search-pages-link-" + bookid.id).html(html);
             $("#search-pages-link-" + bookid.id).data("num_results", data.results.length);
         }
 
@@ -420,7 +420,7 @@ function renderDups(data) {
     }
 
     // create a matrix that tells us how confident we are that two docs are duplicates
-    var count = uniqWords.length // data.results.length;
+    var count = uniqWords.length; // data.results.length;
 
     var conf = Array.apply(null, Array(count)).map(Number.prototype.valueOf, 0);
     // ???? temp matrix for visualizing scores/duplicates
@@ -471,7 +471,7 @@ function renderDups(data) {
                 continue;
             }
 
-            var col = conf[row].indexOf(m)
+            var col = conf[row].indexOf(m);
             // check if this is a column we want to ignore
             if (ignoreCol.has(col)) {
                 conf[row][col] = 0;
@@ -506,8 +506,8 @@ function moveDocument(data, parentIdx, dupIdx, confidence) {
     var name = jqEsc(data.results[dupIdx].name);
 
     // dim out the dup
-    $("#" + name).addClass("dup-result")
-    $("#" + name + '-dup-confidence').html("    Duplicate confidence: " + confidence + "%")
+    $("#" + name).addClass("dup-result");
+    $("#" + name + '-dup-confidence').html("    Duplicate confidence: " + confidence + "%");
 
     parentIdx += 1;
     if ($("#dup-parent-" + parentIdx).length == 0) {
@@ -737,7 +737,7 @@ var onViewPageSuccess = function(args) {
                 + field + '-label"> ' + field + '</span><br/>');
     });
 
-}
+};
 /** this gets called with the response from ViewResource */
 var onViewPageSuccess2 = function(args) {
 
@@ -799,7 +799,7 @@ var onViewPageSuccess2 = function(args) {
         }
     }
 
-    $(pageElement).html("Fetching page...")
+    $(pageElement).html("Fetching page...");
     //  renderBookPageHTML(highlightText(queryTerms, args.text, false), id, $(pageElement));
     renderBookPageHTML(args.text, id, $(pageElement));
     newHighlightText(".book-text", queryTerms);
@@ -853,10 +853,10 @@ var processTags = function() {
     _.each(getCookie("fields").split(','), function(field) {
         var el = $('.' + field + '-class');
         if (document.getElementById("cb-" + field).checked) {
-            el.removeClass(field + "-off")
+            el.removeClass(field + "-off");
             el.addClass(field + "-on")
         } else {
-            el.addClass(field + "-off")
+            el.addClass(field + "-off");
             el.removeClass(field + "-on")
         }
     });
@@ -1134,18 +1134,18 @@ var onSearchWithinBookSuccess = function(data) {
     $('#book-search-results').css("height", 'calc(33% - ' + (gGutterSize / 2) + 'px)');
     $('#page-thumbnails').css("height", 'calc(67% - ' + (gGutterSize / 2) + 'px)');
 
-    $('[data-toggle="tooltip"]').tooltip({container: 'body', placement: 'right'})
+    $('[data-toggle="tooltip"]').tooltip({container: 'body', placement: 'right'});
     $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function() {
         newHighlightText('.tooltip-inner', queryTerms)
-    })
+    });
 
     newHighlightText(".book-text", queryTerms)
 
-}
+};
 
 function showOCRErrorMsg(text) {
 
-    $("#ocr-error").html(text)
+    $("#ocr-error").html(text);
     $("#ocr-error").fadeIn();
 
     setTimeout(function() {
@@ -1157,27 +1157,27 @@ function showOCRErrorMsg(text) {
 
 // display code inspired by: http://okfnlabs.org/wikipediajs/
 var entityCardHTML = '<div class="summary well summary-well">'
-        + '      <a class="fancybox" >'
-        + '      <img class="thumbnail" />'
-        + '      </a>'
-        + '       <h4>'
-        + '          <span class="title"></span>'
-        + '       </h4>'
-        + '                 <p>'
-        + '                     Rank: <span class="rank"></span>'
-        + '                     <br />'
-        + '                     Type: <span class="type"></span>'
-        + '                     <br />'
-        + '                     Location: <span class="place"></span>'
-        + '                     <br />'
-        + '                     Dates: <span class="start"></span> &mdash; <span class="end"></span>'
-        + '                 </p>'
-        + '                 <a class="more" href="#" onclick="toggleEntityDescription(\'{entityID}\');">more <span class="fa fa-angle-double-down"></span> </a>'
-        + '                 <a class="less" href="#" onclick="toggleEntityDescription(\'{entityID}\');" style="display: none;"><span class="fa fa-angle-double-up"></span> less</a>'
-        + '                 <p class="summary"></p>'
-        + '                 <p class="description" style="display: none;"></p>'
-        + '                 <div class="clear"></div>'
-        + '             </div>';
+        + '  <a class="fancybox" >'
+        + '  <img class="thumbnail" />'
+        + '  </a>'
+        + '  <h4>'
+        + '    <span class="title"></span>'
+        + '  </h4>'
+        + '		 <p>'
+        + '			 Rank: <span class="rank"></span>'
+        + '			 <br />'
+        + '			 Type: <span class="type"></span>'
+        + '			 <br />'
+        + '			 Location: <span class="place"></span>'
+        + '			 <br />'
+        + '			 Dates: <span class="start"></span> &mdash; <span class="end"></span>'
+        + '		 </p>'
+        + '		 <a class="more" href="#" onclick="toggleEntityDescription(\'{entityID}\');">more <span class="fa fa-angle-double-down"></span> </a>'
+        + '		 <a class="less" href="#" onclick="toggleEntityDescription(\'{entityID}\');" style="display: none;"><span class="fa fa-angle-double-up"></span> less</a>'
+        + '		 <p class="summary"></p>'
+        + '		 <p class="description" style="display: none;"></p>'
+        + '		 <div class="clear"></div>'
+        + '</div>';
 
 function displayAllEntityCards(dataArr, queryTerms) {
 
@@ -1212,7 +1212,7 @@ function displayEntityCard(info, rank) {
         $(entity_el + ' .summary .thumbnail').attr('src', summaryInfo.image);
         $(entity_el + ' .summary .fancybox').attr('href', summaryInfo.images[1]);
     }
-    var dataAsJson = JSON.stringify(summaryInfo, null, '    ')
+    var dataAsJson = JSON.stringify(summaryInfo, null, '    ');
     $(entity_el + ' .summary .raw').val(dataAsJson);
 
     // Raw Data Summary
@@ -1225,7 +1225,7 @@ function displayEntityCard(info, rank) {
     $(entity_el + ' .summary .rank').text(rank);
 
     // raw JSON
-    var dataAsJson = JSON.stringify(rawData, null, '    ')
+    var dataAsJson = JSON.stringify(rawData, null, '    ');
     $(entity_el + ' .results-json').val(dataAsJson);
 
     // no need for "more/less" if the description is the same as the summary
@@ -1268,7 +1268,7 @@ function getEntityCards(terms) {
                 // hack (for now - should be done with promises or something else clever)
                 // create an array to hold the data, when it's full, render the cards.
 
-                var entityData = new Array();
+                var entityData = [];
 
                 _.forEach(json.results, function(rec) {
                     rec.rank = dbPediaRank++;

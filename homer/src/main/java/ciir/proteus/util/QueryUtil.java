@@ -44,7 +44,7 @@ public class QueryUtil {
    * @param node a Galago Node
    * @return true if node is terminal and operator matches
    */
-  public static boolean isTextNode(Node node) {
+  private static boolean isTextNode(Node node) {
     return node.isText();
   }
 
@@ -56,7 +56,7 @@ public class QueryUtil {
    * @param traversal the traversal object / function
    * @return the modified node, if that's how you want to roll
    */
-  public static Node walk(Node node, Parameters qp, Traversal traversal) {
+  private static Node walk(Node node, Parameters qp, Traversal traversal) {
     try {
       return traversal.traverse(node, qp);
     } catch (Exception e) {

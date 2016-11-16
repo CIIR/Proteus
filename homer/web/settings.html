@@ -107,7 +107,7 @@
             json += innerjson + ']}';
             console.log(json);
             API.updateSubcorpora(JSON.parse(json), function (data) {
-                console.log("success")
+                console.log("success");
                 localStorage["subcorpora"] = JSON.stringify(data.subcorpora);
                 $('.label-error').removeClass("in");
                 $('.label-error').addClass("out");
@@ -129,7 +129,7 @@
                 });
 
             }, function (req, status, err) {
-                console.log("failure")
+                console.log("failure");
                 $(".label-error").html(err);
                 $('.label-error').addClass("in");
             });
@@ -154,11 +154,11 @@
             //                broadcastValues[$(this).val()] = value;
             //            });
 
-            var show_dups = $('#show-dup-settings input[type="checkbox"]').is(':checked')
-            var show_notes = $('#show-note-settings input[type="checkbox"]').is(':checked')
-            var show_found_with_query = $('#show-found-with-query-settings input[type="checkbox"]').is(':checked')
-            var show_unigrams = $('#show-unigram-settings input[type="checkbox"]').is(':checked')
-            var use_query_builder = $('#use-query-builder-settings input[type="checkbox"]').is(':checked')
+            var show_dups = $('#show-dup-settings input[type="checkbox"]').is(':checked');
+            var show_notes = $('#show-note-settings input[type="checkbox"]').is(':checked');
+            var show_found_with_query = $('#show-found-with-query-settings input[type="checkbox"]').is(':checked');
+            var show_unigrams = $('#show-unigram-settings input[type="checkbox"]').is(':checked');
+            var use_query_builder = $('#use-query-builder-settings input[type="checkbox"]').is(':checked');
 
             var settings = {num_entities: num, show_dups: show_dups, show_notes: show_notes,
                 show_found_with_query: show_found_with_query, show_unigrams: show_unigrams,
@@ -170,7 +170,7 @@
                 settings: settings
             };
             API.updateUserSettings(args, function () {
-                console.log("success")
+                console.log("success");
                 $(".saved-settings").html("Settings have been saved.");
                 $(".saved-settings").addClass("in");
 

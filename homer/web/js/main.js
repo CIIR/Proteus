@@ -20,7 +20,7 @@ var Model = {
 var clearModelResults = function(m) {
     m.results = [];
     m.query = "";
-}
+};
 
 var gSearchedKind = 'ia-books'; // default
 var urlParams = getURLParams();
@@ -121,7 +121,7 @@ UI.onClickSearchButton = function() {
 
 UI.onClickVizButton = function() {
 
-    console.log("clicked visualization  button!")
+    console.log("clicked visualization  button!");
     doActionRequest({kind: "all", q: "", action: "viz"});
 };
 
@@ -283,7 +283,7 @@ var createNewCorpus = function(corpusName) {
                 UI.showError("ERROR: ``" + err + "``");
                 throw err;
             });
-}
+};
 
 // get all tags grouped by user on start up
 getAllUsers();

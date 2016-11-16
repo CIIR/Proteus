@@ -11,15 +11,15 @@ QUnit.module("Utilities");
 
 QUnit.test("JQuery Escape", function (assert) {
   var id = 'NothingSpecial';
-  var newid = jqEsc(id)
+  var newid = jqEsc(id);
   assert.equal(newid, id);
 
   id = 'i.have.dots';
-  newid = jqEsc(id)
+  newid = jqEsc(id);
   assert.equal(newid, "i\\.have\\.dots");
 
   id = 'all.special:chars[]';
-  newid = jqEsc(id)
+  newid = jqEsc(id);
   assert.equal(newid, "all\\.special\\:chars\\[\\]");
 });
 
@@ -112,6 +112,12 @@ QUnit.test("Parse Internet Archive ID", function (assert) {
   obj = parsePageID(pageid);
   assert.equal(obj.id, "123_456_789_101112x");
   assert.equal(obj.page, "");
+  assert.equal(obj.note, "");
+
+  pageid = 'Bowdoin_Orient_v.130_no.1-22_1998-1999_83';
+  obj = parsePageID(pageid);
+  assert.equal(obj.id, "Bowdoin_Orient_v.130_no.1-22_1998-1999");
+  assert.equal(obj.page, "83");
   assert.equal(obj.note, "");
 
 });

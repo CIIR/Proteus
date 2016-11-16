@@ -115,7 +115,7 @@ var onViewArticleSuccess = function (args) {
         "userToken": userToken,
         "corpus": corpus,
         "corpusID": corpusID
-    }
+    };
 
     // add a doc specific class to attach notes to.
  //   $("#view-resource").addClass( "notes-" + id);

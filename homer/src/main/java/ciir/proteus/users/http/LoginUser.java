@@ -4,7 +4,6 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusSystem;
 import javax.servlet.http.HttpServletRequest;
 
-import ciir.proteus.util.logging.ClickLogData;
 import ciir.proteus.util.logging.LogHelper;
 import ciir.proteus.util.logging.LoginLogData;
 import org.lemurproject.galago.utility.Parameters;
