@@ -5,7 +5,6 @@ import ciir.proteus.system.ProteusDocument;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
-import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.utility.Parameters;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;

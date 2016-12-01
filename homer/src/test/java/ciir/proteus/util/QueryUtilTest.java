@@ -2,7 +2,6 @@ package ciir.proteus.util;
 
 import org.junit.Test;
 import org.lemurproject.galago.core.retrieval.query.Node;
-import org.lemurproject.galago.core.retrieval.query.SimpleQuery;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 
 import java.util.ArrayList;
