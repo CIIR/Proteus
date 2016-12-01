@@ -1,6 +1,7 @@
 package ciir.proteus.server.action;
 
 import ciir.proteus.server.HTTPError;
+import ciir.proteus.system.ProteusDocument;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.util.QueryUtil;
@@ -8,7 +9,6 @@ import ciir.proteus.util.logging.ClickLogHelper;
 import ciir.proteus.util.logging.LogHelper;
 import ciir.proteus.util.logging.ViewResourceLogData;
 import org.apache.logging.log4j.LogManager;
-import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.SimpleQuery;
 import org.lemurproject.galago.utility.Parameters;
@@ -16,7 +16,6 @@ import org.lemurproject.galago.utility.Parameters;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 
@@ -48,12 +47,7 @@ public class ViewResource implements JSONHandler {
     }
 
     String kind = reqp.getString("kind");
-    Document doc = null;
-    try {
-      doc = system.getRetrieval(kind).getDocument(docId, new Document.DocumentComponents(true, true, false));
-    } catch (IOException e) {
-      log.log(Level.WARNING, "IOException while trying to get document=" + docId + " for kind=" + kind, e);
-    }
+    ProteusDocument doc = system.getIndex().getDocument(kind, docId, true, true);
 
     Parameters response = Parameters.create();
     if(doc == null) {
@@ -94,8 +88,7 @@ public class ViewResource implements JSONHandler {
     }
 
     // get labels.
-    Parameters labels = Parameters.create();
-    labels = system.userdb.getResourceLabels(doc.name, reqp.getInt("corpusID"));
+    Parameters labels = system.userdb.getResourceLabels(doc.name, reqp.getInt("corpusID"));
     response.copyFrom(labels);
 
     // get any notes associated with the book

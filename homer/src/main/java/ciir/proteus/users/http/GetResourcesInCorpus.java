@@ -1,6 +1,7 @@
 package ciir.proteus.users.http;
 
 import ciir.proteus.server.HTTPError;
+import ciir.proteus.system.ProteusDocument;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.Credentials;
 import ciir.proteus.users.error.DBError;
@@ -43,10 +44,10 @@ public class GetResourcesInCorpus extends DBAction {
             // if they don't specify an "all" kind - which points to every index -
             // we'll just return nothing. Not the best solution we could loop through
             // all the kinds or create the "all" kind if it's not provided.
-            Map<String, Document> metadata = Collections.emptyMap();
-            if (system.kinds.containsKey("all")){
+            Map<String, ProteusDocument> metadata = Collections.emptyMap();
+            if (system.getKinds().contains("all")){
                 metadata =  this.system.getDocs("all", resList, true, false);
-                for (Map.Entry<String, Document> i : metadata.entrySet()){
+                for (Map.Entry<String, ProteusDocument> i : metadata.entrySet()){
                     resources.put(i.getKey(), Parameters.parseMap(i.getValue().metadata));
                 }
             } else {

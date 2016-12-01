@@ -1,62 +1,44 @@
 package ciir.proteus.system;
 
+import ciir.proteus.tools.apps.IndexType;
 import ciir.proteus.users.UserDatabase;
 import ciir.proteus.users.UserDatabaseFactory;
 import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketIOServer;
-import org.lemurproject.galago.core.index.mem.FlushToDisk;
-import org.lemurproject.galago.core.index.mem.MemoryIndex;
-import org.lemurproject.galago.core.parse.Document;
-import org.lemurproject.galago.core.parse.Tag;
-import org.lemurproject.galago.core.parse.TagTokenizer;
-import org.lemurproject.galago.core.retrieval.Retrieval;
-import org.lemurproject.galago.core.retrieval.RetrievalFactory;
-import org.lemurproject.galago.core.retrieval.ScoredDocument;
-import org.lemurproject.galago.core.retrieval.processing.MaxPassageFinder;
-import org.lemurproject.galago.core.retrieval.query.Node;
-import org.lemurproject.galago.core.tokenize.Tokenizer;
 import org.lemurproject.galago.utility.Parameters;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ProteusSystem {
 
   public final String defaultKind;
   private final Parameters config;
-  public final Map<String, Retrieval> kinds;
-  private MemoryIndex noteIndex = null;
+
   public UserDatabase userdb;
   final private SocketIOServer broadcastServer;
+
+  private IndexType index;
 
   public ProteusSystem(Parameters argp) throws Exception {
     this.config = argp;
     this.defaultKind = argp.getString("defaultKind");
 
-    kinds = new HashMap<>();
-    Parameters kindCfg = argp.getMap("kinds");
-    for (String kind : kindCfg.keySet()) {
-      try {
-        kinds.put(kind, RetrievalFactory.create(kindCfg.getMap(kind)));
-      } catch (Exception e) {
-        throw new IllegalArgumentException(e);
-      }
+    ClassLoader classLoader = ProteusSystem.class.getClassLoader();
 
+    try {
+      Class klazz = classLoader.loadClass(argp.get("indexType", "ciir.proteus.tools.apps.Galago"));
+      index = (IndexType) klazz.newInstance();
+      index.init(argp);
+      index.whoAmI();
+      System.out.println("Loaded index type: " + klazz.getName());
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
     }
 
     this.userdb = UserDatabaseFactory.instance(argp.getMap("userdb"));
-
-    // RetrievalFactory can't handle memory indexes with disk based indexes.
-    // for now we'll always create a memory based index for notes and add
-    // it to the CORPUS kind. We could do it for ALL kinds but that'd be
-    // inefficient because we need to reload them
-    // each time we want to make the notes searchable - which could be
-    // every time we add a note.
 
     loadNoteIndex();
 
@@ -74,61 +56,29 @@ public class ProteusSystem {
 
   }
 
-  public Retrieval getRetrieval(String kind) {
-    Retrieval r = kinds.get(kind);
-    if (r == null) {
-      throw new IllegalArgumentException("No retrieval for kind=" + kind);
-    }
-    return r;
+  public IndexType getIndex() {
+    return index;
   }
 
-  public List<ScoredDocument> search(String kind, Node query, Parameters qp) {
-    Retrieval retrieval = getRetrieval(kind);
-    try {
-
-      Node ready = retrieval.transformQuery(query, qp);
-      return retrieval.executeQuery(ready, qp).scoredDocuments;
-
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public List<ScoredDocument> findPassages(String kind, Node query, List<String> names) {
-    // find max passage for each document
-    Parameters qp = Parameters.create();
-    qp.set("working", names);
-    qp.set("processingModel", MaxPassageFinder.class.getCanonicalName());
-    qp.set("passageQuery", true);
-    qp.set("passageSize", 100);
-    qp.set("passageShift", 50);
-
-    return search(kind, query, qp);
+  public List<ProteusDocument> doSearch(String kind, String query, Parameters qp) throws IOException {
+    return index.doSearch(kind, query, qp);
   }
 
   public void close() throws IOException {
-    for (Retrieval ret : kinds.values()) {
-      ret.close();
-    }
+
+    index.close();
+
     userdb.close();
     if (broadcastServer != null)
       broadcastServer.stop();
   }
 
-  public Map<String, Document> getDocs(String kind, List<String> names, boolean metadata, boolean text) {
-    try {
-      Document.DocumentComponents docOpts = new Document.DocumentComponents();
-      docOpts.text = text;
-      docOpts.tokenize = text;
-      docOpts.metadata = metadata;
-      Retrieval r =  getRetrieval(kind); //
-      TagTokenizer t = (TagTokenizer) r.getTokenizer();// .getDocuments(names, docOpts);
-      t.addField("div");
+  public Map<String, ProteusDocument> getDocs(String kind, List<String> names, boolean metadata, boolean text) {
+    return index.getDocs(kind, names, metadata, text);
+  }
 
-      return r.getDocuments(names, docOpts);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  public Set<String> getKinds() {
+    return index.getKinds();
   }
 
   public Parameters getConfig() {
@@ -145,61 +95,9 @@ public class ProteusSystem {
   }
 
   public void loadNoteIndex() throws Exception {
-
-    Parameters noteParams = config.get("notes", Parameters.create());
-    String noteIndexPath = noteParams.get("noteIndex", "");
-    if (noteIndexPath.length() == 0) {
-      return;
-    }
-
-    List<String> noteFields = noteParams.getAsList("noteFields", String.class);
-
-    Parameters memIdxParams = Parameters.create();
-    memIdxParams.set("corpus", true);
-    memIdxParams.set("tokenizer", Parameters.create());
-    memIdxParams.getMap("tokenizer").set("fields", noteFields.toArray());
-    memIdxParams.getMap("tokenizer").set("class", TagTokenizer.class.getCanonicalName());
-
-    noteIndex = new MemoryIndex(memIdxParams);
-
     // TODO : get corpus number
     Parameters notes = this.userdb.getNotesForCorpus(1);
-    List<Parameters> arr = notes.getAsList("rows");
-
-    // only have to do the below logic if we have notes
-    if (arr.size() == 0){
-      return;
-    }
-
-    for (Parameters p : arr) {
-      Document d = new Document();
-      d.name = p.get("resource") + "_" + p.get("id");
-      d.text = "<b>" + p.getString("user").split("@")[0] + " : <i>" + p.get("text") + "</i></b> : " + p.get("quote");
-      d.tags = new ArrayList<Tag>();
-      d.metadata = new HashMap<String, String>();
-      // TODO : do we use metadata for things like who made the note, etc?
-      d.metadata.put("docType", "note");
-      noteIndex.process(d);
-    }
-
-    // flush the index to disk
-    FlushToDisk.flushMemoryIndex(noteIndex, noteIndexPath);
-
-    // add disk flushed memory index to the "all" kind
-
-    Retrieval retrieval = getRetrieval("all");
-    Parameters newParams = Parameters.create();
-    Parameters globalParams = retrieval.getGlobalParameters();
-    List<String> idx = new ArrayList<String>();
-    idx.addAll(globalParams.getAsList("index"));
-
-    // only add the note index path if it's not already there
-    if (idx.contains(noteIndexPath) == false){
-      idx.add(noteIndexPath);
-    }
-
-    newParams.put("index", idx);
-    kinds.put("all", RetrievalFactory.create(newParams));
- 
+    index.loadNoteIndex(notes);
   }
+
 }

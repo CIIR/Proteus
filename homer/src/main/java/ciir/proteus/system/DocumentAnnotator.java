@@ -3,16 +3,8 @@ package ciir.proteus.system;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.util.ListUtil;
 import ciir.proteus.util.RetrievalUtil;
-import org.lemurproject.galago.core.parse.Document;
+
 import org.lemurproject.galago.core.parse.Tag;
-import org.lemurproject.galago.core.parse.TagTokenizer;
-import org.lemurproject.galago.core.parse.stem.KrovetzStemmer;
-import org.lemurproject.galago.core.parse.stem.Stemmer;
-import org.lemurproject.galago.core.retrieval.ScoredDocument;
-import org.lemurproject.galago.core.retrieval.ScoredPassage;
-import org.lemurproject.galago.core.retrieval.query.Node;
-import org.lemurproject.galago.core.util.WordLists;
-import org.lemurproject.galago.tupleflow.Utility;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
@@ -42,42 +34,50 @@ public class DocumentAnnotator {
   private int snippetEnd = 100;
   private boolean snippets = true;
 
-  public Parameters annotate(ProteusSystem system, String kind, List<String> names, Parameters reqp) throws DBError, IOException {
-    reqp.put("metadata", false);
-    List<ScoredDocument> fakeDocs = new ArrayList<>();
-    for (String id : names) {
-      fakeDocs.add(new ScoredDocument(id, 0, 0.0));
-    }
-    return annotate(system, kind, fakeDocs, null, reqp);
-  }
+//  public Parameters annotate(ProteusSystem system, String kind, List<String> names, Parameters reqp) throws DBError, IOException {
+//    reqp.put("metadata", false);
+//    List<ScoredDocument> fakeDocs = new ArrayList<>();
+//    for (String id : names) {
+//      fakeDocs.add(new ScoredDocument(id, 0, 0.0));
+//    }
+//    return annotate(system, kind, fakeDocs, null, reqp);
+//  }
 
-  // note that the query could be null if we want to get all documents for a label or corpus.
-  public Parameters annotate(ProteusSystem system, String kind, List<ScoredDocument> results, Node query, Parameters reqp) throws DBError, IOException {
+  public Parameters annotate(ProteusSystem system, String kind, String query, Parameters reqp, List<String> names) throws DBError, IOException {
+    snippets = reqp.get("snippets", true);
+    boolean metadata = reqp.get("metadata", true);
+    Map<String, ProteusDocument> pulled  = system.getDocs(kind, names, metadata, snippets);
+    // ??? pass in ONLY results that match the query
+    return annotate(system, kind, new ArrayList<ProteusDocument>(pulled.values()), query, reqp);
+
+  }
+// TODO query could be in parameters
+    // note that the query could be null if we want to get all documents for a label or corpus.
+  public Parameters annotate(ProteusSystem system, String kind, List<ProteusDocument> results, String query, Parameters reqp) throws DBError, IOException {
 
     if (exclusionTerms == null) {
-      exclusionTerms = WordLists.getWordList("rmstop");
+      exclusionTerms = system.getIndex().getStopWords();
     }
     snippets = reqp.get("snippets", true);
     boolean metadata = reqp.get("metadata", true);
-    boolean getTags = reqp.get("tags", false);
-    boolean getRatings = reqp.get("ratings", false);
     boolean overlapOnly = reqp.get("overlapOnly", false);
     int numEntities = reqp.get("top_k_entities", 0);
     int corpusID = reqp.get("corpus", -1);
 
+
     allEntities = new HashMap<String, Map<String, Integer>>();
     List<String> names = RetrievalUtil.names(results);
-    Stemmer stemmer = new KrovetzStemmer();
+ //   Stemmer stemmer = new KrovetzStemmer();
     // retrieve snippets if requested AND we have a query
-    if (snippets && query != null) {
-      results = system.findPassages(kind, query, names);
+    if (snippets && query != null && !query.isEmpty()) {
+      results = system.getIndex().findPassages(kind, query, names);
     }
 
     // if we need to pull the documents:
-    Map<String, Document> pulled = Collections.emptyMap();
+ /*   Map<String, ProteusDocument> pulled = Collections.emptyMap();
     if (snippets || metadata) {
       pulled = system.getDocs(kind, names, metadata, snippets);
-    }
+    }*/
 
     totalTF = new HashMap<String, Integer>();
     snippetTF = new HashMap<String, Integer>();
@@ -88,19 +88,14 @@ public class DocumentAnnotator {
     Parameters noteParams = system.getConfig().get("notes", Parameters.create());
     List<String> noteFields = noteParams.getAsList("noteFields", String.class);
 
-    TagTokenizer tagTokenizer = new TagTokenizer();
-    for (String field : noteFields) {
-      tagTokenizer.addField(field);
-    }
-    tagTokenizer.addField("div");
-
 
     // result data
     ArrayList<Parameters> resultData = new ArrayList<>(results.size());
 
-    for (ScoredDocument sdoc : results) {
+ //   for (ScoredDocument sdoc : results) {
+      for (ProteusDocument doc : results) {
 
-      Document doc = pulled.get(sdoc.documentName);
+    //  Document doc = pulled.get(sdoc.documentName);
 
       if (doc == null) {
         continue;
@@ -124,7 +119,7 @@ public class DocumentAnnotator {
         docp.put("text", doc.text);
         // for notes, use the whole thing as a snippet
         docp.put("snippet", doc.text);
-        tagTokenizer.tokenize(doc);
+
         // remove the 1st token - that's the person who created the comment and we don't want
         // to count that in the TF
         doc.terms.set(0, "a");
@@ -136,14 +131,12 @@ public class DocumentAnnotator {
         // the document.
         snippetBegin = 0;
         snippetEnd = 100;
-        if (query != null) {
-          ScoredPassage psg = (ScoredPassage) sdoc;
-          snippetBegin = psg.begin;
-          snippetEnd = psg.end;
-        }
+
+        snippetBegin = Math.max(snippetBegin, doc.passageBegin);
+        snippetEnd = Math.max(snippetEnd, doc.passageEnd);
 
         snippetTerms = ListUtil.slice(doc.terms, snippetBegin, snippetEnd);
-        String snippet = (Utility.join(snippetTerms, " "));
+        String snippet = String.join(" ", snippetTerms);
 
         // If this is a book, find the page within the book that the
         // snippet is on via the start offset of the snippet. There is no
@@ -181,7 +174,7 @@ public class DocumentAnnotator {
         int termIdx = 0;
 
         for (String term : doc.terms) {
-          term = stemmer.stem(term);
+     //     term = stemmer.stem(term);
           if (totalTF.containsKey(term)) {
             totalTF.put(term, totalTF.get(term) + 1);
           } else {
@@ -218,13 +211,14 @@ public class DocumentAnnotator {
       }
 
       // count the entities and if we want the "top K" entities, they'll be returned
-      ArrayList<Parameters> entList = processEntities(numEntities, doc);
+
+     ArrayList<Parameters> entList = processEntities(numEntities, doc);
       docp.put("entities", entList);
 
       // default annotations
-      docp.put("name", sdoc.documentName);
-      docp.put("rank", sdoc.rank);
-      docp.put("score", sdoc.score);
+      docp.put("name",  doc.name);
+      docp.put("rank",  doc.rank);
+      docp.put("score",  doc.score);
 
       // metadata annotation
       if (metadata) {
@@ -264,13 +258,13 @@ public class DocumentAnnotator {
     Double bigramSum = topBiGrams.stream().mapToDouble(entry -> entry.getValue()).sum();
 
     ArrayList<Parameters> tmp3 = new ArrayList<>();
-    topBiGrams.forEach((term -> {
+    topBiGrams.forEach(term -> {
       Parameters p = Parameters.create();
       p.put("ngram", term.getKey());
       p.put("count", term.getValue());
       p.put("weight", term.getValue().floatValue() / bigramSum);
       tmp3.add(p);
-    }));
+    });
     ret.put("bigrams", tmp3);
 
     List<Map.Entry<String, Integer>> topTriGrams = totalTriGramTF.entrySet().stream()
@@ -286,13 +280,13 @@ public class DocumentAnnotator {
     Double trigramSum = topTriGrams.stream().mapToDouble(entry -> entry.getValue()).sum();
 
     ArrayList<Parameters> tmp4 = new ArrayList<>();
-    topTriGrams.forEach((term -> {
+    topTriGrams.forEach(term -> {
       Parameters p = Parameters.create();
       p.put("ngram", term.getKey());
       p.put("count", term.getValue());
       p.put("weight", term.getValue().floatValue() / trigramSum);
       tmp4.add(p);
-    }));
+    });
     ret.put("trigrams", tmp4);
 
     List<Map.Entry<String, Integer>> topTen = totalTF.entrySet().stream()
@@ -310,13 +304,13 @@ public class DocumentAnnotator {
     ret.put("totalTF", tmp);
 
     final Double finalSum3 = sum;
-    topTen.forEach((term -> {
+    topTen.forEach(term -> {
       Parameters p = Parameters.create();
       p.put("term", term.getKey());
       p.put("count", term.getValue());
       p.put("weight", term.getValue().floatValue() / finalSum3);
       tmp.add(p);
-    }));
+    });
 
     List<Map.Entry<String, Integer>> snippettopTen = snippetTF.entrySet().stream()
             .filter(entry -> entry.getKey().length() > 3) // words 3 characters or less are not very interesting
@@ -332,13 +326,13 @@ public class DocumentAnnotator {
 
     List<Parameters> snippettmp = new ArrayList<Parameters>();
     final Double finalSum1 = sum;
-    snippettopTen.forEach((term -> {
+    snippettopTen.forEach(term -> {
       Parameters p = Parameters.create();
       p.put("term", term.getKey());
       p.put("count", term.getValue());
       p.put("weight", term.getValue().floatValue() / finalSum1);
       snippettmp.add(p);
-    }));
+    });
     ret.put("snippetTF", snippettmp);
 
     ret.put("results", resultData);
@@ -370,13 +364,13 @@ public class DocumentAnnotator {
         final Double finalSum2 = sum;
 
 
-        entTopTen.forEach((term -> {
+        entTopTen.forEach(term -> {
           final Parameters p1 = Parameters.create();
           p1.put("entity", term.getKey());
           p1.put("count", term.getValue());
           p1.put("weight", term.getValue().floatValue() / finalSum2);
           tmp1.add(p1);
-        }));
+        });
         ret.put(entType + "Entities", tmp1);
       } catch (Exception e) {
         // TODO ignnore for now
@@ -390,7 +384,7 @@ public class DocumentAnnotator {
     return ret;
   }
 
-  private ArrayList<Parameters> processEntities(int numEntities, Document doc) {
+  private ArrayList<Parameters> processEntities(int numEntities, ProteusDocument doc) {
 
     if (doc.tags == null) {
       return new ArrayList<Parameters>(); // empty list
