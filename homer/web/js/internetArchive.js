@@ -204,5 +204,3 @@ resultRenderers["ia-pages"] = renderResult;
 resultRenderers["ia-all"] = renderResult;
 // TODO : MCZ temp for now, focusing on just books/pages
 resultRenderers["all"] = renderResult;
-
-resultRenderers["ia-corpus"] = renderResult;

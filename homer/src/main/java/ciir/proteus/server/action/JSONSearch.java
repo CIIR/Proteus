@@ -55,18 +55,7 @@ public class JSONSearch implements JSONHandler {
       }
     }
 
-    // corpus resources
-    if (action.equals("search-corpus") && corpusid > 0) {
-      // if we're not searching by labels, use the existing list
-      if (resList.isEmpty()) {
-        resList = system.userdb.getAllResourcesForCorpus(Integer.parseInt(userid), corpusid);
-
-        if (resList.isEmpty()) {
-          throw new RuntimeException("The corpus is empty.");
-        }
-      }
-    }
-    // when searching wihing one or more subcorpora,
+    // when searching wiyhin one or more subcorpora,
     // the client should turn off the "get more results" functionality, but just in case, make sure we
     // don't keep returning the same results over and over
     if (!resList.isEmpty() && skipResults > 0) {

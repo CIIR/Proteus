@@ -125,14 +125,6 @@ var doSearchRequest = function(args) {
     }
     var actualArgs = _.merge(defaultArgs, args);
 
-    if (args.kind.endsWith("corpus")) {
-        actualArgs.action = "search-corpus";
-        if (isLoggedIn() == false) {
-            UI.showProgress("Please log in to search a corpus");
-            return;
-        }
-    }
-
     // only allow blank queries if we're searching a corpus or by label(s)
     if ((!actualArgs.q || isBlank(actualArgs.q)) && (_.isEmpty(actualArgs.labels)) && (_.isUndefined(actualArgs.subcorpora) || actualArgs.subcorpora.length == 0)) {
         UI.showProgress("Query is blank!");
@@ -397,7 +389,7 @@ var onSearchSuccess = function(data) {
     }
     // if we searched by labels or (sub)corpus, we returned EVERYTHING so we
     // don't re-enable the auto-retrieve
-    if (usingLabels === false && Model[data.request.kind].request.action != "search-corpus" && (_.isUndefined(data.request.subcorpora) || data.request.subcorpora.length == 0)) {
+    if (usingLabels === false && (_.isUndefined(data.request.subcorpora) || data.request.subcorpora.length == 0)) {
         // ??? if we're expanding pages for a book, this happens TOO SOON, the pages haven't rendered
         // yet so the scroll bar size is wrong
         enableAutoRetrieve();
