@@ -2,35 +2,47 @@ package ciir.proteus.util.logging;
 
 import com.cedarsoftware.util.io.JsonWriter;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * Created by michaelz on 7/8/2015.
  */
-abstract class LogData {
+public abstract class LogData {
 
-  private final String id; // token or IP
-  private final String user;
-  private final String action;
+  private String timestamp;
+  private String id; // token or IP
+  private String user;
+  final protected String action;
 
-  LogData(String id, String user, String action) {
+  public LogData(String id, String user, String action) {
+    this.timestamp  = getTimestamp();
     this.id = id;
     this.user = user;
     this.action = action;
   }
 
-  private String getId() {
+  protected String getId() {
     return id;
   }
 
-  private String getUser() {
+  protected String getUser() {
     return user;
   }
 
-  String getAction() { return action;}
+  protected String getAction() { return action;};
 
-  String getCommonTSV() {
+  protected String getCommonTSV() {
     return getAction() + "\t"
             + getId() + "\t"
             + getUser();
+  }
+
+  private String getTimestamp(){
+    Date date = new Date();
+    SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy H:mm:ss");
+    return sdf.format(date);
   }
 
   // output tab separated info
