@@ -20,6 +20,7 @@ import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,17 @@ public class Galago implements IndexType {
       throw new IllegalArgumentException("No retrieval for kind=" + kind);
     }
     return r;
+  }
+
+  public List<String> getQueryTerms(String query){
+    // assume Simple query language
+    Node parsed = null;
+    try {
+      parsed = SimpleQuery.parseTree(query);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return QueryUtil.queryTerms(parsed);
   }
 
   public Parameters getQueryParameters() {
@@ -118,17 +130,14 @@ public class Galago implements IndexType {
 
   @Override
   public ProteusDocument getDocument(String kind, String name, boolean metadata, boolean text) {
-    // TODO common code with getDocs()
     try {
-      Document.DocumentComponents docOpts = new Document.DocumentComponents();
-      docOpts.text = text;
-      docOpts.tokenize = text;
-      docOpts.metadata = metadata;
-      Retrieval r = getRetrieval(kind);
 
-      Document doc = r.getDocument(name, docOpts);
+      Document doc = getRetrieval(kind).getDocument(name, new Document.DocumentComponents(text, metadata, text));
 
-      // convert to ProteusDocuments
+      if (doc == null){
+        return null;
+      }
+
       return new ProteusDocument(doc2param(doc));
 
     } catch (IOException e) {
@@ -139,20 +148,18 @@ public class Galago implements IndexType {
 
   public Map<String, ProteusDocument> getDocs(String kind, List<String> names, boolean metadata, boolean text) {
     try {
-      Document.DocumentComponents docOpts = new Document.DocumentComponents();
-      docOpts.text = text;
-      docOpts.tokenize = text;
-      docOpts.metadata = metadata;
-      Retrieval r = getRetrieval(kind);
 
-      Map<String, Document> docs = r.getDocuments(names, docOpts);
+      Map<String, Document> docs = getRetrieval(kind).getDocuments(names, new Document.DocumentComponents(text, metadata, text));
 
-      // convert to ProteusDocuments
       Map<String, ProteusDocument> pdocs = new HashMap<String, ProteusDocument>();
 
       Set<String> docNames = docs.keySet();
       for (String name : docNames) {
-        pdocs.put(name, new ProteusDocument(doc2param(docs.get(name))));
+        // it is possible that a document may not exist, usually if it's a blank page
+        Document d = docs.get(name);
+        if (d != null) {
+          pdocs.put(name, new ProteusDocument(doc2param(d)));
+        }
       }
 
       return pdocs;
@@ -245,13 +252,19 @@ public class Galago implements IndexType {
   }
 
   public static Parameters doc2param(Document d) {
+    // it is possible that a document may not exist, usually if its
+    // a blank page
+    if (d == null) {
+      return null;
+    }
     Parameters p = Parameters.create();
     p.set("identifier", d.identifier);
     p.set("name", d.name);
-    p.put("metadata", d.metadata);
     p.set("text", d.text);
-    p.set("terms", d.terms);
-    p.set("tags", d.tags);
+    p.put("metadata", d.metadata != null ? d.metadata : Collections.emptyMap());
+    p.set("terms", d.terms != null ? d.terms : Collections.emptyList());
+    p.set("tags", d.tags != null ? d.tags : Collections.emptyList());
+
     return p;
   }
 

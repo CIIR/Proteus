@@ -22,6 +22,7 @@ public interface IndexType {
   public void loadNoteIndex(Parameters notes) throws Exception;
   public Set<String> getKinds();
   public Set<String> getStopWords() throws IOException;
+  public List<String> getQueryTerms(String query);
   public Parameters getQueryParameters();
   public void close() throws IOException;
 

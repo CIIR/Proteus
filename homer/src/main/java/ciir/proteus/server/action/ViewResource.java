@@ -4,17 +4,14 @@ import ciir.proteus.server.HTTPError;
 import ciir.proteus.system.ProteusDocument;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
-import ciir.proteus.util.QueryUtil;
 import ciir.proteus.util.logging.ClickLogHelper;
 import ciir.proteus.util.logging.LogHelper;
 import ciir.proteus.util.logging.ViewResourceLogData;
 import org.apache.logging.log4j.LogManager;
-import org.lemurproject.galago.core.retrieval.query.Node;
-import org.lemurproject.galago.core.retrieval.query.SimpleQuery;
+
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -72,19 +69,10 @@ public class ViewResource implements JSONHandler {
     response.put("text", doc.text);
 
     // get the query that "found" this document
-    String query = null;
     if (queryid != -1){
-      query = system.userdb.getQuery(null, queryid);
+      String query = system.userdb.getQuery(null, queryid);
       response.put("query", query);
-      // assume simple query language
-      Node tq = null;
-      try {
-        tq = SimpleQuery.parseTree(query);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-      List<String> terms = QueryUtil.queryTerms(tq);
-      response.put("queryTerms", terms);
+      response.put("queryTerms", system.getIndex().getQueryTerms(query));
     }
 
     // get labels.

@@ -58,6 +58,11 @@ public class Lucene implements IndexType {
   }
 
   @Override
+  public List<String> getQueryTerms(String query) {
+    return null;
+  }
+
+  @Override
   public Parameters getQueryParameters() {
     return null;
   }
