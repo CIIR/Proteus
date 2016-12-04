@@ -31,12 +31,14 @@ public class TrecTextParserEE extends TrecTextParser {
     public Document nextDocument() throws IOException {
 
         Document doc = super.nextDocument();
-        Document nerDoc = new Document();
-        nerDoc.text = doNER(doc.text);
-        nerDoc.metadata = doc.metadata;
-        nerDoc.name = doc.name;
-        NamedEntityRecorder ner = new NamedEntityRecorder(outputPath);
-        ner.record(doc);
+        if(!(doc == null)) {
+            Document nerDoc = new Document();
+            nerDoc.text = doNER(doc.text);
+            nerDoc.metadata = doc.metadata;
+            nerDoc.name = doc.name;
+            NamedEntityRecorder ner = new NamedEntityRecorder(outputPath);
+            ner.record(doc);
+        }
 
         return doc;
     }
