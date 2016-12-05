@@ -37,7 +37,7 @@ public class TrecTextParserEE extends TrecTextParser {
             nerDoc.text = doNER(doc.text);
             nerDoc.metadata = doc.metadata;
             nerDoc.name = doc.name;
-            System.out.println(nerDoc.text);
+            //System.out.println(nerDoc.text);
             NamedEntityRecorder ner = new NamedEntityRecorder(outputPath);
             ner.record(nerDoc);
             doc = nerDoc;
