@@ -12,7 +12,8 @@ import java.util.logging.Logger;
 
 /**
  * Created by david on 12/2/16.
- * doNER written byjfoley, michaelz
+ * doNER and getClassifier written byjfoley, michaelz
+ *
  */
 public class TrecTextParserEE extends TrecTextParser {
 
@@ -24,7 +25,7 @@ public class TrecTextParserEE extends TrecTextParser {
     public TrecTextParserEE(DocumentSplit split, Parameters p) throws Exception {
         super(split, p);
         outputPath = p.get("outputPath","entity-records/");
-        nerClassifier = NamedEntityRecognizer.getClassifier();
+        nerClassifier = getClassifier(p);
     }
 
     @Override
@@ -36,8 +37,10 @@ public class TrecTextParserEE extends TrecTextParser {
             nerDoc.text = doNER(doc.text);
             nerDoc.metadata = doc.metadata;
             nerDoc.name = doc.name;
+            System.out.println(nerDoc.text);
             NamedEntityRecorder ner = new NamedEntityRecorder(outputPath);
-            ner.record(doc);
+            ner.record(nerDoc);
+            doc = nerDoc;
         }
 
         return doc;
@@ -60,6 +63,20 @@ public class TrecTextParserEE extends TrecTextParser {
                 return text;
             }
         }
+    }
+
+    protected AbstractSequenceClassifier getClassifier(Parameters p){
+        String nullString = null;
+        String serializedClassifier = p.get("ner-model", nullString);
+        if (serializedClassifier != null && NamedEntityRecognizer.getClassifier() == null) {
+            try {
+                NamedEntityRecognizer.initClassifier(serializedClassifier);
+            } catch (Exception e) {
+                log.log(Level.WARNING, "Failed to load NER model: " + serializedClassifier + " ", e);
+                throw new RuntimeException("Error loading NER model: " + serializedClassifier + ": " + e.toString());
+            }
+        }
+        return NamedEntityRecognizer.getClassifier();
     }
 
 }
