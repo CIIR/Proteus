@@ -81,8 +81,17 @@ public class Galago implements IndexType {
     return QueryUtil.queryTerms(parsed);
   }
 
-  public Parameters getQueryParameters() {
+  public Parameters getQueryParameters(String query) {
     Parameters p = Parameters.create();
+    // parsedQuery is a class variable so we don't have to
+    // re-parse the query when getting these parameters.
+    // However, if they are searching within a corpus WITHOUT
+    // a query, the old value would be returned, so we use the
+    // actual query as a saftey check.
+    if (query.isEmpty()){
+      parsedQuery = null;
+      return p;
+    }
     if (parsedQuery != null) {
       p.set("parsedQuery", parsedQuery.toString());
       p.set("queryTerms", QueryUtil.queryTerms(parsedQuery));

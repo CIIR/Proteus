@@ -63,7 +63,7 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
         _.forEach(value, function(obj) {
           // TODO:  should use default kind not hard code
           // add class="ui-widget-content mz-ner" to <ent> if we want drag-n-drop entities
-          tmphtml += '<ent><a href=\'' + buildSearchLink(key, obj.entity, currentKind) + '\'>' + obj.entity + '</a></ent> (' + obj.count + ')&nbsp;&#8226;&nbsp;';
+          tmphtml += '<ent><a href=\'' + buildSearchLink(key, obj.term, currentKind) + '\'>' + obj.term + '</a></ent> (' + obj.count + ')&nbsp;&#8226;&nbsp;';
         });
       });
       tmphtml += '</' + type + '></div>';

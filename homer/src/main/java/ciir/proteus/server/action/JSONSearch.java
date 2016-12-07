@@ -135,12 +135,12 @@ public class JSONSearch implements JSONHandler {
 
     List<Parameters> results = annotations.getAsList("results");
 
-    response.copyFrom(system.getIndex().getQueryParameters());
+    response.copyFrom(system.getIndex().getQueryParameters(query));
 
     // TODO add subcorpora
     SearchLogData searchData = new SearchLogData(ClickLogHelper.getID(reqp, req), reqp.get("user", "* not logged in *"));
     searchData.setEnteredQuery(query);
-    searchData.setExpandedQuery(query.isEmpty() ? "" : response.getAsString("parsedQuery"));
+    searchData.setExpandedQuery(response.containsKey("parsedQuery") ? response.getAsString("parsedQuery") : "");
     searchData.setKind(kind);
   //  searchData.setCorpus(corpusName);
     //        searchData.setLabels(labels.toString());

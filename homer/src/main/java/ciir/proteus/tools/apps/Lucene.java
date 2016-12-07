@@ -63,7 +63,7 @@ public class Lucene implements IndexType {
   }
 
   @Override
-  public Parameters getQueryParameters() {
+  public Parameters getQueryParameters(String query) {
     return null;
   }
 

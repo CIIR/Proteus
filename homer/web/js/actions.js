@@ -241,28 +241,28 @@ var onSearchSuccess = function(data) {
         });
 
         _.forEach(data.bigrams, function(t) {
-            $("#high-bigrams").append(getTermHTMl(t.ngram, t.count, 'add-quote'));
+            $("#high-bigrams").append(getTermHTMl(t.term, t.count, 'add-quote'));
             if (t.count > maxCount) {
                 maxCount = t.count;
-                maxTerm = t.ngram;
+                maxTerm = t.term;
             }
         });
 
         _.forEach(data.trigrams, function(t) {
-            $("#high-trigrams").append(getTermHTMl(t.ngram, t.count, 'add-quote'));
+            $("#high-trigrams").append(getTermHTMl(t.term, t.count, 'add-quote'));
             if (t.count > maxCount) {
                 maxCount = t.count;
-                maxTerm = t.ngram;
+                maxTerm = t.term;
             }
         });
 
         _.forEach(data.fields, function(field) {
             var html = '<div class="query-terms-area"><b>' + field.capitalizeEachWord() + ': </b>';
             _.forEach(data[field + 'Entities'], function(t) {
-                html += getTermHTMl(t.entity, t.count, 'entity ' + field);
+                html += getTermHTMl(t.term, t.count, 'entity ' + field);
                 if (t.count > maxCount) {
                     maxCount = t.count;
-                    maxTerm = t.entity;
+                    maxTerm = t.term;
                 }
             });
             $("#high-entity-fields").append(html + '</div>');

@@ -79,64 +79,6 @@ public class ProteusDocument {
 
     return sb.toString();
   }
-/*
 
-    public TObjectIntHashMap<String> getBagOfWords() {
-    TObjectIntHashMap<String> termCounts = new TObjectIntHashMap<>();
-    for(String term : terms) {
-      termCounts.adjustOrPutValue(term, 1, 1);
-    }
-    return termCounts;
-  }
-*/
-
-  /**
-   * This class allows the selection of parts of the document to serialize or deserialize.
-   public static class DocumentComponents implements Serializable {
-   private static final long serialVersionUID = -5134430303276805133L;
-   public static DocumentComponents All = new DocumentComponents(true, true, true);
-   public static DocumentComponents JustMetadata = new DocumentComponents(false, true, false);
-   public static DocumentComponents JustText = new DocumentComponents(true, false, false);
-   public static DocumentComponents JustTerms = new DocumentComponents(false, false, true);
-
-   public boolean text = true;
-   public boolean metadata = true;
-   public boolean tokenize = false;
-   // these variables can be used to restrict the text to just a short section at the start of the document
-   // useful for massive files
-   // start and end are byte offsets
-   // -1 indicates no restriction
-   public int subTextStart = -1;
-   public int subTextLen = -1;
-
-   // defaults
-   public DocumentComponents() {
-   }
-
-   public DocumentComponents(boolean text, boolean metadata, boolean tokenize) {
-   this.text = text;
-   this.metadata = metadata;
-   this.tokenize = tokenize;
-   }
-
-   public DocumentComponents(Parameters p) {
-   this.text = p.get("text", text);
-   this.metadata = p.get("metadata", metadata);
-   this.tokenize = p.get("tokenize", tokenize);
-   }
-
-   public Parameters toJSON() {
-   Parameters p = Parameters.create();
-   p.put("text", text);
-   p.put("metadata", metadata);
-   p.put("tokenize", tokenize);
-   return p;
-   }
-
-   @Override public String toString() {
-   return toJSON().toString();
-   }
-   }
-   */
 }
 
