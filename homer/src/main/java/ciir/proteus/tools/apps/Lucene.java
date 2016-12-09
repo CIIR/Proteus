@@ -1,6 +1,7 @@
 package ciir.proteus.tools.apps;
 
 import ciir.proteus.system.ProteusDocument;
+import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
@@ -13,13 +14,11 @@ import java.util.Set;
  */
 public class Lucene implements IndexType {
 
+  public Lucene(Parameters argp) {
+
+  }
   public void whoAmI() {
     System.out.println("I'm the Lucene Version!");
-  }
-
-  @Override
-  public void init(Parameters pargs) {
-
   }
 
   public List<ProteusDocument> doSearch(String kind, String query, Parameters qp) throws IOException {
@@ -53,7 +52,7 @@ public class Lucene implements IndexType {
   }
 
   @Override
-  public Set<String> getStopWords() {
+  public Set<String> getStopWords() throws IOException {
     return null;
   }
 

@@ -14,7 +14,6 @@ import java.util.Set;
 public interface IndexType {
 
   void whoAmI();
-  void init(Parameters pargs);
   List<ProteusDocument> doSearch(String kind, String query, Parameters qp) throws IOException ;
   List<ProteusDocument> findPassages(String kind, String query, List<String> ids) throws IOException;
   Map<String, ProteusDocument> getDocs(String kind, List<String> names, boolean metadata, boolean text);

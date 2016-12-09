@@ -37,7 +37,7 @@ public class Galago implements IndexType {
   private MemoryIndex noteIndex = null;
 
   // TODO make IndexType abstract so ew have common code in one place.
-  public void init(Parameters argp) {
+  public Galago(Parameters argp) {
     config = argp;
     Parameters kindCfg = argp.getMap("kinds");
     for (String kind : kindCfg.keySet()) {

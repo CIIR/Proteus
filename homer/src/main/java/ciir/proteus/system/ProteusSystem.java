@@ -8,6 +8,7 @@ import com.corundumstudio.socketio.SocketIOServer;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,8 +31,8 @@ public class ProteusSystem {
 
     try {
       Class klazz = classLoader.loadClass(argp.get("indexType", "ciir.proteus.tools.apps.Galago"));
-      index = (IndexType) klazz.newInstance();
-      index.init(argp);
+      Constructor<?> ctor = klazz.getConstructor(Parameters.class);
+      index = (IndexType) ctor.newInstance(new Object[]{argp});
       index.whoAmI();
       System.out.println("Loaded index type: " + klazz.getName());
     } catch (ClassNotFoundException e) {
