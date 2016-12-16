@@ -4,6 +4,7 @@ package ciir.proteus.system;
 import org.lemurproject.galago.core.parse.Tag;
 import org.lemurproject.galago.utility.Parameters;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,10 +22,8 @@ public class ProteusDocument {
   public List<Tag> tags;
   public int rank = -1;
   public double score = -1.0;
-
-  // if doing passage retrieval, this will hold start/end which are indexes into the terms array.
-  public int passageBegin = -1;
-  public int passageEnd = -1;
+  public String snippet;
+  public String snippetPage;
 
   public ProteusDocument() {
     metadata = new HashMap<>();
@@ -34,9 +33,15 @@ public class ProteusDocument {
     this.identifier = p.getLong("identifier");
     this.name = p.getString("name");
     this.metadata = (Map<String, String>) p.get("metadata");
+    if (this.metadata == null){
+      this.metadata = Collections.emptyMap();
+    }
     this.text = p.getString("text");
     this.terms = p.getAsList("terms");
     this.tags = p.getAsList("tags");
+    this.snippet = (p.containsKey("snippet") ? p.getAsString("snippet") : null);
+    this.snippetPage = (p.containsKey("snippetPage") ? p.getAsString("snippetPage") :  "");
+
   }
 
   @Override

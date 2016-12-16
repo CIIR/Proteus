@@ -1,6 +1,7 @@
 package ciir.proteus.tools.apps;
 
 import ciir.proteus.system.ProteusDocument;
+import ciir.proteus.util.ListUtil;
 import ciir.proteus.util.QueryUtil;
 import org.lemurproject.galago.core.index.mem.FlushToDisk;
 import org.lemurproject.galago.core.index.mem.MemoryIndex;
@@ -70,7 +71,10 @@ public class Galago implements IndexType {
     return r;
   }
 
-  public List<String> getQueryTerms(String query){
+  public List<String> getQueryTerms(String query) {
+    if (query.isEmpty()) {
+      return null;
+    }
     // assume Simple query language
     Node parsed = null;
     try {
@@ -81,6 +85,23 @@ public class Galago implements IndexType {
     return QueryUtil.queryTerms(parsed);
   }
 
+  @Override
+  public List<String> getWorkingSetDocNames(String kind, String archiveid) throws IOException {
+
+    // There are some archive IDs that would get parsed is using the simple
+    // query language (ex: poems___00wott) so we use the regular Galago syntax.
+    String setQuery = "#combine(#inside( #text:" + archiveid + "() #field:archiveid() ))";
+    Parameters tmpParams = Parameters.create();
+    tmpParams.set("queryType", "StructuredQuery");
+    List<ProteusDocument> workingSet = doSearch(kind, setQuery, tmpParams);
+    ArrayList<String> ids = new ArrayList<>();
+    for (ProteusDocument doc : workingSet) {
+      ids.add(doc.name);
+    }
+    return ids;
+
+  }
+
   public Parameters getQueryParameters(String query) {
     Parameters p = Parameters.create();
     // parsedQuery is a class variable so we don't have to
@@ -88,7 +109,7 @@ public class Galago implements IndexType {
     // However, if they are searching within a corpus WITHOUT
     // a query, the old value would be returned, so we use the
     // actual query as a saftey check.
-    if (query.isEmpty()){
+    if (query.isEmpty()) {
       parsedQuery = null;
       return p;
     }
@@ -100,6 +121,19 @@ public class Galago implements IndexType {
   }
 
   public List<ProteusDocument> doSearch(String kind, String query, Parameters qp) throws IOException {
+
+    // setting this to false, otherwise #scale queries fail
+    // see: https://sourceforge.net/p/lemur/bugs/272/
+    qp.put("deltaReady", false);
+
+    // it's possible for the query to be empty IF we're searching just by labels or within a corpus
+    if (!query.isEmpty() && !qp.containsKey("queryType")) {
+      if (config.get("queryType", "simple").equals("simple")) {
+        qp.set("queryType", "SimpleQuery");
+      } else {
+        qp.set("queryType", "StructuredQuery");
+      }
+    }
 
     // default to simple query language
     if (qp.get("queryType", "???").equals("StructuredQuery")) {
@@ -125,8 +159,25 @@ public class Galago implements IndexType {
         tmp.score = doc.getScore();
         if (qp.get("passageQuery", false) && (doc instanceof ScoredPassage)) {
           ScoredPassage psg = (ScoredPassage) doc;
-          tmp.passageBegin = psg.begin;
-          tmp.passageEnd = psg.end;
+          tmp.snippet = String.join(" ", ListUtil.slice(gdoc.terms, psg.begin, psg.end));
+          // get the page the snippet is on
+
+          // page breaks are <div> tags
+          for (Tag t : tmp.tags) {
+            if (t.name.equals("div")) {
+
+              if (psg.begin <= t.end) {
+                Integer termsOnPage = t.end - psg.begin;
+                Integer termsOnNextPage = psg.end - t.end;
+                if (termsOnNextPage > termsOnPage) {
+                  continue; // use the next page
+                }
+                tmp.snippetPage = t.attributes.get("page");
+                break;
+              }
+            }
+          }
+
         }
         results.add(tmp);
       }
@@ -138,12 +189,12 @@ public class Galago implements IndexType {
   } // end doSearch()
 
   @Override
-  public ProteusDocument getDocument(String kind, String name, boolean metadata, boolean text) {
+  public ProteusDocument getDocument(String kind, String name, boolean metadata, boolean text, String query) {
     try {
 
       Document doc = getRetrieval(kind).getDocument(name, new Document.DocumentComponents(text, metadata, text));
 
-      if (doc == null){
+      if (doc == null) {
         return null;
       }
 
@@ -277,4 +328,8 @@ public class Galago implements IndexType {
     return p;
   }
 
+  @Override
+  public Boolean needPassage() {
+    return true;
+  }
 }

@@ -5,7 +5,6 @@ import ciir.proteus.system.ProteusDocument;
 import ciir.proteus.system.ProteusSystem;
 import ciir.proteus.users.error.DBError;
 import ciir.proteus.util.ListUtil;
-import ciir.proteus.util.RetrievalUtil;
 import ciir.proteus.util.logging.ClickLogHelper;
 import ciir.proteus.util.logging.LogHelper;
 import ciir.proteus.util.logging.ResultLogData;
@@ -40,7 +39,6 @@ public class JSONSearch implements JSONHandler {
     int skipResults = reqp.get("skip", 0);
     int corpusid = reqp.get("corpus", -1);
     String userid = reqp.get("userid", "-1");
-    String action = reqp.get("action", "search");
 
     List<Long> subcorpora = new ArrayList<>(); // empty list
     List<String> resList = new ArrayList<>(); // empty list
@@ -68,39 +66,17 @@ public class JSONSearch implements JSONHandler {
 
     if (resList.size() > 0) {
       qp.put("working", resList);
-    }
-
-    // it's possible for the query to be empty IF we're searching just by labels or within a corpus
-    if (!query.isEmpty()) {
-      if (system.getConfig().get("queryType", "simple").equals("simple")) {
-        qp.set("queryType", "SimpleQuery");
-      } else {
-        qp.set("queryType", "StructuredQuery");
-      }
+      reqp.put("working", resList);
     }
 
     qp.put("requested", numResults + skipResults);
 
-    // setting this to false, otherwise #scale queries fail
-    // see: https://sourceforge.net/p/lemur/bugs/272/
-    qp.put("deltaReady", false);
+    // give them the ability to restrict the results to a book
+    // specified by an archive id
+    if (reqp.containsKey("archiveid")) {
 
-    // give them the ability to restrict the results to a working set
-    // specified by a query passed in - most likely an archive id
-    if (reqp.containsKey("workingSetQuery")) {
+        qp.put("working", system.getWorkingSetDocNames(kind, reqp.getAsString("archiveid")));
 
-      List<ProteusDocument> workingSet = null;
-
-      // NOTE: workingSetQuery is NOT expressed in the simple query language.
-      // There are some archive IDs that would get parsed is using the simple
-      // query language (ex: poems___00wott) so we use the regular Galago syntax.
-
-      Parameters tmpParams = Parameters.create();
-      tmpParams.set("queryType", "StructuredQuery");
-      workingSet = system.doSearch(kind, reqp.getAsString("workingSetQuery"), tmpParams);
-      if (!workingSet.isEmpty()) {
-        qp.put("working", RetrievalUtil.ids(workingSet));
-      }
     } // end if we use a query to get the working set
 
     Parameters response = Parameters.create();
@@ -120,7 +96,7 @@ public class JSONSearch implements JSONHandler {
       docs = ListUtil.drop(system.doSearch(kind, query, qp), skipResults);
       // ??? should do this in doSearch()
       if (!docs.isEmpty()) {
-
+// TODO ?? calling same func in if and else? should be able to simplify this textStartPos
         annotations = da.annotate(this.system, kind, docs, query, reqp);
       }
     } else {
@@ -129,7 +105,7 @@ public class JSONSearch implements JSONHandler {
       reqp.set("tags", false); // 2/2016 - tags are currently not used
       reqp.remove("n");// remove the param that says how many to get
       // TODO perhaps pass resList as a param so don't need two annotate funcs with diff signatures - confusing.
-      annotations = da.annotate(this.system, kind, query, reqp, resList);
+      annotations = da.annotate(this.system, kind, query, reqp);
 
     }
 

@@ -101,4 +101,11 @@ public class ProteusSystem {
     index.loadNoteIndex(notes);
   }
 
+  public List<String> getWorkingSetDocNames(String kind, String archiveid) throws IOException {
+    return index.getWorkingSetDocNames(kind, archiveid);
+  }
+  public Boolean needPassage(){
+    return index.needPassage();
+  }
+
 }

@@ -129,14 +129,23 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
     // if we don't have metadata, get it from the internet archive
     if (_.isUndefined(result.meta) || _.isEmpty(result.meta)){
         var args = {};
-        var identifier = parsePageID(id).id;
+        // note we do NOT use the escaped version of the document name. Doc's with
+        // dots in them would look like "a\.b\.c" and would fail on the API call.
+        // But we DO need to escape it so JQuery works.
+        var identifier = parsePageID(result.name).id;
         getInternetArchiveMetadata(identifier, args, function( ){
-
+            let id = jqEsc(identifier);
             // populate any missing data
-            $("." + identifier + "-meta-name").html(args.metadata.title || args.metadata.TEI || result.name);
+            $("." + id + "-meta-name").html(args.metadata.title || args.metadata.TEI || result.name);
             // using toString() because there can be more than one author.
-            $("." + identifier + "-meta-author").html(args.metadata.creator.toString());
-            $("." + identifier + "-meta-published").html(args.metadata.date)
+            if (_.isUndefined(args.metadata.creator)){
+                $("." + id + "-meta-author").html('unknown');
+            } else {
+                $("." + id + "-meta-author").html(args.metadata.creator.toString());
+            }
+            if (!_.isUndefined(args.metadata.date)) {
+                $("." + id + "-meta-published").html(args.metadata.date)
+            }
         });
     }
 
@@ -163,7 +172,7 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
     resDiv.addClass('result-' + result.rank);
     html = '';
     // if they search a subcorpus for just books with a blank query, "search pages" doesn't make sense
-    if (result.viewKind == 'ia-books' && queryTerms.length > 0) {
+    if (result.viewKind == 'ia-books' && queryBox.val().length > 0) {
         html += '<div  id="search-pages-link-' + name + '" class="search-pages-link" >';
         html += '<a href="#" onclick="UI.getPages(\'' + name + '\');"><span class="glyphicon glyphicon-collapse-down"></span>&nbsp;Show matching pages in this book...</a></div>';
         html += '<div id="page-results-' + name + '"></div>';
@@ -239,15 +248,10 @@ UI.showHideMetadata = function() {
 UI.getPages = function(bookid) {
 
     var terms = (UI.getQuery().trim()).toLowerCase();
-    // working set queries need to be in the normal Galago query language (not the
-    // simple query language) because there are some archive IDs would get
-    // tokenized and cause an issue. ex: poems___00wott
-    var setQuery = '#combine(#inside( #text:' + bookid + '() #field:archiveid() ))';
 
+    // passing in an archiveid will limit the search to that book
     $("#search-pages-link-" + bookid).html($("#search-pages-link-" + bookid).html() + '&nbsp;&nbsp;<img src="/images/more-loader.gif"\>');
-
-    // pass in a query to restrict the search to just this book.
-    doActionSearchPages({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery: setQuery, archiveid: bookid});
+    doActionSearchPages({kind: 'ia-pages', q: terms, action: "search", n: 1000, archiveid: bookid, workingSetQuery: true});
 
 };
 
@@ -563,12 +567,7 @@ function clearQueryBuilder() {
 UI.searchWithinBook = function(bookid) {
 
     var terms = (UI.getQuery().trim()).toLowerCase();
-    // working set queries need to be in the normal Galago query language (not the
-    // simple query language) because there are some archive IDs would get
-    // tokenized and cause an issue. ex: poems___00wott
-    var setQuery = '#combine(#inside( #text:' + bookid + '() #field:archiveid() ))';
-
-    // pass in a query to restrict the search to just this book.
-    doSearchWithinBookRequest({kind: 'ia-pages', q: terms, action: "search", n: 1000, workingSetQuery: setQuery, archiveid: bookid});
+    // pass in archiveid to restrict the search to just this book.
+    doSearchWithinBookRequest({kind: 'ia-pages', q: terms, action: "search", n: 1000, archiveid: bookid, workingSetQuery: true});
 
 };

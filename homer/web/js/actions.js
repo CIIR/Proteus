@@ -813,7 +813,11 @@ var onViewPageSuccess2 = function(args) {
         _.each(args.bookNotes.rows, function(note) {
             // skip if we've already rendered this page
             if (note.page != gFirstPageID) {
-                doActionRequest({action: "view", id: note.page, kind: "ia-pages", queryid: -1});
+                var queryid = -1;
+                if (!_.isUndefined(urlParams["queryid"])){
+                    queryid = parseInt(urlParams["queryid"]);
+                }
+                doActionRequest({action: "view", id: note.page, kind: "ia-pages", queryid: queryid});
             }
         });
 
@@ -892,7 +896,15 @@ function setScrollBinding() {
                 if ($(t).is_on_screen($("#ocr-results-right"))) {
                     // We could use data() rather than splitting things
                     var tmp = $(t).attr("id").split("page-")[1];
-                    doActionRequest({action: "view", id: tmp, kind: "ia-pages", queryid: -1});
+                    var urlParams = getURLParams();
+                    var queryid = -1;
+                    if (!_.isUndefined(urlParams["queryid"])){
+                        queryid = parseInt(urlParams["queryid"]);
+                    }
+                    // if there is anything in the query field, that'll override anything that
+                    // may be on the URl
+                    var queryText = $("#ui-search").val();
+                    doActionRequest({action: "view", id: tmp, kind: "ia-pages", queryid: queryid, queryText : queryText});
                 }
             });
 
@@ -1126,7 +1138,7 @@ var onSearchWithinBookSuccess = function(data) {
     $('#book-search-results').css("height", 'calc(33% - ' + (gGutterSize / 2) + 'px)');
     $('#page-thumbnails').css("height", 'calc(67% - ' + (gGutterSize / 2) + 'px)');
 
-    $('[data-toggle="tooltip"]').tooltip({container: 'body', placement: 'right'});
+    $('[data-toggle="tooltip"]').tooltip({container: 'body', placement: 'right', html: true});
     $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function() {
         newHighlightText('.tooltip-inner', queryTerms)
     });

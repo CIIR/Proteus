@@ -86,11 +86,11 @@ public class DocumentAnnotator {
   private boolean snippets = true;
   private boolean needTermFrequencies = true;
 
-  public Parameters annotate(ProteusSystem system, String kind, String query, Parameters reqp, List<String> names) throws DBError, IOException {
+  public Parameters annotate(ProteusSystem system, String kind, String query, Parameters reqp) throws DBError, IOException {
     snippets = reqp.get("snippets", true);
     boolean metadata = reqp.get("metadata", true);
-    Map<String, ProteusDocument> pulled = system.getDocs(kind, names, metadata, snippets);
-    return annotate(system, kind, new ArrayList<ProteusDocument>(pulled.values()), query, reqp);
+    List<ProteusDocument> pulled = system.doSearch(kind, query, reqp);
+    return annotate(system, kind,  pulled , query, reqp);
   }
 
   // TODO query could be in parameters
@@ -101,7 +101,7 @@ public class DocumentAnnotator {
       // in some cases, the stop word list is immutable, so
       // use a temp Set to get around that.
       Set<String> tmpStopList = system.getIndex().getStopWords();
-      exclusionTerms = new HashSet<>(tmpStopList.size() + 3);
+      exclusionTerms = new HashSet<>(tmpStopList.size() +  3);
       exclusionTerms.addAll(tmpStopList);
       // add some custom words to ignore
       exclusionTerms.add("digitized"); // some books have "digitized by google" at the bottom of each page)
@@ -122,7 +122,7 @@ public class DocumentAnnotator {
     List<String> names = RetrievalUtil.names(results);
 
     // retrieve snippets if requested AND we have a query
-    if (snippets && query != null && !query.isEmpty() && !results.isEmpty()) {
+    if (system.needPassage() && snippets && query != null && !query.isEmpty() && !results.isEmpty()) {
       results = system.getIndex().findPassages(kind, query, names);
     }
 
@@ -161,19 +161,18 @@ public class DocumentAnnotator {
         //the 1st token is the person who created the comment and we don't want
         // to count that in the TF, so replace it with a stop word.
         doc.terms.set(0, "a");
-        doc.passageBegin = 0;
-        doc.passageEnd = doc.text.length();
 
       } else if (snippets) {
         // if the query was null, we'll just get the first part of the document.
 
-        doc.passageBegin = Math.max(0, doc.passageBegin);
-        doc.passageEnd = Math.max(100, doc.passageEnd);
+        if (doc.snippet == null){
+          String snippet = String.join(" ", ListUtil.slice(doc.terms, 0, Math.min(100, doc.terms.size())));
+          docp.put("snippet", snippet);
+        } else {
+          docp.put("snippet", doc.snippet);
+        }
 
-        String snippet = String.join(" ", ListUtil.slice(doc.terms, doc.passageBegin, doc.passageEnd));
-        docp.put("snippet", snippet);
-
-        docp.put("snippetPage", findSnippetPage(doc));
+        docp.put("snippetPage", doc.snippetPage);
 
       } // end if snippet
 
@@ -190,8 +189,8 @@ public class DocumentAnnotator {
       docp.put("score", doc.score);
 
       // metadata annotation
-      if (metadata) {
-        docp.put("meta", Parameters.parseMap(doc.metadata));
+      if (metadata ) {
+        docp.put("meta", Parameters.parseMap(doc.metadata == null ? Collections.EMPTY_MAP : doc.metadata));
       }
 
       // get any notes
@@ -259,11 +258,6 @@ public class DocumentAnnotator {
         consecutiveTerms++;
         totalTF.addTerm(term);
 
-        // TODO should pass in (or get from doc) snippet begin/end
-        if (termIdx >= doc.passageBegin && termIdx < doc.passageEnd) {
-          snippetTF.addTerm(term);
-        }
-
         if (consecutiveTerms >= 2) {
           totalBiGramTF.addTerm(doc.terms.get(termIdx - 1) + " " + term);
           if (consecutiveTerms > 2) {
@@ -277,43 +271,18 @@ public class DocumentAnnotator {
 
     } // end loop through terms
 
+    // do snippets
+    // parse on whitespace and punctuation
+    String[] tokens = doc.snippet.split("[\\p{Punct}\\s]+");
+    for (String term : tokens) {
+      if (term.length() > 3 && exclusionTerms.contains(term) == false) {
+        snippetTF.addTerm(term);
+      }
+    }
   }
 
   private boolean isNote(ProteusDocument doc) {
-    return doc.metadata.containsKey("docType") && doc.metadata.get("docType").equals("note");
-  }
-
-  private String findSnippetPage(ProteusDocument doc) {
-    // If this is a book, find the page within the book that the
-    // snippet is on via the start offset of the snippet. There is no
-    // harm (aside from some wasted computing cycles) calling this on non-books, it'll just return an empty string.
-
-    // for now, we'll just do a brain dead search for the page that contains the snippet.
-
-    // for books, snippets can cross pages so we'll use the page that contains the largest
-    // part of the snippet.
-    String pg = "";
-
-    // skip if this document is a page
-    if (doc.metadata.containsKey("pageNumber")) {
-      return pg;
-    }
-    // page breaks are <div> tags
-    for (Tag t : doc.tags) {
-      if (t.name.equals("div")) {
-
-        if (doc.passageBegin <= t.end) {
-          Integer termsOnPage = t.end - doc.passageBegin;
-          Integer termsOnNextPage = doc.passageEnd - t.end;
-          if (termsOnNextPage > termsOnPage) {
-            continue; // use the next page
-          }
-          pg = t.attributes.get("page");
-          break;
-        }
-      }
-    }
-    return pg;
+    return doc.metadata != null && doc.metadata.containsKey("docType") && doc.metadata.get("docType").equals("note");
   }
 
   // count the entities for this document and include them in the unigram TF counts.
@@ -363,9 +332,11 @@ public class DocumentAnnotator {
       String ent = tag.name + ":\"" + name.toString() + "\"";
       totalTF.addTerm(ent);
       // add to the snippet TF (if appropriate)
-      if (snippets && tag.begin >= doc.passageBegin && tag.end < doc.passageEnd) {
+      // TODO : put equivalent logic back now that snippet is it's own string field
+
+      /*if (snippets && tag.begin >= doc.passageBegin && tag.end < doc.passageEnd) {
         snippetTF.addTerm(ent);
-      }
+      }*/
 
     } // end loop through tags
 

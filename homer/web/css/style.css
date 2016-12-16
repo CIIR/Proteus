@@ -58,6 +58,12 @@
     background: yellow;
 }
 
+lucene-hili {
+    color: black;
+    font-weight: bold;
+    background: yellow;
+}
+
 .resource-labels{
     background-color: lightgrey;
     padding : 2px;

@@ -79,11 +79,12 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
   // their ratings on the left hand side of the screen.
   html += '<span id="' + result.name + '-user-ratings"></span><span  style="display:none" id="' + result.name + '-user-ratings-w-names"></span>';
   html += '<span class="dup-highlight" id="' + result.name + '-dup-confidence"></span>';
-  html += '</td></div></td><td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank + '</td></tr>';
+  html += '</td></div></td><td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank +'</td></tr>';
   html += '<tr class="author"><td><span class="' + identifier + '-meta-author" >' + result.meta.creator;
   html += '</span>&nbsp;•&nbsp;published: <span class="' + identifier + '-meta-published">' + result.meta.date + '</span></td></tr>';
 
   if (snippet) {
+    snippet = snippet.replace(/<br>/g, " ");
     html += '<tr><td class="snippet" colspan="3"> ...' + snippet + '... </td></tr>';
 
     // only get unique words if we haven't seen it before - this will be used later

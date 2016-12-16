@@ -36,17 +36,27 @@ public class ViewResource implements JSONHandler {
       throw new IllegalArgumentException("Expected argument 'kind'");
     }
     Integer queryid = -1;
+    Parameters response = Parameters.create();
 
     if (reqp.isString("queryid")){
       queryid = Integer.parseInt(reqp.get("queryid", "-1"));
     } else {
       queryid = reqp.get("queryid", -1);
     }
+    // get the query that "found" this document. If the text of a query is passed in,
+    // that'll take presidence over a query ID passed in. A queryid may have been hanging
+    // around on the URL but they typed a query. This is often the case when searching
+    // within a book.
+    String query = reqp.get("queryText", "");
+    if (query.isEmpty() && queryid > 0){
+      query = system.userdb.getQuery(null, queryid);
+    }
+    response.put("query", query);
+    response.put("queryTerms", system.getIndex().getQueryTerms(query));
 
     String kind = reqp.getString("kind");
-    ProteusDocument doc = system.getIndex().getDocument(kind, docId, true, true);
+    ProteusDocument doc = system.getIndex().getDocument(kind, docId, true, true, query);
 
-    Parameters response = Parameters.create();
     if(doc == null) {
       response.put("found", false);
       return response;
@@ -68,12 +78,7 @@ public class ViewResource implements JSONHandler {
     response.put("metadata", metadata);
     response.put("text", doc.text);
 
-    // get the query that "found" this document
-    if (queryid != -1){
-      String query = system.userdb.getQuery(null, queryid);
-      response.put("query", query);
-      response.put("queryTerms", system.getIndex().getQueryTerms(query));
-    }
+
 
     // get labels.
     Parameters labels = system.userdb.getResourceLabels(doc.name, reqp.getInt("corpusID"));
