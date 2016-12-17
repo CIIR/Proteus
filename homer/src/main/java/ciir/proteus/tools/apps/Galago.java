@@ -16,7 +16,6 @@ import org.lemurproject.galago.core.retrieval.processing.MaxPassageFinder;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.SimpleQuery;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
-import org.lemurproject.galago.core.util.WordLists;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
@@ -30,16 +29,14 @@ import java.util.Set;
 /**
  * Created by michaelz on 11/28/2016.
  */
-public class Galago implements IndexType {
+public class Galago extends IndexType {
 
-  private final Map<String, Retrieval> kinds = new HashMap<>();
   Node parsedQuery = null;
-  private Parameters config;
   private MemoryIndex noteIndex = null;
 
-  // TODO make IndexType abstract so ew have common code in one place.
   public Galago(Parameters argp) {
-    config = argp;
+    super(argp);
+
     Parameters kindCfg = argp.getMap("kinds");
     for (String kind : kindCfg.keySet()) {
       try {
@@ -50,27 +47,20 @@ public class Galago implements IndexType {
     }
   }
 
+  @Override
   public void whoAmI() {
     System.out.println("I'm the Galago Version!");
   }
 
-  public Set<String> getKinds() {
-    return kinds.keySet();
-  }
-
-  @Override
-  public Set<String> getStopWords() throws IOException {
-    return WordLists.getWordList("rmstop");
-  }
-
   private Retrieval getRetrieval(String kind) {
-    Retrieval r = kinds.get(kind);
+    Retrieval r = (Retrieval) kinds.get(kind);
     if (r == null) {
       throw new IllegalArgumentException("No retrieval for kind=" + kind);
     }
     return r;
   }
 
+  @Override
   public List<String> getQueryTerms(String query) {
     if (query.isEmpty()) {
       return null;
@@ -94,7 +84,7 @@ public class Galago implements IndexType {
     Parameters tmpParams = Parameters.create();
     tmpParams.set("queryType", "StructuredQuery");
     List<ProteusDocument> workingSet = doSearch(kind, setQuery, tmpParams);
-    ArrayList<String> ids = new ArrayList<>();
+    List<String> ids = new ArrayList<>();
     for (ProteusDocument doc : workingSet) {
       ids.add(doc.name);
     }
@@ -102,6 +92,7 @@ public class Galago implements IndexType {
 
   }
 
+  @Override
   public Parameters getQueryParameters(String query) {
     Parameters p = Parameters.create();
     // parsedQuery is a class variable so we don't have to
@@ -120,6 +111,7 @@ public class Galago implements IndexType {
     return p;
   }
 
+  @Override
   public List<ProteusDocument> doSearch(String kind, String query, Parameters qp) throws IOException {
 
     // setting this to false, otherwise #scale queries fail
@@ -147,21 +139,19 @@ public class Galago implements IndexType {
   private List<ProteusDocument> doSearch(String kind, Node query, Parameters qp, String queryText) throws IOException {
 
     Retrieval retrieval = getRetrieval(kind);
-    ArrayList<ProteusDocument> results = new ArrayList<>();
+    List<ProteusDocument> results = new ArrayList<>();
     try {
 
       Node ready = retrieval.transformQuery(query, qp);
       List<ScoredDocument> docs = retrieval.executeQuery(ready, qp).scoredDocuments;
       for (ScoredDocument doc : docs) {
-        Document gdoc = retrieval.getDocument(doc.documentName, Document.DocumentComponents.All);
-        ProteusDocument tmp = new ProteusDocument(doc2param(gdoc));
+        ProteusDocument tmp = getDocument(kind, doc.documentName, true, true, null );
         tmp.rank = doc.getRank();
         tmp.score = doc.getScore();
         if (qp.get("passageQuery", false) && (doc instanceof ScoredPassage)) {
           ScoredPassage psg = (ScoredPassage) doc;
-          tmp.snippet = String.join(" ", ListUtil.slice(gdoc.terms, psg.begin, psg.end));
+          tmp.snippet = String.join(" ", ListUtil.slice(tmp.terms, psg.begin, psg.end));
           // get the page the snippet is on
-
           // page breaks are <div> tags
           for (Tag t : tmp.tags) {
             if (t.name.equals("div")) {
@@ -194,11 +184,7 @@ public class Galago implements IndexType {
 
       Document doc = getRetrieval(kind).getDocument(name, new Document.DocumentComponents(text, metadata, text));
 
-      if (doc == null) {
-        return null;
-      }
-
-      return new ProteusDocument(doc2param(doc));
+      return (doc == null ? null : new ProteusDocument(doc2param(doc)));
 
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -206,12 +192,13 @@ public class Galago implements IndexType {
 
   }
 
+  @Override
   public Map<String, ProteusDocument> getDocs(String kind, List<String> names, boolean metadata, boolean text) {
     try {
 
       Map<String, Document> docs = getRetrieval(kind).getDocuments(names, new Document.DocumentComponents(text, metadata, text));
 
-      Map<String, ProteusDocument> pdocs = new HashMap<String, ProteusDocument>();
+      Map<String, ProteusDocument> pdocs = new HashMap<>();
 
       Set<String> docNames = docs.keySet();
       for (String name : docNames) {
@@ -235,6 +222,7 @@ public class Galago implements IndexType {
   // inefficient because we need to reload them
   // each time we want to make the notes searchable - which could be
   // every time we add a note.
+  @Override
   public void loadNoteIndex(Parameters notes) throws Exception {
 
     Parameters noteParams = config.get("notes", Parameters.create());
@@ -291,7 +279,7 @@ public class Galago implements IndexType {
 
   }
 
-  // ??? if lucene - just return start of doc for now?
+  @Override
   public List<ProteusDocument> findPassages(String kind, String query, List<String> ids) throws IOException {
     // find max passage for each document
     Parameters qp = Parameters.create();
@@ -304,16 +292,15 @@ public class Galago implements IndexType {
     return doSearch(kind, query, qp);
   }
 
-
+  @Override
   public void close() throws IOException {
-    for (Retrieval ret : kinds.values()) {
-      ret.close();
+    for (Object ret : kinds.values()) {
+      ((Retrieval)ret).close();
     }
   }
 
-  public static Parameters doc2param(Document d) {
-    // it is possible that a document may not exist, usually if its
-    // a blank page
+  private static Parameters doc2param(Document d) {
+    // it is possible that a document may not exist, usually if it's a blank page
     if (d == null) {
       return null;
     }

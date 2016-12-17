@@ -5,6 +5,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiFields;
@@ -27,10 +28,9 @@ import org.apache.lucene.search.highlight.TextFragment;
 import org.apache.lucene.search.highlight.TokenSources;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
-import org.apache.lucene.document.Document;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
-import org.lemurproject.galago.core.util.WordLists;
+import org.jsoup.select.Elements;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.io.IOException;
@@ -41,24 +41,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by michaelz on 11/28/2016.
  */
-public class Lucene implements IndexType {
+public class Lucene extends IndexType {
 
-  private final Map<String, IndexSearcher> kinds = new HashMap<>();
-  private Parameters config;
   private Analyzer analyzer = null;
   private SearcherFactory searcherFactory = new SearcherFactory();
   private QueryParser parser = null;
   private List<ProteusDocument> resultData = null;
 
-  // TODO make IndexType abstract so ew have common code in one place.
-
   public Lucene(Parameters argp) {
-    config = argp;
+    super(argp);
     Parameters kindCfg = argp.getMap("kinds");
     for (String kind : kindCfg.keySet()) {
       try {
@@ -95,11 +90,12 @@ public class Lucene implements IndexType {
 
   }
 
+  @Override
   public void whoAmI() {
     System.out.println("I'm the Lucene Version!");
   }
 
-
+  @Override
   public List<ProteusDocument> doSearch(String kind, String query, Parameters qp) throws IOException {
 
     IndexSearcher searcher = getSearcher(kind);
@@ -133,7 +129,7 @@ public class Lucene implements IndexType {
     for (int k = 0; k < hits.length; k++) {
       ProteusDocument pd = getDocument(kind, hits[k].doc, true, true, query);
       pd.score = hits[k].score;
-      pd.rank = k+1;
+      pd.rank = k + 1;
       resultData.add(pd);
     }
 
@@ -141,7 +137,7 @@ public class Lucene implements IndexType {
   }
 
   private IndexSearcher getSearcher(String kind) {
-    IndexSearcher r = kinds.get(kind);
+    IndexSearcher r = (IndexSearcher) kinds.get(kind);
     if (r == null) {
       throw new IllegalArgumentException("No IndexSearcher for kind=" + kind);
     }
@@ -152,7 +148,6 @@ public class Lucene implements IndexType {
   public List<ProteusDocument> findPassages(String kind, String query, List<String> ids) throws IOException {
     return null;
   }
-
 
   @Override
   public Map<String, ProteusDocument> getDocs(String kind, List<String> names, boolean metadata, boolean text) {
@@ -172,7 +167,7 @@ public class Lucene implements IndexType {
   }
 
   // search by internal doc ID
-  public ProteusDocument getDocument(String kind, int luceneDocID, boolean metadata, boolean text, String query) {
+  private ProteusDocument getDocument(String kind, int luceneDocID, boolean metadata, boolean text, String query) {
     IndexSearcher searcher = getSearcher(kind);
     Document doc = null;
 
@@ -203,9 +198,7 @@ public class Lucene implements IndexType {
 
       return new ProteusDocument(docp);
 
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (ParseException e) {
+    } catch (IOException | ParseException e) {
       e.printStackTrace();
     }
     return null;
@@ -243,7 +236,7 @@ public class Lucene implements IndexType {
         // the contents.
         SimpleFragmenter f = (SimpleFragmenter) highlighter.getTextFragmenter();
         // for now, we'll make an educated guess if it's book or a page and set accordingly
-        if (doc.get("id").contains("_")){
+        if (doc.get("id").contains("_")) {
           f.setFragmentSize(500); // assume it's a page
         } else {
           f.setFragmentSize(100); // assume it's a book
@@ -280,10 +273,18 @@ public class Lucene implements IndexType {
       // to find the page the first snippet is on, we'll use the markedUpText field and search
       // for the first instance of "<lucene-hili>"
       org.jsoup.nodes.Document markupDoc = Jsoup.parse(fragments.toString());
-      Element e = markupDoc.select("lucene-hili").first();
+      Element e = markupDoc.select("div lucene-hili").first();
       String pgNum = "1";
+      // now go up until we find the parent <div>. Can't assume immediate parent because
+      // it could be in an entity tag or something else.
       if (e != null) {
-        pgNum = e.parent().attr("page");
+        Elements parents = e.parents();
+        for (Element div : parents){
+          if (div.tag().toString().equals("div")){
+            pgNum = div.attr("page");
+            break;
+          }
+        }
       }
       ret.put("snippetPage", pgNum);
       // limit to 10 fragments
@@ -323,19 +324,6 @@ public class Lucene implements IndexType {
   }
 
   @Override
-  public Set<String> getKinds() {
-    // TODO: this can be in the base class (which is currenly an interface)
-    return kinds.keySet();
-  }
-
-  @Override
-  public Set<String> getStopWords() throws IOException {
-    // for now, use the Galago functionality to get stop words.
-    // TODO - could be in base class if we change it from interface to abstract.
-    return WordLists.getWordList("rmstop");
-  }
-
-  @Override
   public List<String> getQueryTerms(String query) {
     return null; // not needed for lucene, highlighting of terms is done via the Highlighter class
   }
@@ -357,13 +345,13 @@ public class Lucene implements IndexType {
 
   @Override
   public void close() throws IOException {
-    for (IndexSearcher is : kinds.values()) {
-      is.getIndexReader().close();
+    for (Object is : kinds.values()) {
+      ((IndexSearcher) is).getIndexReader().close();
     }
   }
 
   // from Jiepu https://github.com/jiepujiang/cs646_tutorials/blob/master/src/main/java/edu/umass/cs/cs646/utils/LuceneUtils.java
-  public static int findByDocno(IndexReader index, String fieldDocno, String docno) throws IOException {
+  private static int findByDocno(IndexReader index, String fieldDocno, String docno) throws IOException {
     BytesRef term = new BytesRef(docno);
     // TODO: we should be able to exploit the ID field here and not have to iterate
     PostingsEnum posting = MultiFields.getTermDocsEnum(index, fieldDocno, term, PostingsEnum.NONE);
