@@ -169,7 +169,13 @@ function calcPixelSize(count) {
 
 var onSearchSuccess = function(data) {
 
-    getEntityCards(data.queryTerms);
+    // we may not have query terms - especailly with Lucene - so if
+    // that's empty, check for a query in the search box.
+    var qt = data.queryTerms;
+    if (_.isUndefined(qt) || qt.isEmpty()){
+        qt = $("#ui-search").val();
+    }
+    getEntityCards(qt);
 
     // TODO hack to get bibliographic data
     if (data.request.bib == true) {
