@@ -108,7 +108,7 @@ public class Lucene extends IndexType {
     try {
       if (qp.containsKey("working")) {
         workingSetNames = qp.getAsList("working");
-        // don't include "id:" if it's alrady there
+        // don't include "id:" if it's already there
         String field = "id:";
         if (workingSetNames.get(0).contains("id:")){
           field = "";
@@ -263,7 +263,7 @@ public class Lucene extends IndexType {
       }
       List<String> txt = new ArrayList<>(frag.length);
 
-      // get the relavent fragments.
+      // get the relevant fragments.
       // For long documents like books, it may be nice in the future to have
       // each fragment link to the page it's on. We would probably want to use
       // the default fragment size of 100 if we implement something like that.
@@ -272,31 +272,31 @@ public class Lucene extends IndexType {
           txt.add(frag[j].toString());
         }
       }
-
       StringBuilder fragments = null;
+      String fragtxt = null;
       try {
         // each fragment contains the entire document highlighted. Unfortunately it's
         // private so we need to do a little trickery to get it.
         fragments = (StringBuilder) FieldUtils.readField(frag[0], "markedUpText", true);
+        int offset = (int) FieldUtils.readField(frag[0], "textStartPos", true);
+        fragtxt = fragments.toString().substring(0, offset);
       } catch (IllegalAccessException e) {
         e.printStackTrace();
       }
-      // to find the page the first snippet is on, we'll use the markedUpText field and search
-      // for the first instance of "<lucene-hili>"
-      org.jsoup.nodes.Document markupDoc = Jsoup.parse(fragments.toString());
-      Element e = markupDoc.select("div lucene-hili").first();
+      // Find the page the first fragment is on.
+      // The first attempt at this looked for the first occurrence of "<lucene-hili>" then found
+      // its parent "<div>" to get the page number. This works great for pages, but not for books
+      // because a query like "george AND washington" searches the whole book so the first "<lucene-hili>"
+      // tag could be on page 1 but only has the word "george" on it.
+      // This logic takes the whole "markedUpText" and truncates it at the start of the first fragment,
+      // then we search for the LAST "<div>" and get the page from that.
+      org.jsoup.nodes.Document markupDoc = Jsoup.parse(fragtxt);
+      Element e = markupDoc.select("div").last();
       String pgNum = "1";
-      // now go up until we find the parent <div>. Can't assume immediate parent because
-      // it could be in an entity tag or something else.
-      if (e != null) {
-        Elements parents = e.parents();
-        for (Element div : parents){
-          if (div.tag().toString().equals("div")){
-            pgNum = div.attr("page");
-            break;
-          }
-        }
+      if (e!= null){
+        pgNum = e.attr("page");
       }
+
       ret.put("snippetPage", pgNum);
       // limit to 10 fragments
       snippetText = String.join(" ... ", txt.subList(0, Math.min(10, txt.size())));
@@ -327,7 +327,6 @@ public class Lucene extends IndexType {
     return getDocument(kind, luceneDocID, metadata, text, query);
 
   }
-
 
   @Override
   public void loadNoteIndex(Parameters notes) throws Exception {
