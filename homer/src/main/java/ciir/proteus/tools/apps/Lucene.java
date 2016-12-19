@@ -221,8 +221,8 @@ public class Lucene extends IndexType {
 
     if (query == null || query.isEmpty()) {
       ret.put("snippetPage", "1");
-      // limit to 10 fragments
-      ret.put("snippet", String.join(" ... ", tokens.subList(0, Math.min(10, tokens.size()))));
+      // get first 100 terms
+      ret.put("snippet", String.join(" ", tokens.subList(0, Math.min(100, tokens.size()))));
       return ret;
     }
 
@@ -364,7 +364,6 @@ public class Lucene extends IndexType {
   // from Jiepu https://github.com/jiepujiang/cs646_tutorials/blob/master/src/main/java/edu/umass/cs/cs646/utils/LuceneUtils.java
   private static int findByDocno(IndexReader index, String fieldDocno, String docno) throws IOException {
     BytesRef term = new BytesRef(docno);
-    // TODO: we should be able to exploit the ID field here and not have to iterate
     PostingsEnum posting = MultiFields.getTermDocsEnum(index, fieldDocno, term, PostingsEnum.NONE);
     if (posting != null) {
       int docid = posting.nextDoc();
