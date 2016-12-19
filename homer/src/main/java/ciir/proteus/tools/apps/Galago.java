@@ -119,10 +119,8 @@ public class Galago extends IndexType {
     qp.put("deltaReady", false);
 
     // it's possible for the query to be empty IF we're searching just by labels or within a corpus
-    if (query.isEmpty() && qp.containsKey("working")){
-
-        return   getDocs2(kind, qp.getAsList("working"), true, true);
-
+    if (query.isEmpty() && qp.containsKey("working")) {
+      return new ArrayList<ProteusDocument>(getDocs(kind, qp.getAsList("working"), true, true).values());
     }
     if (!query.isEmpty() && !qp.containsKey("queryType")) {
       if (config.get("queryType", "simple").equals("simple")) {
@@ -150,7 +148,7 @@ public class Galago extends IndexType {
       Node ready = retrieval.transformQuery(query, qp);
       List<ScoredDocument> docs = retrieval.executeQuery(ready, qp).scoredDocuments;
       for (ScoredDocument doc : docs) {
-        ProteusDocument tmp = getDocument(kind, doc.documentName, true, true, null );
+        ProteusDocument tmp = getDocument(kind, doc.documentName, true, true, null);
         tmp.rank = doc.getRank();
         tmp.score = doc.getScore();
         if (qp.get("passageQuery", false) && (doc instanceof ScoredPassage)) {
@@ -195,30 +193,6 @@ public class Galago extends IndexType {
       throw new RuntimeException(e);
     }
 
-  }
-
-  // TODO temp
-  public List<ProteusDocument> getDocs2(String kind, List<String> names, boolean metadata, boolean text) {
-    try {
-
-      Map<String, Document> docs = getRetrieval(kind).getDocuments(names, new Document.DocumentComponents(text, metadata, text));
-
-      List<ProteusDocument> pdocs = new ArrayList<>();
-
-      Set<String> docNames = docs.keySet();
-      for (String name : docNames) {
-        // it is possible that a document may not exist, usually if it's a blank page
-        Document d = docs.get(name);
-        if (d != null) {
-          pdocs.add(new ProteusDocument(doc2param(d)));
-        }
-      }
-
-      return pdocs;
-
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   @Override
@@ -324,7 +298,7 @@ public class Galago extends IndexType {
   @Override
   public void close() throws IOException {
     for (Object ret : kinds.values()) {
-      ((Retrieval)ret).close();
+      ((Retrieval) ret).close();
     }
   }
 
