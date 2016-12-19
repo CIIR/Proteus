@@ -172,7 +172,7 @@ var onSearchSuccess = function(data) {
     // we may not have query terms - especailly with Lucene - so if
     // that's empty, check for a query in the search box.
     var qt = data.queryTerms;
-    if (_.isUndefined(qt) || qt.isEmpty()){
+    if (_.isUndefined(qt) || _.isEmpty(qt)){
         qt = $("#ui-search").val();
     }
     getEntityCards(qt);

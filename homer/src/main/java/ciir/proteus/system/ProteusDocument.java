@@ -1,6 +1,7 @@
 // BSD License (http://lemurproject.org/galago-license)
 package ciir.proteus.system;
 
+import ciir.proteus.util.ListUtil;
 import org.lemurproject.galago.core.parse.Tag;
 import org.lemurproject.galago.utility.Parameters;
 
@@ -39,8 +40,9 @@ public class ProteusDocument {
     this.text = p.getString("text");
     this.terms = p.getAsList("terms");
     this.tags = p.getAsList("tags");
-    this.snippet = (p.containsKey("snippet") ? p.getAsString("snippet") : null);
-    this.snippetPage = (p.containsKey("snippetPage") ? p.getAsString("snippetPage") :  "");
+    // if no snippet, use the start of the doc
+    this.snippet = (p.containsKey("snippet") ? p.getAsString("snippet") : String.join(" ", ListUtil.slice(terms, 0, Math.min(100, terms.size()))));
+    this.snippetPage = (p.containsKey("snippetPage") ? p.getAsString("snippetPage") :  "1");
 
   }
 

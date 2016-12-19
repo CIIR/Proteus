@@ -102,14 +102,25 @@ public class Lucene extends IndexType {
     BooleanQuery.Builder booleanQuery = new BooleanQuery.Builder();
 
     List<String> workingSetNames = new ArrayList<>();
+    int numDocsRequested = qp.get("requested", 10);
 
     // TODO : add check for queries that may be too big
     try {
       if (qp.containsKey("working")) {
         workingSetNames = qp.getAsList("working");
-        booleanQuery.add(parser.parse(String.join(" OR ", workingSetNames)), BooleanClause.Occur.MUST);
+        // don't include "id:" if it's alrady there
+        String field = "id:";
+        if (workingSetNames.get(0).contains("id:")){
+          field = "";
+        }
+        booleanQuery.add(parser.parse(String.join(" OR " + field, workingSetNames)), BooleanClause.Occur.MUST);
+        // we want to return every match in the working set, but don't use woring set size because
+        // it could just be one term with a wild card
+        numDocsRequested = 1000;
       }
-      booleanQuery.add(parser.parse(query), BooleanClause.Occur.MUST);
+      if (!query.isEmpty()) {
+        booleanQuery.add(parser.parse(query), BooleanClause.Occur.MUST);
+      }
     } catch (ParseException e) {
       e.printStackTrace();
     }
@@ -117,7 +128,7 @@ public class Lucene extends IndexType {
     // TODO : could be more efficient and user searchAfter() for results
     // beyond the first page. For now, we'll just get all requested and the
     // caller will grab the last N results to return.
-    int numDocsRequested = qp.get("requested", 10);
+
     TopDocs luceneResults = searcher.search(booleanQuery.build(), numDocsRequested);
 
     ScoreDoc[] hits = luceneResults.scoreDocs;
