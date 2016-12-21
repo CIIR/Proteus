@@ -172,7 +172,7 @@ var onSearchSuccess = function(data) {
     // we may not have query terms - especailly with Lucene - so if
     // that's empty, check for a query in the search box.
     var qt = data.queryTerms;
-    if (_.isUndefined(qt) || _.isEmpty(qt)){
+    if (_.isUndefined(qt) || _.isEmpty(qt)) {
         qt = $("#ui-search").val();
     }
     getEntityCards(qt);
@@ -359,7 +359,16 @@ var onSearchSuccess = function(data) {
         if (data.request.skip > 0) {
             UI.showProgress("No more results for '" + data.request.q + "'");
         } else {
-            UI.showProgress("No results found for '" + data.request.q + "'");
+            // some queries like "obeah-men" return no results for a galago index
+            // due to the hyphen. We could tokenize the query on the back end, but that
+            // may have some unintended consequences especially if a "NOT" operator is
+            // implemented that uses the hyphen as a negation. So we'll just offer some
+            // advice if appropriate.
+            let advice = "";
+            if (data.request.q.includes("-")) {
+                advice = ". Did you mean: '" + data.request.q.split('-').join(' ').trim() + "'?";
+            }
+            UI.showProgress("No results found for '" + data.request.q + "'" + advice);
         }
         return;
     }
@@ -820,7 +829,7 @@ var onViewPageSuccess2 = function(args) {
             // skip if we've already rendered this page
             if (note.page != gFirstPageID) {
                 var queryid = -1;
-                if (!_.isUndefined(urlParams["queryid"])){
+                if (!_.isUndefined(urlParams["queryid"])) {
                     queryid = parseInt(urlParams["queryid"]);
                 }
                 doActionRequest({action: "view", id: note.page, kind: "ia-pages", queryid: queryid});
@@ -904,13 +913,13 @@ function setScrollBinding() {
                     var tmp = $(t).attr("id").split("page-")[1];
                     var urlParams = getURLParams();
                     var queryid = -1;
-                    if (!_.isUndefined(urlParams["queryid"])){
+                    if (!_.isUndefined(urlParams["queryid"])) {
                         queryid = parseInt(urlParams["queryid"]);
                     }
                     // if there is anything in the query field, that'll override anything that
                     // may be on the URl
                     var queryText = $("#ui-search").val();
-                    doActionRequest({action: "view", id: tmp, kind: "ia-pages", queryid: queryid, queryText : queryText});
+                    doActionRequest({action: "view", id: tmp, kind: "ia-pages", queryid: queryid, queryText: queryText});
                 }
             });
 
