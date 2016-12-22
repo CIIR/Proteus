@@ -608,7 +608,8 @@ function labelClick(that, subcorpus_id, res, kind) {
         subcorpusid: subcorpus_id,
         queryid: queryID,
         action: action,
-        kind: kind
+        kind: kind,
+        labelText: that.innerText
     };
 
     // TODO MCZ Horribly, HORRIBLY brain dead way of updating

@@ -77,20 +77,12 @@ JSONtoHTMLFunctions["ADD-TAG"] = function (data) {
   return logStart(data) + ' added a tag to document: ' + data.resource + ' tag: ' + data.tag + '</div>'
 };
 
-JSONtoHTMLFunctions["UPD-TAG"] = function (data) {
-  return logStart(data)  + ' updated a tag to document: ' + data.resource + ' tag: ' + data.tag + '</div>'
-};
-
 JSONtoHTMLFunctions["DEL-TAG"] = function (data) {
-  return logStart(data)  + ' deleted a tag from document: ' + data.resource + '</div>'
-};
-
-JSONtoHTMLFunctions["RATE-RES"] = function (data) {
-  return logStart(data)  + ' rated the document: ' + data.resource + ' a ' + data.rating + '</div>'
+  return logStart(data)  + ' deleted a tag from document: ' + data.resource + ' tag: ' + data.tag + '</div>'
 };
 
 JSONtoHTMLFunctions["VIEW-RES"] = function (data) {
-  return ''
+  return logStart(data)  + ' viewed the document: ' + data.docIDs + '</div>'
 };
 JSONtoHTMLFunctions["REGISTER"] = function (data) {
   return ''

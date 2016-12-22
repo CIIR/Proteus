@@ -83,7 +83,8 @@ var doActionRequest = function(args) {
     if (action == "view") {
         var corpus = getCookie("corpus");
         var corpusID = getCorpusID(corpus);
-        args = _.merge(args, {'corpusID': corpusID});
+        var userName = getCookie("username");
+        args = _.merge(args, {'corpusID': corpusID, 'user': userName});
         //disableAutoRetrieve();
         return doViewRequest(args);
     }
