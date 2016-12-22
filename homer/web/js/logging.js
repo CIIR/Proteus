@@ -56,8 +56,7 @@ var noteHTML = function(data, action){
             + ' view: <a target="_blank" href="../view.html?kind=article&action=view&id=' +  data.resource + '&noteid=' + data.notePK + '">Article</a></div>'
   } else {
     return html
-            + ' view: <a target="_blank" href="../view.html?kind=ia-pages&action=view&id=' +  data.resource + '&noteid=' + data.notePK + '">Page</a>, '
-            + '<a target="_blank"  href="../view.html?kind=ia-books&action=view&id=' + id.id + '&pgno=' + id.page + '&noteid=' + data.notePK + '">Book</a></div>'
+            + ' view: <a target="_blank" href="../view.html?kind=ia-pages&action=view&id=' +  data.resource + '&noteid=' + data.notePK + '">Page</a></div>'
   }
 
 };

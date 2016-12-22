@@ -585,10 +585,8 @@ var doViewRequest = function(args) {
                 updateRatings(args);
                 if (args.request.kind == 'article') {
                     onViewArticleSuccess(args);
-                } else if (args.request.kind == 'ia-pages') {
+                } else   {
                     onViewPageSuccess(args);
-                } else {
-                    onViewBookSuccess(args);
                 }
             },
             function(req, status, err) {
