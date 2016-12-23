@@ -364,7 +364,7 @@ var onSearchSuccess = function(data) {
             // may have some unintended consequences especially if a "NOT" operator is
             // implemented that uses the hyphen as a negation. So we'll just offer some
             // advice if appropriate.
-            let advice = "";
+            var advice = "";
             if (data.request.q.includes("-")) {
                 advice = ". Did you mean: '" + data.request.q.split('-').join(' ').trim() + "'?";
             }

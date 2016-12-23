@@ -16,7 +16,7 @@ BookReader.prototype.getBookID = function() { return br.bookId;};
 // IA changed book reader around October 25th 2016. Updating to accommodate
 // the new code.
 BookReader.prototype.getPageNumber = function(idx) {
-  let pg = br.getPageNum(idx);
+  var pg = br.getPageNum(idx);
   if (pg == null || pg.toString().startsWith('n')){
     return null;
   } else {

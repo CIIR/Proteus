@@ -134,7 +134,7 @@ UI.renderSingleResult = function(result, queryTerms, prependTo, queryid) {
         // But we DO need to escape it so JQuery works.
         var identifier = parsePageID(result.name).id;
         getInternetArchiveMetadata(identifier, args, function( ){
-            let id = jqEsc(identifier);
+            var id = jqEsc(identifier);
             // populate any missing data
             $("." + id + "-meta-name").html(args.metadata.title || args.metadata.TEI || result.name);
             // using toString() because there can be more than one author.
