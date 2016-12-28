@@ -736,12 +736,18 @@ var onViewPageSuccess = function(args) {
         });
     }
 
-    _.each(getCookie("fields").split(','), function(field) {
-        $("#ocr-options").append('<input type="checkbox" id="cb-' + field + '" value="' + field
+    var fields = getCookie("fields");
+    var fieldArr = fields.split(',');
+    var fieldHTML = '';
+    _.each(fieldArr, function(field) {
+        fieldHTML += '<input type="checkbox" id="cb-' + field + '" value="' + field
                 + '" onclick="handleNERHilightClick(this, \'' + field + '\');" checked/><span id="cb-'
-                + field + '-label"> ' + field + '</span><br/>');
+                + field + '-label"> ' + field + '</span><br/>';
     });
-
+    if (_.isEmpty(fields)) {
+        fieldHTML = 'none';
+    }
+    $("#ocr-options").html(fieldHTML);
 };
 /** this gets called with the response from ViewResource */
 var onViewPageSuccess2 = function(args) {
@@ -859,7 +865,11 @@ var onViewPageSuccess2 = function(args) {
 
 var processTags = function() {
 
-    _.each(getCookie("fields").split(','), function(field) {
+    var fields = getCookie("fields");
+    if (_.isEmpty(fields)) {
+        return;
+    }
+    _.each(fields.split(','), function(field) {
         var el = $('.' + field + '-class');
         if (document.getElementById("cb-" + field).checked) {
             el.removeClass(field + "-off");
