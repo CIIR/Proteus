@@ -41,9 +41,7 @@ public class LoginUser extends DBAction {
             loginCreds.put("broadcast", system.getConfig().getMap("broadcast"));
         }
 
-        Parameters noteParams = system.getConfig().get("notes", Parameters.create());
-        List<String> noteFields = noteParams.getAsList("noteFields", String.class);
-        loginCreds.put("fields", noteFields);
+        loginCreds.put("fields", system.getConfig().getAsList("indexedFields", String.class));
 
         return loginCreds;
     }

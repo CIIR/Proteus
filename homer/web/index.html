@@ -1,321 +1,299 @@
 ﻿<html>
-    <head>
+<head>
 
-        <!-- supply any functions that browsers like IE don't natively support-->
-        <script src="js/es6-shim.min.js"></script>
+    <!-- supply any functions that browsers like IE don't natively support-->
+    <script src="js/es6-shim.min.js"></script>
 
-        <script>
+    <script>
 
-            // check if the browser supports local storage, we have to do this FIRST
-            // before any other JS stuff which could cause other issues and cause this
-            // to get skipped.
-            // from: http://diveintohtml5.info/detect.html#storage
-            function check() {
-                try {
-                    return 'localStorage' in window && window['localStorage'] !== null;
-                } catch (e) {
-                    return false;
+        // check if the browser supports local storage, we have to do this FIRST
+        // before any other JS stuff which could cause other issues and cause this
+        // to get skipped.
+        // from: http://diveintohtml5.info/detect.html#storage
+        function check() {
+            try {
+                return 'localStorage' in window && window['localStorage'] !== null;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        if (check() == false) {
+            alert("You are using an old browser, please upgrade.");
+            document.execCommand("Stop"); // for IE
+            window.stop(); //works in all browsers but IE
+        }
+    </script>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title id="proteus-title">Proteus: Search</title>
+
+    <!-- Bootstrap -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+
+    <script src="js/jquery/2.0.3/jquery.min.js"></script>
+    <script src="js/lodash/2.4.1/lodash.min.js"></script>
+    <script src="js/history/1.8/native.history.min.js"></script>
+
+    <script src="js/wikipedia.js"></script>
+
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+    <!-- scripts included here evaluate before the page loads -->
+    <script src="js/API.js"></script>
+    <script src="js/util.js"></script>
+    <script src="js/render.js"></script>
+    <script src="js/internetArchive.js"></script>
+    <script src="js/acmdl.js"></script>
+
+    <script src="js/logging.js"></script>
+    <script src="js/socket.io.js"></script>
+
+    <link rel="stylesheet" href="css/style.css" type="text/css"/>
+    <link rel="stylesheet" href="css/search-results.css" type="text/css"/>
+    <link rel="stylesheet" href="css/query-builder.css" type="text/css"/>
+
+    <link rel="stylesheet" href="annotator-full.1.2.10/annotator.min.css" type="text/css" media="screen"/>
+
+    <script type="text/javascript" src="js/annotator.js"></script>
+    <script type="text/javascript" src="js/annotator.permissions.js"></script>
+    <script type="text/javascript" src="js/annotator.auth.js"></script>
+    <script type="text/javascript" src="js/annotator.store.js"></script>
+    <script type="text/javascript" src="js/annotator.filter.js"></script>
+    <script src="js/jquery.mark.min.js"></script>
+
+    <link rel="stylesheet" href="slick/slick.css"/>
+
+    <!-- Add fancyBox -->
+    <link rel="stylesheet" href="js/fancybox/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen"/>
+    <script type="text/javascript" src="js/fancybox/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet"
+          integrity="sha256-k2/8zcNbxVIh5mnQ52A0r3a6jAgMGxFJFE2707UxGCk= sha512-ZV9KawG2Legkwp3nAlxLIVFudTauWuBpC10uEafMHYL0Sarrz5A7G79kXh5+5+woxQ5HM559XX2UZjMJ36Wplg=="
+          crossorigin="anonymous">
+
+    <script>
+        var showSideBarFlag = true;
+        var lastChecked = null;
+        $(document).ready(function () {
+
+            $('.my-slider').slick({"adaptiveHeight": true});
+            var urlParams = getURLParams();
+            if (_.isUndefined(urlParams['user']) && isLoggedIn() == false) {
+                window.location = "login.html";
+                return;
+            }
+
+            if (!_.isUndefined(urlParams['user']) && isLoggedIn() == false) {
+                logIn(urlParams['user']);
+            }
+
+            var fields = getCookie("fields");
+            var fieldArr = fields.split(',');
+            var fieldHTML = '';
+            _.each(fieldArr, function (field) {
+                fieldHTML += '<span> ' + field + '</span><br/>';
+            });
+            if (_.isEmpty(fields)) {
+                fieldHTML = 'none';
+            }
+            $("#ocr-options").html(fieldHTML);
+            // code to add an "x" to the search input field from: https://www.thewebflash.com/clear-button-in-bootstrap-input-group-component/
+            $('.has-clear input[type="text"]').on('input propertychange', function () {
+                var $this = $(this);
+                var visible = Boolean($this.val());
+                $this.siblings('.form-control-clear').toggleClass('hidden', !visible);
+            }).trigger('propertychange');
+            $('.form-control-clear').click(function () {
+                $(this).siblings('input[type="text"]').val('')
+                        .trigger('propertychange').focus();
+                UI.onClickSearchButton();
+            });
+            $("#show-corpus-terms").hide();
+            $("#hide-dups").on("click", function () {
+                UI.showHideDups();
+            });
+            $("#show-overlap").on("click", function () {
+                UI.onClickSearchButton();
+                //UI.showOverlap();
+            });
+            $("#dup-slider").slider({
+                range: "min",
+                min: 0,
+                max: 100,
+                value: 30,
+                stop: function (ui) {
+                    if (_.isUndefined(savedData.results)) {
+                        return;
+                    }
+                    // need to clear out ALL results, if we just searched for
+                    // "pages within a book" the "resultDiv" would be the pages so only
+                    // that would get cleared out.
+                    resultsDiv = $("#results");
+                    resultsDiv.html('');
+                    resultsDiv.show();
+                    UI.appendResults(Model[savedData.request.kind].queryTerms, savedData.results, savedData.queryid);
+                    renderDups(savedData);
+                },
+                slide: function (event, ui) {
+                    $("#dup-value").val(ui.value);
                 }
+            });
+            $("#dup-value").val($("#dup-slider").slider("value"));
+            // !!! HACK to get scrollbars at the bottom working when zooming or resizing browser
+            // TODO: should be able to do this in CSS like I did for the navbar at the top: http://stackoverflow.com/questions/10336194/twitter-bootstrap-top-nav-bar-blocking-top-content-of-the-page
+            // TODO: THIS also messes up the auto-retrieve
+            $(window).resize(function () {
+                $('body').css('padding-bottom', parseInt($('#footer').css("height")) + 10);
+            });
+            $(window).load(function () {
+                $('body').css('padding-bottom', parseInt($('#footer').css("height")) + 10);
+            });
+            UI.updateCorpusListButton();
+            bindCorpusMenuClick();
+            // put focus on the name field when the modal box is shown
+            $('#newCorpusDialog').on('shown.bs.modal', function () {
+                $('#corpus-name').focus();
+            });
+            $('#newCorpusSave').click(function () {
+                submitCorpusDialog();
+            });
+            $("#accordion").accordion({
+                //       heightStyle: "fill",
+                collapsible: true
+            });
+            $(".fancybox").fancybox();
+            $("#overlay").hide();
+            $("#ui-search").keyup(function (evt) {
+                if (evt.keyCode == 13) {
+                    $(".default-search-button").click();
+                }
+            });
+            $('#rateDialog').hide();
+            // we're using the default validation for the email field,
+            // so if that validation passes, perform the login
+            $('#login-nav').submit(function (event) {
+
+                event.preventDefault();
+                $("#login-form").removeClass("open"); // close the form
+                var username = $("#login-email").val();
+                logIn(username);
+            });
+            var tmpShowSideBar = urlParams["showSideBar"];
+            // if not logged in, hide the user info
+            if (isLoggedIn() == false) {
+                $("#corpus-info").hide();
+                $("#ui-go-settings").hide();
             }
-
-            if (check() == false) {
-                alert("You are using an old browser, please upgrade.");
-                document.execCommand("Stop"); // for IE
-                window.stop(); //works in all browsers but IE
+            if (isLoggedIn() == false || (!_.isUndefined(tmpShowSideBar) && tmpShowSideBar === "0")) {
+                $("#user-info").hide();
             }
-        </script>
-
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=9" />
-
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title id="proteus-title">Proteus: Search</title>
-
-        <!-- Bootstrap -->
-        <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
-        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-        <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-        <![endif]-->
-
-
-        <script src="js/jquery/2.0.3/jquery.min.js"></script>
-        <script src="js/lodash/2.4.1/lodash.min.js"></script>
-        <script src="js/history/1.8/native.history.min.js"></script>
-
-        <script src="js/wikipedia.js"></script>
-
-        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
-        <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
-
-        <!-- scripts included here evaluate before the page loads -->
-        <script src="js/API.js"></script>
-        <script src="js/util.js"></script>
-        <script src="js/render.js"></script>
-        <script src="js/internetArchive.js"></script>
-        <script src="js/acmdl.js"></script>
-
-        <script src="js/logging.js"></script>
-        <script src="js/socket.io.js"></script>
-
-        <link rel="stylesheet" href="css/style.css" type="text/css"/>
-        <link rel="stylesheet" href="css/search-results.css" type="text/css"/>
-        <link rel="stylesheet" href="css/query-builder.css" type="text/css"/>
-
-        <link rel="stylesheet" href="annotator-full.1.2.10/annotator.min.css" type="text/css" media="screen"/>
-
-        <script type="text/javascript" src="js/annotator.js"></script>
-        <script type="text/javascript" src="js/annotator.permissions.js"></script>
-        <script type="text/javascript" src="js/annotator.auth.js"></script>
-        <script type="text/javascript" src="js/annotator.store.js"></script>
-        <script type="text/javascript" src="js/annotator.filter.js"></script>
-        <script src="js/jquery.mark.min.js"></script>
-
-        <link rel="stylesheet" href="slick/slick.css"/>
-
-        <!-- Add fancyBox -->
-        <link rel="stylesheet" href="js/fancybox/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen"/>
-        <script type="text/javascript" src="js/fancybox/jquery.fancybox.pack.js?v=2.1.5"></script>
-
-        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet"
-              integrity="sha256-k2/8zcNbxVIh5mnQ52A0r3a6jAgMGxFJFE2707UxGCk= sha512-ZV9KawG2Legkwp3nAlxLIVFudTauWuBpC10uEafMHYL0Sarrz5A7G79kXh5+5+woxQ5HM559XX2UZjMJ36Wplg=="
-              crossorigin="anonymous">
-
-        <script>
-
-            var showSideBarFlag = true;
-            var lastChecked = null;
-            $(document).ready(function() {
-
-                $('.my-slider').slick({"adaptiveHeight": true});
-
-                var urlParams = getURLParams();
-                if (_.isUndefined(urlParams['user']) && isLoggedIn() == false) {
-                    window.location = "login.html";
+            showSideBar();
+            enableAutoRetrieve();
+            displaySubcorporaFacets();
+            $("#clear-all-facets").on('click', function () {
+                getSubcorporaElements().removeAttr('checked');
+                $('#show-overlap').removeAttr('checked');
+                UI.onClickSearchButton();
+            });
+            $("#clear-all-dates").on('click', function () {
+                $('#pub-date input[type="checkbox"]:checked').removeAttr('checked');
+            });
+            $("#clear-all-terms").on('click', function () {
+                _.forEach($('span.term-check-mark'), function (t) {
+                    $(t).removeClass("term-check-mark");
+                });
+                $("#query-builder-query").html('');
+            });
+            if (!_.isUndefined(localStorage["pub-years"])) {
+                var recs = JSON.parse(localStorage["pub-years"]);
+                $("#pub-date").html('');
+                _.each(recs, function (r) {
+                    var s = r.split(":");
+                    $("#pub-date").append('<input type="checkbox" id="year-' + s[0] + '" class="year-chkbox" value="1" />' + s[0] + ' (' + s[1] + ')<br>');
+                });
+            }
+            // allow shift-click on year checkboxes. From: http://stackoverflow.com/questions/659508/how-can-i-shift-select-multiple-checkboxes-like-gmail
+            var $chkboxes = $('.year-chkbox');
+            $chkboxes.click(function (e) {
+                if (!lastChecked) {
+                    lastChecked = this;
                     return;
                 }
 
-                if (!_.isUndefined(urlParams['user']) && isLoggedIn() == false) {
-                    logIn(urlParams['user']);
+                if (e.shiftKey) {
+                    var start = $chkboxes.index(this);
+                    var end = $chkboxes.index(lastChecked);
+                    $chkboxes.slice(Math.min(start, end), Math.max(start, end) + 1).prop('checked', lastChecked.checked);
                 }
 
-                var fields = getCookie("fields");
-                $("#ocr-options").html('');
-                _.each(fields.split(','), function(field) {
-                    $("#ocr-options").append('<span> ' + field + '</span><br/>');
-                });
-
-                // code to add an "x" to the search input field from: https://www.thewebflash.com/clear-button-in-bootstrap-input-group-component/
-                $('.has-clear input[type="text"]').on('input propertychange', function() {
-                    var $this = $(this);
-                    var visible = Boolean($this.val());
-                    $this.siblings('.form-control-clear').toggleClass('hidden', !visible);
-                }).trigger('propertychange');
-
-                $('.form-control-clear').click(function() {
-                    $(this).siblings('input[type="text"]').val('')
-                            .trigger('propertychange').focus();
-                    UI.onClickSearchButton();
-                });
-
-                $("#show-corpus-terms").hide();
-
-                $("#hide-dups").on("click", function() {
-                    UI.showHideDups();
-                });
-
-                $("#show-overlap").on("click", function() {
-                    UI.onClickSearchButton();
-                    //UI.showOverlap();
-                });
-
-
-                $("#dup-slider").slider({
-                    range: "min",
-                    min: 0,
-                    max: 100,
-                    value: 30,
-                    stop: function(ui) {
-                        if (_.isUndefined(savedData.results)) {
-                            return;
-                        }
-                        // need to clear out ALL results, if we just searched for
-                        // "pages within a book" the "resultDiv" would be the pages so only
-                        // that would get cleared out.
-                        resultsDiv = $("#results");
-                        resultsDiv.html('');
-                        resultsDiv.show();
-                        UI.appendResults(Model[savedData.request.kind].queryTerms, savedData.results, savedData.queryid);
-                        renderDups(savedData);
-                    },
-                    slide: function(event, ui) {
-                        $("#dup-value").val(ui.value);
-
-                    }
-                });
-                $("#dup-value").val($("#dup-slider").slider("value"));
-
-                // !!! HACK to get scrollbars at the bottom working when zooming or resizing browser
-                // TODO: should be able to do this in CSS like I did for the navbar at the top: http://stackoverflow.com/questions/10336194/twitter-bootstrap-top-nav-bar-blocking-top-content-of-the-page
-                // TODO: THIS also messes up the auto-retrieve
-                $(window).resize(function() {
-                    $('body').css('padding-bottom', parseInt($('#footer').css("height")) + 10);
-                });
-
-                $(window).load(function() {
-                    $('body').css('padding-bottom', parseInt($('#footer').css("height")) + 10);
-                });
-
-                UI.updateCorpusListButton();
-                bindCorpusMenuClick();
-
-                // put focus on the name field when the modal box is shown
-                $('#newCorpusDialog').on('shown.bs.modal', function() {
-                    $('#corpus-name').focus();
-                });
-
-                $('#newCorpusSave').click(function() {
-                    submitCorpusDialog();
-                });
-
-                $("#accordion").accordion({
-                    //       heightStyle: "fill",
-                    collapsible: true
-                });
-
-                $(".fancybox").fancybox();
-
-                $("#overlay").hide();
-                $("#ui-search").keyup(function(evt) {
-                    if (evt.keyCode == 13) {
-                        $(".default-search-button").click();
-                    }
-                });
-
-                $('#rateDialog').hide();
-                // we're using the default validation for the email field,
-                // so if that validation passes, perform the login
-                $('#login-nav').submit(function(event) {
-
-                    event.preventDefault();
-                    $("#login-form").removeClass("open"); // close the form
-                    var username = $("#login-email").val();
-                    logIn(username);
-                });
-
-                var tmpShowSideBar = urlParams["showSideBar"];
-
-                // if not logged in, hide the user info
-                if (isLoggedIn() == false) {
-                    $("#corpus-info").hide();
-                    $("#ui-go-settings").hide();
-                }
-                if (isLoggedIn() == false || (!_.isUndefined(tmpShowSideBar) && tmpShowSideBar === "0")) {
-                    $("#user-info").hide();
-                }
-                showSideBar();
-                enableAutoRetrieve();
-
-                displaySubcorporaFacets();
-
-                $("#clear-all-facets").on('click', function() {
-                    getSubcorporaElements().removeAttr('checked');
-                    $('#show-overlap').removeAttr('checked');
-                    UI.onClickSearchButton();
-                });
-                $("#clear-all-dates").on('click', function() {
-                    $('#pub-date input[type="checkbox"]:checked').removeAttr('checked');
-                });
-                $("#clear-all-terms").on('click', function() {
-                    _.forEach($('span.term-check-mark'), function(t) {
-                        $(t).removeClass("term-check-mark");
-                    });
-                    $("#query-builder-query").html('');
-                });
-
-                if (!_.isUndefined(localStorage["pub-years"])) {
-                    var recs = JSON.parse(localStorage["pub-years"]);
-                    $("#pub-date").html('');
-                    _.each(recs, function(r) {
-                        var s = r.split(":");
-                        $("#pub-date").append('<input type="checkbox" id="year-' + s[0] + '" class="year-chkbox" value="1" />' + s[0] + ' (' + s[1] + ')<br>');
-
-                    });
-                }
-                // allow shift-click on year checkboxes. From: http://stackoverflow.com/questions/659508/how-can-i-shift-select-multiple-checkboxes-like-gmail
-                var $chkboxes = $('.year-chkbox');
-                $chkboxes.click(function(e) {
-                    if (!lastChecked) {
-                        lastChecked = this;
-                        return;
-                    }
-
-                    if (e.shiftKey) {
-                        var start = $chkboxes.index(this);
-                        var end = $chkboxes.index(lastChecked);
-
-                        $chkboxes.slice(Math.min(start, end), Math.max(start, end) + 1).prop('checked', lastChecked.checked);
-
-                    }
-
-                    lastChecked = this;
-                });
-
-<!-- ----------------------------------------------------- -->
-                var host = 'localhost';
-
-                try {
-                    var socket = io.connect(host + ':' + 9092);
-
-                    socket.on('connect', function() {
-                        output('<span class="connect-msg">Client has connected to the server!</span>');
-                    });
-
-                    socket.on('ProteusEvent', function(data) {
-
-                        var msg = convertJSONtoHTML(data.message);
-                        output(msg);
-
-                        // check if we're displaying this type of message
-                        //                showHideUser();
-                        //                hideMsgs();
-
-                    });
-
-                    socket.on('disconnect', function() {
-                        output('<span class="disconnect-msg">The client has disconnected!</span>');
-                    });
-
-                    function sendDisconnect() {
-                        socket.disconnect();
-                    }
-
-                    function output(message) {
-
-                        var element = $("<div>" + message + "</div>");
-                        $('#activity').prepend(element);
-                    }
-
-
-                } catch (err) {
-                    console.log("asfdasdfasdf")
-                }
-
+                lastChecked = this;
             });
 
-        </script>
+            <!-- ----------------------------------------------------- -->
+            var host = 'localhost';
+
+            try {
+                var socket = io.connect(host + ':' + 9092);
+
+                socket.on('connect', function () {
+                    output('<span class="connect-msg">Client has connected to the server!</span>');
+                });
+
+                socket.on('ProteusEvent', function (data) {
+
+                    var msg = convertJSONtoHTML(data.message);
+                    output(msg);
+
+                    // check if we're displaying this type of message
+                    //                showHideUser();
+                    //                hideMsgs();
+
+                });
+
+                socket.on('disconnect', function () {
+                    output('<span class="disconnect-msg">The client has disconnected!</span>');
+                });
+
+                function sendDisconnect() {
+                    socket.disconnect();
+                }
+
+                function output(message) {
+
+                    var element = $("<div>" + message + "</div>");
+                    $('#activity').prepend(element);
+                }
 
 
-    </head>
-    <body id="body-index">
+            } catch (err) {
+                console.log("asfdasdfasdf")
+            }
 
-        <nav class="navbar navbar-default navbar-static-top">
-            <div class="container-fluid " id="ui">
-                <div class="row clearfix">
-                    <img id="sidebar-button" class="sidebar-button-img" src="images/sidebar_expand.png"/>
+        });
+
+    </script>
+
+
+</head>
+<body id="body-index">
+
+<nav class="navbar navbar-default navbar-static-top">
+    <div class="container-fluid " id="ui">
+        <div class="row clearfix">
+            <img id="sidebar-button" class="sidebar-button-img" src="images/sidebar_expand.png"/>
                     <span class="col-md-4 column col-1-class header-link"> <div id="title">Proteus</div>
                         <a href="https://github.com/CIIR/Proteus/issues/new" target="_blank">Report an issue or make a
                             suggestion</a>
@@ -325,57 +303,57 @@
                            target="_blank" id="search-help"><img src="images/help.png"></a>
                     </span>
 
-                    <div class="col-md-4 column right-align col-2-class">
-                        <div class="input-group">
-                            <div class="form-group has-feedback has-clear">
-                                <!--<input type="text" class="form-control" id="exampleInput1" placeholder="Enter text here">-->
-                                <input id="ui-search" type="text" placeholder="Search..." class="form-control">
-                                <span class="form-control-clear glyphicon glyphicon-remove-circle form-control-feedback hidden"></span>
-                            </div>
+            <div class="col-md-4 column right-align col-2-class">
+                <div class="input-group">
+                    <div class="form-group has-feedback has-clear">
+                        <!--<input type="text" class="form-control" id="exampleInput1" placeholder="Enter text here">-->
+                        <input id="ui-search" type="text" placeholder="Search..." class="form-control">
+                        <span class="form-control-clear glyphicon glyphicon-remove-circle form-control-feedback hidden"></span>
+                    </div>
                             <span class="input-group-btn">
                                 <button id="search-buttons" type="button" class="btn btn-default default-search-button"
                                         tabindex="-1"><span class="glyphicon glyphicon-search"></span>&nbsp;<span
                                         id="search-button-text">Search</span></button>
 
                             </span>
-                        </div>
+                </div>
 
-                    </div>
+            </div>
 
-                    <div id="user-info" class="col-md-2 column col-3-class"></div>
-                    <div id="ui-login-form" class="col-md-2 column col-3-class">
+            <div id="user-info" class="col-md-2 column col-3-class"></div>
+            <div id="ui-login-form" class="col-md-2 column col-3-class">
 
-                        <ul>
-                            <li id="login-form" class="dropdown">
-                                <button class="dropdown-toggle btn btn-sm" data-toggle="dropdown">Sign in <b class="caret"></b>
-                                </button>
-                                <ul class="dropdown-menu" style="padding: 15px;min-width: 250px;">
-                                    <li>
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <form class="form" role="form" accept-charset="UTF-8" id="login-nav">
-                                                    <div class="form-group">
-                                                        <label class="sr-only" for="login-email">Email address</label>
-                                                        <input type="email" class="form-control" id="login-email"
-                                                               placeholder="Email address" required>
-                                                    </div>
-
-                                                    <div class="form-group">
-                                                        <button id="ui-go-loginx" type="submit"
-                                                                class="btn  btn-success  btn-block ">Sign in
-                                                        </button>
-                                                    </div>
-                                                </form>
+                <ul>
+                    <li id="login-form" class="dropdown">
+                        <button class="dropdown-toggle btn btn-sm" data-toggle="dropdown">Sign in <b class="caret"></b>
+                        </button>
+                        <ul class="dropdown-menu" style="padding: 15px;min-width: 250px;">
+                            <li>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <form class="form" role="form" accept-charset="UTF-8" id="login-nav">
+                                            <div class="form-group">
+                                                <label class="sr-only" for="login-email">Email address</label>
+                                                <input type="email" class="form-control" id="login-email"
+                                                       placeholder="Email address" required>
                                             </div>
-                                        </div>
-                                    </li>
-                                </ul>
+
+                                            <div class="form-group">
+                                                <button id="ui-go-loginx" type="submit"
+                                                        class="btn  btn-success  btn-block ">Sign in
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
                             </li>
                         </ul>
-                    </div>
-                    <!-- login based on code from http://bootsnipp.com/snippets/featured/nav-bar-with-popup-sign-in -->
+                    </li>
+                </ul>
+            </div>
+            <!-- login based on code from http://bootsnipp.com/snippets/featured/nav-bar-with-popup-sign-in -->
 
-                    <div class="col-md-2 column col-4-class">
+            <div class="col-md-2 column col-4-class">
 
                         <span>
 
@@ -384,104 +362,104 @@
                             </a>
                         </span>
 
-                    </div>
-                </div>
             </div>
-        </nav>
-
-        <div id="error"></div>
-
-        <div id="all-tags"></div>
-
-        <div id="search-results-left" class="col-md-2 column">
-
-            <fieldset>
-                <legend>Refine by</legend>
-                <div id="search-rb"></div>
-                <hr class="facets-hr">
-                <div id="facets"></div>
-                <button type="button" id="clear-all-facets" class="btn btn-xs disabled ">Clear All</button>
-                <hr class="facets-hr">
-                <input id="show-overlap" type="checkbox" name="show-overlap" value="4">&nbsp;Show only shared results
-            </fieldset>
-            <fieldset>
-                <legend>Entity types</legend>
-                <div id="ocr-options">
-                </div>
-            </fieldset>
-            <fieldset>
-                <legend>Document labels</legend>
-                <div id="ratings"></div>
-            </fieldset>
-
-            <div id="tree">
-                <div id="empty-tree"></div>
-            </div>
-
-
-            <fieldset>
-                <legend>Duplicate threshold</legend>
-
-                <input type="text" id="dup-value" readonly style="border:0; font-weight:bold;">
-
-                <div id="dup-slider"></div>
-
-            </fieldset>
-
-
         </div>
+    </div>
+</nav>
 
-        <div id="search-results-right" class="col-md-10 column  ">
+<div id="error"></div>
 
-            <div id="metadata"></div>
+<div id="all-tags"></div>
 
-            <div id="query-builder-link"><a href="#" onclick="$('#show-corpus-terms').toggle();">Show/Hide Query Builder</a>
-            </div>
-            <div id="show-corpus-terms">
-                <fieldset>
-                    <legend>Build a query</legend>
-                    <button type="button" id="clear-all-terms" class="btn btn-xs ">Clear All</button>
-                    <span id="query-builder-query"></span>
+<div id="search-results-left" class="col-md-2 column">
 
-                    <div class="query-terms-area"><b>Terms (whole documents):</b>
-                        <span class="query-term-buttons" id="high-tf"></span></div>
-                    <div class="query-terms-area"><b>Terms (document snippets):</b>
-                        <span class="query-term-buttons" id="high-snippettf"></span></div>
-                    <div class="query-terms-area"><b>Bigrams:</b>
-                        <span class="query-term-buttons" id="high-bigrams"></span></div>
-                    <div class="query-terms-area"><b>Trigrams:</b>
-                        <span class="query-term-buttons" id="high-trigrams"></span></div>
-                    <div id="high-entity-fields"></div>
-                </fieldset>
-            </div>
-
-            <div id="external-results" class="my-slider "></div>
-
-            <div class="results" style="display: none;"></div>
-            <div class="row clearfix ">
-                <div id="results"></div>
-            </div>
-
-            <div id="view-resource"></div>
-            <div class="row clearfix ">
-
-                <div id="more"></div>
-                <div id="footer">
-                    <div id="progress"></div>
-                </div>
-            </div>
-
+    <fieldset>
+        <legend>Refine by</legend>
+        <div id="search-rb"></div>
+        <hr class="facets-hr">
+        <div id="facets"></div>
+        <button type="button" id="clear-all-facets" class="btn btn-xs disabled ">Clear All</button>
+        <hr class="facets-hr">
+        <input id="show-overlap" type="checkbox" name="show-overlap" value="4">&nbsp;Show only shared results
+    </fieldset>
+    <fieldset>
+        <legend>Entity types</legend>
+        <div id="ocr-options">
         </div>
+    </fieldset>
+    <fieldset>
+        <legend>Document labels</legend>
+        <div id="ratings"></div>
+    </fieldset>
 
-        <!-- scripts included here evaluate after the page loads -->
-        <!-- Include all compiled plugins (below), or include individual files as needed -->
-        <script src="bootstrap/js/bootstrap.min.js"></script>
-        <script src="js/ui.js"></script>
-        <script src="js/actions.js"></script>
-        <script src="js/main.js"></script>
-        <script src="slick/slick.js"></script>
+    <div id="tree">
+        <div id="empty-tree"></div>
+    </div>
 
-    </body>
-    <div id='overlay'></div>
+
+    <fieldset>
+        <legend>Duplicate threshold</legend>
+
+        <input type="text" id="dup-value" readonly style="border:0; font-weight:bold;">
+
+        <div id="dup-slider"></div>
+
+    </fieldset>
+
+
+</div>
+
+<div id="search-results-right" class="col-md-10 column  ">
+
+    <div id="metadata"></div>
+
+    <div id="query-builder-link"><a href="#" onclick="$('#show-corpus-terms').toggle();">Show/Hide Query Builder</a>
+    </div>
+    <div id="show-corpus-terms">
+        <fieldset>
+            <legend>Build a query</legend>
+            <button type="button" id="clear-all-terms" class="btn btn-xs ">Clear All</button>
+            <span id="query-builder-query"></span>
+
+            <div class="query-terms-area"><b>Terms (whole documents):</b>
+                <span class="query-term-buttons" id="high-tf"></span></div>
+            <div class="query-terms-area"><b>Terms (document snippets):</b>
+                <span class="query-term-buttons" id="high-snippettf"></span></div>
+            <div class="query-terms-area"><b>Bigrams:</b>
+                <span class="query-term-buttons" id="high-bigrams"></span></div>
+            <div class="query-terms-area"><b>Trigrams:</b>
+                <span class="query-term-buttons" id="high-trigrams"></span></div>
+            <div id="high-entity-fields"></div>
+        </fieldset>
+    </div>
+
+    <div id="external-results" class="my-slider "></div>
+
+    <div class="results" style="display: none;"></div>
+    <div class="row clearfix ">
+        <div id="results"></div>
+    </div>
+
+    <div id="view-resource"></div>
+    <div class="row clearfix ">
+
+        <div id="more"></div>
+        <div id="footer">
+            <div id="progress"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- scripts included here evaluate after the page loads -->
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="bootstrap/js/bootstrap.min.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/actions.js"></script>
+<script src="js/main.js"></script>
+<script src="slick/slick.js"></script>
+
+</body>
+<div id='overlay'></div>
 
 </html>
