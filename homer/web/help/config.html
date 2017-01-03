@@ -1,0 +1,168 @@
+
+
+  <h1>Configuration</h1>
+  <p>
+
+</p>
+<pre class="json-block">
+{
+	"port": 1234,
+	"indexType": "ciir.proteus.tools.apps.Lucene",
+	"indexedFields" : ["location", "organization", "person" ],
+	"defaultKind": "ia-pages",
+	"notes": {
+		"noteIndex": "F:\\data\\caribbean-notes6",
+		"noteFields": ["location", "organization", "person"]
+	},
+	"kinds": {
+		"ia-books": {
+			"index": "F:\\data\\caribbean-books-via-grep2-lucene2",
+			"button": "Books"
+		},
+		"ia-pages": {
+			"index": "F:\\data\\caribbean-pages-via-grep-lucene",
+			"button": "Pages"
+		},
+		"all": {
+			"index": ["F:\\data\\caribbean-pages-via-grep-lucene",
+			"F:\\data\\caribbean-books-via-grep2-lucene2"],
+			"button": "All"
+		}
+	},
+	"content": {
+		"dir": "web"
+	},
+	"userdb": {
+		"impl": "H2Database",
+		"path": "localdb/ne-test-2334",
+		"user": "sa",
+		"pass": "",
+		"auto_server": "TRUE",
+		"max_pool_size": 50,
+		"initial_pool_size": 10,
+		"max_prepared_statements_per_connection": 10
+	},
+	"broadcast": {
+		"url": "localhost",
+		"port": 9092,
+		"messages": ["search", "results"]
+	},
+	"title": "Local Test Version",
+	"queryType": "simple"
+}
+</pre>
+    <h2>Parameters</h2>
+
+	  <span class="my-pre">port</span>
+	  <ul>
+		  <li>Optional</li>
+		  <li>Type: Integer</li>
+		  <li> Valid values: Any open port</li>
+		  <li>Default: A random open port</li>
+	  </ul>
+	  <br>
+  <span class="my-pre">indexType</span>
+  <ul>
+	  <li>Optional</li>
+	  <li>Type: String</li>
+	  <li> Valid values: <span class="my-pre">ciir.proteus.tools.apps.Lucene</span> or <span class="my-pre">ciir.proteus.tools.apps.Galago</span></li>
+	  <li>Default: <span class="my-pre">ciir.proteus.tools.apps.Galago</span></li>
+  </ul>
+  <br>
+  <span class="my-pre">indexedFields</span>
+  <ul>
+	  <li>Optional</li>
+	  <li>Type: String</li>
+	  <li>Valid values: Any HTML tags in the document. However these should only be the fields that are indexed, such as <span class="my-pre">location</span>, <span class="my-pre">organization</span>, or <span class="my-pre">person</span></li>
+	  <li>Default: none</li>
+  </ul>
+  <br>
+	  <span class="my-pre">defaultKind</span>
+	  <ul>
+		  <li>Required</li>
+		  <li>Type: String</li>
+		  <li> Valid values: <span class="my-pre">all</span>, <span class="my-pre">ia-pages</span>, <span class="my-pre">ia-books</li>
+		  <li>Default: none</li>
+	  </ul>
+	  <br>
+	  <span class="my-pre">notes</span>
+
+	  <ul>
+		  <li><b>Galago only</b></li>
+		  <li>Optional</li>
+		  <li>Type: Object</li>
+		  <li> Valid values: n/a</li>
+		  <li>Default: none</li>
+	  </ul>
+	  <h4>Note Specific Parameters</h4>
+	  <ul>
+	  <span class="my-pre">noteIndex</span>
+	  <ul>
+		  <li>Required</li>
+		  <li>Type: String</li>
+		  <li> Valid values: n/a</li>
+		  <li>Default: none</li>
+	  </ul>
+		  <span class="my-pre">noteFields</span>
+		  <ul>
+			  <li>Optional</li>
+			  <li>Type: Array of String</li>
+			  <li> Valid values: Any HTML tags in the document. However these should only be the fields that are indexed, such as <span class="my-pre">location</span>, <span class="my-pre">organization</span>, or <span class="my-pre">person</span></li>
+			  <li>Default: none</li>
+		  </ul>
+</ul>
+	  <br>
+	  <span class="my-pre">kinds</span>
+	  <br>
+	  <span class="my-pre">content</span>
+	  <br>
+	  <span class="my-pre">userdb</span>
+	  <br>
+	  <span class="my-pre">broadcast</span>
+	  <ul>
+		  <li>Optional</li>
+		  <li>Type: Object</li>
+		  <li> Valid values: n/a</li>
+		  <li>Default: none</li>
+	  </ul>
+	  <h4>Broadcast Specific Parameters</h4>
+	  <ul>
+		  <span class="my-pre">url</span>
+		  <ul>
+			  <li>Required</li>
+			  <li>Type: String</li>
+			  <li> Valid values: n/a</li>
+			  <li>Default: none</li>
+		  </ul>
+		  <a name="broadcast-port"></a><span class="my-pre">port</span>
+		  <ul>
+			  <li>Required</li>
+			  <li>Type: Integer</li>
+			  <li> Valid values: Any open port</li>
+			  <li>Default: none</li>
+		  </ul>
+		  <span class="my-pre">messages</span>
+		  <ul>
+			  <li>Required</li>
+			  <li>Type: Array of String</li>
+			  <li> Valid values:  <span class="my-pre">search</span>, <span class="my-pre">results</span>, <span class="my-pre">add-note</span>, <span class="my-pre">upd-note</span>, <span class="my-pre">del-note</span>, <span class="my-pre">add-tag</span>, <span class="my-pre">del-tag</span>, <span class="my-pre">login</span>, <span class="my-pre">logout</span>, <span class="my-pre">register</span>, <span class="my-pre">view-res</span></li>
+			  <li>Default: none</li>
+		  </ul>
+	  </ul>
+	  <br>
+	  <span class="my-pre">title</span>
+	  <ul>
+		  <li>Optional</li>
+		  <li>Type: String</li>
+		  <li> Valid values: n/a</li>
+		  <li>Default: none</li>
+	  </ul>
+	  <br>
+	  <span class="my-pre">queryType</span>
+	  <ul>
+		  <li><b>Galago only</b></li>
+		  <li>Optional</li>
+		  <li>Type: String</li>
+		  <li> Valid values: <span class="my-pre">simple</span> or <span class="my-pre">complex</span></li>
+		  <li>Default: <span class="my-pre">simple</span></li>
+	  </ul>

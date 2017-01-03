@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width" name="viewport">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <link rel="icon" type="image/icon" href="favicon.ico">
+    <link rel="shortcut icon" type="image/icon" href="favicon.ico">
+    <title>Proteus Documentation</title>
+    <script src="../js/jquery/2.0.3/jquery.min.js"></script>
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+    <!-- fixed side bar from : http://www.samrayner.com/bootstrap-side-navbar/-->
+    <link href="../css/navbar-fixed-side.css" rel="stylesheet"/>
+    <script src="../js/history/1.8/native.history.min.js"></script>
+    <link href="../css/help.css" rel="stylesheet"/>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet"
+          integrity="sha256-k2/8zcNbxVIh5mnQ52A0r3a6jAgMGxFJFE2707UxGCk= sha512-ZV9KawG2Legkwp3nAlxLIVFudTauWuBpC10uEafMHYL0Sarrz5A7G79kXh5+5+woxQ5HM559XX2UZjMJ36Wplg=="
+          crossorigin="anonymous">
+    <script>
+
+        // TODO putting the page on the URL would avoid the "rest on refresh" - but would
+        // have to "scrub" input to avoid random pages showing up
+
+        var getUrlParameter = function getUrlParameter(sParam) {
+            var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+                    sURLVariables = sPageURL.split('&'),
+                    sParameterName,
+                    i;
+
+            for (i = 0; i < sURLVariables.length; i++) {
+                sParameterName = sURLVariables[i].split('=');
+
+                if (sParameterName[0] === sParam) {
+                    return sParameterName[1] === undefined ? true : sParameterName[1];
+                }
+            }
+        };
+
+        $(document).ready(function () {
+
+            var topic = getUrlParameter("topic");
+            if (topic == undefined) {
+                topic = "proteus.html";
+            } else {
+                topic += ".html";
+                // remove the param
+                History.replaceState(null, "Proteus Documentation", "index.html");
+            }
+
+            var contentDiv = $("#content");
+            contentDiv.load(topic);
+            // using only .load() was always clearing the page. Below method from:
+            // http://stackoverflow.com/questions/17823176/using-jquery-to-load-page-into-a-div-element-and-remove-current-loaded-page
+            $('#config-page').click(function (evt) {
+                contentDiv.empty();
+                contentDiv.load("config.html");
+                evt.preventDefault();
+            });
+            $('#index-menu').click(function (evt) {
+                contentDiv.empty();
+                contentDiv.load("proteus.html");
+                evt.preventDefault();
+            });
+            $('#faq-menu').click(function (evt) {
+                contentDiv.empty();
+                contentDiv.load("faq.html");
+                evt.preventDefault();
+            });
+            $('#activity-menu').click(function (evt) {
+                contentDiv.empty();
+                contentDiv.load("activity.html");
+                evt.preventDefault();
+            });
+            $('#misc-menu').click(function (evt) {
+                contentDiv.empty();
+                contentDiv.load("misc.html");
+                evt.preventDefault();
+            });
+            $('#query-menu').click(function (evt) {
+                contentDiv.empty();
+                contentDiv.load("query_syntax.html");
+                evt.preventDefault();
+            });
+            $('#issue-menu').click(function (evt) {
+                contentDiv.empty();
+                contentDiv.load("issues.html");
+                evt.preventDefault();
+            });
+            $('#settings-menu').click(function (evt) {
+                contentDiv.empty();
+                contentDiv.load("settings.html");
+                evt.preventDefault();
+            });
+            $('#bib-menu').click(function (evt) {
+                contentDiv.empty();
+                contentDiv.load("bibliography.html");
+                evt.preventDefault();
+            });
+            $('#ocr-menu').click(function (evt) {
+                contentDiv.empty();
+                contentDiv.load("ocr_view.html");
+                evt.preventDefault();
+            });
+        });
+
+    </script>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-lg-2">
+            <nav class="navbar navbar-default navbar-fixed-side">
+                <div class="container">
+                    <div class="navbar-header">
+                        <button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a href="" class="navbar-brand" id="index-menu">Proteus</a>
+                    </div>
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav navbar-nav">
+                            <li class="active">
+                                <a href="" id="config-page">&#x25C6; Configuration</a>
+                                <a href="" id="ocr-menu">&#x25C6; Viewing a Book</a>
+                                <a href="" id="activity-menu">&#x25C6; Activity</a>
+                                <a href="" id="query-menu">&#x25C6; Query Syntax</a>
+                                <a href="" id="settings-menu">&#x25C6; Settings</a>
+                                <a href="" id="faq-menu">&#x25C6; FAQ</a>
+                                <a href="" id="misc-menu">&#x25C6; Miscellaneous</a>
+                                <a href="" id="issue-menu">&#x25C6; Report an Issue</a>
+                                <a href="" id="bib-menu">&#x25C6; Bibliography</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <div class="col-sm-9 col-lg-10">
+            <div class="container">
+                <div id="content">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../bootstrap/js/bootstrap.min.js"></script>
+</body>
+</html>

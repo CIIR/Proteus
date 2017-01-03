@@ -1,0 +1,20 @@
+    <h1>Query Syntax</h1>
+    <h2>Fields</h2>
+    <p>
+    Fields are term(s) that have been indexed separately from the document text, allowing them to be retrieved more efficiently. Usually these are entity types such as "person" or "location". You can see which fields are available in the "Entity Types" displayed on the main search page.
+    </p>
+    <h2>Galago</h2>
+    <p>
+      Proteus uses Galago's "simple query language", which is a subset of Lucene's query language.
+    </p>
+    <h3>Ordered Window Search</h3>
+    <p>
+    To perform an ordered window search, simply surround the query with double quotes. For example the query “James Allan” will behave (mostly) as you’d expect in Google.
+    </p>
+    <h3>Field Search</h3>
+<p>
+    To search within a field the syntax is: <span class="my-pre">&lt;field&gt;:&lt;term&gt;</span>. For example to search for Professor Allan you may type: <span class="my-pre">person:allan</span> or <span class="my-pre">person:”James Allan”</span>
+</p>
+    <h2>Lucene</h2>
+        <p>Please see the <a target="_blank" href="https://lucene.apache.org/core/6_2_1/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#Overview">Lucene documentation</a> for the query syntax.
+     </p>
