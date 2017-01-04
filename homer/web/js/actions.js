@@ -263,15 +263,18 @@ var onSearchSuccess = function(data) {
         });
 
         _.forEach(data.fields, function(field) {
+            var entityHTML = '';
             var html = '<div class="query-terms-area"><b>' + field.capitalizeEachWord() + ': </b>';
-            _.forEach(data[field + 'Entities'], function(t) {
-                html += getTermHTMl(t.term, t.count, 'entity ' + field);
+            _.forEach(data[field + 'Entities'], function (t) {
+                entityHTML += getTermHTMl(t.term, t.count, 'entity ' + field);
                 if (t.count > maxCount) {
                     maxCount = t.count;
                     maxTerm = t.term;
                 }
             });
-            $("#high-entity-fields").append(html + '</div>');
+            if (!_.isEmpty(entityHTML)) {
+                $("#high-entity-fields").append(html + entityHTML + '</div>');
+            }
         });
 
         // IF we don't have a query, use the top frequency term(s)
