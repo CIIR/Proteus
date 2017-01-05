@@ -113,10 +113,80 @@
 </ul>
 	  <br>
 	  <span class="my-pre">kinds</span>
+  <ul>
+	  <li>Required</li>
+	  <li>Type: Object</li>
+	  <li> Valid values: n/a</li>
+	  <li>Default: none</li>
+  </ul>
+  <h4>Kinds Specific Parameters</h4>
+  <ul>
+	  <span class="my-pre">ia-books</span>, <span class="my-pre">ia-pages</span>, or <span class="my-pre">all</span>
+	  <ul>
+		  <li>At least one is required</li>
+		  <li>Type: String</li>
+		  <li> Valid values: n/a</li>
+		  <li>Default: none</li>
+	  </ul>
+	  <h5>Parameters</h5>
+	  <ul>
+		  <span class="my-pre">index</span>
+		  <ul>
+			  <li>Required</li>
+			  <li>Type: Array of String</li>
+			  <li> Valid values: Path to a valid index</li>
+			  <li>Default: none</li>
+		  </ul>
+	  </ul>
+	  <ul>
+		  <span class="my-pre">button</span>
+		  <ul>
+			  <li>Required</li>
+			  <li>Type: String</li>
+			  <li> Valid values: Any text, this will display in the UI allowing the user to restrict the search to the indexes specified in the <span class="my-pre">index</span> parameter.</li>
+			  <li>Default: none</li>
+		  </ul>
+	  </ul>
+  </ul>
+
 	  <br>
 	  <span class="my-pre">content</span>
+  <ul>
+	  <li>Required</li>
+	  <li>Type: Object</li>
+	  <li> Valid values: n/a</li>
+	  <li>Default: none</li>
+  </ul>
+  <h4>Content Specific Parameters</h4>
+  <ul>
+	  <span class="my-pre">dir</span>
+	  <ul>
+		  <li>Required</li>
+		  <li>Type: String</li>
+		  <li> Valid values: A valid directory where all the HTML/JS/etc. is found.</li>
+		  <li>Default: none, but "web" is a good choice.</li>
+	  </ul>
+</ul>
 	  <br>
 	  <span class="my-pre">userdb</span>
+	  <ul>
+		  <li><b>This is where users, labels, notes, etc. are stored.</b></li>
+		  <li>Requried</li>
+		  <li>Type: Object</li>
+		  <li> Valid values: n/a</li>
+		  <li>Default: none</li>
+	  </ul>
+  <h4>Userdb Specific Parameters</h4>
+  <ul>
+	  <span class="my-pre">path</span>
+	  <ul>
+		  <li><b>While there are other parameters, this is the only one you should change. Use the reference values above for all others.</b></li>
+		  <li>Required</li>
+		  <li>Type: String</li>
+		  <li> Valid values: A valid directory where the database will be stored. Each instance of Proteus should have it's own database.</li>
+		  <li>Default: none</li>
+	  </ul>
+  </ul>
 	  <br>
 	  <span class="my-pre">broadcast</span>
 	  <ul>
