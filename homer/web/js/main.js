@@ -87,11 +87,7 @@ var doActionRequest = function(args) {
         //disableAutoRetrieve();
         return doViewRequest(args);
     }
-    if (!action) {
-        UI.showError("action not defined when calling doActionRequest in JS");
-        return;
-    }
-    UI.showError("Unknown action `" + action + "'");
+    // else, nothing special to do
 };
 
 /* handlers for retrieval button types */
