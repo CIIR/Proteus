@@ -62,12 +62,7 @@ UI.setReadyHandler(function() {
 
     UI.dispalyUserName();
 
-    if (params.action == "search") {// && (!isBlank(params.q) || !isBlank(params.labels))) {
-        UI.setQuery(params.q);
-        doActionRequest(params);
-    } else if (params.action == "view") {
-        doActionRequest(params);
-    }
+    doActionRequest(params);
 
 });
 
@@ -77,7 +72,11 @@ UI.setReadyHandler(function() {
 var doActionRequest = function(args) {
 
     var action = args.action;
+    if (action == "bib") {
+        return doBibliographyRequest(args);
+    }
     if (action == "search") {
+        UI.setQuery(args.q);
         return doSearchRequest(args);
     }
     if (action == "view") {
@@ -118,40 +117,16 @@ UI.onClickSearchButton = function() {
     doActionRequest({kind: kind, q: UI.getQuery(), action: "search"});
 };
 
-// TODO clone of onClickSearchButton - prob lots of dup code
-
-UI.onClickVizButton = function() {
+/*UI.onClickVizButton = function() {
 
     console.log("clicked visualization  button!");
     doActionRequest({kind: "all", q: "", action: "viz"});
-};
-
-
-function tmpSearch(that, kind) {
-    var query = that.text();
-    if (query == SEARCH_FOR_EVERYTHING) {
-        query = "";
-    }
-    console.log("Query: " + query);
-    $("#ui-search").val(query);
-
-    // TODO: can have > 1 retrieval button so we need to know which one to trigger
-    doActionRequest({kind: kind, q: query, action: "search"});
-}
-
-//function tmpEntSearch(entType, that, kind){
-//    var query =  entType  + ':"' + that.text() + '"';
-//    console.log("Query: " + query);
-//    $("#ui-search").val(query);
-//    UI.onClickSearchButton(kind);
-//}
+};*/
 
 function buildSearchLink(entType, q, kind) {
     var query = entType + ':"' + q + '"';
     return "index.html?action=search&kind=" + kind + "&q=" + query;
 }
-
-
 
 var logIn = function(userName) {
     if (!userName)
@@ -227,7 +202,6 @@ var logOut = function() {
         // quick and dirty, trigger refresh to get rid of
         // all the label stuff.
         location.reload(true);
-
 
     }, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");

@@ -61,7 +61,7 @@ function bibGetMetadata(next) {
 
 function bibGetHathiTrustId(next) {
 
-  if (_.isUndefined(this.meta['oclc-id'])) {
+  if (_.isUndefined(this.meta) || _.isUndefined(this.meta['oclc-id'])) {
     next();
     return;
   }

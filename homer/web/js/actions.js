@@ -20,7 +20,7 @@ var page = {
 
 var gDBPediaCount = 0;
 
-var doSearchRequest = function(args) {
+var doSearchRequest = function(args, callback) {
 
     UI.enableSearchButtons(false);
 
@@ -140,7 +140,11 @@ var doSearchRequest = function(args) {
     console.log(Model[args.kind].request);
 
     UI.showProgress("Search Request sent to server!");
-    API.action(actualArgs, onSearchSuccess, function(req, status, err) {
+
+    if (_.isUndefined(callback)){
+        callback = onSearchSuccess;
+    }
+    API.action(actualArgs, callback, function(req, status, err) {
         UI.showError("ERROR: ``" + err + "``");
         UI.enableSearchButtons(true);
         console.log(err);
@@ -152,12 +156,26 @@ var doSearchRequest = function(args) {
     return actualArgs;
 };
 
+
+var doBibliographyRequest = function(args) {
+    // TODO currently a quick-and-dirty "hack". We do a normal search to get the biblio data,
+    // no need for things like clearing UI elements and getting entities and TFs.
+    args.action = "search";
+    var returnArgs =  doSearchRequest(args, showBibliograpyData);
+    // reset the action, since this shows on the URL if they hit F5 on the bibliography data page, it would
+    // cause an error if the action was still "search"
+    var urlParams = getURLParams();
+    urlParams.action = 'bib';
+    pushURLParams(urlParams);
+
+    return returnArgs;
+};
+
 /**
  * This gets called with the response from JSONSearch
  */
 var savedData = [];
 var uniqWords = [];
-
 
 function getTermHTMl(term, count, classes) {
     return '<button class="button term" type="button"  onclick="termClick(this);"><span  class="term ' + classes + '" style="font-size: ' + calcPixelSize(count) + 'px !important;">' + term + '</span><span class="term-freq"> (' + count + ') </span></button> ';
@@ -167,36 +185,34 @@ function calcPixelSize(count) {
     return Math.max(12, Math.min(50, Math.round(Math.sqrt(count))));
 }
 
+var showBibliograpyData = function(data){
+
+    var sortedResults = data.results.naturalSortByField('name');
+
+    _.forEach(sortedResults, function(result) {
+        // since we're making async calls in the queued functions,
+        // we don't know what order they'll be printed in, so
+        // save them into an array in sorted order which we'll use
+        // to print them out ordered correctly.
+        gBibArray.push(result);
+        $(result)
+                .queue(bibGetBookReader)
+                .queue(bibGetMetadata)
+                .queue(bibGetHathiTrustId)
+                .queue(bibPrint)
+    });
+
+}
+
 var onSearchSuccess = function(data) {
 
-    // we may not have query terms - especailly with Lucene - so if
+    // we may not have query terms - especially with Lucene - so if
     // that's empty, check for a query in the search box.
     var qt = data.queryTerms;
     if (_.isUndefined(qt) || _.isEmpty(qt)) {
         qt = $("#ui-search").val();
     }
     getEntityCards(qt);
-
-    // TODO hack to get bibliographic data
-    if (data.request.bib == true) {
-
-        var sortedResults = data.results.naturalSortByField('name');
-
-        _.forEach(sortedResults, function(result) {
-            // since we're making async calls in the queued functions,
-            // we don't know what order they'll be printed in, so
-            // save them into an array in sorted order which we'll use
-            // to print them out ordered correctly.
-            gBibArray.push(result);
-            $(result)
-                    .queue(bibGetBookReader)
-                    .queue(bibGetMetadata)
-                    .queue(bibGetHathiTrustId)
-                    .queue(bibPrint)
-        });
-
-        return;
-    } // end if bib == true
 
     UI.enableSearchButtons(true);
 

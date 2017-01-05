@@ -560,10 +560,9 @@ function displaySubcorporaFacets() {
             // TODO ??? really should be doing the append() thing here rather than building an HTML string.
             html += '<input type="checkbox" onclick="UI.onClickSubcorpus();" name="facets" value="' + r.id + '" ' + checked + ' />&nbsp;' + r.name;
             html += ' (<span class="num-docs-retrieved-for-subcorpus" id="' + r.id + '-subcorpus-num-found">0</span>/' + r.count + ') ';
-            html += '<a target="_blank" href="./bib.html?q=&bib=true&action=search&kind=all&subcorpora=' + r.id + '&name=' + encodeURIComponent(r.name) + '"';
+            html += '<a target="_blank" href="./bib.html?q=&action=bib&kind=all&subcorpora=' + r.id + '&name=' + encodeURIComponent(r.name) + '"';
             html += '<span class="fa fa-download"></span></a>&nbsp;';
             html += '<br>';
-            // TODO ?? don't pass things like bib on URL
         });
     }
 
