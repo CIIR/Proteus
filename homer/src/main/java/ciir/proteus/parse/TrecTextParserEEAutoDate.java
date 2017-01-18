@@ -22,7 +22,7 @@ public class TrecTextParserEEAutoDate extends TrecTextParserEE {
     @Override
     public Document nextDocument() throws IOException {
 
-        Document doc = super.nextDocument();
+        Document doc = nextDocumentBasic();
         if(!(doc == null)) {
             Document nerDoc = new Document();
             nerDoc.text = doNER(doc.text);
@@ -63,9 +63,7 @@ public class TrecTextParserEEAutoDate extends TrecTextParserEE {
                     if (line.trim().equals("<HEADLINE>")){
                         line=reader.readLine();
                         year = line.split("\\s+")[3];
-                        if(!(year.length() == 2)){
-                            int i = 1/0;
-                        }
+                        year = year.replace("</DATE>","");
                         keepLooping = false;
 
                     }

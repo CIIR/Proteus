@@ -46,6 +46,13 @@ public class TrecTextParserEE extends TrecTextParser {
         return doc;
     }
 
+    public Document nextDocumentBasic() throws IOException {
+
+        Document doc = super.nextDocument();
+
+        return doc;
+    }
+
     protected String doNER(String text) {
 
         if (text.length() == 0) {
