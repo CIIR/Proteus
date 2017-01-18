@@ -88,8 +88,18 @@ public class TrecTextParserEEAutoDate extends TrecTextParserEE {
                         String pattern = "(\\d\\d\\d\\d)";
                         Pattern r = Pattern.compile(pattern);
                         Matcher m = r.matcher(line);
-                        m.find();
-                        year = m.group(0);
+                        if (m.find()){
+                            year = m.group(0);
+                        }
+                        else{
+                            System.err.println("NO PUB DATE IN DOC: " + doc.name);
+                        }
+                        //try {
+                        //    year = m.group(0);
+                        //} catch(IllegalStateException ise){
+                        //    System.err.println("ERROR IN DOC: " + doc.name);
+                        //    throw new IllegalStateException(ise.getMessage());
+                        //}
                         keepLooping = false;
                     }
                 }
@@ -97,8 +107,10 @@ public class TrecTextParserEEAutoDate extends TrecTextParserEE {
                 e.printStackTrace();
             }
 
-            String yearBlock = String.format("<DATE>%s</DATE>\n", year);
-            doc.text = yearBlock.concat(doc.text);
+            if(!(year.equals("0000"))) {
+                String yearBlock = String.format("<DATE>%s</DATE>\n", year);
+                doc.text = yearBlock.concat(doc.text);
+            }
         }
 
         return doc;
