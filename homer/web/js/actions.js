@@ -196,9 +196,6 @@ var showBibliograpyData = function(data){
         // to print them out ordered correctly.
         gBibArray.push(result);
         $(result)
-                .queue(bibGetBookReader)
-                .queue(bibGetMetadata)
-                .queue(bibGetHathiTrustId)
                 .queue(bibPrint)
     });
 
@@ -741,18 +738,14 @@ var onViewPageSuccess = function(args) {
 
         getInternetArchiveMetadata(bookid, args, function() {
             gMetadata = args.metadata;
-            getInternetArchiveJS(bookid, function() {
-                onViewPageSuccess2(args);
-            });
+            onViewPageSuccess2(args);
         });
 
     } else {
 
         gMetadata = args.metadata;
         // we still want to get the javascrpt for the book so we may have page numbers
-        getInternetArchiveJS(bookid, function() {
-            onViewPageSuccess2(args);
-        });
+        onViewPageSuccess2(args);
     }
 
     var fields = getCookie("fields");
@@ -800,8 +793,6 @@ var onViewPageSuccess2 = function(args) {
     // only insert placeholders first time
     if (_.isUndefined(gFirstPageID)) {
 
-        var bookReader = getBookReader();
-
         for (i = 0; i < parseInt(gMetadata.imagecount); i += 1) {
             var pid = (gMetadata.identifier + "_" + i);
 
@@ -810,12 +801,7 @@ var onViewPageSuccess2 = function(args) {
             tmpHTML += '<img id="thumbnail-image-' + pid + '" class="ia-thumbnail  image-not-loaded" src="../images/thumb.png" onclick="scrollToPage(\'' + pid + '\');"><br>';
 
             var txt = ' ';
-            if (!_.isUndefined(bookReader) && bookReader.getPageNumber(i) != null) {
-                txt = ' ' + bookReader.getPageNumber(i) + ' ';
-                tmpHTML += 'page ' + bookReader.getPageNumber(i) + '</div>';
-            } else {
-                tmpHTML += 'image ' + (i + 1) + '/' + gMetadata.imagecount + '</div>';
-            }
+            tmpHTML += 'image ' + (i + 1) + '/' + gMetadata.imagecount + '</div>';
 
             $("#book-pages").append('<div class="page-place-holder" id="page-' + pid + '">Page' + txt + 'Placeholder</div>');
 
@@ -1157,7 +1143,6 @@ var onSearchWithinBookSuccess = function(data) {
         return;
     }
 
-    var bookReader = getBookReader();
     _.forEach(data.results, function(result) {
 
         // add the class to the existing page in the thumbnail list
@@ -1168,12 +1153,8 @@ var onSearchWithinBookSuccess = function(data) {
         tmpHTML = '<div  class="ocr-page-thumbnail ocr-page-result center-align" >';
         tmpHTML += '<img id="thumbnail-' + result.name + '" class="ia-thumbnail  " src="' + pageThumbnail(result.name) + '" onclick="scrollToPage(\'' + result.name + '\');"><br>';
         var idx = parseInt(parsePageID(result.name).page);
-        if (!_.isUndefined(bookReader) && bookReader.getPageNumber(idx) != null) {
-            tmpHTML += 'rank ' + result.rank + ' : page ' + bookReader.getPageNumber(idx) + '</div>'
-        } else {
-            // add one because normal humans don't start counting at zero.
-            tmpHTML += 'rank ' + result.rank + ' : image ' + (idx + 1) + '</div>'
-        }
+        // add one because normal humans don't start counting at zero.
+        tmpHTML += 'rank ' + result.rank + ' : image ' + (idx + 1) + '</div>'
         $("#book-search-results").append('<a data-toggle="tooltip" title="' + result.snippet + '" id="title-' + result.name + '" href="#"  >' + tmpHTML + '</a>');
     });
 
