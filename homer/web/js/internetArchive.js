@@ -103,8 +103,9 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
   html += '<span id="' + result.name + '-user-ratings"></span><span  style="display:none" id="' + result.name + '-user-ratings-w-names"></span>';
   html += '<span class="dup-highlight" id="' + result.name + '-dup-confidence"></span>';
   html += '</td></div></td><td class="score">&nbsp;&nbsp;&nbsp;rank: ' + result.rank +'</td></tr>';
-  html += '<tr class="author"><td><span class="' + identifier + '-meta-author" >' + result.meta.creator;
-  html += '</span>&nbsp;•&nbsp;published: <span class="' + identifier + '-meta-published">' + result.meta.date + '</span></td></tr>';
+  html += '<tr class="author"><td>';
+  if ( result.meta.creator ) html += '<span class="' + identifier + '-meta-author" >' + result.meta.creator + '</span>&nbsp;•&nbsp;';
+  html += 'published: <span class="' + identifier + '-meta-published">' + result.meta.date + '</span></td></tr>';
 
   if (snippet) {
     snippet = snippet.replace(/<br>/g, " ");
