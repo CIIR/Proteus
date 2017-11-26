@@ -237,6 +237,14 @@ archiveid {
     display: none;
 }
 
+id {
+    display: none;
+}
+
+series {
+    display: none;
+}
+
 /* CSS for recipes and poems. This was for the Summer 2016 REU students */
 
 #cb-poemline-label {
