@@ -42,7 +42,7 @@ public class ProteusDocument {
     this.tags = p.getAsList("tags");
     // if no snippet, use the start of the doc
     this.snippet = (p.containsKey("snippet") ? p.getAsString("snippet") : String.join(" ", ListUtil.slice(terms, 0, Math.min(100, terms.size()))));
-    this.snippetPage = (p.containsKey("snippetPage") ? p.getAsString("snippetPage") :  "1");
+    this.snippetPage = (p.containsKey("snippetPage") ? p.getAsString("snippetPage") :  "0");
 
   }
 

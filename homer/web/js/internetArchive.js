@@ -1,12 +1,24 @@
 
-var pageImage = function(pageid) {
-  var id = parsePageID(pageid);
-  return "http://www.archive.org/download/" + encodeURIComponent(id.id) + "/page/n" + id.page + ".jpg";
+var pageImage = function(pageid, meta) {
+    if ( meta.page_image ) {
+	return meta.page_image;
+    } else if ( meta['identifier-access'] != undefined ) {
+	var id = parsePageID(pageid);
+	return "http://www.archive.org/download/" + encodeURIComponent(id.id) + "/page/n" + id.page + ".jpg";
+    } else {
+	return 'images/thumb.png';
+    }
 };
 
-var pageThumbnail = function(pageid) {
-  var id = parsePageID(pageid);
-  return "http://www.archive.org/download/" + encodeURIComponent(id.id) + "/page/n" + id.page + "_thumb.jpg";
+var pageThumbnail = function(pageid, meta) {
+    if ( meta.page_thumb ) {
+	return meta.page_thumb;
+    } else if ( meta['identifier-access'] != undefined ) {
+	var id = parsePageID(pageid);
+	return "http://www.archive.org/download/" + encodeURIComponent(id.id) + "/page/n" + id.page + "_thumb.jpg";
+    } else {
+	return 'images/thumb.png';
+    }
 };
 
 var renderResult = function(queryTerms, result, resDiv, queryid) {
@@ -24,17 +36,28 @@ var renderResult = function(queryTerms, result, resDiv, queryid) {
   var snippet = result.snippet;
   var kind = 'ia-books'; // default
 
+    var nameURL = result.meta.page_access;
+    if ( result.meta['identifier-access'] != undefined ) {
+	nameURL = archiveViewerURL(docid);
+    }
+
   if (!_.isUndefined(pageNum) && pageNum.length > 0) {
     kind = 'ia-pages';
   }
   if (kind == 'ia-books' && !_.isUndefined(result.snippetPage)) {
     docid = identifier + "_" + result.snippetPage;
   }
-  var thumbnail = '<img class="ia-thumbnail" src="' + pageThumbnail(docid) + '"/>';
-  var previewImage = '<a class="fancybox" href="' + pageImage(docid) + '" >' +  thumbnail + '</a>';
-  var nameLink = '<a href="' + archiveViewerURL(docid) + '" onmousedown="return rwt(this,' +  result.rank;
-  nameLink += ')" target="_blank"><span class="' + identifier + '-meta-name">' + name + '</span>' ;
-  nameLink +=  '&nbsp;<span class="fa fa-external-link"></span></a>';
+  var thumbnail = '<img class="ia-thumbnail" src="' + pageThumbnail(docid, result.meta) + '"/>';
+  var previewImage = '<a class="fancybox" href="' + pageImage(docid, result.meta) + '" >' +  thumbnail + '</a>';
+  var nameLink = '';
+    if ( nameURL  ) {
+	nameLink += '<a href="' + nameURL + '" onmousedown="return rwt(this,' +  result.rank;
+	nameLink += ')" target="_blank"><span class="' + identifier + '-meta-name">';
+    }
+    nameLink += name;
+    if ( nameURL ) {
+	nameLink += '</span>&nbsp;<span class="fa fa-external-link"></span></a>';
+    }
 
   var tmphtml = '';
 

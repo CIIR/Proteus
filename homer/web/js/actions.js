@@ -557,7 +557,7 @@ function printMatrix(conf, count) {
     console.log(tmp);
 }
 var renderBookPageHTML = function(text, id, el) {
-    var pgImage = pageImage(id);
+    var pgImage = pageImage(id, gMetadata);
 
     var labelHTML = '<div id="notes-' + id + '" class="resource-labels">' + displayLabels(id) + '</div>' +
             '<div left-align" ><span id="' + id + '-user-ratings-w-names"></span></div> <hr>';
@@ -809,7 +809,7 @@ var onViewPageSuccess2 = function(args) {
             // ??? don't think we need an id at the div level, can do "parent()?"
             var el = $("#thumbnail-image-" + jqEsc(pid));
             if (el.is_on_screen($("#page-thumbnails"))) {
-                el.attr('src', pageThumbnail(pid));
+                el.attr('src', pageThumbnail(pid, gMetadata));
                 el.removeClass("image-not-loaded");
             }
         }
@@ -950,7 +950,7 @@ function setScrollBinding() {
                     // We could use data() rather than splitting things
                     var thumbid = $(t).attr("id").split("thumbnail-image-")[1];
                     var thumbidEsc = jqEsc(thumbid);
-                    $("#thumbnail-image-" + thumbidEsc).attr('src', pageThumbnail(thumbid));
+                    $("#thumbnail-image-" + thumbidEsc).attr('src', pageThumbnail(thumbid, gMetadata));
                     $("#thumbnail-image-" + thumbidEsc).removeClass("image-not-loaded");
                 }
             });
@@ -1275,7 +1275,7 @@ function toggleEntityDescription(id) {
 }
 
 function getEntityCards(terms) {
-
+    return;
     if (_.isUndefined(terms) || terms.length == 0) {
         return;
     }
