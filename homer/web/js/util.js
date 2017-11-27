@@ -705,7 +705,7 @@ function termClick(that) {
 
     });
 
-    $("#query-builder-query").html('<a target="_blank" href="index.html?action=search&kind=all&q=' + encodeURI(query) + '">' + query + '</a>');
+    $("#query-builder-query").html('<a target="_blank" href="index.html?action=search&kind=' + UI.defaultKind + '&q=' + encodeURI(query) + '">' + query + '</a>');
 }
 
 function labelClickComment(that, subcorpus_id) {
