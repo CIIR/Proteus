@@ -1168,7 +1168,7 @@ var onSearchWithinBookSuccess = function(data) {
         // append results so pages matching the search are at the top.
 
         tmpHTML = '<div  class="ocr-page-thumbnail ocr-page-result center-align" >';
-        tmpHTML += '<img id="thumbnail-' + result.name + '" class="ia-thumbnail  " src="' + pageThumbnail(result.name) + '" onclick="scrollToPage(\'' + result.name + '\');"><br>';
+        tmpHTML += '<img id="thumbnail-' + result.name + '" class="ia-thumbnail  " src="' + pageThumbnail(result.name, gMetadata) + '" onclick="scrollToPage(\'' + result.name + '\');"><br>';
         var idx = parseInt(parsePageID(result.name).page);
         // add one because normal humans don't start counting at zero.
         tmpHTML += 'rank ' + result.rank + ' : image ' + (idx + 1) + '</div>'
