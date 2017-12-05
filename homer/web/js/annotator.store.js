@@ -16,7 +16,7 @@ Annotator.Plugin.Store = (function(superClass) {
     annotationData: {},
     emulateHTTP: false,
     loadFromSearch: false,
-    prefix: '/store',
+    prefix: 'store',
     urls: {
       create: '/annotations',
       read: '/annotations/:id',

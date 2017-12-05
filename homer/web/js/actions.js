@@ -53,7 +53,7 @@ var doSearchRequest = function(args, callback) {
     UI.checkSettings();
 
     var defaultArgs = {
-        n: 100,
+        n: 10,
         skip: 0,
         snippets: true,
         metadata: true,
@@ -134,7 +134,7 @@ var doSearchRequest = function(args, callback) {
 
     actualArgs.q = sanitizeQuery(actualArgs.q);
 
-    $("#more").html('<img src="/images/more-loader.gif"\>');
+    $("#more").html('<img src="images/more-loader.gif"\>');
 
     Model[args.kind].request = actualArgs;
     console.log(Model[args.kind].request);
@@ -303,23 +303,6 @@ var onSearchSuccess = function(data) {
     Model[data.request.kind].query = data.request.q;
     Model[data.request.kind].queryType = data.queryType;
     Model[data.request.kind].queryid = data.queryid;
-
-    var sortField = 'date';
-    data.results.sort(function(a, b) {
-    	if ( a.meta[sortField] < b.meta[sortField] ) {
-    	    return -1;
-    	}
-    	if ( a.meta[sortField] > b.meta[sortField] ) {
-    	    return 1;
-    	}
-    	if ( a.score < b.score ) {
-    	    return -1;
-    	}
-    	if ( a.score > b.score ) {
-    	    return 1;
-    	}
-    	return 0;
-    });
 
     var rank = Model[data.request.kind].results.length + 1;
     var newResults = _(data.results).map(function(result) {

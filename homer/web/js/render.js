@@ -46,7 +46,7 @@ resultRenderers["default"] = function(queryTerms, result, resDiv) {
 };
 
 Render.makeViewLink = function(id, kind, label, rank) {
-    return '<a href="/?action=view' +
+    return '<a href="index.html?action=view' +
             '&id=' + encodeURIComponent(id) +
             '&kind=' + encodeURIComponent(kind) + '" onmousedown="return rwt(this,' + rank + ')" target="_blank">' +  label + '</a>';
 };

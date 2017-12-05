@@ -36,18 +36,18 @@ var method = function(method, url, terms) {
     };
 };
 
-API.action = method("POST", "/api/action");
-API.getKinds = method("GET", "/api/kinds");
-API.login = method("POST", "/api/login");
-API.logout = method("POST", "/api/logout");
-API.register = method("POST", "/api/register");
-API.getUsers = method("GET", "/api/users");
-API.newCorpus = method("POST", "/api/newcorpus");
-API.updateUserSettings = method("POST", "/api/updatesettings");
-API.getNotes = method("POST", "/store/annotations/search");
-API.getNoteHistory = method("POST", "/api/notehistory");
-API.getActivityLog = method("POST", "/api/activitylog");
-API.getResourcesInCorpus = method("POST", "/api/resourcesincorpus");
-API.updateSubcorpora = method("POST", "/api/updatesubcorpora");
-API.voteForResource = method("POST", "/api/resourcevote");
+API.action = method("POST", "api/action");
+API.getKinds = method("GET", "api/kinds");
+API.login = method("POST", "api/login");
+API.logout = method("POST", "api/logout");
+API.register = method("POST", "api/register");
+API.getUsers = method("GET", "api/users");
+API.newCorpus = method("POST", "api/newcorpus");
+API.updateUserSettings = method("POST", "api/updatesettings");
+API.getNotes = method("POST", "store/annotations/search");
+API.getNoteHistory = method("POST", "api/notehistory");
+API.getActivityLog = method("POST", "api/activitylog");
+API.getResourcesInCorpus = method("POST", "api/resourcesincorpus");
+API.updateSubcorpora = method("POST", "api/updatesubcorpora");
+API.voteForResource = method("POST", "api/resourcevote");
 
