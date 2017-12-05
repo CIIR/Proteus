@@ -129,6 +129,31 @@
                 UI.onClickSearchButton();
                 //UI.showOverlap();
             });
+	    $("#sort-rb").on("click", function () {
+		resultsDiv = $("#results");
+		resultsDiv.html('');
+		resultsDiv.show();
+		var sortField = $('#sort-rb input[type="radio"]:checked').val();
+		savedData.results.sort(function(a, b) {
+		    if ( sortField != 'score' ) {
+			if ( a.meta[sortField] < b.meta[sortField] ) {
+			    return -1;
+			}
+			if ( a.meta[sortField] > b.meta[sortField] ) {
+			    return 1;
+			}
+		    }
+		    if ( a.score > b.score ) {
+			return -1;
+		    }
+		    if ( a.score < b.score ) {
+			return 1;
+		    }
+		    return 0;
+		});
+		UI.appendResults(Model[savedData.request.kind].queryTerms, savedData.results, savedData.queryid);
+		renderDups(savedData);
+	    });
             $("#dup-slider").slider({
                 range: "min",
                 min: 0,

@@ -56,6 +56,13 @@ UI.generateButtons = function() {
             }
 
         });
+	_.forIn(data.kinds[UI.defaultKind].sort, function(spec, field) {
+	    spec.field = field;
+	    $("#sort-rb").append('<label class="radio-inline"><input type="radio" name="sort-field" value="' + spec.field + '">' + spec.button + '</label><br />');
+	    // $("#sort-rb").click(function() {
+	    // 	UI.onClickSearchButton("ia-books", "Search Clusters");
+	    // });
+	});
     });
 
 };
@@ -250,7 +257,7 @@ UI.getPages = function(bookid) {
     var terms = (UI.getQuery().trim()).toLowerCase();
 
     // passing in an archiveid will limit the search to that book
-    $("#search-pages-link-" + bookid).html($("#search-pages-link-" + bookid).html() + '&nbsp;&nbsp;<img src="/images/more-loader.gif"\>');
+    $("#search-pages-link-" + bookid).html($("#search-pages-link-" + bookid).html() + '&nbsp;&nbsp;<img src="images/more-loader.gif"\>');
     doActionSearchPages({kind: 'ia-pages', q: terms, action: "search", n: 1000, archiveid: bookid, workingSetQuery: true});
 
 };

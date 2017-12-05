@@ -304,6 +304,25 @@ var onSearchSuccess = function(data) {
     Model[data.request.kind].queryType = data.queryType;
     Model[data.request.kind].queryid = data.queryid;
 
+    var sortField = $('#sort-rb input[type="radio"]:checked').val();
+    if ( sortField != 'score' ) {
+	data.results.sort(function(a, b) {
+	    if ( a.meta[sortField] < b.meta[sortField] ) {
+		return -1;
+	    }
+	    if ( a.meta[sortField] > b.meta[sortField] ) {
+		return 1;
+	    }
+	    if ( a.score > b.score ) {
+		return -1;
+	    }
+	    if ( a.score < b.score ) {
+		return 1;
+	    }
+	    return 0;
+	});
+    }
+
     var rank = Model[data.request.kind].results.length + 1;
     var newResults = _(data.results).map(function(result) {
         result.viewKind = data.request.viewKind || data.request.kind;
