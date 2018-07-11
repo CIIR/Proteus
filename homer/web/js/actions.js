@@ -575,8 +575,8 @@ function printMatrix(conf, count) {
     }
     console.log(tmp);
 }
-var renderBookPageHTML = function(text, id, el) {
-    var pgImage = pageImage(id, gMetadata);
+var renderBookPageHTML = function(text, id, meta, el) {
+    var pgImage = pageImage(id, meta);
 
     var labelHTML = '<div id="notes-' + id + '" class="resource-labels">' + displayLabels(id) + '</div>' +
             '<div left-align" ><span id="' + id + '-user-ratings-w-names"></span></div> <hr>';
@@ -835,8 +835,7 @@ var onViewPageSuccess2 = function(args) {
     }
 
     $(pageElement).html("Fetching page...");
-    //  renderBookPageHTML(highlightText(queryTerms, args.text, false), id, $(pageElement));
-    renderBookPageHTML(args.text, id, $(pageElement));
+    renderBookPageHTML(args.text, id, args.metadata, $(pageElement));
     newHighlightText(".book-text", queryTerms);
 
     doneLoadingPageText(id);
